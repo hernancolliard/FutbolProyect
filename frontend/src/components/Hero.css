@@ -1,0 +1,50 @@
+.hero-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  /* This container just provides margins around the banner */
+}
+
+.hero-banner {
+  height: 450px; /* Define la altura del banner */
+}
+
+/* Styles for the parallax background image */
+.hero-background-loading {
+  filter: blur(10px); /* Apply blur to low-res image */
+  transition: filter 0.5s ease-in-out; /* Smooth transition for blur */
+}
+
+.hero-background-loaded {
+  filter: blur(0); /* Remove blur when high-res image is loaded */
+  transition: filter 0.5s ease-in-out; /* Smooth transition for blur */
+}
+
+.hero-content {
+  /* Este div contiene el texto y se centra gracias a las propiedades del ParallaxBanner */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  background: rgba(13, 27, 42, 0.6); /* Sombreado para legibilidad */
+}
+
+.hero-content h1 {
+  font-size: 2.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.hero-content p {
+  font-size: 1.3rem;
+  font-weight: 300;
+  max-width: 900px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Eliminamos la clase .hero-section que ya no se usa */
+.hero-section { }
