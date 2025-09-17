@@ -120,8 +120,8 @@ router.get("/", async (req, res) => {
     // 2. Desactivar ofertas destacadas caducadas (se ejecuta siempre)
     const unfeatureQuery = `
       UPDATE ofertas_laborales
-      SET is_featured = 0
-      WHERE is_featured = 1 AND featured_until <= NOW();
+      SET is_featured = FALSE
+      WHERE is_featured = TRUE AND featured_until <= NOW();
     `;
     await db.query(unfeatureQuery);
 
@@ -186,7 +186,7 @@ router.get("/", async (req, res) => {
       SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
-      WHERE o.estado = 'abierta' AND o.is_featured = 1 AND o.featured_until > NOW()
+      WHERE o.estado = 'abierta' AND o.is_featured = TRUE AND o.featured_until > NOW()
       ORDER BY o.featured_until DESC
       LIMIT 6;
     `;
