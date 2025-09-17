@@ -27,7 +27,7 @@ router.post("/register", async (req, res) => {
       "SELECT * FROM usuarios WHERE email = @email",
       { email }
     );
-    if (userExists.recordset.length > 0) {
+    if (userExists.rows.length > 0) {
       return res
         .status(409)
         .json({ message: "El correo electrónico ya está en uso." });
@@ -39,7 +39,7 @@ router.post("/register", async (req, res) => {
 
     // Guardar usuario y devolver los datos del nuevo usuario usando la cláusula OUTPUT
     const queryText = `INSERT INTO usuarios (nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario) 
-                           OUTPUT inserted.id, inserted.nombre, inserted.apellido, inserted.telefono, inserted.email, inserted.dni, inserted.direccion, inserted.ciudad, inserted.pais, inserted.tipo_usuario
+                           RETURNING id, nombre, apellido, telefono, email, dni, direccion, ciudad, pais, tipo_usuario
                            VALUES (@nombre, @apellido, @telefono, @email, @password_hash, @dni, @direccion, @ciudad, @pais, @tipo_usuario)`;
     const newUser = await db.query(queryText, {
       nombre,
@@ -56,13 +56,13 @@ router.post("/register", async (req, res) => {
 
     // Enviar email de bienvenida
     try {
-      await sendWelcomeEmail(newUser.recordset[0].email, newUser.recordset[0].nombre);
+      await sendWelcomeEmail(newUser.rows[0].email, newUser.rows[0].nombre);
     } catch (emailError) {
       console.error("Error al enviar el correo de bienvenida:", emailError);
       // No bloquear el registro si el email falla. Registrar el error para revisión.
     }
 
-    res.status(201).json(newUser.recordset[0]);
+    res.status(201).json(newUser.rows[0]);
   } catch (error) {
     console.error("Error en el registro:", error);
     res.status(500).json({ message: "Error en el servidor." });
@@ -79,7 +79,7 @@ router.post("/login", async (req, res) => {
       "SELECT * FROM usuarios WHERE email = @email",
       { email }
     );
-    const user = result.recordset[0];
+    const user = result.rows[0];
 
     if (!user) {
       return res.status(401).json({ message: "Credenciales inválidas." });
@@ -125,14 +125,14 @@ router.post("/auth/google", async (req, res) => {
     // Buscar usuario por email
     let user = await db.query("SELECT * FROM usuarios WHERE email = @email", { email });
 
-    if (user.recordset.length === 0) {
+    if (user.rows.length === 0) {
       // Si el usuario no existe, registrarlo
       const defaultPassword = Math.random().toString(36).slice(-8); // Contraseña aleatoria
       const salt = await bcrypt.genSalt(10);
       const password_hash = await bcrypt.hash(defaultPassword, salt);
 
       const queryText = `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
-                           OUTPUT inserted.id, inserted.nombre, inserted.email, inserted.tipo_usuario
+                           RETURNING id, nombre, email, tipo_usuario
                            VALUES (@nombre, @email, @password_hash, @tipo_usuario)`;
       const newUser = await db.query(queryText, {
         nombre: name,
@@ -145,10 +145,10 @@ router.post("/auth/google", async (req, res) => {
 
     // Generar JWT
     const tokenPayload = {
-      id: user.recordset[0].id,
-      name: user.recordset[0].nombre,
-      tipo_usuario: user.recordset[0].tipo_usuario,
-      isAdmin: user.recordset[0].isAdmin,
+      id: user.rows[0].id,
+      name: user.rows[0].nombre,
+      tipo_usuario: user.rows[0].tipo_usuario,
+      isAdmin: user.rows[0].isAdmin,
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -168,12 +168,12 @@ router.get("/subscription-status", verificarToken, async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT [plan], fecha_fin, estado, metodo_pago FROM suscripciones WHERE id_usuario = @userId",
+      "SELECT "plan", fecha_fin, estado, metodo_pago FROM suscripciones WHERE id_usuario = @userId",
       { userId }
     );
 
-    if (result.recordset.length > 0) {
-      res.json({ subscription: result.recordset[0] });
+    if (result.rows.length > 0) {
+      res.json({ subscription: result.rows[0] });
     } else {
       res.json({ subscription: null, message: "No hay suscripción activa para este usuario." });
     }
@@ -188,12 +188,12 @@ router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   try {
     const userResult = await db.query("SELECT * FROM usuarios WHERE email = @email", { email });
-    if (userResult.recordset.length === 0) {
+    if (userResult.rows.length === 0) {
       // No revelar que el usuario no existe.
       return res.status(200).json({ message: "Si existe una cuenta con este correo, se ha enviado un enlace para restablecer la contraseña." });
     }
 
-    const user = userResult.recordset[0];
+    const user = userResult.rows[0];
 
     // Generar token
     const token = crypto.randomBytes(20).toString('hex');
@@ -235,15 +235,15 @@ router.post("/reset-password", async (req, res) => {
     // Buscar usuario por el token y verificar que no haya expirado
     const findUserQuery = `
       SELECT * FROM usuarios
-      WHERE reset_password_token = @token AND reset_password_expires > SYSDATETIMEOFFSET()
+      WHERE reset_password_token = @token AND reset_password_expires > NOW()
     `;
     const userResult = await db.query(findUserQuery, { token });
 
-    if (userResult.recordset.length === 0) {
+    if (userResult.rows.length === 0) {
       return res.status(400).json({ message: "El token para restablecer la contraseña es inválido o ha expirado." });
     }
 
-    const user = userResult.recordset[0];
+    const user = userResult.rows[0];
 
     // Hashear la nueva contraseña
     const salt = await bcrypt.genSalt(10);

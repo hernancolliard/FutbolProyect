@@ -286,7 +286,7 @@ router.post(
       ]);
 
       const query = `
-        INSERT INTO ofertas_laborales (
+                INSERT INTO ofertas_laborales (
           id_usuario_ofertante, titulo, descripcion, puesto, ubicacion, salario, 
           horarios, nivel, detalles_adicionales, estado, fecha_publicacion, 
           imagen_url,
@@ -294,15 +294,16 @@ router.post(
           ubicacion_es, ubicacion_en, horarios_es, horarios_en, nivel_es, nivel_en,
           detalles_adicionales_es, detalles_adicionales_en
         ) 
-        OUTPUT INSERTED.id
+        RETURNING id
         VALUES (
           @id_usuario_ofertante, @titulo, @descripcion, @puesto, @ubicacion, @salario, 
           @horarios, @nivel, @detalles_adicionales, 'abierta', NOW(), 
           @imagen_url,
           @titulo_es, @titulo_en, @descripcion_es, @descripcion_en, @puesto_es, @puesto_en,
           @ubicacion_es, @ubicacion_en, @horarios_es, @horarios_en, @nivel_es, @nivel_en,
-          @detalles_adicionales_es, @detalles_adicionales_en
+          detalles_adicionales_es, detalles_adicionales_en
         );
+      
       `;
 
       const result = await db.query(query, {
