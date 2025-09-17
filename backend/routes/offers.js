@@ -121,12 +121,12 @@ router.get("/", async (req, res) => {
     const unfeatureQuery = `
       UPDATE ofertas_laborales
       SET is_featured = 0
-      WHERE is_featured = 1 AND featured_until <= SYSDATETIMEOFFSET();
+      WHERE is_featured = 1 AND featured_until <= NOW();
     `;
     await db.query(unfeatureQuery);
 
     // 3. Construir la consulta dinámica para ofertas regulares
-    let whereClauses = ["o.estado = 'abierta'", "o.is_featured = 0"];
+    let whereClauses = ["o.estado = 'abierta'", "o.is_featured = FALSE"];
     let queryParams = {};
 
     if (puesto) {
@@ -173,8 +173,7 @@ router.get("/", async (req, res) => {
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE ${whereString}
       ORDER BY ${orderBy}
-      OFFSET @offset ROWS
-      FETCH NEXT @limit ROWS ONLY;
+      OFFSET @offset LIMIT @limit;
     `;
     queryParams.offset = offset;
     queryParams.limit = parseInt(limit);
@@ -184,11 +183,12 @@ router.get("/", async (req, res) => {
 
     // 6. Obtener las ofertas destacadas (estas no se filtran, siempre son las mismas)
     let featuredQuery = `
-      SELECT TOP 6 o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
+      SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
-      WHERE o.estado = 'abierta' AND o.is_featured = 1 AND o.featured_until > SYSDATETIMEOFFSET()
-      ORDER BY o.featured_until DESC;
+      WHERE o.estado = 'abierta' AND o.is_featured = 1 AND o.featured_until > NOW()
+      ORDER BY o.featured_until DESC
+      LIMIT 6;
     `;
     const featuredResult = await db.query(featuredQuery);
     const featuredOffers = featuredResult.recordset;
@@ -297,7 +297,7 @@ router.post(
         OUTPUT INSERTED.id
         VALUES (
           @id_usuario_ofertante, @titulo, @descripcion, @puesto, @ubicacion, @salario, 
-          @horarios, @nivel, @detalles_adicionales, 'abierta', SYSDATETIMEOFFSET(), 
+          @horarios, @nivel, @detalles_adicionales, 'abierta', NOW(), 
           @imagen_url,
           @titulo_es, @titulo_en, @descripcion_es, @descripcion_en, @puesto_es, @puesto_en,
           @ubicacion_es, @ubicacion_en, @horarios_es, @horarios_en, @nivel_es, @nivel_en,

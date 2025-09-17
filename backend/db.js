@@ -12,5 +12,20 @@ pool.connect()
   .catch(err => console.error('Error de conexión a la base de datos: ', err));
 
 module.exports = {
-  query: (text, params) => pool.query(text, params),
+  query: async (text, params) => {
+    if (!params) {
+      return pool.query(text);
+    }
+
+    let paramNames = Object.keys(params);
+    let paramValues = Object.values(params);
+    let pgText = text;
+
+    // Replace @param with $1, $2, etc.
+    paramNames.forEach((name, index) => {
+      pgText = pgText.replace(new RegExp(`@${name}`, 'g'), `\${index + 1}`);
+    });
+
+    return pool.query(pgText, paramValues);
+  },
 };
