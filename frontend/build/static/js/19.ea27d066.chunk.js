@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkfrontend=self.webpackChunkfrontend||[]).push([[19],{6019:(e,n,t)=>{t.r(n),t.d(n,{default:()=>c});t(5043);var i=t(5475),r=t(579);const c=function(){return(0,r.jsxs)("div",{style:{textAlign:"center",marginTop:"50px"},children:[(0,r.jsx)("h2",{children:"Pago Pendiente"}),(0,r.jsx)("p",{children:"Tu pago est\xe1 pendiente de aprobaci\xf3n."}),(0,r.jsx)("p",{children:"Te notificaremos cuando se complete."}),(0,r.jsx)(i.N_,{to:"/",children:(0,r.jsx)("button",{children:"Volver al inicio"})})]})}}}]);
+//# sourceMappingURL=19.ea27d066.chunk.js.map
