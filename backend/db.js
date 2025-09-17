@@ -25,7 +25,15 @@ module.exports = {
     for (const key in params) {
       if (params.hasOwnProperty(key)) {
         // Usar una regex para reemplazar todas las ocurrencias de @key como palabra completa
-        pgText = pgText.replace(new RegExp(`@${key}\b`, 'g'), `${paramIndex}`);
+        pgText = pgText.replace(new RegExp(`@${key}\b`, 'g'), '
+        paramIndex++;
+      }
+    }
+
+    return pool.query(pgText, pgValues);
+  },
+};
+ + paramIndex);
         pgValues.push(params[key]);
         paramIndex++;
       }

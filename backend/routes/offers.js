@@ -173,8 +173,10 @@ router.get("/", async (req, res) => {
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE ${whereString}
       ORDER BY ${orderBy}
-      OFFSET ${offset} LIMIT ${limit};
+      OFFSET @offset LIMIT @limit;
     `;
+    queryParams.offset = offset;
+    queryParams.limit = parseInt(limit);
 
     const regularResult = await db.query(regularQuery, queryParams);
     const regularOffers = regularResult.rows;
