@@ -162,7 +162,7 @@ router.get("/", async (req, res) => {
     // 4. Obtener el conteo total de ofertas para la paginación
     const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o WHERE ${whereString}`;
     const countResult = await db.query(countQuery, queryParams);
-    const totalOffers = countResult.recordset[0].total;
+    const totalOffers = countResult.rows[0].total;
     const totalPages = Math.ceil(totalOffers / limit);
 
     // 5. Obtener las ofertas regulares paginadas y ordenadas
@@ -179,7 +179,7 @@ router.get("/", async (req, res) => {
     queryParams.limit = parseInt(limit);
 
     const regularResult = await db.query(regularQuery, queryParams);
-    const regularOffers = regularResult.recordset;
+    const regularOffers = regularResult.rows;
 
     // 6. Obtener las ofertas destacadas (estas no se filtran, siempre son las mismas)
     let featuredQuery = `
@@ -191,7 +191,7 @@ router.get("/", async (req, res) => {
       LIMIT 6;
     `;
     const featuredResult = await db.query(featuredQuery);
-    const featuredOffers = featuredResult.recordset;
+    const featuredOffers = featuredResult.rows;
 
     // 7. Preparar los datos para enviar y cachear
     const responseData = {
@@ -231,10 +231,10 @@ router.get("/:id", async (req, res) => {
       { id }
     );
 
-    if (result.recordset.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: "Oferta no encontrada." });
     }
-    res.json(result.recordset[0]);
+    res.json(result.rows[0]);
   } catch (error) {
     console.error("Error al obtener oferta por ID:", error);
     res
@@ -375,11 +375,11 @@ router.put(
       const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @id`;
       const offerResult = await db.query(offerQuery, { id });
 
-      if (offerResult.recordset.length === 0) {
+      if (offerResult.rows.length === 0) {
         return res.status(404).json({ message: "Oferta no encontrada." });
       }
 
-      const id_dueño_oferta = offerResult.recordset[0].id_usuario_ofertante;
+      const id_dueño_oferta = offerResult.rows[0].id_usuario_ofertante;
 
       // 2. Verificar permisos (solo el dueño o un admin pueden editar)
       if (id_dueño_oferta !== id_usuario_actual && !esAdmin) {
@@ -502,11 +502,11 @@ router.get("/:offerId/applications", verificarToken, async (req, res) => {
     const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
     const offerResult = await db.query(offerQuery, { offerId });
 
-    if (offerResult.recordset.length === 0) {
+    if (offerResult.rows.length === 0) {
       return res.status(404).json({ message: "Oferta no encontrada." });
     }
 
-    if (offerResult.recordset[0].id_usuario_ofertante !== userId) {
+    if (offerResult.rows[0].id_usuario_ofertante !== userId) {
       return res.status(403).json({
         message: "No tienes permiso para ver los postulantes de esta oferta.",
       });
@@ -529,7 +529,7 @@ router.get("/:offerId/applications", verificarToken, async (req, res) => {
       `;
     const applicantsResult = await db.query(applicantsQuery, { offerId });
 
-    res.json(applicantsResult.recordset);
+    res.json(applicantsResult.rows);
   } catch (error) {
     console.error("Error al obtener los postulantes:", error);
     res
@@ -551,10 +551,10 @@ router.post(
       const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
       const offerResult = await db.query(offerQuery, { offerId });
 
-      if (offerResult.recordset.length === 0) {
+      if (offerResult.rows.length === 0) {
         return res.status(404).json({ message: "Oferta no encontrada." });
       }
-      if (offerResult.recordset[0].id_usuario_ofertante === userId) {
+      if (offerResult.rows[0].id_usuario_ofertante === userId) {
         return res
           .status(403)
           .json({ message: "No puedes postularte a tu propia oferta." });
@@ -567,7 +567,7 @@ router.post(
         userId,
       });
 
-      if (applicationResult.recordset.length > 0) {
+      if (applicationResult.rows.length > 0) {
         return res
           .status(409)
           .json({ message: "Ya te has postulado a esta oferta." });
