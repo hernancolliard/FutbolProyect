@@ -17,15 +17,20 @@ module.exports = {
       return pool.query(text);
     }
 
-    let paramNames = Object.keys(params);
-    let paramValues = Object.values(params);
     let pgText = text;
+    let pgValues = [];
+    let paramIndex = 1;
 
-    // Replace @param with $1, $2, etc.
-    paramNames.forEach((name, index) => {
-      pgText = pgText.replace(new RegExp(`@${name}`, 'g'), `\${index + 1}`);
-    });
+    // Reemplazar @param con $1, $2, etc., y recolectar los valores
+    for (const key in params) {
+      if (params.hasOwnProperty(key)) {
+        // Usar una regex para reemplazar todas las ocurrencias de @key como palabra completa
+        pgText = pgText.replace(new RegExp(`@${key}\b`, 'g'), `${paramIndex}`);
+        pgValues.push(params[key]);
+        paramIndex++;
+      }
+    }
 
-    return pool.query(pgText, paramValues);
+    return pool.query(pgText, pgValues);
   },
 };
