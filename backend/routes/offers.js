@@ -12,7 +12,7 @@ const {
   verificarSuscripcionActiva,
 } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
-const translationService = require("../translationService");
+const translationService = require("../services/translationService");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
@@ -507,11 +507,9 @@ router.get("/:offerId/applications", verificarToken, async (req, res) => {
     }
 
     if (offerResult.recordset[0].id_usuario_ofertante !== userId) {
-      return res
-        .status(403)
-        .json({
-          message: "No tienes permiso para ver los postulantes de esta oferta.",
-        });
+      return res.status(403).json({
+        message: "No tienes permiso para ver los postulantes de esta oferta.",
+      });
     }
 
     // Si es el dueño, obtener los postulantes
