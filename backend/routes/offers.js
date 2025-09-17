@@ -12,26 +12,27 @@ const {
   verificarSuscripcionActiva,
 } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
-const { translateText } = require("../translationService");
+const translationService = require("../translationService");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
 // El caché se guardará por 3 minutos (180 segundos)
 const myCache = new NodeCache({ stdTTL: 180 });
 
-
 // --- Esquema de validación para la creación de ofertas ---
 const offerSchema = z.object({
   titulo: z.string().min(5).max(100),
   descripcion: z.string().min(20),
-  puesto: z.string().min(3).optional().or(z.literal('')),
-  ubicacion: z.string().min(3).optional().or(z.literal('')),
-  salario: z.preprocess((val) => (val ? parseFloat(val) : undefined), z.number().positive().optional()),
+  puesto: z.string().min(3).optional().or(z.literal("")),
+  ubicacion: z.string().min(3).optional().or(z.literal("")),
+  salario: z.preprocess(
+    (val) => (val ? parseFloat(val) : undefined),
+    z.number().positive().optional()
+  ),
   horarios: z.string().optional(),
   nivel: z.string().optional(),
   detalles_adicionales: z.string().optional(),
 });
-
 
 // --- Configuración de Multer para la subida de archivos ---
 const storage = multer.memoryStorage();
@@ -47,7 +48,7 @@ const processOfferImages = async (req, res, next) => {
   try {
     for (const field in req.files) {
       const file = req.files[field][0];
-      
+
       // Generar un nombre de archivo base único
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       const fileBase = `${file.fieldname}-${uniqueSuffix}`;
@@ -58,9 +59,7 @@ const processOfferImages = async (req, res, next) => {
       const originalWebpPath = path.join("uploads", `${fileBase}.webp`);
 
       // Convertir la imagen original a WebP (calidad alta)
-      await sharp(file.buffer)
-        .webp({ quality: 85 })
-        .toFile(originalWebpPath);
+      await sharp(file.buffer).webp({ quality: 85 }).toFile(originalWebpPath);
 
       // Crear versión mediana (800px) en WebP
       await sharp(file.buffer)
@@ -88,22 +87,25 @@ const processOfferImages = async (req, res, next) => {
   }
 };
 
-
 // --- RUTA PÚBLICA: OBTENER TODAS LAS OFERTAS (CON FILTROS Y CACHÉ) ---
 router.get("/", async (req, res) => {
-  const { 
-    puesto, 
-    ubicacion, 
+  const {
+    puesto,
+    ubicacion,
     nivel,
     horarios,
     salarioMin,
     salarioMax,
-    sort = 'desc', 
-    page = 1, 
-    limit = 10 
+    sort = "desc",
+    page = 1,
+    limit = 10,
   } = req.query;
 
-  const cacheKey = `offers:${puesto || 'all'}:${ubicacion || 'all'}:${nivel || 'all'}:${horarios || 'all'}:${salarioMin || 'none'}-${salarioMax || 'none'}:${sort}:page${page}:limit${limit}`;
+  const cacheKey = `offers:${puesto || "all"}:${ubicacion || "all"}:${
+    nivel || "all"
+  }:${horarios || "all"}:${salarioMin || "none"}-${
+    salarioMax || "none"
+  }:${sort}:page${page}:limit${limit}`;
 
   try {
     // 1. Intentar obtener los datos desde el caché en memoria
@@ -114,7 +116,7 @@ router.get("/", async (req, res) => {
     }
 
     // console.log("Sirviendo desde la base de datos, no hay caché.");
-    
+
     // 2. Desactivar ofertas destacadas caducadas (se ejecuta siempre)
     const unfeatureQuery = `
       UPDATE ofertas_laborales
@@ -153,8 +155,9 @@ router.get("/", async (req, res) => {
     }
 
     const whereString = whereClauses.join(" AND ");
-    
-    const orderBy = sort === 'asc' ? 'o.fecha_publicacion ASC' : 'o.fecha_publicacion DESC';
+
+    const orderBy =
+      sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
 
     // 4. Obtener el conteo total de ofertas para la paginación
     const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o WHERE ${whereString}`;
@@ -175,7 +178,7 @@ router.get("/", async (req, res) => {
     `;
     queryParams.offset = offset;
     queryParams.limit = parseInt(limit);
-    
+
     const regularResult = await db.query(regularQuery, queryParams);
     const regularOffers = regularResult.recordset;
 
@@ -195,7 +198,7 @@ router.get("/", async (req, res) => {
       featuredOffers,
       offers: regularOffers,
       totalPages,
-      currentPage: parseInt(page)
+      currentPage: parseInt(page),
     };
 
     // 8. Guardar en caché en memoria
@@ -203,10 +206,11 @@ router.get("/", async (req, res) => {
 
     // 9. Devolver la respuesta
     res.json(responseData);
-
   } catch (error) {
     console.error("Error al obtener ofertas:", error);
-    res.status(500).json({ message: "Error del servidor al obtener las ofertas." });
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener las ofertas." });
   }
 });
 
@@ -214,7 +218,8 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, 
              o.imagen_url, 
              o.detalles_adicionales, u.nombre as nombre_ofertante, o.id_usuario_ofertante, 
@@ -222,7 +227,9 @@ router.get("/:id", async (req, res) => {
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE o.id = @id
-    `, { id });
+    `,
+      { id }
+    );
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "Oferta no encontrada." });
@@ -230,7 +237,9 @@ router.get("/:id", async (req, res) => {
     res.json(result.recordset[0]);
   } catch (error) {
     console.error("Error al obtener oferta por ID:", error);
-    res.status(500).json({ message: "Error del servidor al obtener la oferta." });
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener la oferta." });
   }
 });
 
@@ -239,35 +248,41 @@ router.post(
   "/",
   verificarToken,
   verificarSuscripcionActiva(["ofertante", "agencia"]),
-  upload.fields([
-    { name: 'imagen_url', maxCount: 1 },
-  ]),
-  processOfferImages, 
+  upload.fields([{ name: "imagen_url", maxCount: 1 }]),
+  processOfferImages,
   validate(offerSchema),
   async (req, res) => {
-    const { 
-      titulo, 
-      descripcion, 
-      puesto, 
-      ubicacion, 
-      salario, 
-      horarios, 
-      nivel, 
-      detalles_adicionales, 
-      processedImages
+    const {
+      titulo,
+      descripcion,
+      puesto,
+      ubicacion,
+      salario,
+      horarios,
+      nivel,
+      detalles_adicionales,
+      processedImages,
     } = req.body;
     const id_usuario_ofertante = req.user.id;
 
     try {
       // Traducción de los campos
-      const [titulo_trans, desc_trans, puesto_trans, ubicacion_trans, horarios_trans, nivel_trans, detalles_trans] = await Promise.all([
+      const [
+        titulo_trans,
+        desc_trans,
+        puesto_trans,
+        ubicacion_trans,
+        horarios_trans,
+        nivel_trans,
+        detalles_trans,
+      ] = await Promise.all([
         translateText(titulo),
         translateText(descripcion),
         translateText(puesto),
         translateText(ubicacion),
         translateText(horarios),
         translateText(nivel),
-        translateText(detalles_adicionales)
+        translateText(detalles_adicionales),
       ]);
 
       const query = `
@@ -289,7 +304,7 @@ router.post(
           @detalles_adicionales_es, @detalles_adicionales_en
         );
       `;
-      
+
       const result = await db.query(query, {
         id_usuario_ofertante,
         titulo,
@@ -314,19 +329,20 @@ router.post(
         nivel_es: nivel_trans.es,
         nivel_en: nivel_trans.en,
         detalles_adicionales_es: detalles_trans.es,
-        detalles_adicionales_en: detalles_trans.en
+        detalles_adicionales_en: detalles_trans.en,
       });
 
       const newOfferId = result.recordset[0].id;
 
-      res.status(201).json({ 
-        message: "Oferta creada con éxito", 
-        offerId: newOfferId 
+      res.status(201).json({
+        message: "Oferta creada con éxito",
+        offerId: newOfferId,
       });
-
     } catch (error) {
       console.error("Error al crear la oferta:", error);
-      res.status(500).json({ message: "Error del servidor al crear la oferta." });
+      res
+        .status(500)
+        .json({ message: "Error del servidor al crear la oferta." });
     }
   }
 );
@@ -335,9 +351,7 @@ router.post(
 router.put(
   "/:id",
   verificarToken,
-  upload.fields([
-    { name: 'imagen_url', maxCount: 1 },
-  ]),
+  upload.fields([{ name: "imagen_url", maxCount: 1 }]),
   processOfferImages,
   validate(offerSchema),
   async (req, res) => {
@@ -354,7 +368,7 @@ router.put(
       processedImages,
     } = req.body;
     const id_usuario_actual = req.user.id;
-    const esAdmin = req.user.role === 'admin';
+    const esAdmin = req.user.role === "admin";
 
     try {
       // 1. Verificar que la oferta existe y obtener el dueño
@@ -369,7 +383,9 @@ router.put(
 
       // 2. Verificar permisos (solo el dueño o un admin pueden editar)
       if (id_dueño_oferta !== id_usuario_actual && !esAdmin) {
-        return res.status(403).json({ message: "No tienes permiso para editar esta oferta." });
+        return res
+          .status(403)
+          .json({ message: "No tienes permiso para editar esta oferta." });
       }
 
       // 3. Construir la consulta de actualización dinámica
@@ -416,7 +432,7 @@ router.put(
         updateFields.push("salario = @salario");
         queryParams.salario = salario;
       }
-       if (horarios) {
+      if (horarios) {
         const horarios_trans = await translateText(horarios);
         updateFields.push("horarios = @horarios");
         updateFields.push("horarios_es = @horarios_es");
@@ -449,7 +465,9 @@ router.put(
       }
 
       if (updateFields.length === 0) {
-        return res.status(400).json({ message: "No se proporcionaron campos para actualizar." });
+        return res
+          .status(400)
+          .json({ message: "No se proporcionaron campos para actualizar." });
       }
 
       const updateQuery = `
@@ -459,45 +477,45 @@ router.put(
       `;
 
       await db.query(updateQuery, queryParams);
-      
+
       // Invalidar caché para esta oferta y listas de ofertas
       myCache.del(`offer:${id}`);
       myCache.flushAll(); // O invalidar selectivamente las claves de listas
 
       res.status(200).json({ message: "Oferta actualizada con éxito." });
-
     } catch (error) {
       console.error("Error al actualizar la oferta:", error);
-      res.status(500).json({ message: "Error del servidor al actualizar la oferta." });
+      res
+        .status(500)
+        .json({ message: "Error del servidor al actualizar la oferta." });
     }
   }
 );
 
 // --- RUTA PROTEGIDA: OBTENER POSTULANTES DE UNA OFERTA ---
-router.get(
-  "/:offerId/applications",
-  verificarToken,
-  async (req, res) => {
-    const { offerId } = req.params;
-    const userId = req.user.id; // Asumiendo que verificarToken añade el usuario a req
+router.get("/:offerId/applications", verificarToken, async (req, res) => {
+  const { offerId } = req.params;
+  const userId = req.user.id; // Asumiendo que verificarToken añade el usuario a req
 
-    try {
-      // Primero, verificar que el usuario actual es el dueño de la oferta
-      const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
-      const offerResult = await db.query(offerQuery, { offerId });
+  try {
+    // Primero, verificar que el usuario actual es el dueño de la oferta
+    const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
+    const offerResult = await db.query(offerQuery, { offerId });
 
-      if (offerResult.recordset.length === 0) {
-        return res.status(404).json({ message: "Oferta no encontrada." });
-      }
+    if (offerResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Oferta no encontrada." });
+    }
 
-      if (offerResult.recordset[0].id_usuario_ofertante !== userId) {
-        return res
-          .status(403)
-          .json({ message: "No tienes permiso para ver los postulantes de esta oferta." });
-      }
+    if (offerResult.recordset[0].id_usuario_ofertante !== userId) {
+      return res
+        .status(403)
+        .json({
+          message: "No tienes permiso para ver los postulantes de esta oferta.",
+        });
+    }
 
-      // Si es el dueño, obtener los postulantes
-      const applicantsQuery = `
+    // Si es el dueño, obtener los postulantes
+    const applicantsQuery = `
         SELECT
           p.id,
           p.id_usuario_postulante AS id_usuario,
@@ -511,15 +529,16 @@ router.get(
         WHERE p.id_oferta = @offerId
         ORDER BY p.fecha_postulacion DESC;
       `;
-      const applicantsResult = await db.query(applicantsQuery, { offerId });
+    const applicantsResult = await db.query(applicantsQuery, { offerId });
 
-      res.json(applicantsResult.recordset);
-    } catch (error) {
-      console.error("Error al obtener los postulantes:", error);
-      res.status(500).json({ message: "Error del servidor al obtener los postulantes." });
-    }
+    res.json(applicantsResult.recordset);
+  } catch (error) {
+    console.error("Error al obtener los postulantes:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener los postulantes." });
   }
-);
+});
 
 // --- RUTA PROTEGIDA: POSTULARSE A UNA OFERTA ---
 router.post(
@@ -538,15 +557,22 @@ router.post(
         return res.status(404).json({ message: "Oferta no encontrada." });
       }
       if (offerResult.recordset[0].id_usuario_ofertante === userId) {
-        return res.status(403).json({ message: "No puedes postularte a tu propia oferta." });
+        return res
+          .status(403)
+          .json({ message: "No puedes postularte a tu propia oferta." });
       }
 
       // 2. Verificar que el usuario no se haya postulado ya
       const applicationQuery = `SELECT id FROM postulaciones WHERE id_oferta = @offerId AND id_usuario_postulante = @userId`;
-      const applicationResult = await db.query(applicationQuery, { offerId, userId });
+      const applicationResult = await db.query(applicationQuery, {
+        offerId,
+        userId,
+      });
 
       if (applicationResult.recordset.length > 0) {
-        return res.status(409).json({ message: "Ya te has postulado a esta oferta." });
+        return res
+          .status(409)
+          .json({ message: "Ya te has postulado a esta oferta." });
       }
 
       // 3. Crear la postulación
@@ -557,10 +583,11 @@ router.post(
       await db.query(insertQuery, { userId, offerId });
 
       res.status(201).json({ message: "Postulación exitosa." });
-
     } catch (error) {
       console.error("Error al postularse a la oferta:", error);
-      res.status(500).json({ message: "Error del servidor al procesar la postulación." });
+      res
+        .status(500)
+        .json({ message: "Error del servidor al procesar la postulación." });
     }
   }
 );
