@@ -168,7 +168,7 @@ router.get("/subscription-status", verificarToken, async (req, res) => {
 
   try {
     const result = await db.query(
-      "SELECT "plan", fecha_fin, estado, metodo_pago FROM suscripciones WHERE id_usuario = @userId",
+      "SELECT plan, fecha_fin, estado, metodo_pago FROM suscripciones WHERE id_usuario = @userId",
       { userId }
     );
 
