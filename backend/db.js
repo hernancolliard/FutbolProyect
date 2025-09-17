@@ -18,26 +18,19 @@ module.exports = {
     }
 
     let pgText = text;
-    let pgValues = [];
-    let paramIndex = 1;
+    const pgValues = [];
+    
+    // Find all @param instances in the text to define the order
+    const foundParams = text.match(/@\w+/g) || [];
+    const uniqueParams = [...new Set(foundParams)];
 
-    // Reemplazar @param con $1, $2, etc., y recolectar los valores
-    for (const key in params) {
+    uniqueParams.forEach((param, i) => {
+      const key = param.substring(1);
       if (params.hasOwnProperty(key)) {
-        // Usar una regex para reemplazar todas las ocurrencias de @key como palabra completa
-        pgText = pgText.replace(new RegExp(`@${key}\b`, 'g'), '
-        paramIndex++;
-      }
-    }
-
-    return pool.query(pgText, pgValues);
-  },
-};
- + paramIndex);
+        pgText = pgText.replace(new RegExp(param, 'g'), `$${i + 1}`);
         pgValues.push(params[key]);
-        paramIndex++;
       }
-    }
+    });
 
     return pool.query(pgText, pgValues);
   },
