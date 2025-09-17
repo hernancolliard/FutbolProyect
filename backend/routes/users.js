@@ -39,8 +39,8 @@ router.post("/register", async (req, res) => {
 
     // Guardar usuario y devolver los datos del nuevo usuario usando la cláusula OUTPUT
     const queryText = `INSERT INTO usuarios (nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario) 
-                           RETURNING id, nombre, apellido, telefono, email, dni, direccion, ciudad, pais, tipo_usuario
-                           VALUES (@nombre, @apellido, @telefono, @email, @password_hash, @dni, @direccion, @ciudad, @pais, @tipo_usuario)`;
+                           VALUES (@nombre, @apellido, @telefono, @email, @password_hash, @dni, @direccion, @ciudad, @pais, @tipo_usuario)
+                           RETURNING id, nombre, apellido, telefono, email, dni, direccion, ciudad, pais, tipo_usuario`;
     const newUser = await db.query(queryText, {
       nombre,
       apellido,
