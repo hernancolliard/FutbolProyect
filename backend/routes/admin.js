@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const { verificarToken, verificarAdmin } = require("../middleware/authMiddleware");
+console.log("--- ADMIN.JS VERSION 2 --- DEPLOYMENT TEST ---");
 
 // Todas las rutas en este archivo están protegidas y requieren ser admin
 
