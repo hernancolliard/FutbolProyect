@@ -33,13 +33,13 @@ router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
   try {
     const query = `
-      SELECT id, user_id, title, title_es, title_en, youtube_url, cover_image_url, position
+      SELECT id, user_id, title, youtube_url, cover_image_url, position
       FROM user_videos
       WHERE user_id = @userId
       ORDER BY position ASC;
     `;
     const result = await db.query(query, { userId });
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los videos del usuario:", error);
     res
@@ -68,7 +68,7 @@ router.post(
       // 1. Verificar que el usuario no tenga ya 5 videos
       const countQuery = `SELECT COUNT(*) as video_count FROM user_videos WHERE user_id = @user_id`;
       const countResult = await db.query(countQuery, { user_id });
-      if (countResult.recordset[0].video_count >= 5) {
+      if (countResult.rows[0].video_count >= 5) {
         return res
           .status(400)
           .json({ message: "No puedes añadir más de 5 videos." });
@@ -80,7 +80,7 @@ router.post(
         user_id,
         position,
       });
-      if (positionResult.recordset.length > 0) {
+      if (positionResult.rows.length > 0) {
         return res
           .status(400)
           .json({ message: `La posición ${position} ya está ocupada.` });
@@ -150,7 +150,7 @@ router.get("/:userId", verificarToken, async (req, res) => {
         profileToViewId,
         requesterId: requester.id,
       });
-      if (result.recordset.length > 0) {
+      if (result.rows.length > 0) {
         isAuthorized = true;
       }
     }
@@ -169,11 +169,11 @@ router.get("/:userId", verificarToken, async (req, res) => {
     `;
     const profileResult = await db.query(profileQuery, { profileToViewId });
 
-    if (profileResult.recordset.length === 0) {
+    if (profileResult.rows.length === 0) {
       return res.status(404).json({ message: "Usuario no encontrado." });
     }
 
-    res.json(profileResult.recordset[0]);
+    res.json(profileResult.rows[0]);
   } catch (error) {
     console.error("Error al obtener el perfil:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -207,7 +207,7 @@ router.get("/:userId/applications", verificarToken, async (req, res) => {
       ORDER BY p.fecha_postulacion DESC
     `;
     const result = await db.query(applicationsQuery, { userId });
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener postulaciones:", error);
     res
@@ -242,7 +242,7 @@ router.get("/:userId/offers", verificarToken, async (req, res) => {
       ORDER BY fecha_publicacion DESC
     `;
     const result = await db.query(offersQuery, { userId });
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener ofertas:", error);
     res.status(500).json({ message: "Error del servidor al obtener ofertas." });
@@ -340,7 +340,7 @@ router.put(
         pie_dominante_en: pie_dominante_trans.en,
       };
 
-      if (existingProfile.recordset.length > 0) {
+      if (existingProfile.rows.length > 0) {
         let updateFields = [
           "telefono = @telefono",
           "nacionalidad = @nacionalidad",
@@ -403,7 +403,7 @@ router.get("/:userId/photos", async (req, res) => {
       ORDER BY created_at DESC;
     `;
     const result = await db.query(query, { userId });
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener las fotos del usuario:", error);
     res
@@ -485,11 +485,11 @@ router.delete("/:userId/photos/:photoId", verificarToken, async (req, res) => {
       "SELECT url FROM user_photos WHERE id = @photoId AND user_id = @userId";
     const photoResult = await db.query(photoQuery, { photoId, userId });
 
-    if (photoResult.recordset.length === 0) {
+    if (photoResult.rows.length === 0) {
       return res.status(404).json({ message: "Foto no encontrada." });
     }
 
-    const photoUrl = photoResult.recordset[0].url;
+    const photoUrl = photoResult.rows[0].url;
 
     // Delete the file from the uploads folder
     const photoPath = path.join("uploads", photoUrl);
