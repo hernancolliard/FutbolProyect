@@ -132,8 +132,8 @@ router.post("/auth/google", async (req, res) => {
       const password_hash = await bcrypt.hash(defaultPassword, salt);
 
       const queryText = `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
-                           RETURNING id, nombre, email, tipo_usuario
-                           VALUES (@nombre, @email, @password_hash, @tipo_usuario)`;
+                           VALUES (@nombre, @email, @password_hash, @tipo_usuario)
+                           RETURNING id, nombre, email, tipo_usuario`;
       const newUser = await db.query(queryText, {
         nombre: name,
         email,
