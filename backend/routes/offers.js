@@ -12,7 +12,7 @@ const {
   verificarSuscripcionActiva,
 } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
-const translationService = require("../services/translationService");
+const { translateText } = require("../services/translationService");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
