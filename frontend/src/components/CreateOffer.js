@@ -124,8 +124,28 @@ function CreateOffer({ onOfferCreated, onClose }) {
       
       <form onSubmit={handleSubmit}>
         <Stack spacing={2} sx={{ mt: 2 }}>
-          <TextField name="titulo" label={t("offer_title_placeholder")} value={formData.titulo} onChange={handleChange} required fullWidth />
-          <TextField name="descripcion" label={t("offer_description_placeholder")} value={formData.descripcion} onChange={handleChange} required fullWidth multiline rows={4} />
+          <TextField
+            name="titulo"
+            label={t("offer_title_placeholder")}
+            value={formData.titulo}
+            onChange={handleChange}
+            required
+            fullWidth
+            inputProps={{ minLength: 5, maxLength: 100 }}
+            helperText={t("titulo_helper_text")}
+          />
+          <TextField
+            name="descripcion"
+            label={t("offer_description_placeholder")}
+            value={formData.descripcion}
+            onChange={handleChange}
+            required
+            fullWidth
+            multiline
+            rows={4}
+            inputProps={{ minLength: 20 }}
+            helperText={t("descripcion_helper_text")}
+          />
           <TextField name="ubicacion" label={t("location_placeholder")} value={formData.ubicacion} onChange={handleChange} fullWidth />
           <TextField name="puesto" label={t("position_placeholder")} value={formData.puesto} onChange={handleChange} fullWidth />
           <TextField name="salario" label={t("salary_placeholder")} value={formData.salario} onChange={handleChange} fullWidth />

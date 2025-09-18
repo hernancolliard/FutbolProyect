@@ -301,7 +301,7 @@ router.post(
           @imagen_url,
           @titulo_es, @titulo_en, @descripcion_es, @descripcion_en, @puesto_es, @puesto_en,
           @ubicacion_es, @ubicacion_en, @horarios_es, @horarios_en, @nivel_es, @nivel_en,
-          detalles_adicionales_es, detalles_adicionales_en
+          @detalles_adicionales_es, @detalles_adicionales_en
         );
       
       `;
