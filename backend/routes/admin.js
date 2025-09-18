@@ -9,7 +9,7 @@ const { verificarToken, verificarAdmin } = require("../middleware/authMiddleware
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query("SELECT id, nombre, email, tipo_usuario, fecha_creacion, isAdmin FROM usuarios ORDER BY fecha_creacion DESC");
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -89,7 +89,7 @@ router.get("/offers", [verificarToken, verificarAdmin], async (req, res) => {
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       ORDER BY o.fecha_publicacion DESC
     `);
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener ofertas:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -112,7 +112,7 @@ router.delete("/offers/:id", [verificarToken, verificarAdmin], async (req, res) 
 router.get("/subscriptions", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM subscription_plans");
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (error) {
     console.error("Error fetching subscription plans:", error);
     res.status(500).json({ message: "Server error." });
