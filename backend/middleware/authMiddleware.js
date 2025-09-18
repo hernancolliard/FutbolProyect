@@ -35,6 +35,7 @@ const verificarAdmin = (req, res, next) => {
 };
 
 // Middleware para verificar que el usuario tiene una suscripción activa y el tipo correcto
+// Middleware para verificar que el usuario tiene una suscripción activa y el tipo correcto
 const verificarSuscripcionActiva =
   (tiposPermitidos = []) =>
   async (req, res, next) => {
@@ -59,15 +60,12 @@ const verificarSuscripcionActiva =
       }
 
       // 2. Verificar que la suscripción está activa en la base de datos
-      // 2. Verificar que la suscripción está activa en la base de datos
       const resultado = await db.query(
         "SELECT * FROM suscripciones WHERE id_usuario = @id AND estado = 'activa' AND fecha_fin > NOW()",
         { id }
       );
 
       if (resultado.rows.length === 0) {
-
-      if (resultado.recordset.length === 0) {
         return res
           .status(403)
           .json({
