@@ -333,7 +333,7 @@ router.post(
         detalles_adicionales_en: detalles_trans.en,
       });
 
-      const newOfferId = result.recordset[0].id;
+      const newOfferId = result.rows[0].id;
 
       res.status(201).json({
         message: "Oferta creada con éxito",
