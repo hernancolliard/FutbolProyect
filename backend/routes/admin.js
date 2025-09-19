@@ -12,7 +12,7 @@ const {
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, usuarios.isAdmin FROM usuarios ORDER BY fecha_creacion DESC"
+      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isAdmin FROM usuarios ORDER BY fecha_creacion DESC"
     );
     res.json(result.rows);
   } catch (error) {
@@ -30,11 +30,9 @@ router.delete(
     try {
       // Opcional: verificar que no se esté eliminando a sí mismo
       if (parseInt(id, 10) === req.user.id) {
-        return res
-          .status(400)
-          .json({
-            message: "No puedes eliminar tu propia cuenta de administrador.",
-          });
+        return res.status(400).json({
+          message: "No puedes eliminar tu propia cuenta de administrador.",
+        });
       }
       await db.query("DELETE FROM usuarios WHERE id = @id", { id });
       res.status(200).json({ message: "Usuario eliminado exitosamente." });
