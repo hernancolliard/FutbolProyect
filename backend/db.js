@@ -19,24 +19,23 @@ module.exports = {
       return pool.query(text);
     }
 
-    let pgText = text;
     const pgValues = [];
-    let paramIndex = 1;
+    const namedParams = {};
 
-    // Crear un array de pares clave-valor para mantener el orden
-    const paramKeys = Object.keys(params);
-
-    // Iterar sobre los parámetros y construir la consulta para PostgreSQL
-    paramKeys.forEach((key) => {
-      // Reemplazar todas las instancias del parámetro con nombre (@key)
-      // por el marcador de posición posicional ($1, $2, etc.)
-      const namedParam = `@${key}`;
-      const placeholder = `$${paramIndex}`;
-      pgText = pgText.replace(new RegExp(namedParam, "g"), placeholder);
-      pgValues.push(params[key]);
-      paramIndex++;
+    // Reemplazar los parámetros con nombre por marcadores de posición posicionales
+    const newText = text.replace(/@(\w+)/g, (match, key) => {
+      // Verificar si la clave existe en los parámetros proporcionados
+      if (!params.hasOwnProperty(key)) {
+        throw new Error(`Missing parameter value for key: ${key}`);
+      }
+      // Si la clave es nueva, añadir su valor al array y crear un nuevo marcador de posición
+      if (!namedParams.hasOwnProperty(key)) {
+        pgValues.push(params[key]);
+        namedParams[key] = `$${pgValues.length}`;
+      }
+      return namedParams[key];
     });
 
-    return pool.query(pgText, pgValues);
+    return pool.query(newText, pgValues);
   },
 };
