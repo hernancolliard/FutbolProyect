@@ -221,9 +221,9 @@ router.get("/:id", async (req, res) => {
     const result = await db.query(
       `
       SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, 
-            o.imagen_url, 
-            o.detalles_adicionales, u.nombre as nombre_ofertante, o.id_usuario_ofertante, 
-            o.puesto, o.salario, o.nivel, o.horarios, o.is_featured
+             o.imagen_url, 
+             o.detalles_adicionales, u.nombre as nombre_ofertante, o.id_usuario_ofertante, 
+             o.puesto, o.salario, o.nivel, o.horarios, o.is_featured
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE o.id = @id
@@ -285,56 +285,52 @@ router.post(
         translateText(detalles_adicionales),
       ]);
 
-      // CORRECCIÓN: Usar marcadores de posición posicionales ($1, $2, ...)
-      // y pasar los valores en un array.
       const query = `
-        INSERT INTO ofertas_laborales (
+                INSERT INTO ofertas_laborales (
           id_usuario_ofertante, titulo, descripcion, puesto, ubicacion, salario, 
-          horarios, nivel, detalles_adicionales, estado,
+          horarios, nivel, detalles_adicionales, estado, 
           imagen_url,
           titulo_es, titulo_en, descripcion_es, descripcion_en, puesto_es, puesto_en,
           ubicacion_es, ubicacion_en, horarios_es, horarios_en, nivel_es, nivel_en,
           detalles_adicionales_es, detalles_adicionales_en
         ) 
         VALUES (
-          $1, $2, $3, $4, $5, $6,
-          $7, $8, $9, 'abierta',
-          $10,
-          $11, $12, $13, $14, $15, $16,
-          $17, $18, $19, $20, $21, $22,
-          $23, $24
+          @id_usuario_ofertante, @titulo, @descripcion, @puesto, @ubicacion, @salario, 
+          @horarios, @nivel, @detalles_adicionales, 'abierta', 
+          @imagen_url,
+          @titulo_es, @titulo_en, @descripcion_es, @descripcion_en, @puesto_es, @puesto_en,
+          @ubicacion_es, @ubicacion_en, @horarios_es, @horarios_en, @nivel_es, @nivel_en,
+          @detalles_adicionales_es, @detalles_adicionales_en
         )
         RETURNING id;
       `;
 
-      const values = [
+      const result = await db.query(query, {
         id_usuario_ofertante,
         titulo,
         descripcion,
         puesto,
         ubicacion,
-        salario || null,
-        horarios || null,
-        nivel || null,
-        detalles_adicionales || null,
-        processedImages?.imagen_url?.original || null,
-        titulo_trans.es,
-        titulo_trans.en,
-        desc_trans.es,
-        desc_trans.en,
-        puesto_trans.es,
-        puesto_trans.en,
-        ubicacion_trans.es,
-        ubicacion_trans.en,
-        horarios_trans.es,
-        horarios_trans.en,
-        nivel_trans.es,
-        nivel_trans.en,
-        detalles_trans.es,
-        detalles_trans.en,
-      ];
-
-      const result = await db.query(query, values);
+        salario: salario || null,
+        horarios: horarios || null,
+        nivel: nivel || null,
+        detalles_adicionales: detalles_adicionales || null,
+        imagen_url: processedImages?.imagen_url?.original || null,
+        titulo_es: titulo_trans.es,
+        titulo_en: titulo_trans.en,
+        descripcion_es: desc_trans.es,
+        descripcion_en: desc_trans.en,
+        puesto_es: puesto_trans.es,
+        puesto_en: puesto_trans.en,
+        ubicacion_es: ubicacion_trans.es,
+        ubicacion_en: ubicacion_trans.en,
+        horarios_es: horarios_trans.es,
+        horarios_en: horarios_trans.en,
+        nivel_es: nivel_trans.es,
+        nivel_en: nivel_trans.en,
+        detalles_adicionales_es: detalles_trans.es,
+        detalles_adicionales_en: detalles_trans.en,
+      });
 
       const newOfferId = result.rows[0].id;
 

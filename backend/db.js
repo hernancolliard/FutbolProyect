@@ -1,35 +1,40 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
-pool.connect()
-  .then(() => console.log('Conectado a PostgreSQL'))
-  .catch(err => console.error('Error de conexión a la base de datos: ', err));
+pool
+  .connect()
+  .then(() => console.log("Conectado a PostgreSQL"))
+  .catch((err) => console.error("Error de conexión a la base de datos: ", err));
 
 module.exports = {
   query: async (text, params) => {
+    // Si no hay parámetros con nombre, ejecutar la consulta directamente
     if (!params) {
       return pool.query(text);
     }
 
     let pgText = text;
     const pgValues = [];
-    
-    // Find all @param instances in the text to define the order
-    const foundParams = text.match(/@\w+/g) || [];
-    const uniqueParams = [...new Set(foundParams)];
+    let paramIndex = 1;
 
-    uniqueParams.forEach((param, i) => {
-      const key = param.substring(1);
-      if (params.hasOwnProperty(key)) {
-        pgText = pgText.replace(new RegExp(param, 'g'), `$${i + 1}`);
-        pgValues.push(params[key]);
-      }
+    // Crear un array de pares clave-valor para mantener el orden
+    const paramKeys = Object.keys(params);
+
+    // Iterar sobre los parámetros y construir la consulta para PostgreSQL
+    paramKeys.forEach((key) => {
+      // Reemplazar todas las instancias del parámetro con nombre (@key)
+      // por el marcador de posición posicional ($1, $2, etc.)
+      const namedParam = `@${key}`;
+      const placeholder = `$${paramIndex}`;
+      pgText = pgText.replace(new RegExp(namedParam, "g"), placeholder);
+      pgValues.push(params[key]);
+      paramIndex++;
     });
 
     return pool.query(pgText, pgValues);
