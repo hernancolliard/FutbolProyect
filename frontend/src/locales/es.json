@@ -301,6 +301,8 @@
     "duration_1_year": "1 Año",
     "grant_button": "Otorgar",
     "titulo_helper_text": "El título debe tener entre 5 y 100 caracteres.",
-    "descripcion_helper_text": "La descripción debe tener al menos 20 caracteres."
+    "descripcion_helper_text": "La descripción debe tener al menos 20 caracteres.",
+    "error_fetching_terms": "Error al cargar los términos y condiciones.",
+    "error_fetching_privacy": "Error al cargar la política de privacidad."
   }
 }

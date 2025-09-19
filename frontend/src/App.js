@@ -37,6 +37,8 @@ const ProfilePage = lazy(() => import("./components/ProfilePage"));
 const Register = lazy(() => import("./components/Register"));
 const ResetPasswordPage = lazy(() => import("./components/ResetPasswordPage"));
 const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
+const TermsOfService = lazy(() => import("./components/TermsOfService"));
+const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
 function AppContent() {
   const { t } = useTranslation();
@@ -134,6 +136,8 @@ function AppContent() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/create-offer" element={<CreateOffer />} />
             <Route path="/edit-offer/:offerId" element={<CreateOffer />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>
         </Suspense>
       </main>

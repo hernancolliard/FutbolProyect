@@ -8,6 +8,8 @@ const offerRoutes = require("./routes/offers.js");
 const applicationRoutes = require("./routes/applications.js");
 const profileRoutes = require("./routes/profiles.js");
 const adminRoutes = require("./routes/admin.js");
+const termsRoutes = require("./routes/terms.js");
+const privacyRoutes = require("./routes/privacy.js");
 
 const app = express();
 
@@ -30,6 +32,8 @@ app.use("/api/offers", offerRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/terms", termsRoutes);
+app.use("/api/privacy", privacyRoutes);
 
 const PORT = process.env.PORT || 5000;
 

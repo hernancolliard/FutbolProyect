@@ -299,6 +299,8 @@
     "duration_1_year": "1 Year",
     "grant_button": "Grant",
     "titulo_helper_text": "Title must be between 5 and 100 characters.",
-    "descripcion_helper_text": "Description must be at least 20 characters long."
+    "descripcion_helper_text": "Description must be at least 20 characters long.",
+    "error_fetching_terms": "Error fetching terms and conditions.",
+    "error_fetching_privacy": "Error fetching privacy policy."
   }
 }
