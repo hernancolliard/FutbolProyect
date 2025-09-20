@@ -237,15 +237,21 @@ function OfferList({
     swipe: true,
     responsive: [
       {
-        breakpoint: 768,
+        breakpoint: 1024,
         settings: {
           slidesToShow: 2,
         },
       },
       {
-        breakpoint: 480, // opcional, para pantallas más chicas
+        breakpoint: 600,
         settings: {
-          slidesToShow: 2,
+          slidesToShow: 1,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
         },
       },
     ],
