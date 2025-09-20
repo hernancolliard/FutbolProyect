@@ -242,12 +242,6 @@ function OfferList({
           slidesToShow: 2,
         },
       },
-      {
-        breakpoint: 480, // opcional, para pantallas más chicas
-        settings: {
-          slidesToShow: 2,
-        },
-      },
     ],
   };
 
