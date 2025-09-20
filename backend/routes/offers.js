@@ -73,11 +73,11 @@ const processOfferImages = async (req, res, next) => {
         .webp({ quality: 80 })
         .toFile(thumbPath);
 
-      // Guardar las nuevas rutas .webp para la base de datos
+      // Guardar solo el nombre del archivo para la base de datos
       req.body.processedImages[field] = {
-        original: originalWebpPath,
-        medium: mediumPath,
-        thumb: thumbPath,
+        original: `${fileBase}.webp`,
+        medium: `${fileBase}_medium.webp`,
+        thumb: `${fileBase}_thumb.webp`,
       };
     }
     next();
