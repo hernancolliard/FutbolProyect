@@ -8,6 +8,8 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import FileUpload from "./FileUpload";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -37,6 +39,7 @@ function CreateOffer({ onOfferCreated, onClose }) {
   const [success, setSuccess] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const { data: existingOffer, isLoading: isLoadingOffer } = useQuery({
     queryKey: ["offer", offerId],
@@ -46,7 +49,7 @@ function CreateOffer({ onOfferCreated, onClose }) {
 
   useEffect(() => {
     if (isEditMode && existingOffer) {
-      const { titulo, descripcion, ubicacion, puesto, salario, nivel, horarios, detalles_adicionales } = existingOffer;
+      const { titulo, descripcion, ubicacion, puesto, salario, nivel, horarios, detalles_adicionales, imagen_url } = existingOffer;
       setFormData({
         titulo: titulo || "",
         descripcion: descripcion || "",
@@ -57,8 +60,32 @@ function CreateOffer({ onOfferCreated, onClose }) {
         horarios: horarios || "",
         detalles_adicionales: detalles_adicionales || "",
       });
+      if (imagen_url) {
+        setImagePreview(imagen_url);
+      }
     }
   }, [isEditMode, existingOffer]);
+
+  useEffect(() => {
+    let objectUrl;
+    if (files.length > 0) {
+      const file = files[0];
+      objectUrl = URL.createObjectURL(file);
+      setImagePreview(objectUrl);
+    } else if (isEditMode && existingOffer?.imagen_url) {
+      // Revertir a la imagen original si se cancela la selección de un nuevo archivo
+      setImagePreview(existingOffer.imagen_url);
+    } else {
+      setImagePreview(null);
+    }
+
+    // Limpieza para revocar la URL del objeto y evitar fugas de memoria
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [files, isEditMode, existingOffer]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -159,6 +186,17 @@ function CreateOffer({ onOfferCreated, onClose }) {
           <TextField name="detalles_adicionales" label={t("additional_details_placeholder")} value={formData.detalles_adicionales} onChange={handleChange} fullWidth multiline rows={3} />
           
           <FileUpload onFilesChange={setFiles} uploadProgress={uploadProgress} />
+
+          {imagePreview && (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography variant="subtitle2">{t("image_preview")}</Typography>
+              <img
+                src={imagePreview}
+                alt={t("offer_image_preview")}
+                style={{ width: '100%', height: 'auto', maxHeight: '300px', objectFit: 'contain', marginTop: '8px' }}
+              />
+            </Box>
+          )}
 
           <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ pt: 2 }}>
             <Button variant="contained" color="primary" type="submit" disabled={isSubmitting}>
