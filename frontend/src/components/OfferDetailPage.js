@@ -15,6 +15,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import FeatureOfferPaymentModal from "./FeatureOfferPaymentModal";
 import OfferActions from "./OfferActions"; // Importar el componente centralizado
+import OptimizedImage from "./OptimizedImage";
 
 // --- Función de Fetching para React Query ---
 const fetchOffer = async (offerId) => {
@@ -99,6 +100,18 @@ function OfferDetailPage() {
   return (
     <Stack alignItems="center" sx={{ mt: 4 }}>
       <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
+        {offer.imagen_url && (
+          <OptimizedImage
+            src={offer.imagen_url}
+            alt={titulo}
+            style={{
+              width: "100%",
+              height: "auto",
+              maxHeight: "400px",
+              objectFit: "cover",
+            }}
+          />
+        )}
         <CardContent>
           <Typography variant="h4" sx={{ mb: 2 }}>{titulo}</Typography>
           
