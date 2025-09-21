@@ -13,6 +13,7 @@ const {
 } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const { translateText } = require("../services/translationService");
+const { uploadToS3 } = require("../services/s3Service");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
@@ -39,9 +40,11 @@ const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
-// --- Middleware para procesar imágenes de ofertas a WebP ---
+// --- Middleware para procesar y subir imágenes de ofertas a S3 ---
 const processOfferImages = async (req, res, next) => {
-  if (!req.files) return next();
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return next();
+  }
 
   req.body.processedImages = {};
 
@@ -49,40 +52,52 @@ const processOfferImages = async (req, res, next) => {
     for (const field in req.files) {
       const file = req.files[field][0];
 
-      // Generar un nombre de archivo base único
+      // 1. Generar un nombre de archivo base único
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       const fileBase = `${file.fieldname}-${uniqueSuffix}`;
 
-      // Definir rutas para las nuevas imágenes WebP
-      const mediumPath = path.join("uploads", `${fileBase}_medium.webp`);
-      const thumbPath = path.join("uploads", `${fileBase}_thumb.webp`);
-      const originalWebpPath = path.join("uploads", `${fileBase}.webp`);
-
-      // Convertir la imagen original a WebP (calidad alta)
-      await sharp(file.buffer).webp({ quality: 85 }).toFile(originalWebpPath);
-
-      // Crear versión mediana (800px) en WebP
-      await sharp(file.buffer)
+      // 2. Preparar buffers de imagen en formato WebP
+      const originalWebpBuffer = await sharp(file.buffer)
+        .webp({ quality: 85 })
+        .toBuffer();
+      const mediumWebpBuffer = await sharp(file.buffer)
         .resize(800)
         .webp({ quality: 80 })
-        .toFile(mediumPath);
-
-      // Crear miniatura (300px) en WebP
-      await sharp(file.buffer)
+        .toBuffer();
+      const thumbWebpBuffer = await sharp(file.buffer)
         .resize(300)
         .webp({ quality: 80 })
-        .toFile(thumbPath);
+        .toBuffer();
 
-      // Guardar solo el nombre del archivo para la base de datos
+      // 3. Subir todas las versiones a S3 en paralelo
+      const [originalUrl, mediumUrl, thumbUrl] = await Promise.all([
+        uploadToS3(
+          originalWebpBuffer,
+          `offers/${fileBase}.webp`,
+          "image/webp"
+        ),
+        uploadToS3(
+          mediumWebpBuffer,
+          `offers/${fileBase}_medium.webp`,
+          "image/webp"
+        ),
+        uploadToS3(
+          thumbWebpBuffer,
+          `offers/${fileBase}_thumb.webp`,
+          "image/webp"
+        ),
+      ]);
+
+      // 4. Guardar las URLs de S3 para la base de datos
       req.body.processedImages[field] = {
-        original: `${fileBase}.webp`,
-        medium: `${fileBase}_medium.webp`,
-        thumb: `${fileBase}_thumb.webp`,
+        original: originalUrl,
+        medium: mediumUrl,
+        thumb: thumbUrl,
       };
     }
     next();
   } catch (error) {
-    console.error("Error procesando imágenes a WebP:", error);
+    console.error("Error procesando y subiendo imágenes a S3:", error);
     next(error);
   }
 };
