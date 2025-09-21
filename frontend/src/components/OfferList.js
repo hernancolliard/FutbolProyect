@@ -13,6 +13,7 @@ import Slider from "react-slick";
 import FadeInOnScroll from "./FadeInOnScroll";
 import OfferActions from "./OfferActions";
 import useIsMobile from "../hooks/useIsMobile";
+import OptimizedImage from "./OptimizedImage";
 
 function OfferList({
   offers = [],
@@ -70,8 +71,8 @@ function OfferList({
           }}
         >
           {offer.imagen_url ? (
-            <img
-              src={`http://localhost:5000/uploads/${offer.imagen_url}`}
+            <OptimizedImage
+              src={offer.imagen_url}
               alt={titulo}
               className="offer-image"
               style={{
