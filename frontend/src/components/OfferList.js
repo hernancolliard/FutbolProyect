@@ -68,7 +68,9 @@ function OfferList({
             justifyContent: "center",
             flexShrink: 0,
             marginRight: isMobileHome ? 0 : (isHomePage ? 16 : 0),
-            background: "#e0e0e0"
+            background: "#e0e0e0",
+            padding: '1rem',
+            boxSizing: 'border-box'
           }}
         >
           {offer.imagen_url ? (
@@ -78,7 +80,7 @@ function OfferList({
               style={{
                 width: "100%",
                 height: "100%",
-                objectFit: "contain", 
+                objectFit: "cover", 
               }}
             />
           ) : (
