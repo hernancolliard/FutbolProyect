@@ -41,33 +41,35 @@ function OfferList({
     const ubicacion = offer[`ubicacion_${lang}`] || offer.ubicacion;
     const puesto = offer[`puesto_${lang}`] || offer.puesto;
 
+    const isMobileHome = isHomePage && isMobile;
+
     return (
       <Card
         key={offer.id}
         sx={{
-          width: "100%", // Ensure card takes full width of its container
+          width: "100%",
           position: "relative",
           bgcolor: !isHomePage ? "primary.main" : "background.paper",
           color: !isHomePage ? "#fff" : "inherit",
           display: "flex",
-          flexDirection: isHomePage ? "column" : "row", // Conditional flexDirection
-          height: "100%", // Asegura que todas las cards tengan la misma altura
+          flexDirection: isMobileHome ? "column" : "row",
+          height: "100%",
         }}
         elevation={2}
         className="offer-card offer-card-all-offers"
       >
         <div
           style={{
-            width: isHomePage ? "100%" : "auto", // Changed width to auto for horizontal layout
-            height: isHomePage ? "auto" : "100%", // Changed to auto for flexible height on homepage
-            maxHeight: isHomePage ? 150 : "none", // Added maxHeight for homepage to control image size
-            overflow: "hidden", // Ensure content doesn't overflow
+            width: isMobileHome ? "100%" : (isHomePage ? "100%" : "auto"),
+            height: isHomePage ? "auto" : "100%",
+            maxHeight: isHomePage ? 150 : "none",
+            overflow: "hidden",
             background: offer.imagen_url ? "none" : "#e0e0e0",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            marginRight: isHomePage ? 0 : 16, // Add margin-right for horizontal layout
+            marginRight: isHomePage ? 0 : 16,
           }}
         >
           {offer.imagen_url ? (
@@ -76,8 +78,8 @@ function OfferList({
               alt={titulo}
               className="offer-image"
               style={{
-                width: "auto", // Changed width to auto
-                height: "100%", // Keep height 100%
+                width: "auto",
+                height: "100%",
                 objectFit: "cover",
               }}
             />
@@ -85,34 +87,22 @@ function OfferList({
             <span style={{ color: "#888", fontSize: 16 }}>{t("no_image")}</span>
           )}
         </div>
-        {/* Conditional rendering for content and actions wrapper */}
-        {isHomePage ? (
-          <>
-            {" "}
-            {/* Old layout: CardContent and CardActions directly under Card */}
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{ color: !isHomePage ? "#fff" : "inherit" }}
-              >
-                {titulo}
-              </Typography>
-              <Typography
-                variant="subtitle2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
+        
+        <CardContent sx={{ flexGrow: 1, p: isMobileHome ? 1 : 2 }}>
+          <Typography variant={isMobileHome ? "body1" : "h6"} sx={{ color: !isHomePage ? "#fff" : "inherit", fontWeight: isMobileHome ? 'bold' : 'regular' }}>
+            {titulo}
+          </Typography>
+
+          {/* Ocultar detalles en la vista de inicio móvil */}
+          {!isMobileHome && (
+            <>
+              <Typography variant="subtitle2" color={!isHomePage ? "#fff" : "text.secondary"}>
                 {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
               </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
+              <Typography variant="body2" color={!isHomePage ? "#fff" : "text.secondary"}>
                 {t("location")} {ubicacion || t("not_specified")}
               </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
+              <Typography variant="body2" color={!isHomePage ? "#fff" : "text.secondary"}>
                 {t("position")} {puesto || t("not_specified")}
               </Typography>
               <Typography
@@ -121,7 +111,7 @@ function OfferList({
                   mt: 1,
                   color: !isHomePage ? "#fff" : "inherit",
                   display: "-webkit-box",
-                  WebkitLineClamp: 3, // Limitar a 3 líneas
+                  WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -129,93 +119,32 @@ function OfferList({
               >
                 {descripcion}
               </Typography>
-            </CardContent>
-            <CardActions
-              sx={{
-                flexDirection: { xs: "column", sm: "row" },
-                alignItems: { xs: "stretch", sm: "center" },
-                "& > :not(style)": {
-                  width: { xs: "100%", sm: "auto" },
-                },
-              }}
+            </>
+          )}
+        </CardContent>
+
+        {/* En la vista de inicio móvil, las acciones podrían estar simplificadas o movidas */}
+        {(!isMobileHome) && (
+          <CardActions
+            sx={{
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "stretch", sm: "center" },
+              "& > :not(style)": {
+                width: { xs: "100%", sm: "auto" },
+              },
+            }}
+          >
+            <Button
+              variant="contained"
+              color={isHomePage ? "primary" : "secondary"}
+              onClick={() => handleViewOffer(offer.id)}
             >
-              <Button
-                variant="contained"
-                color={isHomePage ? "primary" : "secondary"}
-                onClick={() => handleViewOffer(offer.id)}
-              >
-                {t("view_offer")}
-              </Button>
-              {showApplyButton && !isMobile && (
-                <OfferActions offer={offer} onOfferAction={onOfferAction} />
-              )}
-            </CardActions>
-          </>
-        ) : (
-          <Stack sx={{ flexGrow: 1, flexDirection: "column" }}>
-            {" "}
-            {/* New layout: Stack for content and actions */}
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{ color: !isHomePage ? "#fff" : "inherit" }}
-              >
-                {titulo}
-              </Typography>
-              <Typography
-                variant="subtitle2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
-              </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("location")} {ubicacion || t("not_specified")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("position")} {puesto || t("not_specified")}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  mt: 1,
-                  color: !isHomePage ? "#fff" : "inherit",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3, // Limitar a 3 líneas
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {descripcion}
-              </Typography>
-            </CardContent>
-            <CardActions
-              sx={{
-                flexDirection: { xs: "column", sm: "row" },
-                alignItems: { xs: "stretch", sm: "center" },
-                "& > :not(style)": {
-                  width: { xs: "100%", sm: "auto" },
-                },
-              }}
-            >
-              <Button
-                variant="contained"
-                color={isHomePage ? "primary" : "secondary"}
-                onClick={() => handleViewOffer(offer.id)}
-              >
-                {t("view_offer")}
-              </Button>
-              {showApplyButton && !isMobile && (
-                <OfferActions offer={offer} onOfferAction={onOfferAction} />
-              )}
-            </CardActions>
-          </Stack>
+              {t("view_offer")}
+            </Button>
+            {showApplyButton && !isMobile && (
+              <OfferActions offer={offer} onOfferAction={onOfferAction} />
+            )}
+          </CardActions>
         )}
       </Card>
     );
