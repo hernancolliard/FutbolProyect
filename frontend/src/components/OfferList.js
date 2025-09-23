@@ -53,7 +53,7 @@ function OfferList({
           bgcolor: !isHomePage ? "primary.main" : "background.paper",
           color: !isHomePage ? "#fff" : "inherit",
           display: "flex",
-          flexDirection: isMobileHome ? "column" : "row",
+          flexDirection: isHomePage || isMobileHome ? "column" : "row",
           height: "100%",
         }}
         elevation={2}
@@ -63,7 +63,7 @@ function OfferList({
         <div
           style={{
             width: isMobileHome ? "100%" : (isHomePage ? "100%" : "200px"),
-            height: isMobileHome ? "150px" : "100%",
+            height: isHomePage || isMobileHome ? "150px" : "100%",
             overflow: "hidden",
             display: "flex",
             alignItems: "center",
