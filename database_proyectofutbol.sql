@@ -157,3 +157,5 @@ CREATE INDEX idx_postulaciones_id_usuario_postulante ON postulaciones(id_usuario
 -- Índices en tablas de perfiles, fotos y videos (para búsquedas por usuario)
 CREATE INDEX idx_user_photos_user_id ON user_photos(user_id);
 CREATE INDEX idx_user_videos_user_id ON user_videos(user_id);
+
+select * from usuarios u;
