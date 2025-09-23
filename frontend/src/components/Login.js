@@ -26,9 +26,8 @@ function Login({ onClose }) {
     e.preventDefault();
     setError("");
     try {
-      const response = await apiClient.post("/users/login", formData);
-      const { token } = response.data;
-      login(token);
+      await apiClient.post("/users/login", formData);
+      login();
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || t("login_error"));
@@ -37,11 +36,10 @@ function Login({ onClose }) {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await apiClient.post("/users/auth/google", {
+      await apiClient.post("/users/auth/google", {
         id_token: credentialResponse.credential,
       });
-      const { token } = response.data;
-      login(token);
+      login();
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || t("login_with_google_error"));

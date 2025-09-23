@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import apiClient from '../services/api';
 
 const AuthContext = createContext(null);
@@ -7,25 +7,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Al cargar la app, llama al endpoint /me para ver si hay una sesión activa (via cookie)
-    const checkUser = async () => {
-      try {
-        const response = await apiClient.get('/users/me');
-        setUser(response.data);
-      } catch (error) {
-        // Si hay un error (ej. 401), significa que no hay usuario autenticado
-        setUser(null);
-      }
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/users/me');
+      setUser(response.data);
+    } catch (error) {
+      setUser(null);
+    } finally {
       setLoading(false);
-    };
-
-    checkUser();
+    }
   }, []);
 
-  const login = (userData) => {
-    // El backend ya ha establecido la cookie. Aquí solo actualizamos el estado en React.
-    setUser(userData);
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  const login = () => {
+    // Después de un login exitoso, el backend ya ha establecido la cookie.
+    // Volvemos a obtener los datos del usuario para actualizar el estado.
+    setLoading(true); // Opcional: mostrar un spinner mientras se recargan los datos
+    fetchUser();
   };
 
   const logout = async (navigate) => {

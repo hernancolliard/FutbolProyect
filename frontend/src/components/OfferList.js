@@ -96,8 +96,7 @@ function OfferList({
               {titulo}
             </Typography>
 
-            {!isMobileHome && (
-              <>
+            <>
                 <Typography variant="subtitle2" color={!isHomePage ? "#fff" : "text.secondary"}>
                   {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
                 </Typography>
@@ -122,7 +121,6 @@ function OfferList({
                   {descripcion}
                 </Typography>
               </>
-            )}
           </div>
 
           <CardActions
@@ -151,7 +149,7 @@ function OfferList({
             >
               {t("view_offer")}
             </Button>
-            {showApplyButton && !isMobileHome && (
+            {showApplyButton && (
               <OfferActions offer={offer} onOfferAction={onOfferAction} />
             )}
           </CardActions>
