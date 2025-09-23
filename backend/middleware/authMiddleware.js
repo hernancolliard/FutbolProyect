@@ -1,23 +1,22 @@
 const jwt = require("jsonwebtoken");
 const db = require("../db");
 
-// Middleware para verificar que el usuario está autenticado
+// Middleware para verificar que el usuario está autenticado (leyendo el token desde una cookie)
 const verificarToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Formato "Bearer TOKEN"
+  const token = req.cookies.token;
 
   if (!token) {
     return res
-      .status(403)
-      .json({ message: "Se requiere un token para la autenticación." });
+      .status(401) // 401 Unauthorized es más apropiado que 403 Forbidden
+      .json({ message: "Acceso denegado. No se proporcionó un token." });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Añade el payload del token (id, nombre, tipo_usuario) a la request
+    req.user = decoded; // Añade el payload del token a la request
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Token inválido." });
+    return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
 

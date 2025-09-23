@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
 require("dotenv").config({ quiet: true });
 
 const userRoutes = require("./routes/users.js");
@@ -13,14 +14,18 @@ const privacyRoutes = require("./routes/privacy.js");
 
 const app = express();
 
+// Configuración de CORS para permitir cookies y un origen específico
+app.use(cors({ 
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
+  credentials: true 
+}));
+
 // Middleware para el webhook de Stripe. Debe ir ANTES de express.json()
-// porque Stripe envía el cuerpo de la petición en formato raw.
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
-app.use(cors()); // Permite peticiones desde el frontend
-app.use(express.json({ limit: "50mb" })); // Permite al servidor entender JSON, con un límite de 10MB
-
-
+// Middlewares para parsear JSON y cookies
+app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
 
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use("/uploads", express.static("uploads"));

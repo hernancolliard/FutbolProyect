@@ -2,9 +2,6 @@ const { Pool } = require("pg");
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
 });
 
 pool
@@ -14,28 +11,37 @@ pool
 
 module.exports = {
   query: async (text, params) => {
-    // Si no hay parámetros con nombre, ejecutar la consulta directamente
-    if (!params) {
-      return pool.query(text);
+    try {
+      // Lógica para convertir parámetros con nombre a posicionales
+      if (!params) {
+        return await pool.query(text);
+      }
+
+      const pgValues = [];
+      const namedParams = {};
+
+      const newText = text.replace(/@(\w+)/g, (match, key) => {
+        if (!params.hasOwnProperty(key)) {
+          throw new Error(`Missing parameter value for key: ${key}`);
+        }
+        if (!namedParams.hasOwnProperty(key)) {
+          pgValues.push(params[key]);
+          namedParams[key] = `$${pgValues.length}`;
+        }
+        return namedParams[key];
+      });
+
+      return await pool.query(newText, pgValues);
+
+    } catch (error) {
+      // Loguear el error con más contexto antes de que se propague
+      console.error("Error ejecutando la consulta:", { 
+        query: text, 
+        params: params, 
+        error: error.message 
+      });
+      // Re-lanzar el error para que el manejador de la ruta lo capture
+      throw error;
     }
-
-    const pgValues = [];
-    const namedParams = {};
-
-    // Reemplazar los parámetros con nombre por marcadores de posición posicionales
-    const newText = text.replace(/@(\w+)/g, (match, key) => {
-      // Verificar si la clave existe en los parámetros proporcionados
-      if (!params.hasOwnProperty(key)) {
-        throw new Error(`Missing parameter value for key: ${key}`);
-      }
-      // Si la clave es nueva, añadir su valor al array y crear un nuevo marcador de posición
-      if (!namedParams.hasOwnProperty(key)) {
-        pgValues.push(params[key]);
-        namedParams[key] = `$${pgValues.length}`;
-      }
-      return namedParams[key];
-    });
-
-    return pool.query(newText, pgValues);
   },
 };

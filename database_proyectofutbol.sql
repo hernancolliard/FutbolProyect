@@ -1,5 +1,3 @@
-
-
 -- Tabla de usuarios
 CREATE TABLE usuarios (
 	id SERIAL PRIMARY KEY,
@@ -34,7 +32,7 @@ CREATE TABLE ofertas_laborales (
 	imagen_url_3 VARCHAR(255),
 	imagen_url_4 VARCHAR(255),
 	puesto VARCHAR(100),
-	salario VARCHAR(50),
+	salario DECIMAL(10, 2),
 	nivel VARCHAR(50),
 	horarios VARCHAR(100),
 	is_featured BOOLEAN DEFAULT FALSE,
@@ -139,12 +137,23 @@ CREATE TABLE user_videos (
 	UNIQUE (user_id, position)
 );
 
-select * from usuarios u 
-UPDATE usuarios
-SET "tipo_usuario" = "ofertante"
-WHERE id = 2
+ALTER TABLE ofertas_laborales
+ALTER COLUMN salario TYPE DECIMAL(10, 2)
+USING salario::DECIMAL(10, 2);
+-- --- Índices para mejorar el rendimiento ---
 
-select * from ofertas_laborales
-select column_name, data_type
-FROM information_schema.columns
-WHERE table_name = 'ofertas_laborales';
+-- Índices en la tabla de usuarios
+CREATE INDEX idx_usuarios_tipo_usuario ON usuarios(tipo_usuario);
+
+-- Índices en la tabla de ofertas_laborales
+CREATE INDEX idx_ofertas_id_usuario_ofertante ON ofertas_laborales(id_usuario_ofertante);
+CREATE INDEX idx_ofertas_estado ON ofertas_laborales(estado);
+CREATE INDEX idx_ofertas_is_featured ON ofertas_laborales(is_featured);
+
+-- Índices en la tabla de postulaciones
+CREATE INDEX idx_postulaciones_id_oferta ON postulaciones(id_oferta);
+CREATE INDEX idx_postulaciones_id_usuario_postulante ON postulaciones(id_usuario_postulante);
+
+-- Índices en tablas de perfiles, fotos y videos (para búsquedas por usuario)
+CREATE INDEX idx_user_photos_user_id ON user_photos(user_id);
+CREATE INDEX idx_user_videos_user_id ON user_videos(user_id);

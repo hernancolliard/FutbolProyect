@@ -383,7 +383,7 @@ router.put(
       processedImages,
     } = req.body;
     const id_usuario_actual = req.user.id;
-    const esAdmin = req.user.role === "admin";
+    const esAdmin = req.user.isAdmin; // Corregido para ser consistente con el payload del JWT
 
     try {
       // 1. Verificar que la oferta existe y obtener el dueño
@@ -591,7 +591,7 @@ router.post(
       // 3. Crear la postulación
       const insertQuery = `
         INSERT INTO postulaciones (id_usuario_postulante, id_oferta, fecha_postulacion, estado)
-        VALUES (@userId, @offerId, SYSDATETIMEOFFSET(), 'enviada');
+        VALUES (@userId, @offerId, NOW(), 'enviada');
       `;
       await db.query(insertQuery, { userId, offerId });
 

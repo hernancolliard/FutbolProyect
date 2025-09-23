@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import apiClient from '../services/api';
 
 const AuthContext = createContext(null);
@@ -9,43 +8,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    // Al cargar la app, llama al endpoint /me para ver si hay una sesión activa (via cookie)
+    const checkUser = async () => {
       try {
-        const decodedUser = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-        if (decodedUser.exp > currentTime) {
-          setUser(decodedUser);
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        } else {
-          localStorage.removeItem('token');
-        }
+        const response = await apiClient.get('/users/me');
+        setUser(response.data);
       } catch (error) {
-        console.error("Error decoding token:", error);
-        localStorage.removeItem('token');
+        // Si hay un error (ej. 401), significa que no hay usuario autenticado
+        setUser(null);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    checkUser();
   }, []);
 
-  const login = (token) => {
-    localStorage.setItem('token', token);
-    const decodedUser = jwtDecode(token);
-    setUser(decodedUser);
-    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  const login = (userData) => {
+    // El backend ya ha establecido la cookie. Aquí solo actualizamos el estado en React.
+    setUser(userData);
   };
 
-  const logout = (navigate) => {
-    localStorage.removeItem('token');
-    setUser(null);
-    delete apiClient.defaults.headers.common['Authorization'];
-    if (navigate) {
-      navigate('/'); // Redirect to homepage
+  const logout = async (navigate) => {
+    try {
+      await apiClient.post('/users/logout');
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      setUser(null);
+      if (navigate) {
+        navigate('/'); // Redirigir a la página de inicio
+      }
     }
   };
 
   const authContextValue = {
     user,
+    setUser, // Exponer setUser para permitir actualizaciones de perfil
     login,
     logout,
     isAuthenticated: !!user,

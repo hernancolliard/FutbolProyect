@@ -1,9 +1,10 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import OfferList from "./components/OfferList";
 import About from "./components/About";
 import Mission from "./components/Mission";
@@ -20,6 +21,7 @@ import Header from "./components/Header";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { ParallaxProvider } from "react-scroll-parallax";
 
+// Lazy load page components
 const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
 const AllOffersPage = lazy(() => import("./components/AllOffersPage"));
 const ApplicantsPage = lazy(() => import("./components/ApplicantsPage"));
@@ -40,30 +42,32 @@ const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
 const TermsOfService = lazy(() => import("./components/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 
+// Create a client
+const queryClient = new QueryClient();
+
+const fetchHomePageOffers = async () => {
+  const { data } = await apiClient.get("/offers?limit=6");
+  // Combine featured and normal offers for the homepage display
+  return [...(data.featuredOffers || []), ...(data.offers || [])];
+};
+
 function AppContent() {
   const { t } = useTranslation();
-  const [homePageOffers, setHomePageOffers] = useState([]);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchHomePageOffers = async () => {
-      try {
-        const response = await apiClient.get("/offers?limit=6");
-        const { featuredOffers = [], offers = [] } = response.data;
-        setHomePageOffers([...featuredOffers, ...offers]);
-      } catch (error) {
-        console.error("Error fetching home page offers:", error);
-      }
-    };
+  const { 
+    data: homePageOffers = [], 
+    isLoading, 
+    error 
+  } = useQuery({ 
+    queryKey: ['homePageOffers'], 
+    queryFn: fetchHomePageOffers 
+  });
 
-    fetchHomePageOffers();
-  }, [refreshKey]);
-
-  const refreshData = () => {
-    setRefreshKey((prevKey) => prevKey + 1);
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['homePageOffers'] });
   };
 
   return (
@@ -96,11 +100,17 @@ function AppContent() {
                     <TrustedBy />
                   </FadeInOnScroll>
                   <Hero />
-                  <OfferList
-                    offers={homePageOffers}
-                    onOfferAction={refreshData}
-                    isHomePage={true}
-                  />
+                  {isLoading ? (
+                    <LoadingSpinner />
+                  ) : error ? (
+                    <p>{t('error_loading_offers')}</p>
+                  ) : (
+                    <OfferList
+                      offers={homePageOffers}
+                      onOfferAction={handleRefresh}
+                      isHomePage={true}
+                    />
+                  )}
                   <div className="view-all-offers-container">
                     <Link to="/offers" className="btn-main">
                       {t("view_all_offers")}
@@ -120,6 +130,7 @@ function AppContent() {
                 </>
               }
             />
+            {/* Other Routes */}
             <Route path="/offers" element={<AllOffersPage />} />
             <Route path="/offers/:offerId" element={<OfferDetailPage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />
@@ -160,13 +171,15 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <ParallaxProvider>
-          <AppContent />
-        </ParallaxProvider>
-      </AuthProvider>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <ParallaxProvider>
+            <AppContent />
+          </ParallaxProvider>
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
