@@ -41,11 +41,14 @@ function SubscribeButton({ planType, billingCycle, children }) {
                 "/payments/create-paypal-order",
                 { planType, billingCycle }
               );
+              if (!response.data || !response.data.orderID) {
+                throw new Error("Respuesta inválida del servidor al crear la orden de PayPal.");
+              }
               return response.data.orderID;
             } catch (error) {
               console.error("Error al crear la orden de PayPal:", error);
-              toast.error("Hubo un error al crear la orden de PayPal.");
-              return null;
+              toast.error("Hubo un error al iniciar el pago con PayPal. Por favor, inténtelo de nuevo.");
+              throw error; // Lanzar el error para que PayPal lo maneje
             }
           },
           onApprove: async (data, actions) => {

@@ -140,7 +140,13 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
       if (planResult.recordset.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
-      value = planResult.recordset[0].price_usd.toFixed(2);
+      
+      const price = parseFloat(planResult.recordset[0].price_usd);
+      if (isNaN(price)) {
+        console.error("Precio inválido recibido de la base de datos:", planResult.recordset[0].price_usd);
+        return res.status(500).json({ message: "Formato de precio no válido." });
+      }
+      value = price.toFixed(2);
       description = `Suscripción ${planType} - ${billingCycle}`;
     } else if (planType === "destacar_oferta") {
       description = "Destacar Oferta";
