@@ -14,6 +14,7 @@ import FadeInOnScroll from "./FadeInOnScroll";
 import OfferActions from "./OfferActions";
 import useIsMobile from "../hooks/useIsMobile";
 import OptimizedImage from "./OptimizedImage";
+import "./OfferList.css";
 
 function OfferList({
   offers = [],
@@ -56,7 +57,8 @@ function OfferList({
           height: "100%",
         }}
         elevation={2}
-        className="offer-card offer-card-all-offers"
+        className={`offer-card ${isHomePage ? "home-offer-card" : "offer-card-all-offers"}`}
+        onClick={isHomePage ? () => handleViewOffer(offer.id) : undefined}
       >
         <div
           style={{
@@ -137,7 +139,15 @@ function OfferList({
             <Button
               variant="contained"
               color={isHomePage ? "primary" : "secondary"}
-              onClick={() => handleViewOffer(offer.id)}
+              onClick={(e) => {
+                // Si no estamos en la home, el botón navega. Si estamos en la home, toda la card lo hace.
+                if (!isHomePage) {
+                  handleViewOffer(offer.id);
+                } 
+                // En la home, el evento de clic del botón no debe hacer nada especial,
+                // simplemente permitirá que el evento burbujee hasta el onClick del Card.
+                e.stopPropagation(); // Detenemos la propagación para evitar doble manejo si hubiera otros listeners.
+              }}
             >
               {t("view_offer")}
             </Button>

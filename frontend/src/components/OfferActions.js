@@ -94,7 +94,14 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
 
       {/* El botón de postularse ahora tiene su propia lógica */}
       {canApply && (
-        <Button variant="contained" onClick={handleApply} disabled={isApplying || hasApplied}>
+        <Button
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleApply();
+          }}
+          disabled={isApplying || hasApplied}
+        >
           {isApplying ? t('applying') : hasApplied ? t('applied') : t('apply')}
         </Button>
       )}

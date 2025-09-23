@@ -1,0 +1,14 @@
+/* Estilos para las tarjetas de oferta en el carrusel de la página de inicio */
+.home-offer-card {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
+  display: flex;
+  flex-direction: column;
+}
+
+.home-offer-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+}
