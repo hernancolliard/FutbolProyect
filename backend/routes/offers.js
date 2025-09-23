@@ -383,7 +383,7 @@ router.put(
       processedImages,
     } = req.body;
     const id_usuario_actual = req.user.id;
-    const esAdmin = req.user.isAdmin; // Corregido para ser consistente con el payload del JWT
+            const esAdmin = req.user.isadmin; // Corregido para ser consistente con el payload del JWT
 
     try {
       // 1. Verificar que la oferta existe y obtener el dueño

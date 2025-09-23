@@ -16,7 +16,8 @@ CREATE TABLE usuarios (
 	reset_password_token VARCHAR(255),
 	reset_password_expires TIMESTAMPTZ
 );
-
+ALTER TABLE usuarios RENAME COLUMN "isAdmin" TO isadmin;
+select * from usuarios u; 
 -- Tabla de ofertas_laborales
 CREATE TABLE ofertas_laborales (
 	id SERIAL PRIMARY KEY,

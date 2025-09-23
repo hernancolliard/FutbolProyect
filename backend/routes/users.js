@@ -42,7 +42,7 @@ router.post("/register", validate(registerSchema), async (req, res) => {
 
     const queryText = `INSERT INTO usuarios (nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario) 
                            VALUES (@nombre, @apellido, @telefono, @email, @password_hash, @dni, @direccion, @ciudad, @pais, @tipo_usuario)
-                           RETURNING id, nombre, apellido, email, tipo_usuario, "isAdmin"`;
+                                                      RETURNING id, nombre, apellido, email, tipo_usuario, isadmin`;
     const newUserResult = await db.query(queryText, { nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario });
     const newUser = newUserResult.rows[0];
 
@@ -76,7 +76,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas." });
     }
 
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isAdmin: user['isAdmin'] };
+    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isadmin: user['isadmin'] };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     res.cookie('token', token, {
@@ -119,7 +119,7 @@ router.post("/auth/google", async (req, res) => {
     }
 
     const user = result.rows[0];
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isAdmin: user['isAdmin'] };
+    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isadmin: user['isadmin'] };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     res.cookie('token', token, {

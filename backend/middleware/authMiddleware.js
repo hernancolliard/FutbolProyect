@@ -23,7 +23,7 @@ const verificarToken = (req, res, next) => {
 // Middleware para verificar que el usuario es un administrador
 const verificarAdmin = (req, res, next) => {
   // Se asume que verificarToken ya se ejecutó y pobló req.user
-  if (!req.user || !req.user.isAdmin) {
+    if (!req.user || !req.user.isadmin) {
     return res
       .status(403)
       .json({
@@ -39,7 +39,7 @@ const verificarSuscripcionActiva =
   (tiposPermitidos = []) =>
   async (req, res, next) => {
     // Si el usuario es admin, se salta todas las comprobaciones y se le da acceso.
-    if (req.user && req.user.isAdmin) {
+        if (req.user && req.user.isadmin) {
       return next();
     }
 

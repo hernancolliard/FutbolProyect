@@ -12,7 +12,7 @@ const {
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isAdmin FROM usuarios ORDER BY fecha_creacion DESC"
+            "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isadmin FROM usuarios ORDER BY fecha_creacion DESC"
     );
     res.json(result.rows);
   } catch (error) {

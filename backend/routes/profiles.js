@@ -137,7 +137,7 @@ router.get("/:userId", verificarToken, async (req, res) => {
   try {
     let isAuthorized = false;
 
-    if (requester.id === profileToViewId || requester.isAdmin) {
+            if (requester.id === profileToViewId || requester.isadmin) {
       isAuthorized = true;
     } else if (requester.tipo_usuario === "ofertante") {
       const checkQuery = `
@@ -192,7 +192,7 @@ router.get("/:userId/applications", verificarToken, async (req, res) => {
   }
 
   // Solo el propio usuario o un admin pueden ver las postulaciones
-  if (requester.id !== userId && !requester.isAdmin) {
+  if (requester.id !== userId && !requester.isadmin) {
     return res
       .status(403)
       .json({ message: "No tienes permiso para ver estas postulaciones." });
@@ -228,7 +228,7 @@ router.get("/:userId/offers", verificarToken, async (req, res) => {
   }
 
   // Solo el propio usuario (ofertante) o un admin pueden ver sus ofertas
-  if (requester.id !== userId && !requester.isAdmin) {
+  if (requester.id !== userId && !requester.isadmin) {
     return res
       .status(403)
       .json({ message: "No tienes permiso para ver estas ofertas." });
