@@ -4,11 +4,16 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   height: 100%; /* Asegura que todas las tarjetas tengan la misma altura */
-  display: flex;
-  flex-direction: column;
+  /* Se eliminan display:flex y flex-direction para no interferir con los estilos del componente */
 }
 
 .home-offer-card:hover {
   transform: translateY(-7px);
   box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Eliminar el borde/outline azul al hacer clic en la tarjeta */
+.home-offer-card:focus, .home-offer-card:focus-visible {
+  outline: none;
+  border: none;
 }
