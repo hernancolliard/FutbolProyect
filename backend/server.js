@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
+const path = require('path'); // Importar path
 require("dotenv").config({ quiet: true });
 
 const userRoutes = require("./routes/users.js");
@@ -30,6 +31,9 @@ app.use(cookieParser());
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use("/uploads", express.static("uploads"));
 
+// Servir archivos estáticos de la aplicación React
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
 // Rutas de la API
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
@@ -39,6 +43,11 @@ app.use("/api/profiles", profileRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/terms", termsRoutes);
 app.use("/api/privacy", privacyRoutes);
+
+// Ruta catch-all para servir la aplicación de React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 

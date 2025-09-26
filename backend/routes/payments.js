@@ -31,10 +31,10 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
 
     if (planType === "ofertante" || planType === "postulante") {
       const planResult = await db.query('SELECT price_mp FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
-      if (planResult.recordset.length === 0) {
+      if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
-      unit_price = planResult.recordset[0].price_mp;
+      unit_price = planResult.rows[0].price_mp;
       title = `Suscripción ${planType} - ${billingCycle}`;
     } else if (planType === "destacar_oferta") {
       title = "Destacar Oferta";
@@ -137,13 +137,13 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
 
     if (planType === "ofertante" || planType === "postulante") {
       const planResult = await db.query('SELECT price_usd FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
-      if (planResult.recordset.length === 0) {
+      if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
       
-      const price = parseFloat(planResult.recordset[0].price_usd);
+      const price = parseFloat(planResult.rows[0].price_usd);
       if (isNaN(price)) {
-        console.error("Precio inválido recibido de la base de datos:", planResult.recordset[0].price_usd);
+        console.error("Precio inválido recibido de la base de datos:", planResult.rows[0].price_usd);
         return res.status(500).json({ message: "Formato de precio no válido." });
       }
       value = price.toFixed(2);

@@ -36,7 +36,7 @@ router.post(
 
       // Notificar al ofertante
       try {
-        const inserted_id_oferta = result.recordset[0].id_oferta;
+        const inserted_id_oferta = result.rows[0].id_oferta;
 
         // Obtener detalles de la oferta y del ofertante
         const offerDetailsQuery = `
@@ -47,8 +47,8 @@ router.post(
         `;
         const offerDetailsResult = await db.query(offerDetailsQuery, { inserted_id_oferta });
         
-        if (offerDetailsResult.recordset.length > 0) {
-          const { titulo, email_ofertante } = offerDetailsResult.recordset[0];
+        if (offerDetailsResult.rows.length > 0) {
+          const { titulo, email_ofertante } = offerDetailsResult.rows[0];
           const applicantName = req.user.name;
           await sendNewApplicationNotification(email_ofertante, applicantName, titulo);
         }
