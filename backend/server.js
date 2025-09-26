@@ -45,7 +45,7 @@ app.use("/api/terms", termsRoutes);
 app.use("/api/privacy", privacyRoutes);
 
 // Ruta catch-all para servir la aplicación de React
-app.get('/*', (req, res) => {
+app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
