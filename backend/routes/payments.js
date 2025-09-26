@@ -30,9 +30,7 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
     let description = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
-      console.log(`Buscando plan de suscripción para billingCycle: ${billingCycle}`);
       const planResult = await db.query('SELECT price_mp FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
-      console.log("Resultado de la consulta a la base de datos:", planResult);
       if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
@@ -138,9 +136,7 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     let custom_id = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
-      console.log(`Buscando plan de suscripción para billingCycle: ${billingCycle}`);
       const planResult = await db.query('SELECT price_usd FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
-      console.log("Resultado de la consulta a la base de datos:", planResult);
       if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
