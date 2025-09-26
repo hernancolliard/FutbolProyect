@@ -30,7 +30,9 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
     let description = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
+      console.log(`Buscando plan de suscripción para billingCycle: ${billingCycle}`);
       const planResult = await db.query('SELECT price_mp FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
+      console.log("Resultado de la consulta a la base de datos:", planResult);
       if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
@@ -136,7 +138,9 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     let custom_id = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
+      console.log(`Buscando plan de suscripción para billingCycle: ${billingCycle}`);
       const planResult = await db.query('SELECT price_usd FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
+      console.log("Resultado de la consulta a la base de datos:", planResult);
       if (planResult.rows.length === 0) {
         return res.status(400).json({ message: "Ciclo de facturación no válido." });
       }
@@ -151,7 +155,7 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     } else if (planType === "destacar_oferta") {
       description = "Destacar Oferta";
       value = "10.00";
-      custom_id = planType;
+      custom_id = `${req.user.id}_${req.body.offerId}`;
     } else {
       return res.status(400).json({ message: "Tipo de plan no válido." });
     }
@@ -175,7 +179,7 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     res.json({ orderID: order.result.id, links: order.result.links });
 
   } catch (error) {
-    console.error("Error al crear orden de PayPal:", error.message);
+    console.error("Error al crear orden de PayPal:", error);
     res.status(500).json({ message: "Error al crear la orden de PayPal." });
   }
 });
@@ -194,10 +198,8 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
     const customId = capture.result.purchase_units[0].custom_id;
 
     if (status === "COMPLETED") {
-      const [plan, cycle] = customId.split('-');
-
-      if (plan === "destacar_oferta") {
-        const [parsedUserId, offerId] = capture.result.purchase_units[0].custom_id.split('_');
+      if (customId.includes('_')) { // Destacar oferta
+        const [parsedUserId, offerId] = customId.split('_');
         const featuredUntil = new Date();
         featuredUntil.setDate(featuredUntil.getDate() + 7);
 
@@ -208,7 +210,8 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
         `;
         await db.query(queryText, { offerId: parseInt(offerId, 10), featuredUntil });
         res.json({ success: true });
-      } else {
+      } else { // Suscripción
+        const [plan, cycle] = customId.split('-');
         const fechaFin = new Date();
         if (cycle === 'monthly') {
           fechaFin.setMonth(fechaFin.getMonth() + 1);
@@ -233,7 +236,7 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
       res.status(400).json({ message: "El pago de PayPal no se completó." });
     }
   } catch (error) {
-    console.error("Error al capturar orden de PayPal:", error.message);
+    console.error("Error al capturar orden de PayPal:", error);
     res.status(500).json({ message: "Error al capturar la orden de PayPal." });
   }
 });
