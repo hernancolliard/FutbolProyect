@@ -86,7 +86,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
         <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
           {user ? (
             <>
-              {(user.tipo_usuario === 'ofertante' || user.isAdmin) && (
+              {(user.tipo_usuario === 'ofertante' || user.isadmin) && (
                 <Button
                   variant="contained"
                   color="secondary"
@@ -171,7 +171,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <MenuItem component={Link} to="/subscribe" onClick={handleMobileMenuClose}>
               {t('subscriptions')}
             </MenuItem>
-            {user && user.isAdmin && (
+            {user && user.isadmin && (
               <MenuItem component={Link} to="/admin" onClick={handleMobileMenuClose}>
                 Admin
               </MenuItem>

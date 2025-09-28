@@ -138,13 +138,10 @@ function OfferList({
               variant="contained"
               color={isHomePage ? "primary" : "secondary"}
               onClick={(e) => {
-                // Si no estamos en la home, el botón navega. Si estamos en la home, toda la card lo hace.
-                if (!isHomePage) {
-                  handleViewOffer(offer.id);
-                } 
-                // En la home, el evento de clic del botón no debe hacer nada especial,
-                // simplemente permitirá que el evento burbujee hasta el onClick del Card.
-                e.stopPropagation(); // Detenemos la propagación para evitar doble manejo si hubiera otros listeners.
+                // Detener la propagación para evitar que el onClick de la Card se dispare también.
+                e.stopPropagation();
+                // Navegar siempre al detalle de la oferta.
+                handleViewOffer(offer.id);
               }}
             >
               {t("view_offer")}

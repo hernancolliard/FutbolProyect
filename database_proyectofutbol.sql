@@ -160,3 +160,7 @@ CREATE INDEX idx_user_photos_user_id ON user_photos(user_id);
 CREATE INDEX idx_user_videos_user_id ON user_videos(user_id);
 
 select * from usuarios u;
+
+INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('monthly', 2.00, 2000.00);
+INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('annual', 12.00, 12000.00);
+select * from subscription_plans sp;
