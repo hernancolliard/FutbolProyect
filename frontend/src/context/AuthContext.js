@@ -1,5 +1,11 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import apiClient from '../services/api';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
+import apiClient from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -9,8 +15,8 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await apiClient.get('/users/me');
-      console.log('User data from /users/me:', response.data); // Debugging line
+      const response = await apiClient.get("/users/me");
+      console.log("User data from /users/me:", response.data); // Debugging line
       setUser(response.data);
     } catch (error) {
       setUser(null);
@@ -32,13 +38,13 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async (navigate) => {
     try {
-      await apiClient.post('/users/logout');
+      await apiClient.post("/users/logout");
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
       setUser(null);
       if (navigate) {
-        navigate('/'); // Redirigir a la página de inicio
+        navigate("/"); // Redirigir a la página de inicio
       }
     }
   };
@@ -49,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     isAuthenticated: !!user,
-    loading
+    loading,
   };
 
   return (
