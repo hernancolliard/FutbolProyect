@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = useCallback(async () => {
     try {
       const response = await apiClient.get('/users/me');
+      console.log('User data from /users/me:', response.data); // Debugging line
       setUser(response.data);
     } catch (error) {
       setUser(null);

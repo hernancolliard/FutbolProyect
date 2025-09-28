@@ -17,6 +17,7 @@ import OptimizedImage from './OptimizedImage';
 function Header({ onShowLoginModal, onShowRegisterModal }) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
+  console.log('User object in Header:', user); // Debugging line
   const navigate = useNavigate(); // Get navigate function
   const [anchorEl, setAnchorEl] = useState(null);
   const [languageAnchorEl, setLanguageAnchorEl] = useState(null); // Nuevo estado para el menú de idioma
