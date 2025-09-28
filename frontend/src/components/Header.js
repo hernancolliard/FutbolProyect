@@ -179,7 +179,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <Box sx={{ my: 1 }} />
             {user ? (
               <>
-                {(user.tipo_usuario === 'ofertante' || user.isAdmin) && (
+                {(user.tipo_usuario === 'ofertante' || user.isadmin) && (
                   <MenuItem
                     onClick={handleCreateOfferClick}
                   >
