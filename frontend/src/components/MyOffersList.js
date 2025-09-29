@@ -22,7 +22,10 @@ function MyOffersList({ userId, isOwnProfile, isAdmin }) {
       setError("");
       try {
         const response = await apiClient.get(`/profiles/${userId}/offers`);
-        setOffers(response.data);
+        // --- LA LÍNEA CLAVE ---
+        // Asegúrate de que response.data sea un array antes de guardarlo.
+        // Si no lo es, guarda un array vacío para evitar errores.
+        setOffers(Array.isArray(response.data) ? response.data : []);
       } catch (err) {
         setError(err.response?.data?.message || t("error_loading_offers"));
         console.error("Error fetching offers:", err);
@@ -40,48 +43,54 @@ function MyOffersList({ userId, isOwnProfile, isAdmin }) {
     return (
       <Stack alignItems="center" sx={{ mt: 2 }}>
         <CircularProgress />
-        <Typography sx={{ ml: 2 }}>{t("loading_offers")}</Typography>
       </Stack>
     );
+
   if (error) return <Alert severity="error">{error}</Alert>;
-  if (offers.length === 0) {
-    return <Typography>{t("no_offers_published_yet")}</Typography>;
-  }
+
+  // Con la corrección de arriba, esta parte del código ya es segura,
+  // pero mantener las comprobaciones explícitas es una buena práctica.
   return (
     <Stack className="my-lists-section" spacing={2} sx={{ mt: 2 }}>
       <Typography variant="h6">{t("my_published_offers")}</Typography>
       <Stack className="offers-list-container" spacing={2}>
-        {offers.map((offer) => (
-          <Card key={offer.id} className="offer-item">
-            <CardContent>
-              <Typography
-                variant="h6"
-                component={Link}
-                to={`/offers/${offer.id}`}
-                sx={{ textDecoration: "none" }}
-              >
-                {offer.titulo}
-              </Typography>
-              <Typography>
-                <strong>{t("status")}</strong> {offer.estado}
-              </Typography>
-              <Typography>
-                <strong>{t("date")}</strong>{" "}
-                {new Date(offer.fecha_publicacion).toLocaleDateString()}
-              </Typography>
-              <Typography>{offer.descripcion.substring(0, 100)}...</Typography>
-              <Button
-                component={Link}
-                to={`/offers/${offer.id}/applicants`}
-                variant="outlined"
-                color="primary"
-                sx={{ mt: 1 }}
-              >
-                {t("view_applicants")}
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+        {offers.length > 0 ? (
+          offers.map((offer) => (
+            <Card key={offer.id} className="offer-item">
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  component={Link}
+                  to={`/offers/${offer.id}`}
+                  sx={{ textDecoration: "none" }}
+                >
+                  {offer.titulo}
+                </Typography>
+                <Typography>
+                  <strong>{t("status")}</strong> {offer.estado}
+                </Typography>
+                <Typography>
+                  <strong>{t("date")}</strong>{" "}
+                  {new Date(offer.fecha_publicacion).toLocaleDateString()}
+                </Typography>
+                <Typography>
+                  {offer.descripcion.substring(0, 100)}...
+                </Typography>
+                <Button
+                  component={Link}
+                  to={`/offers/${offer.id}/applicants`}
+                  variant="outlined"
+                  color="primary"
+                  sx={{ mt: 1 }}
+                >
+                  {t("view_applicants")}
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Typography>{t("no_offers_published_yet")}</Typography>
+        )}
       </Stack>
     </Stack>
   );

@@ -12,10 +12,10 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Box, Grid } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import YouTubeIcon from '@mui/icons-material/YouTube';
-import PublicIcon from '@mui/icons-material/Public';
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import PublicIcon from "@mui/icons-material/Public";
 import { useAuth } from "../context/AuthContext";
 import useIsMobile from "../hooks/useIsMobile";
 import VideoCard from "./VideoCard";
@@ -42,9 +42,9 @@ const fetchUserApplications = async (userId) => {
 };
 
 const fetchUserOffers = async (userId) => {
-    const { data } = await apiClient.get(`/profiles/${userId}/offers`);
-    return data;
-  };
+  const { data } = await apiClient.get(`/profiles/${userId}/offers`);
+  return data;
+};
 
 function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -68,28 +68,52 @@ function ProfilePage() {
     handleCloseEditProfileModal();
   };
 
-  const { data: profile, isLoading: isLoadingProfile, isError: isErrorProfile, error: errorProfile } = useQuery({
+  const {
+    data: profile,
+    isLoading: isLoadingProfile,
+    isError: isErrorProfile,
+    error: errorProfile,
+  } = useQuery({
     queryKey: ["profile", userId],
     queryFn: () => fetchProfile(userId),
   });
 
-  const { data: userVideos, isLoading: isLoadingVideos, isError: isErrorVideos, error: errorVideos } = useQuery({
+  const {
+    data: userVideos,
+    isLoading: isLoadingVideos,
+    isError: isErrorVideos,
+    error: errorVideos,
+  } = useQuery({
     queryKey: ["userVideos", userId],
     queryFn: () => fetchUserVideos(userId),
     initialData: [],
   });
 
-  const { data: userApplications, isLoading: isLoadingApplications, isError: isErrorApplications, error: errorApplications } = useQuery({
+  const {
+    data: userApplications,
+    isLoading: isLoadingApplications,
+    isError: isErrorApplications,
+    error: errorApplications,
+  } = useQuery({
     queryKey: ["userApplications", userId],
     queryFn: () => fetchUserApplications(userId),
-    enabled: !!currentUser && (currentUser.id === parseInt(userId, 10) || currentUser.isAdmin),
+    enabled:
+      !!currentUser &&
+      (currentUser.id === parseInt(userId, 10) || currentUser.isAdmin),
     initialData: [], // Ensure it's always an array
   });
 
-  const { isLoading: isLoadingOffers, isError: isErrorOffers, error: errorOffers } = useQuery({
+  const {
+    isLoading: isLoadingOffers,
+    isError: isErrorOffers,
+    error: errorOffers,
+  } = useQuery({
     queryKey: ["userOffers", userId],
     queryFn: () => fetchUserOffers(userId),
-    enabled: !!profile && (profile.tipo_usuario === 'ofertante' || profile.tipo_usuario === 'agencia'),
+    enabled:
+      !!profile &&
+      (profile.tipo_usuario === "ofertante" ||
+        profile.tipo_usuario === "agencia"),
   });
 
   const isMyProfile = currentUser && currentUser.id === parseInt(userId, 10);
@@ -128,7 +152,11 @@ function ProfilePage() {
   }
 
   if (isErrorProfile) {
-    return <Alert severity="error">{errorProfile.message || t("error_loading_profile")}</Alert>;
+    return (
+      <Alert severity="error">
+        {errorProfile.message || t("error_loading_profile")}
+      </Alert>
+    );
   }
 
   if (!profile) {
@@ -144,136 +172,304 @@ function ProfilePage() {
 
   const lang = i18n.language;
   const nacionalidad = profile[`nacionalidad_${lang}`] || profile.nacionalidad;
-  const posicion_principal = profile[`posicion_principal_${lang}`] || profile.posicion_principal;
-  const pie_dominante = profile[`pie_dominante_${lang}`] || profile.pie_dominante;
-  const resumen_profesional = profile[`resumen_profesional_${lang}`] || profile.resumen_profesional;
+  const posicion_principal =
+    profile[`posicion_principal_${lang}`] || profile.posicion_principal;
+  const pie_dominante =
+    profile[`pie_dominante_${lang}`] || profile.pie_dominante;
+  const resumen_profesional =
+    profile[`resumen_profesional_${lang}`] || profile.resumen_profesional;
 
   return (
     <Stack alignItems="center" sx={{ mt: 4 }}>
       <Card sx={{ maxWidth: 900, width: "100%" }} elevation={3}>
         <CardContent>
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="flex-start" sx={{ mb: 4 }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={3}
+            alignItems="flex-start"
+            sx={{ mb: 4 }}
+          >
             {profile.foto_perfil_url && (
               <Box sx={{ flexShrink: 0 }}>
                 <img
                   src={profile.foto_perfil_url}
                   alt={t("profile_image")}
-                  style={{ width: 150, height: 150, borderRadius: "50%", objectFit: "cover", border: "2px solid #ccc" }}
+                  style={{
+                    width: 150,
+                    height: 150,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid #ccc",
+                  }}
                 />
               </Box>
             )}
-            
+
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="h4" sx={{ mb: 1 }}>
                 {profile.nombre} {profile.apellido}
               </Typography>
-              <Typography><strong>{t("email_label")}</strong> {profile.email}</Typography>
-              <Typography><strong>{t("phone_placeholder")}</strong> {profile.telefono || t("not_specified")}</Typography>
-              <Typography><strong>{t("nationality")}</strong> {nacionalidad || t("not_specified")}</Typography>
-              <Typography><strong>{t("position")}</strong> {posicion_principal || t("not_specified")}</Typography>
+              <Typography>
+                <strong>{t("email_label")}</strong> {profile.email}
+              </Typography>
+              <Typography>
+                <strong>{t("phone_placeholder")}</strong>{" "}
+                {profile.telefono || t("not_specified")}
+              </Typography>
+              <Typography>
+                <strong>{t("nationality")}</strong>{" "}
+                {nacionalidad || t("not_specified")}
+              </Typography>
+              <Typography>
+                <strong>{t("position")}</strong>{" "}
+                {posicion_principal || t("not_specified")}
+              </Typography>
             </Box>
             {isMyProfile && (
-              <Button variant="contained" sx={{ mt: 2 }} onClick={handleOpenEditProfileModal}>
+              <Button
+                variant="contained"
+                sx={{ mt: 2 }}
+                onClick={handleOpenEditProfileModal}
+              >
                 {t("edit_profile_button", "Editar Perfil")}
               </Button>
             )}
           </Stack>
 
-          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>{t("social_networks_links_title")}</Typography>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t("social_networks_links_title")}
+          </Typography>
           <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
             {profile.linkedin_url &&
               (isMobile ? (
-                <IconButton component="a" href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><LinkedInIcon /></IconButton>
+                <IconButton
+                  component="a"
+                  href={profile.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                >
+                  <LinkedInIcon />
+                </IconButton>
               ) : (
-                <Button variant="outlined" startIcon={<LinkedInIcon />} href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">LinkedIn</Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<LinkedInIcon />}
+                  href={profile.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  LinkedIn
+                </Button>
               ))}
             {profile.instagram_url &&
               (isMobile ? (
-                <IconButton component="a" href={profile.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram"><InstagramIcon /></IconButton>
+                <IconButton
+                  component="a"
+                  href={profile.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
+                  <InstagramIcon />
+                </IconButton>
               ) : (
-                <Button variant="outlined" startIcon={<InstagramIcon />} href={profile.instagram_url} target="_blank" rel="noopener noreferrer">Instagram</Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<InstagramIcon />}
+                  href={profile.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Instagram
+                </Button>
               ))}
             {profile.youtube_url &&
               (isMobile ? (
-                <IconButton component="a" href={profile.youtube_url} target="_blank" rel="noopener noreferrer" aria-label="YouTube"><YouTubeIcon /></IconButton>
+                <IconButton
+                  component="a"
+                  href={profile.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                >
+                  <YouTubeIcon />
+                </IconButton>
               ) : (
-                <Button variant="outlined" startIcon={<YouTubeIcon />} href={profile.youtube_url} target="_blank" rel="noopener noreferrer">YouTube</Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<YouTubeIcon />}
+                  href={profile.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  YouTube
+                </Button>
               ))}
             {profile.transfermarkt_url &&
               (isMobile ? (
-                <IconButton component="a" href={profile.transfermarkt_url} target="_blank" rel="noopener noreferrer" aria-label="Transfermarkt"><PublicIcon /></IconButton>
+                <IconButton
+                  component="a"
+                  href={profile.transfermarkt_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Transfermarkt"
+                >
+                  <PublicIcon />
+                </IconButton>
               ) : (
-                <Button variant="outlined" startIcon={<PublicIcon />} href={profile.transfermarkt_url} target="_blank" rel="noopener noreferrer">Transfermarkt</Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<PublicIcon />}
+                  href={profile.transfermarkt_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Transfermarkt
+                </Button>
               ))}
           </Stack>
 
-          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>{t("physical_data")}</Typography>
+          <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+            {t("physical_data")}
+          </Typography>
           <Stack spacing={1} sx={{ mb: 3 }}>
-            <Typography><strong>{t("height")}</strong> {profile.altura_cm ? `${profile.altura_cm} cm` : t("not_specified")}</Typography>
-            <Typography><strong>{t("weight")}</strong> {profile.peso_kg ? `${profile.peso_kg} kg` : t("not_specified")}</Typography>
-            <Typography><strong>{t("dominant_foot")}</strong> {pie_dominante || t("not_specified")}</Typography>
-            <Typography><strong>{t("professional_summary")}</strong> {resumen_profesional || t("no_summary_available")}</Typography>
+            <Typography>
+              <strong>{t("height")}</strong>{" "}
+              {profile.altura_cm
+                ? `${profile.altura_cm} cm`
+                : t("not_specified")}
+            </Typography>
+            <Typography>
+              <strong>{t("weight")}</strong>{" "}
+              {profile.peso_kg ? `${profile.peso_kg} kg` : t("not_specified")}
+            </Typography>
+            <Typography>
+              <strong>{t("dominant_foot")}</strong>{" "}
+              {pie_dominante || t("not_specified")}
+            </Typography>
+            <Typography>
+              <strong>{t("professional_summary")}</strong>{" "}
+              {resumen_profesional || t("no_summary_available")}
+            </Typography>
             {profile.cv_url && (
-              <Button variant="outlined" sx={{ mt: 2 }} href={profile.cv_url} target="_blank" rel="noopener noreferrer">{t("download_cv")}</Button>
+              <Button
+                variant="outlined"
+                sx={{ mt: 2 }}
+                href={profile.cv_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("download_cv")}
+              </Button>
             )}
           </Stack>
 
           <UserPhotosSection userId={userId} isMyProfile={isMyProfile} />
 
-          <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>{t("profile_videos_title", "Videos del Perfil")}</Typography>
+          <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+            {t("profile_videos_title", "Videos del Perfil")}
+          </Typography>
           {isLoadingVideos ? (
             <CircularProgress />
           ) : isErrorVideos ? (
-            <Alert severity="error">{errorVideos.message || t("error_loading_videos", "Error al cargar videos.")}</Alert>
+            <Alert severity="error">
+              {errorVideos.message ||
+                t("error_loading_videos", "Error al cargar videos.")}
+            </Alert>
           ) : (
             <Grid container spacing={2}>
               {videosToDisplay.map((video, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
-                  <VideoCard video={video} onAdd={() => isMyProfile && handleOpenVideoForm({ position: index + 1 })} onPlay={handleOpenVideoPlayer} />
+                  <VideoCard
+                    video={video}
+                    onAdd={() =>
+                      isMyProfile &&
+                      handleOpenVideoForm({ position: index + 1 })
+                    }
+                    onPlay={handleOpenVideoPlayer}
+                  />
                 </Grid>
               ))}
             </Grid>
           )}
 
           {isMyProfile && (
-            <Button variant="contained" sx={{ mt: 3 }} onClick={() => handleOpenVideoForm()}>
+            <Button
+              variant="contained"
+              sx={{ mt: 3 }}
+              onClick={() => handleOpenVideoForm()}
+            >
               {t("add_new_video", "Añadir nuevo video")}
             </Button>
           )}
 
           {isMyProfile && (
             <>
-              <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>{t("my_applications_title", "Mis Postulaciones")}</Typography>
+              <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+                {t("my_applications_title", "Mis Postulaciones")}
+              </Typography>
               {isLoadingApplications ? (
                 <CircularProgress />
               ) : isErrorApplications ? (
-                <Alert severity="error">{errorApplications.message || t("error_loading_applications", "Error al cargar postulaciones.")}</Alert>
-              ) : userApplications.length === 0 ? (
-                <Typography>{t("no_applications_yet", "Aún no tienes postulaciones.")}</Typography>
-              ) : (
+                <Alert severity="error">
+                  {errorApplications.message ||
+                    t(
+                      "error_loading_applications",
+                      "Error al cargar postulaciones."
+                    )}
+                </Alert>
+              ) : Array.isArray(userApplications) &&
+                userApplications.length > 0 ? (
+                // Si es un array y tiene elementos, mapea y muestra las postulaciones
                 <Stack spacing={1}>
                   {userApplications.map((app) => (
                     <Card key={app.id} variant="outlined" sx={{ p: 2 }}>
                       <Typography variant="h6">{app.oferta_titulo}</Typography>
-                      <Typography variant="body2"><strong>{t("status")}:</strong> {app.estado}</Typography>
-                      <Typography variant="body2"><strong>{t("date")}:</strong> {new Date(app.fecha_postulacion).toLocaleDateString()}</Typography>
-                      <Button size="small" onClick={() => navigate(`/offers/${app.oferta_id}`)}>{t("view_offer")}</Button>
+                      <Typography variant="body2">
+                        <strong>{t("status")}:</strong> {app.estado}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>{t("date")}:</strong>{" "}
+                        {new Date(app.fecha_postulacion).toLocaleDateString()}
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={() => navigate(`/offers/${app.oferta_id}`)}
+                      >
+                        {t("view_offer")}
+                      </Button>
                     </Card>
                   ))}
                 </Stack>
+              ) : (
+                // En cualquier otro caso (si no es un array, o está vacío), muestra el mensaje
+                <Typography>
+                  {t("no_applications_yet", "Aún no tienes postulaciones.")}
+                </Typography>
               )}
             </>
           )}
 
-          {profile.tipo_usuario === 'ofertante' || profile.tipo_usuario === 'agencia' ? (
+          {profile.tipo_usuario === "ofertante" ||
+          profile.tipo_usuario === "agencia" ? (
             <>
-              <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>{t("my_offers_title", "Mis Ofertas")}</Typography>
+              <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+                {t("my_offers_title", "Mis Ofertas")}
+              </Typography>
               {isLoadingOffers ? (
                 <CircularProgress />
               ) : isErrorOffers ? (
-                <Alert severity="error">{errorOffers.message || t("error_loading_offers", "Error al cargar las ofertas.")}</Alert>
+                <Alert severity="error">
+                  {errorOffers.message ||
+                    t("error_loading_offers", "Error al cargar las ofertas.")}
+                </Alert>
               ) : (
-                <MyOffersList userId={userId} isOwnProfile={isMyProfile} isAdmin={currentUser?.isAdmin} />
+                <MyOffersList
+                  userId={userId}
+                  isOwnProfile={isMyProfile}
+                  isAdmin={currentUser?.isAdmin}
+                />
               )}
             </>
           ) : null}
@@ -281,17 +477,49 @@ function ProfilePage() {
       </Card>
 
       {selectedVideoToPlay && (
-        <VideoPlayerModal open={showVideoPlayerModal} onClose={handleCloseVideoPlayer} youtubeUrl={selectedVideoToPlay.youtube_url} />
+        <VideoPlayerModal
+          open={showVideoPlayerModal}
+          onClose={handleCloseVideoPlayer}
+          youtubeUrl={selectedVideoToPlay.youtube_url}
+        />
       )}
 
       {showVideoFormModal && (
-        <VideoFormModal open={showVideoFormModal} onClose={handleCloseVideoForm} video={videoToEdit} onSave={handleVideoSaved} />
+        <VideoFormModal
+          open={showVideoFormModal}
+          onClose={handleCloseVideoForm}
+          video={videoToEdit}
+          onSave={handleVideoSaved}
+        />
       )}
 
       {showEditProfileModal && profile && (
-        <Modal open={showEditProfileModal} onClose={handleCloseEditProfileModal} aria-labelledby="edit-profile-modal-title" aria-describedby="edit-profile-modal-description">
-          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: { xs: '90%', sm: '70%', md: '50%' }, bgcolor: 'background.paper', boxShadow: 24, p: 4, maxHeight: '90vh', overflowY: 'auto', borderRadius: 2 }}>
-            <EditProfileForm profileData={profile} onSave={handleProfileSaved} onCancel={handleCloseEditProfileModal} />
+        <Modal
+          open={showEditProfileModal}
+          onClose={handleCloseEditProfileModal}
+          aria-labelledby="edit-profile-modal-title"
+          aria-describedby="edit-profile-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: "70%", md: "50%" },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              maxHeight: "90vh",
+              overflowY: "auto",
+              borderRadius: 2,
+            }}
+          >
+            <EditProfileForm
+              profileData={profile}
+              onSave={handleProfileSaved}
+              onCancel={handleCloseEditProfileModal}
+            />
           </Box>
         </Modal>
       )}
