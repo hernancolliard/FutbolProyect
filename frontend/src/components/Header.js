@@ -89,7 +89,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <Button color="inherit" component={Link} to="/subscribe">
               {t("subscriptions")}
             </Button>
-            {user && user.isAdmin && (
+            {user && user.isadmin && (
               <Button color="inherit" component={Link} to="/admin">
                 Admin
               </Button>
