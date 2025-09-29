@@ -26,6 +26,7 @@ const whitelist = [
   "http://localhost:3000",
   "https://futbolproyect.com",
   "https://www.futbolproyect.com",
+  "https://futbolproyect.onrender.com",
 ];
 const corsOptions = {
   origin: function (origin, callback) {
