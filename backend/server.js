@@ -22,10 +22,18 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(cors({ 
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
-  credentials: true 
-}));
+const whitelist = ['http://localhost:3000', 'https://futbolproyect.com', 'https://www.futbolproyect.com'];
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true
+}
+app.use(cors(corsOptions));
 // Stripe webhook needs to be before express.json
 app.use("/api/payments/webhook", express.raw({ type: "application/json" })); 
 app.use(express.json({ limit: "10mb" }));
@@ -47,7 +55,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build')))
 
 // The "catchall" handler: for any request that doesn't match one above,
 // send back React's index.html file.
-app.get('/*', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
