@@ -1,17 +1,24 @@
 import axios from "axios";
 
-// Determine the base URL from environment variables or use a default for local development.
-const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-// Ensure the base URL ends with '/api' to prevent routing errors in production.
-// This removes a trailing '/api' if it exists and then adds it, ensuring it's present exactly once.
-const normalizedApiUrl = `${apiBaseUrl.replace(/\/api\/?$/, "")}/api`;
-
 const apiClient = axios.create({
-  baseURL: normalizedApiUrl,
+  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
   withCredentials: true, // Allows axios to send cookies for session management.
 });
 
-// An interceptor is not needed here as the browser handles cookies automatically with `withCredentials: true`.
+// Interceptor to prepend /api to all requests
+apiClient.interceptors.request.use(
+  (config) => {
+    // Ensure the URL starts with /api, but don't add it if it's already there.
+    if (config.url && !config.url.startsWith("/api")) {
+      // Ensure there's a leading slash if the original URL was relative, then add /api.
+      const path = config.url.startsWith('/') ? config.url : `/${config.url}`;
+      config.url = `/api${path}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;
