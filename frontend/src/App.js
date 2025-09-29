@@ -20,6 +20,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { ParallaxProvider } from "react-scroll-parallax";
+import AdminRoute from "./components/AdminRoute";
 
 // Lazy load page components
 const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
@@ -144,7 +145,7 @@ function AppContent() {
             <Route path="/pago-cancelado-paypal" element={<PagoCanceladoPayPal />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/create-offer" element={<CreateOffer />} />
             <Route path="/edit-offer/:offerId" element={<CreateOffer />} />
             <Route path="/terms" element={<TermsOfService />} />
