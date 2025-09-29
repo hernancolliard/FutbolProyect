@@ -68,18 +68,13 @@ router.post(
       }
 
       const queryText = `
-      MERGE suscripciones AS target
-      USING (SELECT @userId AS id_usuario) AS source
-      ON (target.id_usuario = source.id_usuario)
-      WHEN MATCHED THEN
-          UPDATE SET
-              [plan] = @planType,
-              fecha_fin = @fechaFin,
-              estado = 'activa',
-              metodo_pago = 'admin_grant'
-      WHEN NOT MATCHED THEN
-          INSERT (id_usuario, [plan], fecha_fin, estado, metodo_pago)
-          VALUES (@userId, @planType, @fechaFin, 'activa', 'admin_grant');
+      INSERT INTO suscripciones (id_usuario, plan, fecha_fin, estado, metodo_pago)
+      VALUES (@userId, @planType, @fechaFin, 'activa', 'admin_grant')
+      ON CONFLICT (id_usuario) DO UPDATE SET
+        plan = @planType,
+        fecha_fin = @fechaFin,
+        estado = 'activa',
+        metodo_pago = 'admin_grant';
     `;
 
       await db.query(queryText, {

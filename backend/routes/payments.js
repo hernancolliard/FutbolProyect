@@ -107,14 +107,14 @@ router.post("/webhook-mp", async (req, res) => {
           }
 
           const queryText = `
-            MERGE suscripciones AS target
-            USING (SELECT @userId AS id_usuario) AS source
-            ON (target.id_usuario = source.id_usuario)
-            WHEN MATCHED THEN
-                UPDATE SET id_mp_pago = @paymentId, [plan] = @plan, fecha_fin = @fechaFin, estado = 'activa', metodo_pago = 'mercadopago'
-            WHEN NOT MATCHED THEN
-                INSERT (id_usuario, id_mp_pago, [plan], fecha_fin, estado, metodo_pago)
-                VALUES (@userId, @paymentId, @plan, @fechaFin, 'activa', 'mercadopago');
+            INSERT INTO suscripciones (id_usuario, id_mp_pago, plan, fecha_fin, estado, metodo_pago)
+            VALUES (@userId, @paymentId, @plan, @fechaFin, 'activa', 'mercadopago')
+            ON CONFLICT (id_usuario) DO UPDATE SET
+              id_mp_pago = @paymentId,
+              plan = @plan,
+              fecha_fin = @fechaFin,
+              estado = 'activa',
+              metodo_pago = 'mercadopago';
           `;
           await db.query(queryText, { userId: parseInt(userId, 10), paymentId: paymentId.toString(), plan, fechaFin });
         }
@@ -216,14 +216,14 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
         }
 
         const queryText = `
-          MERGE suscripciones AS target
-          USING (SELECT @userId AS id_usuario) AS source
-          ON (target.id_usuario = source.id_usuario)
-          WHEN MATCHED THEN
-              UPDATE SET id_paypal_pago = @paypalPaymentId, [plan] = @plan, fecha_fin = @fechaFin, estado = 'activa', metodo_pago = 'paypal'
-          WHEN NOT MATCHED THEN
-              INSERT (id_usuario, id_paypal_pago, [plan], fecha_fin, estado, metodo_pago)
-              VALUES (@userId, @paypalPaymentId, @plan, @fechaFin, 'activa', 'paypal');
+          INSERT INTO suscripciones (id_usuario, id_paypal_pago, plan, fecha_fin, estado, metodo_pago)
+          VALUES (@userId, @paypalPaymentId, @plan, @fechaFin, 'activa', 'paypal')
+          ON CONFLICT (id_usuario) DO UPDATE SET
+            id_paypal_pago = @paypalPaymentId,
+            plan = @plan,
+            fecha_fin = @fechaFin,
+            estado = 'activa',
+            metodo_pago = 'paypal';
         `;
         await db.query(queryText, { userId: parseInt(userId, 10), paypalPaymentId: paypalPaymentId.toString(), plan, fechaFin });
         res.json({ success: true });
