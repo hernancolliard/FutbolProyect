@@ -366,6 +366,7 @@ router.post(
 router.put(
   "/:id",
   verificarToken,
+  popularRolUsuario,
   upload.fields([{ name: "imagen_url", maxCount: 1 }]),
   processOfferImages,
   validate(offerSchema),

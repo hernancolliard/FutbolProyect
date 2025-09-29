@@ -114,4 +114,4 @@ const verificarSuscripcionActiva =
     }
   };
 
-module.exports = { verificarToken, verificarAdmin, verificarSuscripcionActiva };
+module.exports = { verificarToken, verificarAdmin, verificarSuscripcionActiva, popularRolUsuario };

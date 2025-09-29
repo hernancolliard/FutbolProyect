@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const { verificarToken } = require("../middleware/authMiddleware");
+const { verificarToken, popularRolUsuario } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const { z } = require("zod");
 const multer = require("multer");
@@ -124,7 +124,7 @@ router.post(
 );
 
 // --- RUTA PROTEGIDA: OBTENER EL PERFIL DE UN USUARIO ---
-router.get("/:userId", verificarToken, async (req, res) => {
+router.get("/:userId", verificarToken, popularRolUsuario, async (req, res) => {
   const profileToViewId = parseInt(req.params.userId, 10);
   const requester = req.user;
 
@@ -181,7 +181,7 @@ router.get("/:userId", verificarToken, async (req, res) => {
 });
 
 // --- RUTA PROTEGIDA: OBTENER POSTULACIONES DE UN USUARIO ---
-router.get("/:userId/applications", verificarToken, async (req, res) => {
+router.get("/:userId/applications", verificarToken, popularRolUsuario, async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
   const requester = req.user;
 
@@ -217,7 +217,7 @@ router.get("/:userId/applications", verificarToken, async (req, res) => {
 });
 
 // --- RUTA PROTEGIDA: OBTENER OFERTAS PUBLICADAS POR UN USUARIO (OFERTANTE) ---
-router.get("/:userId/offers", verificarToken, async (req, res) => {
+router.get("/:userId/offers", verificarToken, popularRolUsuario, async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
   const requester = req.user;
 
