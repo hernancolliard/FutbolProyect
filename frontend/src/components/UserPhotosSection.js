@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import apiClient from '../services/api';
-import FileUpload from './FileUpload'; // Reusing the file upload component
+import FileUpload from './FileUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
@@ -53,15 +53,19 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
   const { data: userPhotos, isLoading, isError, error } = useQuery({
     queryKey: ['userPhotos', userId],
     queryFn: () => fetchUserPhotos(userId),
+    initialData: [], // Ensure userPhotos is always an array
   });
 
   // Mutation for uploading photo
   const uploadPhotoMutation = useMutation({
     mutationFn: uploadPhoto,
-    onSuccess: (data) => {
-      toast.success(data.message || t('photo_upload_success'));
-      queryClient.invalidateQueries(['userPhotos', userId]);
-      setShowPhotoUpload(false); // Close upload section after success
+    onSuccess: (newPhoto) => {
+      toast.success(t('photo_upload_success'));
+      // Manually update the cache to avoid race conditions and ensure it's an array
+      queryClient.setQueryData(['userPhotos', userId], (oldData) => {
+        return oldData ? [...oldData, newPhoto] : [newPhoto];
+      });
+      setShowPhotoUpload(false);
       setPhotoTitle("");
     },
     onError: (err) => {
@@ -72,9 +76,12 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
   // Mutation for deleting photo
   const deletePhotoMutation = useMutation({
     mutationFn: deletePhoto,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success(data.message || t('photo_delete_success'));
-      queryClient.invalidateQueries(['userPhotos', userId]);
+      // Manually remove the photo from the cache
+      queryClient.setQueryData(['userPhotos', userId], (oldData) => {
+        return oldData ? oldData.filter(photo => photo.id !== variables.photoId) : [];
+      });
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || t('photo_delete_error'));
@@ -83,8 +90,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
 
   const handleFileUpload = useCallback((files) => {
     if (files.length > 0) {
-      // Limit to 5 photos
-      if (userPhotos && userPhotos.length + files.length > 5) {
+      if (userPhotos && userPhotos.length >= 5) {
         toast.error(t('max_photos_reached', 'You can only upload up to 5 photos.'));
         return;
       }
@@ -120,7 +126,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
         <Alert severity="error">{error.message || t('error_loading_photos', 'Error al cargar fotos.')}</Alert>
       ) : (
         <Grid container spacing={2}>
-          {userPhotos?.map((photo) => {
+          {userPhotos.map((photo) => {
             const title = photo[`title_${lang}`] || photo.title;
             return (
               <Grid item key={photo.id} xs={6} sm={4} md={3}>
@@ -139,13 +145,12 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
                   onClick={() => handleOpenPhotoView(photo)}
                 >
                   <img
-                    src={`http://localhost:5000/uploads/${photo.url}`} // Assuming 'url' field for photo
+                    src={photo.url} // Use the full URL from the backend
                     alt={title}
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectFit: 'scale-down',
-                      imageOrientation: 'from-image',
+                      objectFit: 'cover',
                     }}
                   />
                   {isMyProfile && (
@@ -163,7 +168,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
                       }}
                       className="delete-button"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent opening photo modal
+                        e.stopPropagation();
                         handleDeletePhoto(photo.id);
                       }}
                     >
@@ -177,7 +182,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
               </Grid>
             );
           })}
-          {isMyProfile && userPhotos?.length < 5 && !showPhotoUpload && (
+          {isMyProfile && userPhotos.length < 5 && !showPhotoUpload && (
             <Grid item xs={12}>
                 <Button
                     variant="contained"
@@ -215,7 +220,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
         <DialogContent>
           {selectedPhotoToView && (
             <img
-              src={`http://localhost:5000/uploads/${selectedPhotoToView.url}`}
+              src={selectedPhotoToView.url} // Use the full URL from the backend
               alt={selectedPhotoToView[`title_${lang}`] || selectedPhotoToView.title}
               style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: 'auto' }}
             />
