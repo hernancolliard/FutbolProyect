@@ -15,13 +15,12 @@ const privacyRoutes = require("./routes/privacy.js");
 
 const app = express();
 
-// Set Cross-Origin-Opener-Policy to allow pop-ups (e.g., for Google Auth)
+// General Middleware
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   next();
 });
 
-// Middleware
 const whitelist = [
   "http://localhost:3000",
   "https://futbolproyect.com",
@@ -33,12 +32,19 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-// Stripe webhook needs to be before express.json
-app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
-// API Routes
+// Special case for Stripe webhook
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+
+// --- STATIC ASSETS FIRST ---
+// Serve static assets from the uploads folder
+app.use("/uploads", express.static("uploads"));
+// Serve static assets from the React app build folder
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+// --- API ROUTES ---
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/offers", offerRoutes);
@@ -48,12 +54,9 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/terms", termsRoutes);
 app.use("/api/privacy", privacyRoutes);
 
-// Serve static assets from the React app build and uploads
-app.use("/uploads", express.static("uploads"));
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-// The "catchall" handler: for any request that doesn't match one above,
-// send back React's index.html file.
-app.get('*', (req, res) => {
+// --- SPA CATCHALL HANDLER ---
+// For any request that doesn't match one of the above, send back React's index.html file.
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
