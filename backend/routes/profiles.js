@@ -31,6 +31,11 @@ const upload = multer({ storage: storage });
 // --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
 router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
+
+  if (isNaN(parseInt(userId, 10))) {
+    return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+  }
+
   try {
     const query = `
       SELECT id, user_id, title, youtube_url, cover_image_url, position
@@ -422,6 +427,10 @@ router.post(
     const { title } = req.body;
     const requester = req.user;
 
+    if (isNaN(parseInt(userId, 10))) {
+      return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+    }
+
     if (parseInt(userId, 10) !== requester.id) {
       return res
         .status(403)
@@ -470,6 +479,10 @@ router.post(
 router.delete("/:userId/photos/:photoId", verificarToken, async (req, res) => {
   const { userId, photoId } = req.params;
   const requester = req.user;
+
+  if (isNaN(parseInt(userId, 10)) || isNaN(parseInt(photoId, 10))) {
+    return res.status(400).json({ message: "El ID de usuario y de foto deben ser números." });
+  }
 
   if (parseInt(userId, 10) !== requester.id) {
     return res
