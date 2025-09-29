@@ -10,6 +10,7 @@ const {
   verificarToken,
   verificarAdmin,
   verificarSuscripcionActiva,
+  popularRolUsuario,
 } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const { translateText } = require("../services/translationService");
