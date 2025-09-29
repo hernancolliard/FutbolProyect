@@ -114,4 +114,28 @@ const verificarSuscripcionActiva =
     }
   };
 
+const popularRolUsuario = async (req, res, next) => {
+    if (!req.user || !req.user.id) {
+        // This should not happen if verificarToken is used before
+        req.user.isadmin = false;
+        return next();
+    }
+
+    try {
+        const result = await db.query(
+            "SELECT isadmin FROM usuarios WHERE id = @id",
+            { id: req.user.id }
+        );
+
+        const user = result.rows[0];
+        req.user.isadmin = user ? user.isadmin : false;
+        next();
+    } catch (error) {
+        console.error("Error al popular el rol del usuario:", error);
+        // Continue without admin role
+        req.user.isadmin = false;
+        next();
+    }
+};
+
 module.exports = { verificarToken, verificarAdmin, verificarSuscripcionActiva, popularRolUsuario };
