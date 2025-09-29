@@ -76,14 +76,14 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas." });
     }
 
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isadmin: user['isadmin'] };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 día
+      sameSite: 'Lax',
+      maxAge: 60 * 60 * 1000, // 1 hora
     });
 
     // Devolver datos del usuario sin el hash de la contraseña
@@ -119,14 +119,14 @@ router.post("/auth/google", async (req, res) => {
     }
 
     const user = result.rows[0];
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario, isadmin: user['isadmin'] };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'Lax',
+      maxAge: 60 * 60 * 1000, // 1 hora
     });
 
     const { password_hash, ...userWithoutPassword } = user;

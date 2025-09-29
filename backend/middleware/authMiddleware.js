@@ -21,30 +21,62 @@ const verificarToken = (req, res, next) => {
 };
 
 // Middleware para verificar que el usuario es un administrador
-const verificarAdmin = (req, res, next) => {
-  // Se asume que verificarToken ya se ejecutó y pobló req.user
-    if (!req.user || !req.user.isadmin) {
-    return res
-      .status(403)
-      .json({
-        message: "Acción no permitida. Se requiere rol de administrador.",
-      });
-  }
-  next();
+const verificarAdmin = async (req, res, next) => {
+    // Se asume que verificarToken ya se ejecutó y pobló req.user con el ID
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Token no válido." });
+    }
+
+    try {
+        // **CONSULTA A LA BASE DE DATOS**
+        const result = await db.query(
+            "SELECT isadmin FROM usuarios WHERE id = @id",
+            { id: req.user.id }
+        );
+
+        const user = result.rows[0];
+
+        if (!user || !user.isadmin) {
+            return res
+                .status(403)
+                .json({
+                    message: "Acción no permitida. Se requiere rol de administrador.",
+                });
+        }
+        
+        // Opcional: Anexar el rol actualizado a req.user si es necesario
+        req.user.isadmin = user.isadmin; 
+        next();
+    } catch (error) {
+        console.error("Error al verificar administrador:", error);
+        res.status(500).json({ message: "Error del servidor." });
+    }
 };
 
-// Middleware para verificar que el usuario tiene una suscripción activa y el tipo correcto
 // Middleware para verificar que el usuario tiene una suscripción activa y el tipo correcto
 const verificarSuscripcionActiva =
   (tiposPermitidos = []) =>
   async (req, res, next) => {
-    // Si el usuario es admin, se salta todas las comprobaciones y se le da acceso.
-        if (req.user && req.user.isadmin) {
-      return next();
-    }
-
     try {
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Token no válido." });
+      }
+      
       const { id, tipo_usuario } = req.user;
+
+      // Verificar si el usuario es administrador
+      const adminResult = await db.query(
+        "SELECT isadmin FROM usuarios WHERE id = @id",
+        { id: req.user.id }
+      );
+      
+      const userIsAdmin = adminResult.rows[0] && adminResult.rows[0].isadmin;
+      req.user.isadmin = userIsAdmin; // poblar para uso posterior si es necesario
+
+      // Si el usuario es admin, se salta todas las comprobaciones y se le da acceso.
+      if (userIsAdmin) {
+        return next();
+      }
 
       // 1. Verificar que el tipo de usuario es el permitido para esta acción
       if (
