@@ -56,9 +56,9 @@ app.use("/api/privacy", privacyRoutes);
 // Serve static assets from the React app build and uploads
 app.use("/uploads", express.static("uploads"));
 app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-// Catch-all: debe ir al final del todo
-app.get("*", (req, res) => {
+// The "catchall" handler: for any request that doesn't match one above,
+// send back React's index.html file.
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
