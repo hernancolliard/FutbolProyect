@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require('cookie-parser');
-const path = require('path');
+const cookieParser = require("cookie-parser");
+const path = require("path");
 require("dotenv").config({ quiet: true });
 
 const userRoutes = require("./routes/users.js");
@@ -22,20 +22,24 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-const whitelist = ['http://localhost:3000', 'https://futbolproyect.com', 'https://www.futbolproyect.com'];
+const whitelist = [
+  "http://localhost:3000",
+  "https://futbolproyect.com",
+  "https://www.futbolproyect.com",
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
-}
+  credentials: true,
+};
 app.use(cors(corsOptions));
 // Stripe webhook needs to be before express.json
-app.use("/api/payments/webhook", express.raw({ type: "application/json" })); 
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
@@ -51,12 +55,11 @@ app.use("/api/privacy", privacyRoutes);
 
 // Serve static assets from the React app build and uploads
 app.use("/uploads", express.static("uploads"));
-app.use(express.static(path.join(__dirname, '../frontend/build')))
+app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-// The "catchall" handler: for any request that doesn't match one above,
-// send back React's index.html file.
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+// Catch-all: debe ir al final del todo
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
 const PORT = process.env.PORT || 5000;
