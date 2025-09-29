@@ -23,7 +23,7 @@ const fetchOffers = async ({ queryKey }) => {
     }
   }
 
-  const { data } = await apiClient.get(`/offers?${params.toString()}`);
+  const { data } = await apiClient.get(`offers?${params.toString()}`);
   return data;
 };
 
