@@ -5,13 +5,13 @@ const path = require('path');
 require("dotenv").config({ quiet: true });
 
 const userRoutes = require("./routes/users.js");
-const paymentRoutes = require("./routes/payments.js");
-const offerRoutes = require("./routes/offers.js");
-const applicationRoutes = require("./routes/applications.js");
-const profileRoutes = require("./routes/profiles.js");
-const adminRoutes = require("./routes/admin.js");
-const termsRoutes = require("./routes/terms.js");
-const privacyRoutes = require("./routes/privacy.js");
+// const paymentRoutes = require("./routes/payments.js");
+// const offerRoutes = require("./routes/offers.js");
+// const applicationRoutes = require("./routes/applications.js");
+// const profileRoutes = require("./routes/profiles.js");
+// const adminRoutes = require("./routes/admin.js");
+// const termsRoutes = require("./routes/terms.js");
+// const privacyRoutes = require("./routes/privacy.js");
 
 const app = express();
 
@@ -32,7 +32,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 // API Routes
-// app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes);
 // app.use("/api/payments", paymentRoutes);
 // app.use("/api/offers", offerRoutes);
 // app.use("/api/applications", applicationRoutes);
