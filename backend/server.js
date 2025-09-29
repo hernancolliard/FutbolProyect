@@ -32,14 +32,14 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
 // API Routes
-app.use("/api/users", userRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/offers", offerRoutes);
-app.use("/api/applications", applicationRoutes);
-app.use("/api/profiles", profileRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/terms", termsRoutes);
-app.use("/api/privacy", privacyRoutes);
+// app.use("/api/users", userRoutes);
+// app.use("/api/payments", paymentRoutes);
+// app.use("/api/offers", offerRoutes);
+// app.use("/api/applications", applicationRoutes);
+// app.use("/api/profiles", profileRoutes);
+// app.use("/api/admin", adminRoutes);
+// app.use("/api/terms", termsRoutes);
+// app.use("/api/privacy", privacyRoutes);
 
 // Serve static assets from the React app build and uploads
 app.use("/uploads", express.static("uploads"));
