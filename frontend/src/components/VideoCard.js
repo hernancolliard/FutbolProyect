@@ -5,10 +5,14 @@ import {
   CardMedia,
   CardContent,
   Typography,
+  CardActions,
+  IconButton,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import EditIcon from "@mui/icons-material/Edit";
+import apiClient from "../services/api";
 
-const VideoCard = ({ video, onAdd, onPlay }) => {
+const VideoCard = ({ video, onAdd, onPlay, onEdit, isMyProfile }) => {
   if (!video) {
     return (
       <Card sx={{ height: "100%", display: "flex" }}>
@@ -35,21 +39,37 @@ const VideoCard = ({ video, onAdd, onPlay }) => {
     );
   }
 
+  const imageUrl = `${apiClient.defaults.baseURL}/uploads/${video.cover_image_url}`;
+
   return (
-    <Card sx={{ height: "100%" }}>
-      <CardActionArea onClick={() => onPlay(video)}>
+    <Card
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      <CardActionArea onClick={() => onPlay(video)} sx={{ flexGrow: 1 }}>
         <CardMedia
           component="img"
-          image={`http://localhost:5000/uploads/${video.cover_image_url}`}
+          image={imageUrl}
           alt={video.title}
-          sx={{ objectFit: "cover", maxHeight: 100 }} // Set max height to 100px and object-fit cover
+          sx={{ objectFit: "cover", height: 120 }}
         />
-        <CardContent>
-          <Typography gutterBottom variant="h6" component="div" noWrap>
+        <CardContent sx={{ p: 1 }}>
+          <Typography variant="subtitle1" component="div" noWrap>
             {video.title}
           </Typography>
         </CardContent>
       </CardActionArea>
+      {isMyProfile && (
+        <CardActions sx={{ p: 0, justifyContent: "flex-end" }}>
+          <IconButton aria-label="edit" size="small" onClick={() => onEdit(video)}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </CardActions>
+      )}
     </Card>
   );
 };

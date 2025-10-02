@@ -385,10 +385,12 @@ function ProfilePage() {
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   <VideoCard
                     video={video}
+                    isMyProfile={isMyProfile}
                     onAdd={() =>
                       isMyProfile &&
                       handleOpenVideoForm({ position: index + 1 })
                     }
+                    onEdit={handleOpenVideoForm}
                     onPlay={handleOpenVideoPlayer}
                   />
                 </Grid>
