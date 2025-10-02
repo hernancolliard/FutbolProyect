@@ -104,6 +104,7 @@ function ProfilePage() {
   });
 
   const {
+    data: userOffers,
     isLoading: isLoadingOffers,
     isError: isErrorOffers,
     error: errorOffers,
@@ -114,6 +115,7 @@ function ProfilePage() {
       !!profile &&
       (profile.tipo_usuario === "ofertante" ||
         profile.tipo_usuario === "agencia"),
+    initialData: [],
   });
 
   const isMyProfile = currentUser && currentUser.id === parseInt(userId, 10);
@@ -466,6 +468,7 @@ function ProfilePage() {
                 </Alert>
               ) : (
                 <MyOffersList
+                  offers={userOffers || []}
                   userId={userId}
                   isOwnProfile={isMyProfile}
                   isAdmin={currentUser?.isAdmin}
