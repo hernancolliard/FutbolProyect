@@ -10,6 +10,10 @@ const sharp = require("sharp");
 const { translateText } = require("../services/translationService");
 const fs = require("fs");
 
+// Configuración de Multer para almacenamiento en memoria
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
@@ -188,10 +192,6 @@ const videoSchema = z.object({
       .max(5, "La posición debe ser entre 1 y 5")
   ),
 });
-
-// Configuración de Multer para almacenamiento en memoria
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 // --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
 router.get("/:userId/videos", async (req, res) => {
