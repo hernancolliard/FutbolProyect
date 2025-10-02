@@ -15,6 +15,140 @@ const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
 };
 
+// --- RUTA PÚBLICA: OBTENER PERFIL DE USUARIO ---
+router.get("/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      SELECT *, 
+             (SELECT url FROM user_photos WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as foto_perfil_url
+      FROM usuarios u
+      WHERE u.id = @userId;
+    `;
+    const result = await db.query(query, { userId });
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const userProfile = result.rows[0];
+
+    if (userProfile.foto_perfil_url) {
+      userProfile.foto_perfil_url = getFullUrl(req, `uploads/${userProfile.foto_perfil_url}`);
+    }
+
+    res.json(userProfile);
+  } catch (error) {
+    console.error("Error al obtener el perfil del usuario:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+// --- RUTA PROTEGIDA: ACTUALIZAR PERFIL DEL USUARIO AUTENTICADO ---
+router.put(
+  "/me",
+  verificarToken,
+  upload.single("foto_perfil"),
+  async (req, res) => {
+    const userId = req.user.id;
+    const {
+      nombre,
+      apellido,
+      telefono,
+      nacionalidad,
+      posicion_principal,
+      resumen_profesional,
+      cv_url,
+      linkedin_url,
+      instagram_url,
+      youtube_url,
+      transfermarkt_url,
+      altura_cm,
+      peso_kg,
+      pie_dominante,
+      fecha_de_nacimiento,
+    } = req.body;
+
+    let fotoPerfilFilename = null;
+
+    try {
+      if (req.file) {
+        const uploadsDir = path.resolve(__dirname, "..", "uploads");
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        fotoPerfilFilename = `user-photo-${userId}-${Date.now()}.webp`;
+        const outputPath = path.join(uploadsDir, fotoPerfilFilename);
+
+        await sharp(req.file.buffer)
+          .rotate()
+          .resize(300, 300, { fit: "cover" })
+          .webp({ quality: 80 })
+          .toFile(outputPath);
+      }
+
+      const query = `
+        UPDATE usuarios
+        SET 
+          nombre = @nombre,
+          apellido = @apellido,
+          telefono = @telefono,
+          nacionalidad = @nacionalidad,
+          posicion_principal = @posicion_principal,
+          resumen_profesional = @resumen_profesional,
+          cv_url = @cv_url,
+          linkedin_url = @linkedin_url,
+          instagram_url = @instagram_url,
+          youtube_url = @youtube_url,
+          transfermarkt_url = @transfermarkt_url,
+          altura_cm = @altura_cm,
+          peso_kg = @peso_kg,
+          pie_dominante = @pie_dominante,
+          fecha_de_nacimiento = @fecha_de_nacimiento,
+          foto_perfil_url = COALESCE(@fotoPerfilFilename, foto_perfil_url)
+        WHERE id = @userId
+        RETURNING *;
+      `;
+
+      const result = await db.query(query, {
+        userId,
+        nombre,
+        apellido,
+        telefono,
+        nacionalidad,
+        posicion_principal,
+        resumen_profesional,
+        cv_url,
+        linkedin_url,
+        instagram_url,
+        youtube_url,
+        transfermarkt_url,
+        altura_cm,
+        peso_kg,
+        pie_dominante,
+        fecha_de_nacimiento,
+        fotoPerfilFilename,
+      });
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Usuario no encontrado." });
+      }
+
+      const updatedUser = result.rows[0];
+      if (updatedUser.foto_perfil_url) {
+        updatedUser.foto_perfil_url = getFullUrl(req, `uploads/${updatedUser.foto_perfil_url}`);
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error al actualizar el perfil:", error);
+      res.status(500).json({ message: "Error del servidor al actualizar el perfil." });
+    }
+  }
+);
+
 // --- RUTA PÚBLICA: OBTENER OFERTAS DE UN USUARIO ---
 router.get("/:userId/offers", async (req, res) => {
   const { userId } = req.params;
@@ -248,5 +382,167 @@ router.post(
 );
 
 // ... (El resto de las rutas como DELETE)
+
+// --- RUTA PROTEGIDA: ELIMINAR UNA FOTO ---
+router.delete(
+  "/:userId/photos/:photoId",
+  verificarToken,
+  async (req, res) => {
+    const { userId, photoId } = req.params;
+    const requester = req.user;
+
+    if (parseInt(userId, 10) !== requester.id) {
+      return res
+        .status(403)
+        .json({ message: "No tienes permiso para eliminar fotos de este perfil." });
+    }
+
+    try {
+      // Opcional: verificar que la foto existe y pertenece al usuario
+      const photoResult = await db.query(
+        "SELECT * FROM user_photos WHERE id = @photoId AND user_id = @userId",
+        { photoId, userId }
+      );
+
+      if (photoResult.rows.length === 0) {
+        return res.status(404).json({ message: "Foto no encontrada." });
+      }
+
+      // Eliminar archivo del sistema de archivos
+      const filename = photoResult.rows[0].url;
+      const filePath = path.resolve(__dirname, "..", "uploads", filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      // Eliminar de la base de datos
+      await db.query("DELETE FROM user_photos WHERE id = @photoId", { photoId });
+
+      res.json({ message: "Foto eliminada correctamente." });
+    } catch (error) {
+      console.error("Error al eliminar la foto:", error);
+      res.status(500).json({ message: "Error del servidor al eliminar la foto." });
+    }
+  }
+);
+
+// --- RUTA PROTEGIDA: ACTUALIZAR UN VIDEO ---
+router.put(
+  "/videos/:videoId",
+  verificarToken,
+  upload.single("cover_image"),
+  validate(videoSchema.partial()), // Permite actualizaciones parciales
+  async (req, res) => {
+    const { videoId } = req.params;
+    const userId = req.user.id;
+    const { title, youtube_url, position } = req.body;
+
+    try {
+      // Verificar que el video pertenece al usuario
+      const videoResult = await db.query(
+        "SELECT * FROM user_videos WHERE id = @videoId AND user_id = @userId",
+        { videoId, userId }
+      );
+
+      if (videoResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "Video no encontrado o no tienes permiso para editarlo." });
+      }
+
+      let coverImageFilename = videoResult.rows[0].cover_image_url;
+
+      if (req.file) {
+        const uploadsDir = path.resolve(__dirname, "..", "uploads");
+        const newCoverImageFilename = `cover-${userId}-${Date.now()}.webp`;
+        const outputPath = path.join(uploadsDir, newCoverImageFilename);
+
+        await sharp(req.file.buffer)
+          .resize(800, 450)
+          .webp({ quality: 85 })
+          .toFile(outputPath);
+
+        // Eliminar la imagen de portada anterior si existe
+        if (coverImageFilename) {
+          const oldPath = path.join(uploadsDir, coverImageFilename);
+          if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath);
+          }
+        }
+        coverImageFilename = newCoverImageFilename;
+      }
+
+      const translatedTitles = await translateText(title, ["es", "en"]);
+
+      const updateQuery = `
+        UPDATE user_videos
+        SET 
+          title = @title,
+          title_es = @title_es,
+          title_en = @title_en,
+          youtube_url = @youtube_url,
+          position = @position,
+          cover_image_url = @coverImageFilename
+        WHERE id = @videoId
+        RETURNING *;
+      `;
+
+      const result = await db.query(updateQuery, {
+        videoId,
+        title,
+        title_es: translatedTitles.es,
+        title_en: translatedTitles.en,
+        youtube_url,
+        position,
+        coverImageFilename,
+      });
+
+      const updatedVideo = result.rows[0];
+      updatedVideo.cover_image_url = getFullUrl(req, `uploads/${updatedVideo.cover_image_url}`);
+
+      res.json(updatedVideo);
+    } catch (error) {
+      console.error("Error al actualizar el video:", error);
+      res.status(500).json({ message: "Error del servidor al actualizar el video." });
+    }
+  }
+);
+
+// --- RUTA PROTEGIDA: ELIMINAR UN VIDEO ---
+router.delete("/videos/:videoId", verificarToken, async (req, res) => {
+  const { videoId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // Verificar que el video pertenece al usuario
+    const videoResult = await db.query(
+      "SELECT * FROM user_videos WHERE id = @videoId AND user_id = @userId",
+      { videoId, userId }
+    );
+
+    if (videoResult.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Video no encontrado o no tienes permiso para eliminarlo." });
+    }
+
+    // Eliminar la imagen de portada del sistema de archivos
+    const coverImageFilename = videoResult.rows[0].cover_image_url;
+    if (coverImageFilename) {
+      const filePath = path.resolve(__dirname, "..", "uploads", coverImageFilename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // Eliminar de la base de datos
+    await db.query("DELETE FROM user_videos WHERE id = @videoId", { videoId });
+
+    res.json({ message: "Video eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar el video:", error);
+    res.status(500).json({ message: "Error del servidor al eliminar el video." });
+  }
+});
 
 module.exports = router;

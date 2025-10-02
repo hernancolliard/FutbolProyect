@@ -142,8 +142,7 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
             <FileUpload 
               onFilesChange={handleFileChange} 
               uploadProgress={uploadProgress} 
-              // Si estamos editando y ya hay una imagen, podríamos mostrarla aquí
-              // initialFiles={video?.cover_image_url ? [{ preview: `http://localhost:5000/uploads/${video.cover_image_url}` }] : []}
+              initialFiles={video?.cover_image_url ? [{ preview: video.cover_image_url }] : []}
             />
 
             {isSaving && (

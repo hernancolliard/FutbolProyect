@@ -89,7 +89,7 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
             <Typography>{t("profile_image")}</Typography>
             {profileData.foto_perfil_url && (
               <img
-                src={`http://localhost:5000/uploads/${profileData.foto_perfil_url}`}
+                src={profileData.foto_perfil_url}
                 alt="Perfil"
                 className="profile-pic-preview"
               />
