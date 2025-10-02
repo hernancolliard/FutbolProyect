@@ -125,7 +125,7 @@ router.post("/auth/google", async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
+      sameSite: 'Lax',
       maxAge: 60 * 60 * 1000, // 1 hora
     });
 

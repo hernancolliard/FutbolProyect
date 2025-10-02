@@ -3,9 +3,11 @@ const db = require("../db");
 
 // Middleware para verificar que el usuario está autenticado (leyendo el token desde una cookie)
 const verificarToken = (req, res, next) => {
+  console.log("Cookies en la solicitud:", req.cookies); // DEBUGGING LINE
   const token = req.cookies.token;
 
   if (!token) {
+    console.log("No se encontró el token en las cookies."); // DEBUGGING LINE
     return res
       .status(401) // 401 Unauthorized es más apropiado que 403 Forbidden
       .json({ message: "Acceso denegado. No se proporcionó un token." });
@@ -16,6 +18,7 @@ const verificarToken = (req, res, next) => {
     req.user = decoded; // Añade el payload del token a la request
     next();
   } catch (err) {
+    console.log("Error al verificar el token:", err.message); // DEBUGGING LINE
     return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
