@@ -30,7 +30,7 @@ router.get("/:userId/offers", async (req, res) => {
       WHERE id_usuario_ofertante = @userId
       ORDER BY fecha_publicacion DESC;
     `;
-    const result = await db.query(query, { userId });
+    const result = await db.query(query, { userId: parseInt(userId, 10) });
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener las ofertas del usuario:", error);
