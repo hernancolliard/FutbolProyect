@@ -15,6 +15,31 @@ const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
 };
 
+// --- RUTA PÚBLICA: OBTENER OFERTAS DE UN USUARIO ---
+router.get("/:userId/offers", async (req, res) => {
+  const { userId } = req.params;
+
+  if (isNaN(parseInt(userId, 10))) {
+    return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+  }
+
+  try {
+    const query = `
+      SELECT id, titulo, descripcion, estado, fecha_publicacion
+      FROM ofertas_laborales
+      WHERE id_usuario_ofertante = @userId
+      ORDER BY fecha_publicacion DESC;
+    `;
+    const result = await db.query(query, { userId });
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener las ofertas del usuario:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener las ofertas." });
+  }
+});
+
 // --- Esquema de validación para videos ---
 const videoSchema = z.object({
   title: z.string().min(3).max(100),

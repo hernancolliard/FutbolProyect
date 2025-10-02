@@ -350,6 +350,9 @@ router.post(
 
       const newOfferId = result.rows[0].id;
 
+      // Invalidar el caché para que la nueva oferta aparezca inmediatamente
+      myCache.flushAll();
+
       res.status(201).json({
         message: "Oferta creada con éxito",
         offerId: newOfferId,
