@@ -10,6 +10,8 @@ const sharp = require("sharp");
 const { translateText } = require("../services/translationService");
 const fs = require("fs");
 
+const { uploadToS3 } = require("../services/s3Service");
+
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
@@ -33,10 +35,6 @@ router.get("/:userId", async (req, res) => {
     }
 
     const userProfile = result.rows[0];
-
-    if (userProfile.foto_perfil_url) {
-      userProfile.foto_perfil_url = getFullUrl(req, `uploads/${userProfile.foto_perfil_url}`);
-    }
 
     res.json(userProfile);
   } catch (error) {
@@ -70,23 +68,23 @@ router.put(
       fecha_de_nacimiento,
     } = req.body;
 
-    let fotoPerfilFilename = null;
+    let fotoPerfilUrl = null;
 
     try {
       if (req.file) {
-        const uploadsDir = path.resolve(__dirname, "..", "uploads");
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-
-        fotoPerfilFilename = `user-photo-${userId}-${Date.now()}.webp`;
-        const outputPath = path.join(uploadsDir, fotoPerfilFilename);
-
-        await sharp(req.file.buffer)
+        const processedImageBuffer = await sharp(req.file.buffer)
           .rotate()
           .resize(300, 300, { fit: "cover" })
           .webp({ quality: 80 })
-          .toFile(outputPath);
+          .toBuffer();
+
+        const key = `user-photos/profile-${userId}-${Date.now()}.webp`;
+
+        fotoPerfilUrl = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
       }
 
       const query = `
@@ -107,7 +105,7 @@ router.put(
           peso_kg = @peso_kg,
           pie_dominante = @pie_dominante,
           fecha_de_nacimiento = @fecha_de_nacimiento,
-          foto_perfil_url = COALESCE(@fotoPerfilFilename, foto_perfil_url)
+          foto_perfil_url = COALESCE(@fotoPerfilUrl, foto_perfil_url)
         WHERE id = @userId
         RETURNING *;
       `;
@@ -129,7 +127,7 @@ router.put(
         peso_kg,
         pie_dominante,
         fecha_de_nacimiento,
-        fotoPerfilFilename,
+        fotoPerfilUrl,
       });
 
       if (result.rows.length === 0) {
@@ -137,9 +135,6 @@ router.put(
       }
 
       const updatedUser = result.rows[0];
-      if (updatedUser.foto_perfil_url) {
-        updatedUser.foto_perfil_url = getFullUrl(req, `uploads/${updatedUser.foto_perfil_url}`);
-      }
 
       res.json(updatedUser);
     } catch (error) {
@@ -239,18 +234,18 @@ router.post(
     }
 
     try {
-      const uploadsDir = path.resolve(__dirname, "..", "uploads");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const coverImageFilename = `cover-${user_id}-${Date.now()}.webp`;
-      const outputPath = path.join(uploadsDir, coverImageFilename);
-
-      await sharp(req.file.buffer)
+      const processedImageBuffer = await sharp(req.file.buffer)
         .resize(800, 450)
         .webp({ quality: 85 })
-        .toFile(outputPath);
+        .toBuffer();
+
+      const key = `video-covers/cover-${user_id}-${Date.now()}.webp`;
+
+      const coverImageUrl = await uploadToS3(
+        processedImageBuffer,
+        key,
+        "image/webp"
+      );
 
       const translatedTitles = await translateText(title, ["es", "en"]);
 
@@ -265,12 +260,11 @@ router.post(
         title_es: translatedTitles.es,
         title_en: translatedTitles.en,
         youtube_url,
-        cover_image_url: coverImageFilename,
+        cover_image_url: coverImageUrl,
         position,
       });
 
       const newVideo = result.rows[0];
-      newVideo.cover_image_url = getFullUrl(req, `uploads/${newVideo.cover_image_url}`);
 
       res.status(201).json(newVideo);
     } catch (error) {
@@ -337,19 +331,19 @@ router.post(
     }
 
     try {
-      const uploadsDir = path.resolve(__dirname, "..", "uploads");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const photoFilename = `user-photo-${userId}-${Date.now()}.webp`;
-      const outputPath = path.join(uploadsDir, photoFilename);
-
-      await sharp(req.file.buffer)
+      const processedImageBuffer = await sharp(req.file.buffer)
         .rotate()
         .resize(1024)
         .webp({ quality: 80 })
-        .toFile(outputPath);
+        .toBuffer();
+
+      const key = `user-photos/photo-${userId}-${Date.now()}.webp`;
+
+      const photoUrl = await uploadToS3(
+        processedImageBuffer,
+        key,
+        "image/webp"
+      );
 
       const translatedTitles = await translateText(title);
 
@@ -360,14 +354,13 @@ router.post(
       `;
       const result = await db.query(insertQuery, {
         userId,
-        url: photoFilename,
+        url: photoUrl,
         title,
         title_es: translatedTitles.es,
         title_en: translatedTitles.en,
       });
 
       const newPhoto = result.rows[0];
-      newPhoto.url = getFullUrl(req, `uploads/${newPhoto.url}`);
 
       res.status(201).json(newPhoto);
     } catch (error) {
@@ -449,23 +442,24 @@ router.put(
       let coverImageFilename = videoResult.rows[0].cover_image_url;
 
       if (req.file) {
-        const uploadsDir = path.resolve(__dirname, "..", "uploads");
-        const newCoverImageFilename = `cover-${userId}-${Date.now()}.webp`;
-        const outputPath = path.join(uploadsDir, newCoverImageFilename);
-
-        await sharp(req.file.buffer)
+        const processedImageBuffer = await sharp(req.file.buffer)
           .resize(800, 450)
           .webp({ quality: 85 })
-          .toFile(outputPath);
+          .toBuffer();
+
+        const key = `video-covers/cover-${userId}-${Date.now()}.webp`;
+
+        const newCoverImageUrl = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
 
         // Eliminar la imagen de portada anterior si existe
         if (coverImageFilename) {
-          const oldPath = path.join(uploadsDir, coverImageFilename);
-          if (fs.existsSync(oldPath)) {
-            fs.unlinkSync(oldPath);
-          }
+          // TODO: Implementar la eliminación de la imagen anterior de S3
         }
-        coverImageFilename = newCoverImageFilename;
+        coverImageFilename = newCoverImageUrl;
       }
 
       const translatedTitles = await translateText(title, ["es", "en"]);
