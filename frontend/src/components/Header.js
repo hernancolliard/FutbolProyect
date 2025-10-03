@@ -159,7 +159,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                 {t("register")}
               </Button>
             </>
-          )
+          )}
         </Box>
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
           {/* Nuevo menú desplegable de idioma para móvil */}
@@ -269,7 +269,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                   {t("register")}
                 </MenuItem>
               </>
-            )
+            )}
           </Menu>
         </Box>
       </Toolbar>
