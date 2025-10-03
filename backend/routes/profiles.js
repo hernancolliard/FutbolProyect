@@ -4,15 +4,11 @@ const db = require("../db");
 const { verificarToken, popularRolUsuario } = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const { z } = require("zod");
-const multer = require("multer");
+const upload = require("../middleware/upload");
 const path = require("path");
 const sharp = require("sharp");
 const { translateText } = require("../services/translationService");
 const fs = require("fs");
-
-// Configuración de Multer para almacenamiento en memoria
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {

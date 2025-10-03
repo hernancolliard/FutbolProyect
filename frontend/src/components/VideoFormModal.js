@@ -6,18 +6,18 @@ import { toast } from 'react-toastify';
 import apiClient from '../services/api';
 import FileUpload from './FileUpload'; // Reutilizamos el componente de subida de archivos
 
-const saveVideo = async ({ videoData, isEdit }) => {
+const saveVideo = async ({ videoData, isEdit, videoId }) => {
   const formData = new FormData();
   for (const key in videoData) {
     if (key === 'coverImageFile' && videoData[key]) {
       formData.append('cover_image', videoData[key]);
-    } else if (videoData[key] !== null && videoData[key] !== undefined) {
+    } else if (videoData[key] !== null && videoData[key] !== undefined && key !== 'id') {
       formData.append(key, videoData[key]);
     }
   }
 
   if (isEdit) {
-    const { data } = await apiClient.put(`/profiles/videos/${videoData.id}`, formData, {
+    const { data } = await apiClient.put(`/profiles/videos/${videoId}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
@@ -94,7 +94,7 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    mutate({ videoData: formData, isEdit: !!video });
+    mutate({ videoData: formData, isEdit: !!video, videoId: video?.id });
   };
 
   const positions = Array.from({ length: 5 }, (_, i) => i + 1);
