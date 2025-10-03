@@ -39,7 +39,7 @@ const VideoCard = ({ video, onAdd, onPlay, onEdit, isMyProfile }) => {
     );
   }
 
-  const imageUrl = `${apiClient.defaults.baseURL}/uploads/${video.cover_image_url}`;
+  const imageUrl = video.cover_image_url;
 
   return (
     <Card
