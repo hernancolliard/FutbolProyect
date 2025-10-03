@@ -1,0 +1,3 @@
+ALTER TABLE user_videos
+ADD COLUMN title_es VARCHAR(255),
+ADD COLUMN title_en VARCHAR(255);
