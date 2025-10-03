@@ -23,9 +23,9 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT *, 
-             (SELECT url FROM user_photos WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as foto_perfil_url
+      SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento
       FROM usuarios u
+      LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
       WHERE u.id = @userId;
     `;
     const result = await db.query(query, { userId });
@@ -87,16 +87,17 @@ router.put(
         );
       }
 
-      const query = `
-        UPDATE usuarios
-        SET 
-          nombre = @nombre,
-          apellido = @apellido,
+      const upsertQuery = `
+        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
+        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
+        ON CONFLICT (id_usuario)
+        DO UPDATE SET
+          foto_perfil_url = COALESCE(@fotoPerfilUrl, perfiles_usuario.foto_perfil_url),
           telefono = @telefono,
           nacionalidad = @nacionalidad,
-          posicion_principal = @posicion_principal,
           resumen_profesional = @resumen_profesional,
           cv_url = @cv_url,
+          posicion_principal = @posicion_principal,
           linkedin_url = @linkedin_url,
           instagram_url = @instagram_url,
           youtube_url = @youtube_url,
@@ -104,21 +105,18 @@ router.put(
           altura_cm = @altura_cm,
           peso_kg = @peso_kg,
           pie_dominante = @pie_dominante,
-          fecha_de_nacimiento = @fecha_de_nacimiento,
-          foto_perfil_url = COALESCE(@fotoPerfilUrl, foto_perfil_url)
-        WHERE id = @userId
+          fecha_de_nacimiento = @fecha_de_nacimiento
         RETURNING *;
       `;
 
-      const result = await db.query(query, {
+      await db.query(upsertQuery, {
         userId,
-        nombre,
-        apellido,
+        fotoPerfilUrl,
         telefono,
         nacionalidad,
-        posicion_principal,
         resumen_profesional,
         cv_url,
+        posicion_principal,
         linkedin_url,
         instagram_url,
         youtube_url,
@@ -127,8 +125,9 @@ router.put(
         peso_kg,
         pie_dominante,
         fecha_de_nacimiento,
-        fotoPerfilUrl,
       });
+
+      const result = await db.query("SELECT * FROM usuarios WHERE id = @userId", { userId });
 
       if (result.rows.length === 0) {
         return res.status(404).json({ message: "Usuario no encontrado." });
