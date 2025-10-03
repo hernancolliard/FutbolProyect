@@ -16,8 +16,6 @@ const privacyRoutes = require("./routes/privacy.js");
 const app = express();
 
 // General Middleware
-
-
 const whitelist = [
   "http://localhost:3000",
   "https://futbolproyect.com",
