@@ -121,10 +121,10 @@ router.put(
         instagram_url,
         youtube_url,
         transfermarkt_url,
-        altura_cm,
-        peso_kg,
+        altura_cm: altura_cm || null,
+        peso_kg: peso_kg || null,
         pie_dominante,
-        fecha_de_nacimiento,
+        fecha_de_nacimiento: fecha_de_nacimiento || null,
       });
 
       const result = await db.query("SELECT * FROM usuarios WHERE id = @userId", { userId });

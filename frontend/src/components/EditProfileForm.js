@@ -60,6 +60,10 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
       data.append("foto_perfil", selectedFile);
     }
 
+    for (let pair of data.entries()) {
+      console.log(pair[0]+ ', ' + pair[1]); 
+    }
+
     try {
       await apiClient.put("/profiles/me", data);
       onSave();
