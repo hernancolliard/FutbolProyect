@@ -35,7 +35,7 @@ app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
 // --- STATIC ASSETS FIRST ---
 // Serve static assets from the uploads folder
-app.use("/uploads", express.static("uploads"));
+//app.use("/uploads", express.static("uploads"));
 // Serve static assets from the React app build folder
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 

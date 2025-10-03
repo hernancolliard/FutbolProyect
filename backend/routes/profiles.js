@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const { verificarToken, popularRolUsuario } = require("../middleware/authMiddleware");
+const {
+  verificarToken,
+  popularRolUsuario,
+} = require("../middleware/authMiddleware");
 const validate = require("../middleware/validateMiddleware");
 const { z } = require("zod");
 const upload = require("../middleware/upload");
@@ -127,7 +130,10 @@ router.put(
         fecha_de_nacimiento: fecha_de_nacimiento || null,
       });
 
-      const result = await db.query("SELECT * FROM usuarios WHERE id = @userId", { userId });
+      const result = await db.query(
+        "SELECT * FROM usuarios WHERE id = @userId",
+        { userId }
+      );
 
       if (result.rows.length === 0) {
         return res.status(404).json({ message: "Usuario no encontrado." });
@@ -138,7 +144,9 @@ router.put(
       res.json(updatedUser);
     } catch (error) {
       console.error("Error al actualizar el perfil:", error);
-      res.status(500).json({ message: "Error del servidor al actualizar el perfil." });
+      res
+        .status(500)
+        .json({ message: "Error del servidor al actualizar el perfil." });
     }
   }
 );
@@ -148,7 +156,9 @@ router.get("/:userId/offers", async (req, res) => {
   const { userId } = req.params;
 
   if (isNaN(parseInt(userId, 10))) {
-    return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+    return res
+      .status(400)
+      .json({ message: "El ID de usuario debe ser un número." });
   }
 
   try {
@@ -184,11 +194,14 @@ const videoSchema = z.object({
 });
 
 // --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
+// --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
 router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
 
   if (isNaN(parseInt(userId, 10))) {
-    return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+    return res
+      .status(400)
+      .json({ message: "El ID de usuario debe ser un número." });
   }
 
   try {
@@ -200,14 +213,8 @@ router.get("/:userId/videos", async (req, res) => {
     `;
     const result = await db.query(query, { userId });
 
-    const videosWithFullUrls = result.rows.map((video) => ({
-      ...video,
-      cover_image_url: video.cover_image_url
-        ? getFullUrl(req, `uploads/${video.cover_image_url}`)
-        : null,
-    }));
-
-    res.json(videosWithFullUrls);
+    // Simplemente enviamos las filas directamente, ya que la URL de S3 es completa
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los videos del usuario:", error);
     res
@@ -278,6 +285,7 @@ router.post(
 // ... (Otras rutas sin cambios)
 
 // --- RUTA PÚBLICA: OBTENER FOTOS DE UN USUARIO ---
+// --- RUTA PÚBLICA: OBTENER FOTOS DE UN USUARIO ---
 router.get("/:userId/photos", async (req, res) => {
   const { userId } = req.params;
   try {
@@ -289,12 +297,8 @@ router.get("/:userId/photos", async (req, res) => {
     `;
     const result = await db.query(query, { userId });
 
-    const photosWithFullUrls = result.rows.map((photo) => ({
-      ...photo,
-      url: getFullUrl(req, `uploads/${photo.url}`),
-    }));
-
-    res.json(photosWithFullUrls);
+    // Enviamos las filas directamente, la URL de la foto ya es la de S3.
+    res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener las fotos del usuario:", error);
     res
@@ -314,7 +318,9 @@ router.post(
     const requester = req.user;
 
     if (isNaN(parseInt(userId, 10))) {
-      return res.status(400).json({ message: "El ID de usuario debe ser un número." });
+      return res
+        .status(400)
+        .json({ message: "El ID de usuario debe ser un número." });
     }
 
     if (parseInt(userId, 10) !== requester.id) {
@@ -372,47 +378,45 @@ router.post(
 // ... (El resto de las rutas como DELETE)
 
 // --- RUTA PROTEGIDA: ELIMINAR UNA FOTO ---
-router.delete(
-  "/:userId/photos/:photoId",
-  verificarToken,
-  async (req, res) => {
-    const { userId, photoId } = req.params;
-    const requester = req.user;
+router.delete("/:userId/photos/:photoId", verificarToken, async (req, res) => {
+  const { userId, photoId } = req.params;
+  const requester = req.user;
 
-    if (parseInt(userId, 10) !== requester.id) {
-      return res
-        .status(403)
-        .json({ message: "No tienes permiso para eliminar fotos de este perfil." });
-    }
-
-    try {
-      // Opcional: verificar que la foto existe y pertenece al usuario
-      const photoResult = await db.query(
-        "SELECT * FROM user_photos WHERE id = @photoId AND user_id = @userId",
-        { photoId, userId }
-      );
-
-      if (photoResult.rows.length === 0) {
-        return res.status(404).json({ message: "Foto no encontrada." });
-      }
-
-      // Eliminar archivo del sistema de archivos
-      const filename = photoResult.rows[0].url;
-      const filePath = path.resolve(__dirname, "..", "uploads", filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-
-      // Eliminar de la base de datos
-      await db.query("DELETE FROM user_photos WHERE id = @photoId", { photoId });
-
-      res.json({ message: "Foto eliminada correctamente." });
-    } catch (error) {
-      console.error("Error al eliminar la foto:", error);
-      res.status(500).json({ message: "Error del servidor al eliminar la foto." });
-    }
+  if (parseInt(userId, 10) !== requester.id) {
+    return res.status(403).json({
+      message: "No tienes permiso para eliminar fotos de este perfil.",
+    });
   }
-);
+
+  try {
+    // Opcional: verificar que la foto existe y pertenece al usuario
+    const photoResult = await db.query(
+      "SELECT * FROM user_photos WHERE id = @photoId AND user_id = @userId",
+      { photoId, userId }
+    );
+
+    if (photoResult.rows.length === 0) {
+      return res.status(404).json({ message: "Foto no encontrada." });
+    }
+
+    // Eliminar archivo del sistema de archivos
+    const filename = photoResult.rows[0].url;
+    const filePath = path.resolve(__dirname, "..", "uploads", filename);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    // Eliminar de la base de datos
+    await db.query("DELETE FROM user_photos WHERE id = @photoId", { photoId });
+
+    res.json({ message: "Foto eliminada correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar la foto:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al eliminar la foto." });
+  }
+});
 
 // --- RUTA PROTEGIDA: ACTUALIZAR UN VIDEO ---
 router.put(
@@ -433,9 +437,9 @@ router.put(
       );
 
       if (videoResult.rows.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "Video no encontrado o no tienes permiso para editarlo." });
+        return res.status(404).json({
+          message: "Video no encontrado o no tienes permiso para editarlo.",
+        });
       }
 
       let coverImageFilename = videoResult.rows[0].cover_image_url;
@@ -487,12 +491,17 @@ router.put(
       });
 
       const updatedVideo = result.rows[0];
-      updatedVideo.cover_image_url = getFullUrl(req, `uploads/${updatedVideo.cover_image_url}`);
+      updatedVideo.cover_image_url = getFullUrl(
+        req,
+        `uploads/${updatedVideo.cover_image_url}`
+      );
 
       res.json(updatedVideo);
     } catch (error) {
       console.error("Error al actualizar el video:", error);
-      res.status(500).json({ message: "Error del servidor al actualizar el video." });
+      res
+        .status(500)
+        .json({ message: "Error del servidor al actualizar el video." });
     }
   }
 );
@@ -510,15 +519,20 @@ router.delete("/videos/:videoId", verificarToken, async (req, res) => {
     );
 
     if (videoResult.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "Video no encontrado o no tienes permiso para eliminarlo." });
+      return res.status(404).json({
+        message: "Video no encontrado o no tienes permiso para eliminarlo.",
+      });
     }
 
     // Eliminar la imagen de portada del sistema de archivos
     const coverImageFilename = videoResult.rows[0].cover_image_url;
     if (coverImageFilename) {
-      const filePath = path.resolve(__dirname, "..", "uploads", coverImageFilename);
+      const filePath = path.resolve(
+        __dirname,
+        "..",
+        "uploads",
+        coverImageFilename
+      );
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -530,7 +544,9 @@ router.delete("/videos/:videoId", verificarToken, async (req, res) => {
     res.json({ message: "Video eliminado correctamente." });
   } catch (error) {
     console.error("Error al eliminar el video:", error);
-    res.status(500).json({ message: "Error del servidor al eliminar el video." });
+    res
+      .status(500)
+      .json({ message: "Error del servidor al eliminar el video." });
   }
 });
 
