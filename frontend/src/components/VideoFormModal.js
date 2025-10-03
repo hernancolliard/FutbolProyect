@@ -94,7 +94,8 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    mutate({ videoData: formData, isEdit: !!video, videoId: video?.id });
+    const isEdit = !!video?.id;
+    mutate({ videoData: formData, isEdit, videoId: video?.id });
   };
 
   const positions = Array.from({ length: 5 }, (_, i) => i + 1);

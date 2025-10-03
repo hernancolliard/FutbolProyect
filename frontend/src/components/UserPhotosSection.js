@@ -56,6 +56,8 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
     initialData: [], // Ensure userPhotos is always an array
   });
 
+  console.log("userPhotos:", userPhotos);
+
   // Mutation for uploading photo
   const uploadPhotoMutation = useMutation({
     mutationFn: uploadPhoto,

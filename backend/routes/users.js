@@ -79,6 +79,7 @@ router.post("/login", async (req, res) => {
     const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+    console.log("Setting token cookie in /login");
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -122,6 +123,7 @@ router.post("/auth/google", async (req, res) => {
     const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+    console.log("Setting token cookie in /auth/google");
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
