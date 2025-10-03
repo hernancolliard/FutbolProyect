@@ -86,6 +86,7 @@ function ProfilePage() {
   } = useQuery({
     queryKey: ["userVideos", userId],
     queryFn: () => fetchUserVideos(userId),
+    enabled: !!userId, // Solo ejecutar si userId está presente
     initialData: [],
   });
 

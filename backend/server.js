@@ -16,10 +16,7 @@ const privacyRoutes = require("./routes/privacy.js");
 const app = express();
 
 // General Middleware
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  next();
-});
+
 
 const whitelist = [
   "http://localhost:3000",

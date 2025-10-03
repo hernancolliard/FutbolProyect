@@ -103,7 +103,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             gap: 2,
           }}
         >
-          {user ? (
+          {user && user.id ? (
             <>
               {(user.tipo_usuario === "ofertante" || user.isadmin) && (
                 <Button
@@ -129,7 +129,18 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                 {t("logout")}
               </Button>
             </>
+          ) : user ? (
+            // Render a limited view if user exists but id doesn't (during login process)
+            <>
+              <Typography variant="body2" sx={{ mx: 1 }}>
+                {t("welcome_user", { name: user.name })}
+              </Typography>
+              <Button color="error" variant="outlined" onClick={handleLogout}>
+                {t("logout")}
+              </Button>
+            </>
           ) : (
+            // Render login/register buttons if no user
             <>
               <Button color="inherit" onClick={() => changeLanguage("es")}>
                 ES
@@ -148,7 +159,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                 {t("register")}
               </Button>
             </>
-          )}
+          )
         </Box>
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
           {/* Nuevo menú desplegable de idioma para móvil */}
@@ -208,7 +219,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
               </MenuItem>
             )}
             <Box sx={{ my: 1 }} />
-            {user ? (
+            {user && user.id ? (
               <>
                 {(user.tipo_usuario === "ofertante" || user.isadmin) && (
                   <MenuItem onClick={handleCreateOfferClick}>
@@ -222,6 +233,15 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                 >
                   {t("my_profile")}
                 </MenuItem>
+                <MenuItem disabled>
+                  | {t("welcome_user", { name: user.name })}
+                </MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
+                  {t("logout")}
+                </MenuItem>
+              </>
+            ) : user ? (
+              <>
                 <MenuItem disabled>
                   | {t("welcome_user", { name: user.name })}
                 </MenuItem>
@@ -249,7 +269,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                   {t("register")}
                 </MenuItem>
               </>
-            )}
+            )
           </Menu>
         </Box>
       </Toolbar>
