@@ -456,8 +456,9 @@ function ProfilePage() {
             </>
           )}
 
-          {(isMyProfile && (currentUser.tipo_usuario === "ofertante" || currentUser.tipo_usuario === "agencia")) ||
-          (!isMyProfile && (profile.tipo_usuario === "ofertante" || profile.tipo_usuario === "agencia")) ? (
+          {!!profile &&
+          (profile.tipo_usuario === "ofertante" ||
+            profile.tipo_usuario === "agencia") ? (
             <>
               <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
                 {t("my_offers_title", "Mis Ofertas")}
