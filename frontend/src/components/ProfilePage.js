@@ -37,7 +37,7 @@ const fetchUserVideos = async (userId) => {
 };
 
 const fetchUserApplications = async (userId) => {
-  const { data } = await apiClient.get(`/profiles/${userId}/applications`);
+  const { data } = await apiClient.get(`/applications/user/${userId}`);
   return data;
 };
 
@@ -456,7 +456,7 @@ function ProfilePage() {
             </>
           )}
 
-          {!!profile &&
+          {profile &&
           (profile.tipo_usuario === "ofertante" ||
             profile.tipo_usuario === "agencia") ? (
             <>
