@@ -26,7 +26,17 @@ const corsOptions = {
   origin: whitelist,
   credentials: true,
 };
-app.use(cors(corsOptions));
+const cors = require("cors");
+
+// ... (otro código) ...
+
+// REEMPLAZA tu app.use(cors()) con esto:
+app.use(
+  cors({
+    origin: "https://futbolproyect.com", // La URL de tu frontend
+    credentials: true, // ¡Esta es la línea clave!
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use("/api/contact", contactRoutes);
