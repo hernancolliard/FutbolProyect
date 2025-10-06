@@ -1,103 +1,108 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import apiClient from "../services/api";
-import { toast } from 'react-toastify';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useTranslation } from "react-i18next";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
 
-function SubscribeButton({ planType, billingCycle, children }) {
-  const paypalButtonRef = useRef();
+function SubscribeButton({ planType, billingCycle }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleMercadoPagoSubscribe = async () => {
+  const handleSubscribeMP = async () => {
+    setLoading(true);
+    setError("");
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Debes iniciar sesión para suscribirte.");
-        return;
-      }
-
       const response = await apiClient.post("/payments/create-preference-mp", {
         planType,
         billingCycle,
       });
-      window.open(response.data.init_point, "_blank");
+      window.location.href = response.data.init_point;
     } catch (error) {
-      console.error("Error al suscribirse con Mercado Pago:", error);
-      toast.error(
-        error.response?.data?.message ||
-          "Hubo un error al procesar la suscripción con Mercado Pago."
-      );
+      // --- INICIO DE LA MODIFICACIÓN ---
+      if (error.response && error.response.status === 401) {
+        setError(t("must_be_logged_in_to_subscribe"));
+      } else {
+        console.error("Error al crear la preferencia de MP:", error);
+        setError(
+          error.response?.data?.message ||
+            "Error al iniciar el proceso de pago."
+        );
+      }
+      // --- FIN DE LA MODIFICACIÓN ---
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (
-      window.paypal &&
-      paypalButtonRef.current &&
-      paypalButtonRef.current.innerHTML === ""
-    ) {
-      window.paypal
-        .Buttons({
-          createOrder: async (data, actions) => {
-            try {
-              const response = await apiClient.post(
-                "/payments/create-paypal-order",
-                { planType, billingCycle }
-              );
-              if (!response.data || !response.data.orderID) {
-                throw new Error("Respuesta inválida del servidor al crear la orden de PayPal.");
-              }
-              return response.data.orderID;
-            } catch (error) {
-              console.error("Error al crear la orden de PayPal:", error);
-              toast.error("Hubo un error al iniciar el pago con PayPal. Por favor, inténtelo de nuevo.");
-              throw error; // Lanzar el error para que PayPal lo maneje
-            }
-          },
-          onApprove: async (data, actions) => {
-            try {
-              const response = await apiClient.post(
-                "/payments/capture-paypal-order",
-                { orderID: data.orderID, planType, billingCycle }
-              );
-              if (response.data.success) {
-                toast.success("¡Pago de PayPal exitoso!");
-                window.location.href = "/pago-exitoso-paypal";
-              } else {
-                toast.error("El pago de PayPal no se completó.");
-                window.location.href = "/pago-cancelado-paypal";
-              }
-            } catch (error) {
-              console.error("Error al capturar el pago de PayPal:", error);
-              toast.error("Hubo un error al capturar el pago de PayPal.");
-              window.location.href = "/pago-cancelado-paypal";
-            }
-          },
-          onError: (err) => {
-            console.error("Error en el botón de PayPal:", err);
-            toast.error(
-              "Ocurrió un error con PayPal. Por favor, inténtalo de nuevo."
-            );
-          },
-        })
-        .render(paypalButtonRef.current);
+  const createOrder = async (data, actions) => {
+    try {
+      const response = await apiClient.post("/payments/create-order-paypal", {
+        planType,
+        billingCycle,
+      });
+      return response.data.id;
+    } catch (error) {
+      // --- INICIO DE LA MODIFICACIÓN ---
+      if (error.response && error.response.status === 401) {
+        // Para PayPal, un alert es más directo ya que no hay un campo de error visible.
+        alert(t("must_be_logged_in_to_subscribe"));
+      } else {
+        console.error("Error creating PayPal order:", error);
+      }
+      // --- FIN DE LA MODIFICACIÓN ---
     }
-  }, [planType, billingCycle]);
+  };
+
+  const onApprove = async (data, actions) => {
+    try {
+      await apiClient.post("/payments/capture-order-paypal", {
+        orderID: data.orderID,
+        planType,
+        billingCycle,
+      });
+      navigate("/pago-exitoso-paypal");
+    } catch (error) {
+      console.error("Error capturing PayPal order:", error);
+      navigate("/pago-cancelado-paypal");
+    }
+  };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        alignItems: "center",
-      }}
-    >
-      <button
-        className="subscribe-button"
-        onClick={handleMercadoPagoSubscribe}
-        style={{ width: "200px", height: "35px" }}
+    <div>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubscribeMP}
+        disabled={loading}
+        sx={{ mb: 2, width: "100%" }}
       >
-        {children} Mercado Pago
-      </button>
-      <div ref={paypalButtonRef}></div>
+        {loading ? <CircularProgress size={24} /> : "Mercado Pago"}
+      </Button>
+
+      <PayPalScriptProvider
+        options={{
+          "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID,
+          currency: "USD",
+        }}
+      >
+        <PayPalButtons
+          style={{ layout: "vertical" }}
+          createOrder={createOrder}
+          onApprove={onApprove}
+        />
+      </PayPalScriptProvider>
     </div>
   );
 }

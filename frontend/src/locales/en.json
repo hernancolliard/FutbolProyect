@@ -301,6 +301,7 @@
     "titulo_helper_text": "Title must be between 5 and 100 characters.",
     "descripcion_helper_text": "Description must be at least 20 characters long.",
     "error_fetching_terms": "Error fetching terms and conditions.",
-    "error_fetching_privacy": "Error fetching privacy policy."
+    "error_fetching_privacy": "Error fetching privacy policy.",
+    "must_be_logged_in_to_subscribe": "You must be logged in to subscribe."
   }
 }
