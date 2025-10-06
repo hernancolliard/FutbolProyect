@@ -5,9 +5,12 @@ const { z } = require("zod");
 const db = require("../db");
 const validate = require("../middleware/validateMiddleware");
 const { verificarToken } = require("../middleware/authMiddleware");
-const { OAuth2Client } = require('google-auth-library');
-const crypto = require('crypto');
-const { sendPasswordResetEmail, sendWelcomeEmail } = require('../services/emailService');
+const { OAuth2Client } = require("google-auth-library");
+const crypto = require("crypto");
+const {
+  sendPasswordResetEmail,
+  sendWelcomeEmail,
+} = require("../services/emailService");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -19,22 +22,40 @@ const registerSchema = z.object({
   apellido: z.string().min(1, "El apellido es requerido."),
   telefono: z.string().min(1, "El teléfono es requerido."),
   email: z.string().email("El correo electrónico no es válido."),
-  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+  password: z
+    .string()
+    .min(6, "La contraseña debe tener al menos 6 caracteres."),
   dni: z.string().min(1, "El DNI es requerido."),
   direccion: z.string().min(1, "La dirección es requerida."),
   ciudad: z.string().min(1, "La ciudad es requerida."),
   pais: z.string().min(1, "El país es requerido."),
-  tipo_usuario: z.enum(['postulante', 'ofertante', 'agencia']),
+  tipo_usuario: z.enum(["postulante", "ofertante", "agencia"]),
 });
 
 // Endpoint de Registro
 router.post("/register", validate(registerSchema), async (req, res) => {
-  const { nombre, apellido, telefono, email, password, dni, direccion, ciudad, pais, tipo_usuario } = req.body;
+  const {
+    nombre,
+    apellido,
+    telefono,
+    email,
+    password,
+    dni,
+    direccion,
+    ciudad,
+    pais,
+    tipo_usuario,
+  } = req.body;
 
   try {
-    const userExists = await db.query("SELECT * FROM usuarios WHERE email = @email", { email });
+    const userExists = await db.query(
+      "SELECT * FROM usuarios WHERE email = @email",
+      { email }
+    );
     if (userExists.rows.length > 0) {
-      return res.status(409).json({ message: "El correo electrónico ya está en uso." });
+      return res
+        .status(409)
+        .json({ message: "El correo electrónico ya está en uso." });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -43,7 +64,18 @@ router.post("/register", validate(registerSchema), async (req, res) => {
     const queryText = `INSERT INTO usuarios (nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario) 
                            VALUES (@nombre, @apellido, @telefono, @email, @password_hash, @dni, @direccion, @ciudad, @pais, @tipo_usuario)
                                                       RETURNING id, nombre, apellido, email, tipo_usuario, isadmin`;
-    const newUserResult = await db.query(queryText, { nombre, apellido, telefono, email, password_hash, dni, direccion, ciudad, pais, tipo_usuario });
+    const newUserResult = await db.query(queryText, {
+      nombre,
+      apellido,
+      telefono,
+      email,
+      password_hash,
+      dni,
+      direccion,
+      ciudad,
+      pais,
+      tipo_usuario,
+    });
     const newUser = newUserResult.rows[0];
 
     try {
@@ -64,7 +96,10 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const result = await db.query("SELECT * FROM usuarios WHERE email = @email", { email });
+    const result = await db.query(
+      "SELECT * FROM usuarios WHERE email = @email",
+      { email }
+    );
     const user = result.rows[0];
 
     if (!user) {
@@ -76,21 +111,28 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas." });
     }
 
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const payload = {
+      id: user.id,
+      name: user.nombre,
+      tipo_usuario: user.tipo_usuario,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     console.log("Setting token cookie in /login");
-    res.cookie('token', token, {
+    // CÓDIGO CORREGIDO Y MEJORADO
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
-      maxAge: 60 * 60 * 1000, // 1 hora
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/", // <-- ESTA ES LA LÍNEA CLAVE QUE SOLUCIONA EL PROBLEMA
+      expires: new Date(Date.now() + 3600000), // Opcional: la cookie expira en 1 hora
     });
 
     // Devolver datos del usuario sin el hash de la contraseña
     const { password_hash, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
-
   } catch (error) {
     console.error("Error en el login:", error);
     res.status(500).json({ message: "Error en el servidor." });
@@ -102,65 +144,82 @@ router.post("/auth/google", async (req, res) => {
   const { id_token } = req.body;
 
   try {
-    const ticket = await client.verifyIdToken({ idToken: id_token, audience: process.env.GOOGLE_CLIENT_ID });
+    const ticket = await client.verifyIdToken({
+      idToken: id_token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
     const googlePayload = ticket.getPayload();
     const { email, name } = googlePayload;
 
-    let result = await db.query("SELECT * FROM usuarios WHERE email = @email", { email });
+    let result = await db.query("SELECT * FROM usuarios WHERE email = @email", {
+      email,
+    });
 
     if (result.rows.length === 0) {
-      const defaultPassword = crypto.randomBytes(16).toString('hex');
+      const defaultPassword = crypto.randomBytes(16).toString("hex");
       const salt = await bcrypt.genSalt(10);
       const password_hash = await bcrypt.hash(defaultPassword, salt);
 
       const queryText = `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario) 
                            VALUES (@nombre, @email, @password_hash, 'postulante')
                            RETURNING *`;
-      result = await db.query(queryText, { nombre: name, email, password_hash });
+      result = await db.query(queryText, {
+        nombre: name,
+        email,
+        password_hash,
+      });
     }
 
     const user = result.rows[0];
-    const payload = { id: user.id, name: user.nombre, tipo_usuario: user.tipo_usuario };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const payload = {
+      id: user.id,
+      name: user.nombre,
+      tipo_usuario: user.tipo_usuario,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     console.log("Setting token cookie in /auth/google");
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
       maxAge: 60 * 60 * 1000, // 1 hora
     });
 
     const { password_hash, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
-
   } catch (error) {
     console.error("Error en la autenticación de Google:", error);
-    res.status(500).json({ message: "Error en el servidor al autenticar con Google." });
+    res
+      .status(500)
+      .json({ message: "Error en el servidor al autenticar con Google." });
   }
 });
 
 // Endpoint para cerrar sesión
-router.post('/logout', (req, res) => {
-  res.clearCookie('token').json({ message: 'Cierre de sesión exitoso.' });
+router.post("/logout", (req, res) => {
+  res.clearCookie("token").json({ message: "Cierre de sesión exitoso." });
 });
 
 // Endpoint para verificar el estado de autenticación del usuario
-router.get('/me', verificarToken, async (req, res) => {
+router.get("/me", verificarToken, async (req, res) => {
   try {
     // El middleware verificarToken ya ha puesto los datos del usuario en req.user
     // pero queremos los datos más frescos de la BD.
-    const result = await db.query('SELECT * FROM usuarios WHERE id = @id', { id: req.user.id });
+    const result = await db.query("SELECT * FROM usuarios WHERE id = @id", {
+      id: req.user.id,
+    });
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado.' });
+      return res.status(404).json({ message: "Usuario no encontrado." });
     }
     const { password_hash, ...userWithoutPassword } = result.rows[0];
     res.json(userWithoutPassword);
   } catch (error) {
-    res.status(500).json({ message: 'Error del servidor.' });
+    res.status(500).json({ message: "Error del servidor." });
   }
 });
-
 
 // ... (resto de las rutas como forgot-password, etc.)
 
