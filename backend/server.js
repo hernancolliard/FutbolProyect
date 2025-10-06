@@ -26,7 +26,6 @@ const corsOptions = {
   origin: whitelist,
   credentials: true,
 };
-const cors = require("cors");
 
 // ... (otro código) ...
 
