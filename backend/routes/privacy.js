@@ -38,7 +38,7 @@ Utilizamos medidas de seguridad administrativas, técnicas y físicas para ayuda
 
 ## 6. Contacto
 
-Si tiene preguntas o comentarios sobre esta Política de Privacidad, contáctenos en: privacy@futbolproyect.com
+Si tiene preguntas o comentarios sobre esta Política de Privacidad, contáctenos en: administracion@futbolproyect.com
   `;
   res.status(200).send(privacyContent);
 });
