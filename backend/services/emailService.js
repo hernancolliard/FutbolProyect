@@ -12,7 +12,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const sendContactEmail = async (name, fromEmail, message) => {
   try {
     const { data, error } = await resend.emails.send({
-      from: "FutbolProyect <onboarding@resend.dev>", // ¡Importante! Este es un remitente por defecto de Resend.
+      from: "FutbolProyect <info@futbolproyect.com>", // ¡Importante! Este es un remitente por defecto de Resend.
       to: ["info@futbolproyect.com"], // Tu correo donde recibes los mensajes.
       subject: `Nuevo mensaje de contacto de: ${name}`,
       html: `
