@@ -97,13 +97,14 @@ router.get("/user/:userId", verificarToken, async (req, res) => {
   }
 
   try {
+    // CÓDIGO CORREGIDO
     const query = `
-            SELECT p.id, p.id_oferta, p.fecha_postulacion, p.estado, o.titulo as oferta_titulo
-            FROM postulaciones p
-            JOIN ofertas_laborales o ON p.id_oferta = o.id
-            WHERE p.id_usuario_postulante = @userId
-            ORDER BY p.fecha_postulacion DESC;
-        `;
+    SELECT p.id, p.id_oferta AS oferta_id, p.fecha_postulacion, p.estado, o.titulo as oferta_titulo
+    FROM postulaciones p
+    JOIN ofertas_laborales o ON p.id_oferta = o.id
+    WHERE p.id_usuario_postulante = @userId
+    ORDER BY p.fecha_postulacion DESC;
+`;
     const result = await db.query(query, { userId });
     res.json(result.rows);
   } catch (error) {
