@@ -41,22 +41,28 @@ function SubscribeButton({ planType, billingCycle }) {
     }
   };
 
+  // --- Reemplaza la función createOrder con esta ---
   const createOrder = async (data, actions) => {
     try {
       const response = await apiClient.post("/payments/create-order-paypal", {
         planType,
         billingCycle,
       });
+      // Si todo va bien, devolvemos el ID de la orden.
       return response.data.id;
     } catch (error) {
-      // --- INICIO DE LA MODIFICACIÓN ---
+      // Si hay un error al llamar a nuestro backend...
       if (error.response && error.response.status === 401) {
-        // Para PayPal, un alert es más directo ya que no hay un campo de error visible.
         alert(t("must_be_logged_in_to_subscribe"));
       } else {
         console.error("Error creating PayPal order:", error);
+        // Mostramos un mensaje genérico al usuario.
+        alert(
+          "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo."
+        );
       }
-      // --- FIN DE LA MODIFICACIÓN ---
+      // ¡Esta es la línea clave! Le informamos a PayPal que la creación de la orden falló.
+      throw error;
     }
   };
 
