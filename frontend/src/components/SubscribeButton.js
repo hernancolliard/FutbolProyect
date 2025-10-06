@@ -58,11 +58,11 @@ function SubscribeButton({ planType, billingCycle }) {
         console.error("Error creating PayPal order:", error);
         // Mostramos un mensaje genérico al usuario.
         alert(
-          "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo."
+          "No se pudo iniciar el pago con PayPal. Por favor, revisa las credenciales del servidor e intenta de nuevo."
         );
       }
       // ¡Esta es la línea clave! Le informamos a PayPal que la creación de la orden falló.
-      throw error;
+      throw new Error(error);
     }
   };
 
