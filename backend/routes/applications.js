@@ -45,15 +45,24 @@ router.post(
           JOIN usuarios u ON o.id_usuario_ofertante = u.id
           WHERE o.id = @inserted_id_oferta
         `;
-        const offerDetailsResult = await db.query(offerDetailsQuery, { inserted_id_oferta });
-        
+        const offerDetailsResult = await db.query(offerDetailsQuery, {
+          inserted_id_oferta,
+        });
+
         if (offerDetailsResult.rows.length > 0) {
           const { titulo, email_ofertante } = offerDetailsResult.rows[0];
           const applicantName = req.user.name;
-          await sendNewApplicationNotification(email_ofertante, applicantName, titulo);
+          await sendNewApplicationNotification(
+            email_ofertante,
+            applicantName,
+            titulo
+          );
         }
       } catch (emailError) {
-        console.error("Error al enviar el correo de notificación de postulación:", emailError);
+        console.error(
+          "Error al enviar el correo de notificación de postulación:",
+          emailError
+        );
         // No bloquear la postulación si el email falla.
       }
 
@@ -72,5 +81,36 @@ router.post(
     }
   }
 );
+// Agrega esta ruta en backend/routes/applications.js
 
+// --- RUTA PROTEGIDA: OBTENER POSTULACIONES DE UN USUARIO ---
+router.get("/user/:userId", verificarToken, async (req, res) => {
+  const { userId } = req.params;
+  const requesterId = req.user.id;
+  const isAdmin = req.user.isadmin;
+
+  // Solo el propio usuario o un administrador pueden ver las postulaciones.
+  if (requesterId !== parseInt(userId, 10) && !isAdmin) {
+    return res
+      .status(403)
+      .json({ message: "No tienes permiso para ver estas postulaciones." });
+  }
+
+  try {
+    const query = `
+            SELECT p.id, p.id_oferta, p.fecha_postulacion, p.estado, o.titulo as oferta_titulo
+            FROM postulaciones p
+            JOIN ofertas_laborales o ON p.id_oferta = o.id
+            WHERE p.id_usuario_postulante = @userId
+            ORDER BY p.fecha_postulacion DESC;
+        `;
+    const result = await db.query(query, { userId });
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener las postulaciones del usuario:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener las postulaciones." });
+  }
+});
 module.exports = router;
