@@ -4,6 +4,7 @@
     "ajv": "^6.12.6",
     "ajv-keywords": "^3.5.2",
     "nodemailer": "^7.0.7",
+    "resend": "^6.1.2",
     "zod": "^4.1.5"
   },
   "devDependencies": {

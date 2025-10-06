@@ -1,92 +1,44 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_PORT == 465, // true para 465, false para otros puertos como 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    // No fallar en certificados TLS inválidos (a veces necesario en entornos de servidor)
-    rejectUnauthorized: false,
-  },
-});
+// Resend se configura automáticamente con la variable de entorno RESEND_API_KEY
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const sendPasswordResetEmail = async (to, token) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-
-  const mailOptions = {
-    from: '"Futbol-EMP" <no-reply@futbolproyect.com>',
-    to: to,
-    subject: "Restablecimiento de contraseña",
-    html: `
-      <p>Has solicitado un restablecimiento de contraseña.</p>
-      <p>Haz clic en este <a href="${resetUrl}">enlace</a> para establecer una nueva contraseña.</p>
-      <p>Si no solicitaste esto, por favor ignora este correo.</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
-};
-
-const sendWelcomeEmail = async (to, name) => {
-  const mailOptions = {
-    from: '"Futbol-EMP" <no-reply@futbolproyect.com>',
-    to: to,
-    subject: "¡Bienvenido a Futbolproyect!",
-    html: `
-      <h1>¡Hola, ${name}!</h1>
-      <p>Te damos la bienvenida a Futbolproyect, la plataforma que conecta talentos del fútbol con oportunidades únicas.</p>
-      <p>Ya puedes empezar a explorar ofertas o a buscar el talento que necesitas.</p>
-      <p>¡Mucha suerte!</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
-};
-
-const sendNewApplicationNotification = async (
-  to,
-  applicantName,
-  offerTitle
-) => {
-  const mailOptions = {
-    from: '"Futbol-EMP" <no-reply@futbolproyect.com>',
-    to: to,
-    subject: `¡Nueva postulación para tu oferta: ${offerTitle}!`,
-    html: `
-      <h1>¡Has recibido un nuevo postulante!</h1>
-      <p>El usuario <b>${applicantName}</b> se ha postulado a tu oferta de trabajo "<b>${offerTitle}</b>".</p>
-      <p>Puedes revisar todas las postulaciones en tu panel de control.</p>
-      <p>¡Mucha suerte en tu búsqueda!</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
-};
+/**
+ * Envía un correo electrónico a través de Resend desde el formulario de contacto.
+ * @param {string} name - El nombre del remitente.
+ * @param {string} fromEmail - El email del remitente.
+ * @param {string} message - El mensaje del formulario.
+ */
 const sendContactEmail = async (name, fromEmail, message) => {
-  const mailOptions = {
-    from: `"${name}" <${fromEmail}>`, // Muestra el nombre y correo de quien envía
-    to: "info@futbolproyect.com", // El correo donde recibirás los mensajes
-    subject: `Nuevo mensaje de contacto de: ${name}`,
-    html: `
-      <h1>Nuevo Mensaje del Formulario de Contacto</h1>
-      <p><strong>Nombre:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${fromEmail}</p>
-      <hr>
-      <h2>Mensaje:</h2>
-      <p>${message}</p>
-    `,
-  };
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "FutbolProyect <onboarding@resend.dev>", // ¡Importante! Este es un remitente por defecto de Resend.
+      to: ["info@futbolproyect.com"], // Tu correo donde recibes los mensajes.
+      subject: `Nuevo mensaje de contacto de: ${name}`,
+      html: `
+        <h1>Nuevo Mensaje del Formulario de Contacto</h1>
+        <p><strong>Nombre:</strong> ${name}</p>
+        <p><strong>Email del remitente:</strong> ${fromEmail}</p>
+        <hr>
+        <h2>Mensaje:</h2>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+      `,
+      reply_to: fromEmail, // Permite que al darle "Responder", se responda al email del usuario.
+    });
 
-  await transporter.sendMail(mailOptions);
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log("Correo de contacto enviado con éxito:", data);
+    return data;
+  } catch (error) {
+    console.error("Error al enviar correo con Resend:", error);
+    throw error;
+  }
 };
 
+// Por ahora, solo exportamos esta función. Puedes añadir las otras después si las necesitas.
 module.exports = {
-  sendPasswordResetEmail,
-  sendWelcomeEmail,
-  sendNewApplicationNotification,
   sendContactEmail,
 };
