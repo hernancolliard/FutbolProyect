@@ -7,6 +7,8 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+import apiClient from "../services/api"; // Importamos apiClient
 
 function ContactPage() {
   const { t } = useTranslation();
@@ -16,17 +18,32 @@ function ContactPage() {
     message: "",
   });
   const [feedback, setFeedback] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar el formulario a un backend.
-    // Por ahora, solo mostramos un mensaje de confirmación.
-    setFeedback(t("contact_form_feedback", { name: formData.name }));
-    setFormData({ name: "", email: "", message: "" });
+    setLoading(true);
+    setError("");
+    setFeedback("");
+
+    try {
+      // Hacemos la llamada a nuestro nuevo endpoint del backend
+      await apiClient.post("/contact", formData);
+
+      setFeedback(t("contact_form_feedback", { name: formData.name }));
+      setFormData({ name: "", email: "", message: "" }); // Limpiamos el formulario
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Ocurrió un error al enviar el mensaje."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,14 +91,28 @@ function ContactPage() {
                 multiline
                 rows={6}
               />
-              <Button type="submit" variant="contained" color="primary">
-                {t("send_message_button")}
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  t("send_message_button")
+                )}
               </Button>
             </Stack>
           </form>
           {feedback && (
             <Alert severity="success" sx={{ mt: 2 }}>
               {feedback}
+            </Alert>
+          )}
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
             </Alert>
           )}
         </CardContent>

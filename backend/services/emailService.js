@@ -31,10 +31,10 @@ const sendWelcomeEmail = async (to, name) => {
   const mailOptions = {
     from: '"Futbol-EMP" <no-reply@futbolproyect.com>',
     to: to,
-    subject: "¡Bienvenido a Futbol-EMP!",
+    subject: "¡Bienvenido a Futbolproyect!",
     html: `
       <h1>¡Hola, ${name}!</h1>
-      <p>Te damos la bienvenida a Futbol-EMP, la plataforma que conecta talentos del fútbol con oportunidades únicas.</p>
+      <p>Te damos la bienvenida a Futbolproyect, la plataforma que conecta talentos del fútbol con oportunidades únicas.</p>
       <p>Ya puedes empezar a explorar ofertas o a buscar el talento que necesitas.</p>
       <p>¡Mucha suerte!</p>
     `,
@@ -62,9 +62,27 @@ const sendNewApplicationNotification = async (
 
   await transporter.sendMail(mailOptions);
 };
+const sendContactEmail = async (name, fromEmail, message) => {
+  const mailOptions = {
+    from: `"${name}" <${fromEmail}>`, // Muestra el nombre y correo de quien envía
+    to: "info@futbolproyect.com", // El correo donde recibirás los mensajes
+    subject: `Nuevo mensaje de contacto de: ${name}`,
+    html: `
+      <h1>Nuevo Mensaje del Formulario de Contacto</h1>
+      <p><strong>Nombre:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${fromEmail}</p>
+      <hr>
+      <h2>Mensaje:</h2>
+      <p>${message}</p>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
 
 module.exports = {
   sendPasswordResetEmail,
   sendWelcomeEmail,
   sendNewApplicationNotification,
+  sendContactEmail,
 };

@@ -12,7 +12,7 @@ const profileRoutes = require("./routes/profiles.js");
 const adminRoutes = require("./routes/admin.js");
 const termsRoutes = require("./routes/terms.js");
 const privacyRoutes = require("./routes/privacy.js");
-
+const contactRoutes = require("./routes/contact");
 const app = express();
 
 // General Middleware
@@ -29,7 +29,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-
+app.use("/api/contact", contactRoutes);
 // Special case for Stripe webhook
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
