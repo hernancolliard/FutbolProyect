@@ -167,6 +167,12 @@ router.post("/webhook-mp", async (req, res) => {
 router.post("/create-paypal-order", verificarToken, async (req, res) => {
   const { planType, billingCycle } = req.body;
 
+  // --- NUEVO LOG 1: Verificar que la ruta se está ejecutando ---
+  console.log("Iniciando creación de orden de PayPal para:", {
+    planType,
+    billingCycle,
+  });
+
   try {
     let description = "";
     let value = "0.00";
@@ -178,6 +184,8 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
         { planName: billingCycle }
       );
       if (planResult.rows.length === 0) {
+        // --- NUEVO LOG 2: Error de plan no válido ---
+        console.error("Error: Ciclo de facturación no válido:", billingCycle);
         return res
           .status(400)
           .json({ message: "Ciclo de facturación no válido." });
@@ -185,8 +193,9 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
 
       const price = parseFloat(planResult.rows[0].price_usd);
       if (isNaN(price)) {
+        // --- NUEVO LOG 3: Error de precio inválido ---
         console.error(
-          "Precio inválido recibido de la base de datos:",
+          "Error: Precio inválido recibido de la base de datos:",
           planResult.rows[0].price_usd
         );
         return res
@@ -195,13 +204,17 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
       }
       value = price.toFixed(2);
       description = `Suscripción ${planType} - ${billingCycle}`;
-    } else if (planType === "destacar_oferta") {
-      description = "Destacar Oferta";
-      value = "10.00";
-      custom_id = `${req.user.id}_${req.body.offerId}`;
     } else {
       return res.status(400).json({ message: "Tipo de plan no válido." });
     }
+
+    // --- NUEVO LOG 4: Datos de la orden antes de crearla ---
+    console.log("Datos para la orden de PayPal:", {
+      intent: "CAPTURE",
+      value,
+      description,
+      custom_id,
+    });
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
@@ -214,16 +227,27 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
           custom_id: custom_id,
         },
       ],
-      application_context: {
-        return_url: `${process.env.FRONTEND_URL}/pago-exitoso-paypal`,
-        cancel_url: `${process.env.FRONTEND_URL}/pago-cancelado-paypal`,
-      },
     });
 
     const order = await paypalClient.execute(request);
-    res.json({ orderID: order.result.id, links: order.result.links });
+
+    // --- NUEVO LOG 5: Orden creada exitosamente ---
+    console.log("Orden de PayPal creada con éxito. OrderID:", order.result.id);
+
+    res.json({ orderID: order.result.id });
   } catch (error) {
-    console.error("Error al crear orden de PayPal:", error);
+    // --- NUEVO LOG 6: ¡ESTE ES EL MÁS IMPORTANTE! ---
+    console.error(
+      "----------- ERROR CRÍTICO AL CREAR ORDEN DE PAYPAL -----------"
+    );
+    // Imprime el error completo que devuelve la API de PayPal
+    console.error("Mensaje de error:", error.message);
+    if (error.statusCode) {
+      console.error("Status Code:", error.statusCode);
+      console.error("Detalles del error (Headers):", error.headers);
+    }
+    console.error("----------------------------------------------------------");
+
     res.status(500).json({ message: "Error al crear la orden de PayPal." });
   }
 });
