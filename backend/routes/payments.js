@@ -14,11 +14,26 @@ const client = new MercadoPagoConfig({
 });
 
 // Configura PayPal
-const environment = new paypal.core.SandboxEnvironment(
-  process.env.PAYPAL_CLIENT_ID,
-  process.env.PAYPAL_CLIENT_SECRET
-);
+// --- INICIO DE LA MODIFICACIÓN ---
+
+// Configura PayPal dinámicamente
+let environment;
+if (process.env.PAYPAL_MODE === "live") {
+  console.log("Usando credenciales de PayPal en modo LIVE.");
+  environment = new paypal.core.LiveEnvironment(
+    process.env.PAYPAL_CLIENT_ID,
+    process.env.PAYPAL_CLIENT_SECRET
+  );
+} else {
+  console.log("Usando credenciales de PayPal en modo SANDBOX.");
+  environment = new paypal.core.SandboxEnvironment(
+    process.env.PAYPAL_CLIENT_ID,
+    process.env.PAYPAL_CLIENT_SECRET
+  );
+}
 const paypalClient = new paypal.core.PayPalHttpClient(environment);
+
+// --- FIN DE LA MODIFICACIÓN ---
 
 router.post("/create-preference-mp", verificarToken, async (req, res) => {
   const { planType, billingCycle } = req.body;
@@ -30,9 +45,14 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
     let description = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
-      const planResult = await db.query('SELECT price_mp FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
+      const planResult = await db.query(
+        "SELECT price_mp FROM subscription_plans WHERE plan_name = @planName",
+        { planName: billingCycle }
+      );
       if (planResult.rows.length === 0) {
-        return res.status(400).json({ message: "Ciclo de facturación no válido." });
+        return res
+          .status(400)
+          .json({ message: "Ciclo de facturación no válido." });
       }
       unit_price = planResult.rows[0].price_mp;
       title = `Suscripción ${planType} - ${billingCycle}`;
@@ -55,7 +75,10 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
             quantity: 1,
           },
         ],
-        external_reference: planType === "destacar_oferta" ? `${userId}_${req.body.offerId}` : userId.toString(),
+        external_reference:
+          planType === "destacar_oferta"
+            ? `${userId}_${req.body.offerId}`
+            : userId.toString(),
         back_urls: {
           success: `${process.env.FRONTEND_URL}/pago-exitoso-mp`,
           failure: `${process.env.FRONTEND_URL}/pago-cancelado-mp`,
@@ -65,7 +88,6 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
       },
     });
     res.json({ init_point: response.init_point, preferenceId: response.id });
-
   } catch (error) {
     console.error("Error al crear preferencia de Mercado Pago:", error);
     res.status(500).json({ message: "Error al crear la preferencia de pago." });
@@ -77,7 +99,8 @@ router.post("/webhook-mp", async (req, res) => {
 
   try {
     if (topic === "payment") {
-      const paymentId = req.body.data?.id || req.query["data.id"] || req.query.id;
+      const paymentId =
+        req.body.data?.id || req.query["data.id"] || req.query.id;
       const payment = await new Payment(client).get({ id: paymentId });
 
       const userId = payment.external_reference;
@@ -85,10 +108,10 @@ router.post("/webhook-mp", async (req, res) => {
       const description = payment.description;
 
       if (status === "approved") {
-        const [plan, cycle] = description.split('-');
+        const [plan, cycle] = description.split("-");
 
         if (plan === "destacar_oferta") {
-          const [parsedUserId, offerId] = userId.split('_');
+          const [parsedUserId, offerId] = userId.split("_");
           const featuredUntil = new Date();
           featuredUntil.setDate(featuredUntil.getDate() + 7);
 
@@ -97,12 +120,15 @@ router.post("/webhook-mp", async (req, res) => {
             SET is_featured = 1, featured_until = @featuredUntil
             WHERE id = @offerId;
           `;
-          await db.query(queryText, { offerId: parseInt(offerId, 10), featuredUntil });
+          await db.query(queryText, {
+            offerId: parseInt(offerId, 10),
+            featuredUntil,
+          });
         } else {
           const fechaFin = new Date();
-          if (cycle === 'monthly') {
+          if (cycle === "monthly") {
             fechaFin.setMonth(fechaFin.getMonth() + 1);
-          } else if (cycle === 'annual') {
+          } else if (cycle === "annual") {
             fechaFin.setFullYear(fechaFin.getFullYear() + 1);
           }
 
@@ -116,9 +142,14 @@ router.post("/webhook-mp", async (req, res) => {
               estado = 'activa',
               metodo_pago = 'mercadopago';
           `;
-          await db.query(queryText, { userId: parseInt(userId, 10), paymentId: paymentId.toString(), plan, fechaFin });
+          await db.query(queryText, {
+            userId: parseInt(userId, 10),
+            paymentId: paymentId.toString(),
+            plan,
+            fechaFin,
+          });
         }
-      } 
+      }
     }
     res.status(200).send("OK");
   } catch (error) {
@@ -136,15 +167,25 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     let custom_id = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
-      const planResult = await db.query('SELECT price_usd FROM subscription_plans WHERE plan_name = @planName', { planName: billingCycle });
+      const planResult = await db.query(
+        "SELECT price_usd FROM subscription_plans WHERE plan_name = @planName",
+        { planName: billingCycle }
+      );
       if (planResult.rows.length === 0) {
-        return res.status(400).json({ message: "Ciclo de facturación no válido." });
+        return res
+          .status(400)
+          .json({ message: "Ciclo de facturación no válido." });
       }
-      
+
       const price = parseFloat(planResult.rows[0].price_usd);
       if (isNaN(price)) {
-        console.error("Precio inválido recibido de la base de datos:", planResult.rows[0].price_usd);
-        return res.status(500).json({ message: "Formato de precio no válido." });
+        console.error(
+          "Precio inválido recibido de la base de datos:",
+          planResult.rows[0].price_usd
+        );
+        return res
+          .status(500)
+          .json({ message: "Formato de precio no válido." });
       }
       value = price.toFixed(2);
       description = `Suscripción ${planType} - ${billingCycle}`;
@@ -159,21 +200,22 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
     request.requestBody({
-        intent: "CAPTURE",
-        purchase_units: [{
-            amount: { currency_code: "USD", value: value },
-            description: description,
-            custom_id: custom_id,
-        }],
-        application_context: {
-          return_url: `${process.env.FRONTEND_URL}/pago-exitoso-paypal`,
-          cancel_url: `${process.env.FRONTEND_URL}/pago-cancelado-paypal`,
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: { currency_code: "USD", value: value },
+          description: description,
+          custom_id: custom_id,
         },
+      ],
+      application_context: {
+        return_url: `${process.env.FRONTEND_URL}/pago-exitoso-paypal`,
+        cancel_url: `${process.env.FRONTEND_URL}/pago-cancelado-paypal`,
+      },
     });
 
     const order = await paypalClient.execute(request);
     res.json({ orderID: order.result.id, links: order.result.links });
-
   } catch (error) {
     console.error("Error al crear orden de PayPal:", error);
     res.status(500).json({ message: "Error al crear la orden de PayPal." });
@@ -194,8 +236,9 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
     const customId = capture.result.purchase_units[0].custom_id;
 
     if (status === "COMPLETED") {
-      if (customId.includes('_')) { // Destacar oferta
-        const [parsedUserId, offerId] = customId.split('_');
+      if (customId.includes("_")) {
+        // Destacar oferta
+        const [parsedUserId, offerId] = customId.split("_");
         const featuredUntil = new Date();
         featuredUntil.setDate(featuredUntil.getDate() + 7);
 
@@ -204,14 +247,18 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
           SET is_featured = 1, featured_until = @featuredUntil
           WHERE id = @offerId;
         `;
-        await db.query(queryText, { offerId: parseInt(offerId, 10), featuredUntil });
+        await db.query(queryText, {
+          offerId: parseInt(offerId, 10),
+          featuredUntil,
+        });
         res.json({ success: true });
-      } else { // Suscripción
-        const [plan, cycle] = customId.split('-');
+      } else {
+        // Suscripción
+        const [plan, cycle] = customId.split("-");
         const fechaFin = new Date();
-        if (cycle === 'monthly') {
+        if (cycle === "monthly") {
           fechaFin.setMonth(fechaFin.getMonth() + 1);
-        } else if (cycle === 'annual') {
+        } else if (cycle === "annual") {
           fechaFin.setFullYear(fechaFin.getFullYear() + 1);
         }
 
@@ -225,7 +272,12 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
             estado = 'activa',
             metodo_pago = 'paypal';
         `;
-        await db.query(queryText, { userId: parseInt(userId, 10), paypalPaymentId: paypalPaymentId.toString(), plan, fechaFin });
+        await db.query(queryText, {
+          userId: parseInt(userId, 10),
+          paypalPaymentId: paypalPaymentId.toString(),
+          plan,
+          fechaFin,
+        });
         res.json({ success: true });
       }
     } else {
