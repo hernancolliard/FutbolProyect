@@ -23,7 +23,7 @@ function SubscribeButton({ planType, billingCycle }) {
         planType,
         billingCycle,
       });
-      window.location.href = response.data.init_point;
+      window.open(response.data.init_point, "_blank");
     } catch (error) {
       // --- INICIO DE LA MODIFICACIÓN ---
       if (error.response && error.response.status === 401) {
@@ -49,7 +49,7 @@ function SubscribeButton({ planType, billingCycle }) {
         billingCycle,
       });
       // Si todo va bien, devolvemos el ID de la orden.
-      return response.data.id;
+      return response.data.orderID;
     } catch (error) {
       // Si hay un error al llamar a nuestro backend...
       if (error.response && error.response.status === 401) {
