@@ -44,7 +44,7 @@ function SubscribeButton({ planType, billingCycle }) {
   // --- Reemplaza la función createOrder con esta ---
   const createOrder = async (data, actions) => {
     try {
-      const response = await apiClient.post("/payments/create-order-paypal", {
+      const response = await apiClient.post("/payments/create-paypal-order", {
         planType,
         billingCycle,
       });
@@ -65,7 +65,7 @@ function SubscribeButton({ planType, billingCycle }) {
 
   const onApprove = async (data, actions) => {
     try {
-      await apiClient.post("/payments/capture-order-paypal", {
+      await apiClient.post("/payments/capture-paypal-order", {
         orderID: data.orderID,
         planType,
         billingCycle,
