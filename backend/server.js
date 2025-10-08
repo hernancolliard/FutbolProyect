@@ -15,6 +15,12 @@ const privacyRoutes = require("./routes/privacy.js");
 const contactRoutes = require("./routes/contact");
 const app = express();
 
+// --- STATIC ASSETS FIRST ---
+// Sirve los archivos estáticos de la aplicación de React construida.
+// Esto debe ir primero para que las peticiones de CSS, JS, imágenes y el index.html
+// se manejen de forma rápida y eficiente, sin pasar por middlewares de API.
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
 // General Middleware
 const whitelist = [
   "http://localhost:3000",
@@ -38,17 +44,11 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
-app.use("/api/contact", contactRoutes);
-// Special case for Stripe webhook
-app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
-
-// --- STATIC ASSETS FIRST ---
-// Serve static assets from the uploads folder
-//app.use("/uploads", express.static("uploads"));
-// Serve static assets from the React app build folder
-app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 // --- API ROUTES ---
+// Special case for Stripe webhook (debe ir antes de express.json si no se usa en el resto de la api)
+app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+app.use("/api/contact", contactRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/offers", offerRoutes);
