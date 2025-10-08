@@ -48,20 +48,17 @@ function SubscribeButton({ planType, billingCycle }) {
         planType,
         billingCycle,
       });
-      // Si todo va bien, devolvemos el ID de la orden.
+      // --- CORRECCIÓN APLICADA AQUÍ ---
       return response.data.orderID;
     } catch (error) {
-      // Si hay un error al llamar a nuestro backend...
       if (error.response && error.response.status === 401) {
-        alert(t("must_be_logged_in_to_subscribe"));
+        setError(t("must_be_logged_in_to_subscribe"));
       } else {
         console.error("Error creating PayPal order:", error);
-        // Mostramos un mensaje genérico al usuario.
-        alert(
-          "No se pudo iniciar el pago con PayPal. Por favor, revisa las credenciales del servidor e intenta de nuevo."
+        setError(
+          "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo."
         );
       }
-      // ¡Esta es la línea clave! Le informamos a PayPal que la creación de la orden falló.
       throw new Error(error);
     }
   };
