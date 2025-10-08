@@ -17,16 +17,22 @@ const client = new MercadoPagoConfig({
 // --- INICIO DE LA MODIFICACIÓN ---
 
 // Configura PayPal dinámicamente
+// --- INICIO DE LA MODIFICACIÓN ---
+
+// Importa LiveEnvironment
+const { LiveEnvironment, SandboxEnvironment } = paypal.core;
+
+// Configura PayPal dinámicamente
 let environment;
 if (process.env.PAYPAL_MODE === "live") {
-  console.log("Usando credenciales de PayPal en modo LIVE.");
-  environment = new paypal.core.LiveEnvironment(
+  console.log("CONFIRMACIÓN: Usando credenciales de PayPal en modo LIVE.");
+  environment = new LiveEnvironment(
     process.env.PAYPAL_CLIENT_ID,
     process.env.PAYPAL_CLIENT_SECRET
   );
 } else {
-  console.log("Usando credenciales de PayPal en modo SANDBOX.");
-  environment = new paypal.core.SandboxEnvironment(
+  console.log("CONFIRMACIÓN: Usando credenciales de PayPal en modo SANDBOX.");
+  environment = new SandboxEnvironment(
     process.env.PAYPAL_CLIENT_ID,
     process.env.PAYPAL_CLIENT_SECRET
   );
