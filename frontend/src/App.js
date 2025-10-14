@@ -20,6 +20,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { ParallaxProvider } from "react-scroll-parallax";
+import { HelmetProvider } from "react-helmet-async";
 import AdminRoute from "./components/AdminRoute";
 
 // Lazy load page components
@@ -172,15 +173,17 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <ParallaxProvider>
-            <AppContent />
-          </ParallaxProvider>
-        </AuthProvider>
-      </Router>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <AuthProvider>
+            <ParallaxProvider>
+              <AppContent />
+            </ParallaxProvider>
+          </AuthProvider>
+        </Router>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

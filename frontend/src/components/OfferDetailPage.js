@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { Helmet } from "react-helmet-async";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -98,61 +99,67 @@ function OfferDetailPage() {
   const detalles_adicionales = offer[`detalles_adicionales_${lang}`] || offer.detalles_adicionales;
 
   return (
-    <Stack alignItems="center" sx={{ mt: 4 }}>
-      <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
-        {offer.imagen_url && (
-          <OptimizedImage
-            src={offer.imagen_url}
-            alt={titulo}
-            style={{
-              width: "100%",
-              height: "auto",
-              maxHeight: "400px",
-              objectFit: "cover",
-            }}
+    <>
+      <Helmet>
+        <title>{`${titulo} - FutbolProyect`}</title>
+        <meta name="description" content={descripcion ? descripcion.substring(0, 160) : ''} />
+      </Helmet>
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
+          {offer.imagen_url && (
+            <OptimizedImage
+              src={offer.imagen_url}
+              alt={titulo}
+              style={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "400px",
+                objectFit: "cover",
+              }}
+            />
+          )}
+          <CardContent>
+            <Typography variant="h4" sx={{ mb: 2 }}>{titulo}</Typography>
+            
+            {/* ... (resto del contenido de la tarjeta) ... */}
+            <Typography><strong>{t("published_by")}</strong> {offer.nombre_ofertante}</Typography>
+            <Typography><strong>{t("location")}</strong> {ubicacion || t("not_specified")}</Typography>
+            <Typography><strong>{t("position")}</strong> {puesto || t("not_specified")}</Typography>
+            <Typography><strong>{t("salary")}</strong> {offer.salario || t("not_specified")}</Typography>
+            <Typography><strong>{t("level")}</strong> {nivel || t("not_specified")}</Typography>
+            <Typography><strong>{t("schedule")}</strong> {horarios || t("not_specified")}</Typography>
+            <Typography><strong>{t("publication_date")}</strong> {new Date(offer.fecha_publicacion).toLocaleDateString()}</Typography>
+            <Typography sx={{ mt: 2 }}><strong>{t("description")}</strong> {descripcion}</Typography>
+            {detalles_adicionales && (
+              <Stack sx={{ mt: 2 }}>
+                <Typography variant="h6">{t("additional_details_title")}</Typography>
+                <Typography>{detalles_adicionales}</Typography>
+              </Stack>
+            )}
+
+            {/* --- Botones de Acción --- */}
+            <Stack alignItems="center" sx={{ mt: 3 }} spacing={2}>
+              {(isOwner || isAdmin) && (
+                <Button variant="contained" color="secondary" onClick={handleOpenPaymentModal}>
+                  Destacar Oferta ($10 USD)
+                </Button>
+              )}
+              
+              {/* Renderizamos el componente de acciones que ahora contiene la lógica de postulación */}
+              <OfferActions offer={offer} onOfferAction={handleOfferAction} isFetching={isLoading} />
+
+            </Stack>
+          </CardContent>
+        </Card>
+        {showPaymentModal && (
+          <FeatureOfferPaymentModal
+            show={showPaymentModal}
+            onClose={handleClosePaymentModal}
+            offerId={offerId}
           />
         )}
-        <CardContent>
-          <Typography variant="h4" sx={{ mb: 2 }}>{titulo}</Typography>
-          
-          {/* ... (resto del contenido de la tarjeta) ... */}
-          <Typography><strong>{t("published_by")}</strong> {offer.nombre_ofertante}</Typography>
-          <Typography><strong>{t("location")}</strong> {ubicacion || t("not_specified")}</Typography>
-          <Typography><strong>{t("position")}</strong> {puesto || t("not_specified")}</Typography>
-          <Typography><strong>{t("salary")}</strong> {offer.salario || t("not_specified")}</Typography>
-          <Typography><strong>{t("level")}</strong> {nivel || t("not_specified")}</Typography>
-          <Typography><strong>{t("schedule")}</strong> {horarios || t("not_specified")}</Typography>
-          <Typography><strong>{t("publication_date")}</strong> {new Date(offer.fecha_publicacion).toLocaleDateString()}</Typography>
-          <Typography sx={{ mt: 2 }}><strong>{t("description")}</strong> {descripcion}</Typography>
-          {detalles_adicionales && (
-            <Stack sx={{ mt: 2 }}>
-              <Typography variant="h6">{t("additional_details_title")}</Typography>
-              <Typography>{detalles_adicionales}</Typography>
-            </Stack>
-          )}
-
-          {/* --- Botones de Acción --- */}
-          <Stack alignItems="center" sx={{ mt: 3 }} spacing={2}>
-            {(isOwner || isAdmin) && (
-              <Button variant="contained" color="secondary" onClick={handleOpenPaymentModal}>
-                Destacar Oferta ($10 USD)
-              </Button>
-            )}
-            
-            {/* Renderizamos el componente de acciones que ahora contiene la lógica de postulación */}
-            <OfferActions offer={offer} onOfferAction={handleOfferAction} isFetching={isLoading} />
-
-          </Stack>
-        </CardContent>
-      </Card>
-      {showPaymentModal && (
-        <FeatureOfferPaymentModal
-          show={showPaymentModal}
-          onClose={handleClosePaymentModal}
-          offerId={offerId}
-        />
-      )}
-    </Stack>
+      </Stack>
+    </>
   );
 }
 
