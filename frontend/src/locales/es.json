@@ -151,6 +151,7 @@
     "error_saving_profile": "Error al guardar el perfil.",
     "edit_profile_title": "Editar Perfil",
     "profile_image": "Imagen de Perfil",
+    "profile_picture_alt": "Foto de perfil de {{name}}",
     "select_file": "Seleccionar Archivo",
     "file": "Archivo:",
     "personal_data_title": "Datos Personales",

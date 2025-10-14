@@ -94,7 +94,7 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
             {profileData.foto_perfil_url && (
               <img
                 src={profileData.foto_perfil_url}
-                alt="Perfil"
+                alt={t('profile_picture_alt', { name: profileData.nombre })}
                 className="profile-pic-preview"
               />
             )}

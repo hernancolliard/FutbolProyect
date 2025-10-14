@@ -196,7 +196,7 @@ function ProfilePage() {
               <Box sx={{ flexShrink: 0 }}>
                 <img
                   src={profile.foto_perfil_url}
-                  alt={t("profile_image")}
+                  alt={t('profile_picture_alt', { name: profile.nombre })}
                   style={{
                     width: 150,
                     height: 150,

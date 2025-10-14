@@ -151,6 +151,7 @@
     "error_saving_profile": "Error saving profile.",
     "edit_profile_title": "Edit Profile",
     "profile_image": "Profile Image",
+    "profile_picture_alt": "Profile picture of {{name}}",
     "select_file": "Select File",
     "file": "File:",
     "personal_data_title": "Personal Data",
