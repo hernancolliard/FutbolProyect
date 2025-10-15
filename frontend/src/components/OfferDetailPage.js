@@ -98,11 +98,52 @@ function OfferDetailPage() {
   const horarios = offer[`horarios_${lang}`] || offer.horarios;
   const detalles_adicionales = offer[`detalles_adicionales_${lang}`] || offer.detalles_adicionales;
 
+  // Estructura de datos para el Rich Snippet de Google Jobs
+  const jobPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": titulo,
+    "description": descripcion,
+    "identifier": {
+      "@type": "PropertyValue",
+      "name": "FutbolProyect",
+      "value": offer.id
+    },
+    "datePosted": offer.fecha_publicacion,
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": offer.nombre_ofertante,
+      "sameAs": "https://futbolproyect.com"
+    },
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": ubicacion
+      }
+    },
+    ...(offer.salario && {
+      "baseSalary": {
+        "@type": "MonetaryAmount",
+        "currency": "USD", // Asumimos USD, se puede ajustar si hay un campo de moneda
+        "value": {
+          "@type": "QuantitativeValue",
+          "value": offer.salario,
+          "unitText": "MONTH" // Asumimos mensual, se puede ajustar
+        }
+      }
+    })
+  };
+
+
   return (
     <>
       <Helmet>
         <title>{`${titulo} - FutbolProyect`}</title>
         <meta name="description" content={descripcion ? descripcion.substring(0, 160) : ''} />
+        <script type="application/ld+json">
+          {JSON.stringify(jobPostingSchema)}
+        </script>
       </Helmet>
       <Stack alignItems="center" sx={{ mt: 4 }}>
         <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
