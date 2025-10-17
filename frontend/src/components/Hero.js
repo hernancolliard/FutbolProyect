@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Hero.css";
 import { useTranslation } from "react-i18next";
 import { ParallaxBanner } from "react-scroll-parallax";
+import { Helmet } from "react-helmet-async";
 import heroBackgroundImage from "../images/fondo_1.webp";
 import heroLowResBackgroundImage from "../images/fondo_1_lowres.webp"; // Assuming a low-res version exists
 
@@ -20,7 +21,10 @@ const Hero = () => {
   const background = {
     image: highResImageLoaded ? heroBackgroundImage : heroLowResBackgroundImage,
     speed: -20,
-    className: highResImageLoaded ? "hero-background-loaded" : "hero-background-loading",
+    className:
+      highResImageLoaded
+        ? "hero-background-loaded"
+        : "hero-background-loading",
   };
 
   const headline = {
@@ -35,9 +39,18 @@ const Hero = () => {
   };
 
   return (
-    <div className="hero-container">
-      <ParallaxBanner layers={[background, headline]} className="hero-banner" />
-    </div>
+    <>
+      <Helmet>
+        <title>FutbolProyect | Conectando Talentos del Fútbol</title>
+        <meta
+          name="description"
+          content="Encuentra tu próxima oportunidad en el mundo del fútbol. FutbolProyect conecta a futbolistas, entrenadores, ojeadores y clubes. ¡Explora ofertas de empleo y perfiles de talento hoy!"
+        />
+      </Helmet>
+      <div className="hero-container">
+        <ParallaxBanner layers={[background, headline]} className="hero-banner" />
+      </div>
+    </>
   );
 };
 

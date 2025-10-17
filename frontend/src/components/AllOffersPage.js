@@ -4,6 +4,7 @@ import apiClient from "../services/api";
 import OfferList from "./OfferList";
 import Pagination from "./Pagination";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet-async";
 import LoadingSpinner from "./LoadingSpinner";
 import useIsMobile from "../hooks/useIsMobile"; // Import the hook
 
@@ -32,7 +33,7 @@ function AllOffersPage() {
   const { t } = useTranslation();
   const isMobile = useIsMobile(); // Use the hook
   const [showMobileFilters, setShowMobileFilters] = useState(false); // State for mobile filter visibility
-  
+
   // Estado para los filtros (actualización inmediata)
   const [filters, setFilters] = useState({
     puesto: "",
@@ -79,83 +80,92 @@ function AllOffersPage() {
   });
 
   return (
-    <div className="all-offers-page">
-      <h2>{t("all_offers_title")}</h2>
-      
-      {/* --- Botón para mostrar/ocultar filtros en móvil --- */}
-      {isMobile && (
-        <button className="toggle-filters-button" onClick={toggleMobileFilters}>
-          {showMobileFilters ? t("hide_filters") : t("show_filters")}
-        </button>
-      )}
+    <>
+      <Helmet>
+        <title>{t("all_offers_seo_title", "Buscar Ofertas de Empleo en Fútbol | FutbolProyect")}</title>
+        <meta
+          name="description"
+          content={t("all_offers_seo_desc", "Explora todas las ofertas de empleo para futbolistas, entrenadores, ojeadores y staff. Usa nuestros filtros para encontrar tu próximo club o rol en la industria del fútbol en FutbolProyect.")}
+        />
+      </Helmet>
+      <div className="all-offers-page">
+        <h2>{t("all_offers_title")}</h2>
 
-      {/* --- Contenedor de Filtros (condicional en móvil) --- */}
-      {(!isMobile || showMobileFilters) && (
-        <div className="filters-container">
-          <input
-            type="text"
-            name="puesto"
-            placeholder={t("filter_by_position")}
-            value={filters.puesto}
-            onChange={handleFilterChange}
-            className="filter-input"
-          />
-          <input
-            type="text"
-            name="ubicacion"
-            placeholder={t("filter_by_location")}
-            value={filters.ubicacion}
-            onChange={handleFilterChange}
-            className="filter-input"
-          />
-          <select name="nivel" value={filters.nivel} onChange={handleFilterChange} className="filter-select">
-            <option value="">{t("filter_by_level", "Nivel")}</option>
-            <option value="Profesional">{t("level_professional", "Profesional")}</option>
-            <option value="Semi-Profesional">{t("level_semi_professional", "Semi-Profesional")}</option>
-            <option value="Amateur">{t("level_amateur", "Amateur")}</option>
-            <option value="Otro">{t("level_other", "Otro")}</option>
-          </select>
-          <input
-            type="number"
-            name="salarioMin"
-            placeholder={t("filter_by_min_salary", "Salario Mín.")}
-            value={filters.salarioMin}
-            onChange={handleFilterChange}
-            className="filter-input"
-          />
-          <input
-            type="number"
-            name="salarioMax"
-            placeholder={t("filter_by_max_salary", "Salario Máx.")}
-            value={filters.salarioMax}
-            onChange={handleFilterChange}
-            className="filter-input"
-          />
-          <select name="sort" value={filters.sort} onChange={handleFilterChange} className="filter-select">
-            <option value="desc">{t("sort_by_recent", "Más recientes")}</option>
-            <option value="asc">{t("sort_by_oldest", "Más antiguos")}</option>
-          </select>
-        </div>
-      )}
+        {/* --- Botón para mostrar/ocultar filtros en móvil --- */}
+        {isMobile && (
+          <button className="toggle-filters-button" onClick={toggleMobileFilters}>
+            {showMobileFilters ? t("hide_filters") : t("show_filters")}
+          </button>
+        )}
 
-      {/* --- Contenido de la Página --- */}
-      {isLoading ? (
-        <LoadingSpinner text={t("loading_offers")} />
-      ) : isError ? (
-        <p>
-          {t("error_loading_offers", "Error loading offers")}: {error.message}
-        </p>
-      ) : (
-        <>
-          <OfferList offers={data?.offers || []} showApplyButton={false} />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={data?.totalPages || 0}
-            onPageChange={handlePageChange}
-          />
-        </>
-      )}
-    </div>
+        {/* --- Contenedor de Filtros (condicional en móvil) --- */}
+        {(!isMobile || showMobileFilters) && (
+          <div className="filters-container">
+            <input
+              type="text"
+              name="puesto"
+              placeholder={t("filter_by_position")}
+              value={filters.puesto}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
+            <input
+              type="text"
+              name="ubicacion"
+              placeholder={t("filter_by_location")}
+              value={filters.ubicacion}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
+            <select name="nivel" value={filters.nivel} onChange={handleFilterChange} className="filter-select">
+              <option value="">{t("filter_by_level", "Nivel")}</option>
+              <option value="Profesional">{t("level_professional", "Profesional")}</option>
+              <option value="Semi-Profesional">{t("level_semi_professional", "Semi-Profesional")}</option>
+              <option value="Amateur">{t("level_amateur", "Amateur")}</option>
+              <option value="Otro">{t("level_other", "Otro")}</option>
+            </select>
+            <input
+              type="number"
+              name="salarioMin"
+              placeholder={t("filter_by_min_salary", "Salario Mín.")}
+              value={filters.salarioMin}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
+            <input
+              type="number"
+              name="salarioMax"
+              placeholder={t("filter_by_max_salary", "Salario Máx.")}
+              value={filters.salarioMax}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
+            <select name="sort" value={filters.sort} onChange={handleFilterChange} className="filter-select">
+              <option value="desc">{t("sort_by_recent", "Más recientes")}</option>
+              <option value="asc">{t("sort_by_oldest", "Más antiguos")}</option>
+            </select>
+          </div>
+        )}
+
+        {/* --- Contenido de la Página --- */}
+        {isLoading ? (
+          <LoadingSpinner text={t("loading_offers")} />
+        ) : isError ? (
+          <p>
+            {t("error_loading_offers", "Error loading offers")}: {error.message}
+          </p>
+        ) : (
+          <>
+            <OfferList offers={data?.offers || []} showApplyButton={false} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={data?.totalPages || 0}
+              onPageChange={handlePageChange}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
