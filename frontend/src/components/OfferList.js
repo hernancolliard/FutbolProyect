@@ -25,6 +25,7 @@ function OfferList({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [offersToDisplay, setOffersToDisplay] = useState([]);
+  const isMobile = useIsMobile(); // <-- CORRECCIÓN 1: Llamada al hook añadida
 
   useEffect(() => {
     setOffersToDisplay(offers);
@@ -216,7 +217,8 @@ function OfferList({
             <Typography variant="h5" sx={{ mb: 2 }}>
               {t("featured_offers")}
             </Typography>
-            <Slider {...sliderSettings} className="offers-carousel">
+            {/* CORRECCIÓN 2: Se usa 'settings' en lugar de 'sliderSettings' */}
+            <Slider {...settings} className="offers-carousel">
               {featuredOffers.map((offer) => (
                 <div key={offer.id} style={{ padding: 8 }}>
                   {renderOfferCard(offer)}
@@ -235,7 +237,7 @@ function OfferList({
           <Typography sx={{ mt: 2 }}>{t("no_offers_available")}</Typography>
         ) : isHomePage ? (
           <Slider
-            {...sliderSettings}
+            {...settings} // <-- CORRECCIÓN 2: Se usa 'settings' en lugar de 'sliderSettings'
             infinite={normalOffers.length > 3}
             className="offers-carousel"
           >
