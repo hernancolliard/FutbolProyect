@@ -125,63 +125,6 @@ router.delete(
   }
 );
 
-// --- RUTA PROTEGIDA (ADMIN): DESTACAR UNA OFERTA ---
-router.post(
-  "/offers/:id/feature",
-  [verificarToken, verificarAdmin],
-  async (req, res) => {
-    const { id } = req.params;
-    // Por defecto, se destaca por 30 días, pero se puede sobrescribir desde el frontend.
-    const { durationDays = 30 } = req.body;
-
-    try {
-      const featuredUntil = new Date();
-      featuredUntil.setDate(
-        featuredUntil.getDate() + parseInt(durationDays, 10)
-      );
-
-      const result = await db.query(
-        `UPDATE ofertas_laborales 
-         SET is_featured = TRUE, featured_until = @featuredUntil 
-         WHERE id = @id`,
-        { id, featuredUntil }
-      );
-
-      if (result.rowCount === 0) {
-        return res.status(404).json({ message: "Oferta no encontrada." });
-      }
-
-      res.status(200).json({ message: "Oferta destacada exitosamente." });
-    } catch (error) {
-      console.error("Error al destacar la oferta:", error);
-      res.status(500).json({ message: "Error del servidor." });
-    }
-  }
-);
-
-// --- RUTA PROTEGIDA (ADMIN): QUITAR ESTADO DESTACADO DE UNA OFERTA ---
-router.post(
-  "/offers/:id/unfeature",
-  [verificarToken, verificarAdmin],
-  async (req, res) => {
-    const { id } = req.params;
-    try {
-      await db.query(
-        "UPDATE ofertas_laborales SET is_featured = FALSE, featured_until = NULL WHERE id = @id",
-        { id }
-      );
-      res
-        .status(200)
-        .json({
-          message: "Se ha quitado el estado de destacado de la oferta.",
-        });
-    } catch (error) {
-      console.error("Error al quitar el destacado de la oferta:", error);
-      res.status(500).json({ message: "Error del servidor." });
-    }
-  }
-);
-
 // GET /api/admin/subscriptions - Get all subscription plans
 router.get(
   "/subscriptions",

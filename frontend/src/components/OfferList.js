@@ -187,27 +187,9 @@ function OfferList({
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 4, // 1. Este es el valor por defecto (escritorio)
-    slidesToScroll: 4, // 2. Este es el valor por defecto (escritorio)
+    slidesToShow: isMobile ? 2 : 3,
+    slidesToScroll: isMobile ? 2 : 3,
     initialSlide: 0,
-    responsive: [
-      // 3. Aquí está la magia
-      {
-        breakpoint: 768, // El punto de quiebre (puedes ajustarlo)
-        settings: {
-          slidesToShow: 2, // 4. Mostrar 2 slides en móvil
-          slidesToScroll: 2, // 5. Hacer scroll de 2 en móvil
-        },
-      },
-      // Puedes añadir más breakpoints si lo necesitas
-      // {
-      //   breakpoint: 1024,
-      //   settings: {
-      //     slidesToShow: 3,
-      //     slidesToScroll: 3
-      //   }
-      // }
-    ],
   };
   return (
     <FadeInOnScroll>

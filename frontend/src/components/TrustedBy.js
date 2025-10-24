@@ -5,9 +5,11 @@ import "slick-carousel/slick/slick-theme.css";
 import "./TrustedBy.css";
 import { useTranslation } from 'react-i18next';
 import OptimizedImage from './OptimizedImage';
+import useIsMobile from "../hooks/useIsMobile";
 
 function TrustedBy() {
   const { t } = useTranslation();
+  const isMobile = useIsMobile(600);
   const logos = [
     {
       name: "Club A",
@@ -34,32 +36,12 @@ function TrustedBy() {
   const settings = {
     dots: false,
     infinite: true,
-    slidesToShow: 5,
+    slidesToShow: isMobile ? 3 : 5,
     slidesToScroll: 1,
     autoplay: true,
     speed: 2000,
     autoplaySpeed: 2000,
     cssEase: "linear",
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 5,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 3,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 3,
-        },
-      },
-    ],
   };
 
   return (
