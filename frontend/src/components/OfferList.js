@@ -25,7 +25,6 @@ function OfferList({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [offersToDisplay, setOffersToDisplay] = useState([]);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     setOffersToDisplay(offers);
@@ -57,22 +56,24 @@ function OfferList({
           height: "100%",
         }}
         elevation={2}
-        className={`offer-card ${isHomePage ? "home-offer-card" : "offer-card-all-offers"}`}
+        className={`offer-card ${
+          isHomePage ? "home-offer-card" : "offer-card-all-offers"
+        }`}
         onClick={isHomePage ? () => handleViewOffer(offer.id) : undefined}
       >
         <div
           style={{
-            width: isMobileHome ? "100%" : (isHomePage ? "100%" : "200px"),
+            width: isMobileHome ? "100%" : isHomePage ? "100%" : "200px",
             height: isHomePage || isMobileHome ? "150px" : "100%",
             overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            marginRight: isMobileHome ? 0 : (isHomePage ? 16 : 0),
+            marginRight: isMobileHome ? 0 : isHomePage ? 16 : 0,
             background: "#e0e0e0",
-            padding: '1rem',
-            boxSizing: 'border-box'
+            padding: "1rem",
+            boxSizing: "border-box",
           }}
         >
           {offer.imagen_url ? (
@@ -82,45 +83,68 @@ function OfferList({
               style={{
                 width: "100%",
                 height: "100%",
-                objectFit: "cover", 
+                objectFit: "cover",
               }}
             />
           ) : (
             <span style={{ color: "#888", fontSize: 16 }}>{t("no_image")}</span>
           )}
         </div>
-        
-        <CardContent sx={{ flexGrow: 1, p: isMobileHome ? 1 : 2, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+
+        <CardContent
+          sx={{
+            flexGrow: 1,
+            p: isMobileHome ? 1 : 2,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
           <div>
-            <Typography variant={isMobileHome ? "body1" : "h6"} sx={{ color: !isHomePage ? "#fff" : "inherit", fontWeight: isMobileHome ? 'bold' : 'regular' }}>
+            <Typography
+              variant={isMobileHome ? "body1" : "h6"}
+              sx={{
+                color: !isHomePage ? "#fff" : "inherit",
+                fontWeight: isMobileHome ? "bold" : "regular",
+              }}
+            >
               {titulo}
             </Typography>
 
             <>
-                <Typography variant="subtitle2" color={!isHomePage ? "#fff" : "text.secondary"}>
-                  {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
-                </Typography>
-                <Typography variant="body2" color={!isHomePage ? "#fff" : "text.secondary"}>
-                  {t("location")} {ubicacion || t("not_specified")}
-                </Typography>
-                <Typography variant="body2" color={!isHomePage ? "#fff" : "text.secondary"}>
-                  {t("position")} {puesto || t("not_specified")}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mt: 1,
-                    color: !isHomePage ? "#fff" : "inherit",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {descripcion}
-                </Typography>
-              </>
+              <Typography
+                variant="subtitle2"
+                color={!isHomePage ? "#fff" : "text.secondary"}
+              >
+                {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
+              </Typography>
+              <Typography
+                variant="body2"
+                color={!isHomePage ? "#fff" : "text.secondary"}
+              >
+                {t("location")} {ubicacion || t("not_specified")}
+              </Typography>
+              <Typography
+                variant="body2"
+                color={!isHomePage ? "#fff" : "text.secondary"}
+              >
+                {t("position")} {puesto || t("not_specified")}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 1,
+                  color: !isHomePage ? "#fff" : "inherit",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {descripcion}
+              </Typography>
+            </>
           </div>
 
           <CardActions
@@ -158,28 +182,32 @@ function OfferList({
   const featuredOffers = offersToDisplay.filter((o) => o.is_featured);
   const normalOffers = offersToDisplay.filter((o) => !o.is_featured);
 
-  const sliderSettings = {
-    dots: false,
+  const settings = {
+    dots: true,
     infinite: true,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    speed: 1200,
-    autoplaySpeed: 3500,
-    cssEase: "linear",
-    arrows: true,
-    draggable: true,
-    swipe: true,
+    speed: 500,
+    slidesToShow: 4, // 1. Este es el valor por defecto (escritorio)
+    slidesToScroll: 4, // 2. Este es el valor por defecto (escritorio)
+    initialSlide: 0,
     responsive: [
+      // 3. Aquí está la magia
       {
-        breakpoint: 768,
+        breakpoint: 768, // El punto de quiebre (puedes ajustarlo)
         settings: {
-          slidesToShow: 2,
+          slidesToShow: 2, // 4. Mostrar 2 slides en móvil
+          slidesToScroll: 2, // 5. Hacer scroll de 2 en móvil
         },
       },
+      // Puedes añadir más breakpoints si lo necesitas
+      // {
+      //   breakpoint: 1024,
+      //   settings: {
+      //     slidesToShow: 3,
+      //     slidesToScroll: 3
+      //   }
+      // }
     ],
   };
-
   return (
     <FadeInOnScroll>
       <div className="offer-list-container">
