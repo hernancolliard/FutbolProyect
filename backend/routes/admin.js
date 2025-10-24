@@ -170,3 +170,28 @@ router.put(
 );
 
 module.exports = router;
+
+// PATCH /api/admin/offers/:id/toggle-feature - Toggle the featured status of an offer
+router.patch(
+  "/offers/:id/toggle-feature",
+  [verificarToken, verificarAdmin],
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await db.query(
+        "UPDATE ofertas_laborales SET is_featured = NOT is_featured WHERE id = @id RETURNING id, is_featured",
+        { id: parseInt(id, 10) }
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Offer not found." });
+      }
+      res.status(200).json({
+        message: "Offer feature status toggled successfully.",
+        offer: result.rows[0],
+      });
+    } catch (error) {
+      console.error("Error toggling offer feature status:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+);

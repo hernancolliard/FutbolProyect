@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button, Switch } from "@mui/material";
 
 function OfferManagement() {
   const { t } = useTranslation();
@@ -41,6 +41,17 @@ function OfferManagement() {
     }
   };
 
+  const handleToggleFeature = async (offerId, currentStatus) => {
+    try {
+      await apiClient.patch(`/admin/offers/${offerId}/toggle-feature`);
+      setOffers(offers.map(o => o.id === offerId ? { ...o, is_featured: !currentStatus } : o));
+      toast.success("Estado de oferta destacada actualizado.");
+    } catch (error) {
+      toast.error("Error al actualizar el estado de la oferta.");
+      console.error("Error toggling feature status:", error);
+    }
+  };
+
   if (loading) {
     return (
       <Typography align="center" sx={{ mt: 4 }}>
@@ -61,6 +72,7 @@ function OfferManagement() {
             <TableCell>{t('id_header')}</TableCell>
             <TableCell>{t('title_header')}</TableCell>
             <TableCell>{t('offerer_header')}</TableCell>
+            <TableCell>Destacada</TableCell>
             <TableCell>{t('location_header')}</TableCell>
             <TableCell>{t('position_header')}</TableCell>
             <TableCell>{t('published_date_header')}</TableCell>
@@ -73,6 +85,13 @@ function OfferManagement() {
               <TableCell>{offer.id}</TableCell>
               <TableCell>{offer.titulo}</TableCell>
               <TableCell>{offer.nombre_ofertante}</TableCell>
+              <TableCell>
+                <Switch
+                  checked={offer.is_featured}
+                  onChange={() => handleToggleFeature(offer.id, offer.is_featured)}
+                  inputProps={{ 'aria-label': 'controlled' }}
+                />
+              </TableCell>
               <TableCell>{offer.ubicacion}</TableCell>
               <TableCell>{offer.puesto}</TableCell>
               <TableCell>
