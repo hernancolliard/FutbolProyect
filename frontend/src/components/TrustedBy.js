@@ -13,23 +13,23 @@ function TrustedBy() {
   const logos = [
     {
       name: "Club A",
-      url: "/images/logos/club_a.jpeg",
+      url: "/images/logos/logofpazul.webp",
     },
     {
       name: "Agencia B",
-      url: "/images/logos/agency_b.png",
+      url: "/images/logos/logofpazul.webp",
     },
     {
       name: "Club C",
-      url: "/images/logos/club_c.png",
+      url: "/images/logos/logofpazul.webp",
     },
     {
       name: "Club D",
-      url: "/images/logos/club_d.png",
+      url: "/images/logos/logofpazul.webp",
     },
     {
       name: "Agencia E",
-      url: "/images/logos/agency_e.png",
+      url: "/images/logos/logofpazul.webp",
     },
   ];
 
