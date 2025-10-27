@@ -64,7 +64,7 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
       title = `Suscripción ${planType} - ${billingCycle}`;
     } else if (planType === "destacar_oferta") {
       title = "Destacar Oferta";
-      unit_price = 1000; // Still hardcoded for featured offer
+      unit_price = 5000; // Still hardcoded for featured offer
       description = planType;
     } else {
       return res.status(400).json({ message: "Tipo de plan no válido." });
@@ -176,7 +176,7 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
   try {
     let description = "";
     let value = "0.00";
-    let custom_id = `${planType}-${billingCycle}`;
+    let custom_id;
 
     if (planType === "ofertante" || planType === "postulante") {
       const planResult = await db.query(
@@ -204,6 +204,11 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
       }
       value = price.toFixed(2);
       description = `Suscripción ${planType} - ${billingCycle}`;
+      custom_id = `${planType}-${billingCycle}`;
+    } else if (planType === "destacar_oferta") {
+      description = "Destacar Oferta";
+      value = "4.00";
+      custom_id = `${req.user.id}_${req.body.offerId}`;
     } else {
       return res.status(400).json({ message: "Tipo de plan no válido." });
     }
