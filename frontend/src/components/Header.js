@@ -277,4 +277,14 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                   }}
                 >
                   {t("register")}
-                </M
+                </MenuItem>
+              </>
+            )}
+          </Menu>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+}
+
+export default Header;
