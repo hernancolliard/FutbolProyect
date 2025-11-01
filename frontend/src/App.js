@@ -115,12 +115,19 @@ function AppContent() {
                       isHomePage={true}
                     />
                   )}
-                  <FeaturedProfilesCarousel />
                   <div className="view-all-offers-container">
                     <Link to="/offers" className="btn-main">
                       {t("view_all_offers")}
                     </Link>
                   </div>
+
+                  <FeaturedProfilesCarousel />
+                  <div className="view-all-profiles-container" style={{textAlign: 'center', padding: '2rem 0'}}>
+                    <Link to="/perfiles-destacados" className="btn-main">
+                      {t("view_all_profiles", "Ver todos los perfiles")}
+                    </Link>
+                  </div>
+
                   <hr />
                   <div className="info-sections-container">
                     <About />
