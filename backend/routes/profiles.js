@@ -550,4 +550,36 @@ router.delete("/videos/:videoId", verificarToken, async (req, res) => {
   }
 });
 
+
+// --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
+router.get("/destacados", async (req, res) => {
+  try {
+    const query = `
+      SELECT
+          u.id,
+          u.nombre,
+          u.apellido,
+          p.foto_perfil_url,
+          p.posicion_principal,
+          p.nacionalidad
+      FROM
+          usuarios u
+      JOIN
+          perfiles_usuario p ON u.id = p.id_usuario
+      JOIN
+          suscripciones s ON u.id = s.id_usuario
+      WHERE
+          s.estado = 'activa' AND s.fecha_fin > NOW()
+      ORDER BY
+          s.fecha_fin DESC;
+    `;
+    const result = await db.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener los perfiles destacados:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
 module.exports = router;
+

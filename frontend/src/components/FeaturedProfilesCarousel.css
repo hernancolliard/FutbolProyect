@@ -1,0 +1,76 @@
+
+.featured-profiles-carousel-container {
+  padding: 2rem 1rem;
+  background-color: #f9f9f9;
+}
+
+.carousel-title {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.profiles-carousel .slick-slide {
+  padding: 0 10px; /* Espacio entre las tarjetas */
+}
+
+.carousel-profile-card-wrapper {
+  padding: 10px;
+}
+
+.carousel-profile-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.carousel-profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.carousel-profile-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.carousel-profile-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.carousel-profile-info {
+  padding: 1rem;
+}
+
+.carousel-profile-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.carousel-profile-detail {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Slick Carousel Dots */
+.profiles-carousel .slick-dots {
+  bottom: -25px;
+}
+
+.profiles-carousel .slick-dots li button:before {
+  font-size: 12px;
+  color: #007bff;
+}
+
+.profiles-carousel .slick-dots li.slick-active button:before {
+  color: #0056b3;
+}
+

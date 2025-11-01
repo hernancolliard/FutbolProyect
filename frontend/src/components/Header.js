@@ -86,6 +86,9 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <Button color="inherit" component={Link} to="/offers">
               {t("offers")}
             </Button>
+            <Button color="inherit" component={Link} to="/perfiles-destacados">
+              {t("featured_profiles", "Perfiles Destacados")}
+            </Button>
             <Button color="inherit" component={Link} to="/subscribe">
               {t("subscriptions")}
             </Button>
@@ -204,6 +207,13 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             </MenuItem>
             <MenuItem
               component={Link}
+              to="/perfiles-destacados"
+              onClick={handleMobileMenuClose}
+            >
+              {t("featured_profiles", "Perfiles Destacados")}
+            </MenuItem>
+            <MenuItem
+              component={Link}
               to="/subscribe"
               onClick={handleMobileMenuClose}
             >
@@ -267,14 +277,4 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                   }}
                 >
                   {t("register")}
-                </MenuItem>
-              </>
-            )}
-          </Menu>
-        </Box>
-      </Toolbar>
-    </AppBar>
-  );
-}
-
-export default Header;
+                </M

@@ -43,6 +43,8 @@ const ResetPasswordPage = lazy(() => import("./components/ResetPasswordPage"));
 const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
 const TermsOfService = lazy(() => import("./components/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
+const FeaturedProfilesPage = lazy(() => import("./components/FeaturedProfilesPage"));
+const FeaturedProfilesCarousel = lazy(() => import("./components/FeaturedProfilesCarousel"));
 
 // Create a client
 const queryClient = new QueryClient();
@@ -113,6 +115,7 @@ function AppContent() {
                       isHomePage={true}
                     />
                   )}
+                  <FeaturedProfilesCarousel />
                   <div className="view-all-offers-container">
                     <Link to="/offers" className="btn-main">
                       {t("view_all_offers")}
@@ -136,6 +139,7 @@ function AppContent() {
             <Route path="/offers" element={<AllOffersPage />} />
             <Route path="/offers/:offerId" element={<OfferDetailPage />} />
             <Route path="/profile/:userId" element={<ProfilePage />} />
+            <Route path="/perfiles-destacados" element={<FeaturedProfilesPage />} />
             <Route path="/offers/:offerId/applicants" element={<ApplicantsPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/subscribe" element={<SubscriptionPage />} />
