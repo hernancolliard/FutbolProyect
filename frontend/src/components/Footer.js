@@ -33,7 +33,7 @@ function Footer() {
         <Stack direction="row" spacing={1}>
           <IconButton
             component="a"
-            href="https://facebook.com"
+            href="https://www.facebook.com/profile.php?id=61583277031848"
             target="_blank"
             rel="noopener noreferrer"
             color="inherit"
@@ -61,7 +61,7 @@ function Footer() {
           </IconButton>
           <IconButton
             component="a"
-            href="https://instagram.com"
+            href="https://www.instagram.com/futbol.proyect/#"
             target="_blank"
             rel="noopener noreferrer"
             color="inherit"
