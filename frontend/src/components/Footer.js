@@ -75,7 +75,7 @@ function Footer() {
           </IconButton>
           <IconButton
             component="a"
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/company/109604115/"
             target="_blank"
             rel="noopener noreferrer"
             color="inherit"
