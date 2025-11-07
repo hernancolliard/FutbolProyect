@@ -53,12 +53,12 @@ function FeaturedProfilesCarousel() {
               <Link to={`/profile/${profile.id}`} className="carousel-profile-card-link">
                 <img
                   src={profile.foto_perfil_url || '/images/logos/logofp.png'}
-                  alt={`Perfil de ${profile.nombre} ${profile.apellido}`}
+                  alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                   className="carousel-profile-image"
                   onError={(e) => { e.target.onerror = null; e.target.src = '/images/logos/logofp.png'; }}
                 />
                 <div className="carousel-profile-info">
-                  <h3 className="carousel-profile-name">{`${profile.nombre} ${profile.apellido}`}</h3>
+                  <h3 className="carousel-profile-name">{`${profile.nombre} ${profile.apellido || ''}`}</h3>
                   <p className="carousel-profile-detail">{profile.posicion_principal || t('not_specified', 'No especificada')}</p>
                 </div>
               </Link>
