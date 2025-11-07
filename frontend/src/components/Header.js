@@ -126,7 +126,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                 {t("my_profile")}
               </Button>
               <Typography variant="body2" sx={{ mx: 1 }}>
-                | {t("welcome_user", { name: user.name })}
+                | {t("welcome_user", { name: user.nombre })}
               </Typography>
               <Button color="error" variant="outlined" onClick={handleLogout}>
                 {t("logout")}
@@ -244,7 +244,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
                   {t("my_profile")}
                 </MenuItem>
                 <MenuItem disabled>
-                  | {t("welcome_user", { name: user.name })}
+                  | {t("welcome_user", { name: user.nombre })}
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
                   {t("logout")}

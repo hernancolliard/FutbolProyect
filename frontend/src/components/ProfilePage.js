@@ -222,7 +222,7 @@ function ProfilePage() {
 
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h4" sx={{ mb: 1 }}>
-                  {profile.nombre} {profile.apellido}
+                  {profile.nombre} {profile.apellido || ""}
                 </Typography>
                 <Typography>
                   <strong>{t("email_label")}</strong> {profile.email}
