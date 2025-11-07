@@ -78,6 +78,16 @@ router.post("/register", validate(registerSchema), async (req, res) => {
     });
     const newUser = newUserResult.rows[0];
 
+    // Crear perfil de usuario con foto por defecto
+    const defaultProfilePhoto = "/images/logos/logofpazul.webp";
+    await db.query(
+      "INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url) VALUES (@id_usuario, @foto_perfil_url)",
+      {
+        id_usuario: newUser.id,
+        foto_perfil_url: defaultProfilePhoto,
+      }
+    );
+
     try {
       await sendWelcomeEmail(newUser.email, newUser.nombre);
     } catch (emailError) {
@@ -168,6 +178,17 @@ router.post("/auth/google", async (req, res) => {
         email,
         password_hash,
       });
+
+      // Crear perfil de usuario con foto por defecto para el nuevo usuario de Google
+      const newUser = result.rows[0];
+      const defaultProfilePhoto = "/images/logos/logofpazul.webp";
+      await db.query(
+        "INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url) VALUES (@id_usuario, @foto_perfil_url)",
+        {
+          id_usuario: newUser.id,
+          foto_perfil_url: defaultProfilePhoto,
+        }
+      );
     }
 
     const user = result.rows[0];
