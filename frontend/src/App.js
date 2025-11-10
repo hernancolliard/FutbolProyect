@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from "react";
+import React, { useState, Suspense, lazy, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import { ToastContainer } from "react-toastify";
@@ -22,6 +22,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { ParallaxProvider } from "react-scroll-parallax";
 import { HelmetProvider } from "react-helmet-async";
 import AdminRoute from "./components/AdminRoute";
+import PromotionModal from "./components/PromotionModal";
 
 // Lazy load page components
 const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
@@ -59,7 +60,18 @@ function AppContent() {
   const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem('promotionModalShown');
+    const currentMonth = new Date().getMonth(); // 0-11 (enero-diciembre)
+
+    if (!alreadyShown && currentMonth === 10) { // 10 es Noviembre
+      setShowPromotionModal(true);
+      sessionStorage.setItem('promotionModalShown', 'true');
+    }
+  }, []);
 
   const { 
     data: homePageOffers = [], 
@@ -166,6 +178,8 @@ function AppContent() {
         </Suspense>
       </main>
       <Footer />
+
+      <PromotionModal isOpen={showPromotionModal} onClose={() => setShowPromotionModal(false)} />
 
       <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)}>
         <Suspense fallback={<LoadingSpinner />}>

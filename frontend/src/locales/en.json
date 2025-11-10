@@ -303,6 +303,10 @@
     "descripcion_helper_text": "Description must be at least 20 characters long.",
     "error_fetching_terms": "Error fetching terms and conditions.",
     "error_fetching_privacy": "Error fetching privacy policy.",
-    "must_be_logged_in_to_subscribe": "You must be logged in to subscribe."
+    "must_be_logged_in_to_subscribe": "You must be logged in to subscribe.",
+    "promotionModal.title": "Special November Offer!",
+    "promotionModal.description": "Register during the month of November and get a FREE subscription. Full access for players and for clubs/agencies!",
+    "promotionModal.registerPlayer": "Register as a Player",
+    "promotionModal.registerClub": "Register as a Club/Agency"
   }
 }

@@ -305,6 +305,10 @@
     "descripcion_helper_text": "La descripción debe tener al menos 20 caracteres.",
     "error_fetching_terms": "Error al cargar los términos y condiciones.",
     "must_be_logged_in_to_subscribe": "Debes iniciar sesión para poder suscribirte.",
-    "error_fetching_privacy": "Error al cargar la política de privacidad."
+    "error_fetching_privacy": "Error al cargar la política de privacidad.",
+    "promotionModal.title": "¡Oferta Especial de Noviembre!",
+    "promotionModal.description": "Regístrate durante el mes de Noviembre y obtén una suscripción GRATIS. ¡Acceso total para jugadores y para clubes/agencias!",
+    "promotionModal.registerPlayer": "Registrarme como Jugador",
+    "promotionModal.registerClub": "Registrarme como Club/Agencia"
   }
 }
