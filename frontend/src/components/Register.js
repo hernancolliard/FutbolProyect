@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import apiClient from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
 
-function Register({ onClose }) {
+function Register({ onClose, initialRole = 'player' }) {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     nombre: "",
@@ -20,10 +20,17 @@ function Register({ onClose }) {
     direccion: "",
     ciudad: "",
     pais: "",
-    tipo_usuario: "postulante",
+    tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante',
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante'
+    }));
+  }, [initialRole]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -61,7 +61,13 @@ function AppContent() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [registrationRole, setRegistrationRole] = useState('player');
   const navigate = useNavigate();
+
+  const handleShowRegisterModal = (role) => {
+    setRegistrationRole(role);
+    setShowRegisterModal(true);
+  };
 
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem('promotionModalShown');
@@ -101,7 +107,7 @@ function AppContent() {
       />
       <Header
         onShowLoginModal={() => setShowLoginModal(true)}
-        onShowRegisterModal={() => setShowRegisterModal(true)}
+        onShowRegisterModal={() => handleShowRegisterModal('player')}
         onShowCreateOfferModal={() => navigate('/create-offer')}
       />
       <Toolbar />
@@ -179,7 +185,11 @@ function AppContent() {
       </main>
       <Footer />
 
-      <PromotionModal isOpen={showPromotionModal} onClose={() => setShowPromotionModal(false)} />
+      <PromotionModal 
+        isOpen={showPromotionModal} 
+        onClose={() => setShowPromotionModal(false)} 
+        onShowRegisterModal={handleShowRegisterModal} 
+      />
 
       <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)}>
         <Suspense fallback={<LoadingSpinner />}>
@@ -189,7 +199,10 @@ function AppContent() {
 
       <Modal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)}>
         <Suspense fallback={<LoadingSpinner />}>
-          <Register onClose={() => setShowRegisterModal(false)} />
+          <Register 
+            onClose={() => setShowRegisterModal(false)} 
+            initialRole={registrationRole} 
+          />
         </Suspense>
       </Modal>
     </div>

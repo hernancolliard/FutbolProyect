@@ -3,8 +3,13 @@ import Modal from './Modal';
 import { useTranslation } from 'react-i18next';
 import './PromotionModal.css';
 
-const PromotionModal = ({ isOpen, onClose }) => {
+const PromotionModal = ({ isOpen, onClose, onShowRegisterModal }) => {
     const { t } = useTranslation();
+
+    const handleRegisterClick = (role) => {
+        onShowRegisterModal(role);
+        onClose();
+    };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -13,8 +18,12 @@ const PromotionModal = ({ isOpen, onClose }) => {
                 <h2>{t('promotionModal.title')}</h2>
                 <p>{t('promotionModal.description')}</p>
                 <div className="buttons-container">
-                    <a href="/register?role=player" className="modal-button">{t('promotionModal.registerPlayer')}</a>
-                    <a href="/register?role=club" className="modal-button">{t('promotionModal.registerClub')}</a>
+                    <button onClick={() => handleRegisterClick('player')} className="modal-button">
+                        {t('promotionModal.registerPlayer')}
+                    </button>
+                    <button onClick={() => handleRegisterClick('club')} className="modal-button">
+                        {t('promotionModal.registerClub')}
+                    </button>
                 </div>
             </div>
         </Modal>
