@@ -12,7 +12,7 @@ const {
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isadmin FROM usuarios ORDER BY fecha_creacion DESC"
+      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isadmin, profile_views FROM usuarios ORDER BY fecha_creacion DESC"
     );
     res.json(result.rows);
   } catch (error) {
@@ -97,7 +97,7 @@ router.post(
 router.get("/offers", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query(`
-      SELECT o.*, u.nombre as nombre_ofertante
+      SELECT o.*, u.nombre as nombre_ofertante, (SELECT COUNT(*) FROM postulaciones p WHERE p.id_oferta = o.id) as application_count
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       ORDER BY o.fecha_publicacion DESC

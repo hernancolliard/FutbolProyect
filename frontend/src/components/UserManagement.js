@@ -85,6 +85,7 @@ function UserManagement() {
             <TableCell>{t('name_header')}</TableCell>
             <TableCell>{t('email_header')}</TableCell>
             <TableCell>{t('user_type_header')}</TableCell>
+            <TableCell>{t('profile_views_header', 'Profile Views')}</TableCell>
             <TableCell>{t('is_admin_header')}</TableCell>
             <TableCell>{t('created_at_header')}</TableCell>
             <TableCell>{t('actions_header')}</TableCell>
@@ -97,7 +98,8 @@ function UserManagement() {
               <TableCell>{user.nombre}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.tipo_usuario}</TableCell>
-              <TableCell>{user.isAdmin ? t('yes') : t('no')}</TableCell>
+              <TableCell>{user.profile_views}</TableCell>
+              <TableCell>{user.isadmin ? t('yes') : t('no')}</TableCell>
               <TableCell>
                 {new Date(user.fecha_creacion).toLocaleDateString()}
               </TableCell>

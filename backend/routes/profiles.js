@@ -76,6 +76,25 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
+// --- RUTA PÚBLICA: INCREMENTAR VISTA DE PERFIL ---
+router.post("/:userId/view", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      UPDATE usuarios
+      SET profile_views = profile_views + 1
+      WHERE id = @userId;
+    `;
+    await db.query(query, { userId });
+
+    res.status(200).json({ message: "View count updated." });
+  } catch (error) {
+    console.error("Error updating view count:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
 // --- RUTA PROTEGIDA: ACTUALIZAR PERFIL DEL USUARIO AUTENTICADO ---
 router.put(
   "/me",

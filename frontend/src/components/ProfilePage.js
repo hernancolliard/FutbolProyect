@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 import { useTranslation } from "react-i18next";
@@ -121,6 +121,20 @@ function ProfilePage() {
   });
 
   const isMyProfile = currentUser && currentUser.id === parseInt(userId, 10);
+
+  useEffect(() => {
+    if (userId && !isMyProfile) {
+      const recordView = async () => {
+        try {
+          await apiClient.post(`/profiles/${userId}/view`);
+        } catch (error) {
+          // No mostramos el error al usuario, solo en consola.
+          console.error("Failed to record profile view:", error);
+        }
+      };
+      recordView();
+    }
+  }, [userId, isMyProfile]);
 
   const handleOpenVideoPlayer = (video) => {
     setSelectedVideoToPlay(video);
@@ -360,7 +374,8 @@ function ProfilePage() {
                 {profile.peso_kg ? `${profile.peso_kg} kg` : t("not_specified")}
               </Typography>
               <Typography>
-                <strong>{t("dominant_foot")}</strong>{" "}
+                <strong>{t("dominant_foot")}
+                </strong>{" "}
                 {pie_dominante || t("not_specified")}
               </Typography>
               <Typography>

@@ -73,6 +73,7 @@ function OfferManagement() {
             <TableCell>{t('title_header')}</TableCell>
             <TableCell>{t('offerer_header')}</TableCell>
             <TableCell>Destacada</TableCell>
+            <TableCell>{t('applications_header', 'Postulaciones')}</TableCell>
             <TableCell>{t('location_header')}</TableCell>
             <TableCell>{t('position_header')}</TableCell>
             <TableCell>{t('published_date_header')}</TableCell>
@@ -92,6 +93,7 @@ function OfferManagement() {
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
               </TableCell>
+              <TableCell>{offer.application_count}</TableCell>
               <TableCell>{offer.ubicacion}</TableCell>
               <TableCell>{offer.puesto}</TableCell>
               <TableCell>
