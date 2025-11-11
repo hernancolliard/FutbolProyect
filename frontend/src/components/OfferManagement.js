@@ -101,6 +101,13 @@ function OfferManagement() {
               </TableCell>
               <TableCell>
                 <Button
+                  onClick={() => navigate(`/offers/${offer.id}/applicants`)}
+                  variant="outlined"
+                  sx={{ mr: 1 }}
+                >
+                  {t('view_applicants_button', 'View Applicants')}
+                </Button>
+                <Button
                   onClick={() => navigate(`/edit-offer/${offer.id}`)}
                   variant="outlined"
                   sx={{ mr: 1 }}

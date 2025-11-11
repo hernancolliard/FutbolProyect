@@ -513,12 +513,12 @@ router.put(
 );
 
 // --- RUTA PROTEGIDA: OBTENER POSTULANTES DE UNA OFERTA ---
-router.get("/:offerId/applications", verificarToken, async (req, res) => {
+router.get("/:offerId/applications", [verificarToken, popularRolUsuario], async (req, res) => {
   const { offerId } = req.params;
-  const userId = req.user.id; // Asumiendo que verificarToken añade el usuario a req
+  const userId = req.user.id;
 
   try {
-    // Primero, verificar que el usuario actual es el dueño de la oferta
+    // Primero, verificar que la oferta existe
     const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
     const offerResult = await db.query(offerQuery, { offerId });
 
@@ -526,13 +526,17 @@ router.get("/:offerId/applications", verificarToken, async (req, res) => {
       return res.status(404).json({ message: "Oferta no encontrada." });
     }
 
-    if (offerResult.rows[0].id_usuario_ofertante !== userId) {
+    const isOwner = offerResult.rows[0].id_usuario_ofertante === userId;
+    const isAdmin = req.user.isadmin;
+
+    // Permitir si el usuario es el dueño O si es administrador
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({
         message: "No tienes permiso para ver los postulantes de esta oferta.",
       });
     }
 
-    // Si es el dueño, obtener los postulantes
+    // Si tiene permiso, obtener los postulantes
     const applicantsQuery = `
         SELECT
           p.id,
