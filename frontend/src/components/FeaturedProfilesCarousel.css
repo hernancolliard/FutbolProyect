@@ -1,5 +1,6 @@
 
 .featured-profiles-carousel-container {
+  position: relative; /* Needed for arrow positioning */
   padding: 2rem 1rem;
   background-color: #f9f9f9;
 }
@@ -72,5 +73,41 @@
 
 .profiles-carousel .slick-dots li.slick-active button:before {
   color: #0056b3;
+}
+
+/* Custom Arrow Styling */
+.custom-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.custom-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.prev-arrow {
+  left: 25px;
+}
+
+.next-arrow {
+  right: 25px;
+}
+
+/* Hide default slick arrows as they are replaced by custom ones */
+.slick-prev, .slick-next {
+  display: none !important;
 }
 

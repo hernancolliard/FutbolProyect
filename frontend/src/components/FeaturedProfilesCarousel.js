@@ -7,7 +7,34 @@ import apiClient from '../services/api';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from 'react-i18next';
 import useIsMobile from '../hooks/useIsMobile';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './FeaturedProfilesCarousel.css';
+
+// --- Custom Arrow Components ---
+function NextArrow(props) {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={`${className} custom-arrow next-arrow`}
+      onClick={onClick}
+    >
+      <FaChevronRight />
+    </div>
+  );
+}
+
+function PrevArrow(props) {
+  const { className, style, onClick } = props;
+  return (
+    <div
+      className={`${className} custom-arrow prev-arrow`}
+      onClick={onClick}
+    >
+      <FaChevronLeft />
+    </div>
+  );
+}
+
 
 const fetchFeaturedProfiles = async () => {
   const { data } = await apiClient.get('/profiles/destacados');
@@ -29,6 +56,8 @@ function FeaturedProfilesCarousel() {
     slidesToShow: isMobile ? 2 : 3,
     slidesToScroll: isMobile ? 2 : 3,
     initialSlide: 0,
+    nextArrow: <NextArrow />,
+    prevArrow: <PrevArrow />,
   };
 
   if (isLoading) {
