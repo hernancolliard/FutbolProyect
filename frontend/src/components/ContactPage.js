@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import apiClient from "../services/api"; // Importamos apiClient
+import { Helmet } from "react-helmet-async";
 
 function ContactPage() {
   const { t } = useTranslation();
@@ -47,77 +48,83 @@ function ContactPage() {
   };
 
   return (
-    <Stack
-      className="contact-page-container"
-      alignItems="center"
-      sx={{ mt: 4 }}
-    >
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        {t("contact_page_title")}
-      </Typography>
-      <Typography sx={{ mb: 3 }}>{t("contact_page_subtitle")}</Typography>
-      <Card sx={{ maxWidth: 500, width: "100%" }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            {t("contact_form_title")}
-          </Typography>
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={2}>
-              <TextField
-                type="text"
-                name="name"
-                label={t("your_name_placeholder")}
-                value={formData.name}
-                onChange={handleChange}
-                required
-                fullWidth
-              />
-              <TextField
-                type="email"
-                name="email"
-                label={t("your_email_placeholder")}
-                value={formData.email}
-                onChange={handleChange}
-                required
-                fullWidth
-              />
-              <TextField
-                name="message"
-                label={t("your_message_placeholder")}
-                value={formData.message}
-                onChange={handleChange}
-                required
-                fullWidth
-                multiline
-                rows={6}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  t("send_message_button")
-                )}
-              </Button>
-            </Stack>
-          </form>
-          {feedback && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              {feedback}
-            </Alert>
-          )}
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-    </Stack>
+    <>
+      <Helmet>
+        <title>{t('contact_seo_title', 'Contacto - FutbolProyect')}</title>
+        <meta name="description" content={t('contact_seo_desc', 'Ponte en contacto con el equipo de FutbolProyect. Envíanos tus preguntas, sugerencias o consultas a través de nuestro formulario de contacto.')} />
+      </Helmet>
+      <Stack
+        className="contact-page-container"
+        alignItems="center"
+        sx={{ mt: 4 }}
+      >
+        <Typography variant="h4" sx={{ mb: 2 }}>
+          {t("contact_page_title")}
+        </Typography>
+        <Typography sx={{ mb: 3 }}>{t("contact_page_subtitle")}</Typography>
+        <Card sx={{ maxWidth: 500, width: "100%" }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {t("contact_form_title")}
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={2}>
+                <TextField
+                  type="text"
+                  name="name"
+                  label={t("your_name_placeholder")}
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  type="email"
+                  name="email"
+                  label={t("your_email_placeholder")}
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  fullWidth
+                />
+                <TextField
+                  name="message"
+                  label={t("your_message_placeholder")}
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  fullWidth
+                  multiline
+                  rows={6}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    t("send_message_button")
+                  )}
+                </Button>
+              </Stack>
+            </form>
+            {feedback && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                {feedback}
+              </Alert>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+      </Stack>
+    </>
   );
 }
 

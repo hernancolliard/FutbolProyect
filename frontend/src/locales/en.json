@@ -307,6 +307,14 @@
     "promotionModal.title": "Special November Offer!",
     "promotionModal.description": "Register during the month of November and get a FREE subscription. Full access for players and for clubs/agencies!",
     "promotionModal.registerPlayer": "Register as a Player",
-    "promotionModal.registerClub": "Register as a Club/Agency"
+    "promotionModal.registerClub": "Register as a Club/Agency",
+    "contact_seo_title": "Contact - FutbolProyect",
+    "contact_seo_desc": "Get in touch with the FutbolProyect team. Send us your questions, suggestions, or inquiries through our contact form.",
+    "subscriptions_seo_title": "Subscription Plans - FutbolProyect",
+    "subscriptions_seo_desc": "Choose the subscription plan that best suits your needs at FutbolProyect. Options for offerers and for talents looking for opportunities.",
+    "terms_seo_title": "Terms of Service - FutbolProyect",
+    "terms_seo_desc": "Read the terms and conditions of service for the use of the FutbolProyect platform. Understand your rights and obligations as a user.",
+    "privacy_seo_title": "Privacy Policy - FutbolProyect",
+    "privacy_seo_desc": "Consult our privacy policy to understand how FutbolProyect collects, uses, and protects your personal information."
   }
 }

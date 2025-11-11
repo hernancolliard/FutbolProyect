@@ -3,9 +3,6 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 require("dotenv").config({ quiet: true });
-const { SitemapStream, streamToPromise } = require('sitemap');
-const { Readable } = require('stream');
-const db = require('./db');
 
 const userRoutes = require("./routes/users.js");
 const paymentRoutes = require("./routes/payments.js");
@@ -16,6 +13,7 @@ const adminRoutes = require("./routes/admin.js");
 const termsRoutes = require("./routes/terms.js");
 const privacyRoutes = require("./routes/privacy.js");
 const contactRoutes = require("./routes/contact");
+const sitemapRoutes = require("./routes/sitemap"); // Importar la nueva ruta
 const app = express();
 
 // --- General Middleware ---
@@ -39,41 +37,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/terms", termsRoutes);
 app.use("/api/privacy", privacyRoutes);
 app.use("/api/contact", contactRoutes);
-
-// Sitemap route
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    const links = [
-      { url: '/', changefreq: 'daily', priority: 1.0 },
-      { url: '/offers', changefreq: 'daily', priority: 0.8 },
-      { url: '/contact', changefreq: 'monthly', priority: 0.7 },
-      { url: '/subscribe', changefreq: 'monthly', priority: 0.7 },
-      { url: '/terms', changefreq: 'yearly', priority: 0.3 },
-      { url: '/privacy', changefreq: 'yearly', priority: 0.3 },
-    ];
-
-    // Fetch active offers
-    const offersData = await db.query("SELECT id FROM ofertas_laborales WHERE estado = 'abierta'");
-    offersData.rows.forEach(offer => {
-      links.push({ url: `/offers/${offer.id}`, changefreq: 'weekly', priority: 0.9 });
-    });
-
-    // Fetch users for profiles
-    const usersData = await db.query('SELECT id FROM usuarios');
-    usersData.rows.forEach(user => {
-      links.push({ url: `/profile/${user.id}`, changefreq: 'monthly', priority: 0.6 });
-    });
-
-    const stream = new SitemapStream({ hostname: 'https://futbolproyect.com' });
-    res.header('Content-Type', 'application/xml');
-
-    const xml = await streamToPromise(Readable.from(links).pipe(stream));
-    res.send(xml);
-  } catch (error) {
-    console.error('Sitemap generation error:', error);
-    res.status(500).end();
-  }
-});
+app.use("/api/sitemap", sitemapRoutes); // Usar la nueva ruta
 
 // --- PRERENDER.IO MIDDLEWARE ---
 app.use(require('prerender-node').set('prerenderToken', process.env.PRERENDER_TOKEN));
