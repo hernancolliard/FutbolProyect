@@ -28,8 +28,6 @@ function SubscriptionPage() {
     queryFn: fetchSubscriptionPlans,
   });
 
-  console.log('Subscription plans data from API:', plans);
-
   const handleBillingCycleChange = (event, newBillingCycle) => {
     if (newBillingCycle !== null) {
       setBillingCycle(newBillingCycle);
@@ -37,16 +35,14 @@ function SubscriptionPage() {
   };
 
   // --- Helper to find plan price ---
-  const getPrice = (planName) => {
+  const getPrice = (name) => {
     if (!plans) return null;
-    const plan = plans.find(p => p.plan_name === planName);
+    const plan = plans.find(p => p.plan_name === name);
     return plan ? plan.price_usd : null;
   };
 
-  const offererMonthlyPrice = getPrice('ofertante_monthly');
-  const offererAnnualPrice = getPrice('ofertante_annual');
-  const applicantMonthlyPrice = getPrice('postulante_monthly');
-  const applicantAnnualPrice = getPrice('postulante_annual');
+  const monthlyPrice = getPrice('monthly');
+  const annualPrice = getPrice('annual');
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -92,8 +88,8 @@ function SubscriptionPage() {
               <Typography>{t("offerer_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
                 {billingCycle === 'monthly' 
-                  ? `$${offererMonthlyPrice}/mes` 
-                  : `$${offererAnnualPrice}/año`}
+                  ? `$${monthlyPrice}/mes` 
+                  : `$${annualPrice}/año`}
               </Typography>
               <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
             </CardContent>
@@ -104,8 +100,8 @@ function SubscriptionPage() {
               <Typography>{t("applicant_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
                 {billingCycle === 'monthly' 
-                  ? `$${applicantMonthlyPrice}/mes` 
-                  : `$${applicantAnnualPrice}/año`}
+                  ? `$${monthlyPrice}/mes` 
+                  : `$${annualPrice}/año`}
               </Typography>
               <SubscribeButton planType="postulante" billingCycle={billingCycle} />
             </CardContent>
