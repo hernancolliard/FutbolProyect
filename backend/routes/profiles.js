@@ -38,7 +38,7 @@ router.get("/destacados", async (req, res) => {
       JOIN
           suscripciones s ON u.id = s.id_usuario
       WHERE
-          s.estado = 'activa' AND s.fecha_fin > NOW()
+          s.estado = 'activa' AND s.fecha_fin > NOW() AND u.tipo_usuario = 'postulante'
       ORDER BY
           s.fecha_fin DESC;
     `;
