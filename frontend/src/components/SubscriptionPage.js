@@ -28,6 +28,8 @@ function SubscriptionPage() {
     queryFn: fetchSubscriptionPlans,
   });
 
+  console.log('Subscription plans data from API:', plans);
+
   const handleBillingCycleChange = (event, newBillingCycle) => {
     if (newBillingCycle !== null) {
       setBillingCycle(newBillingCycle);
