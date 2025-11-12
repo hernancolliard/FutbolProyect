@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "../services/api";
 import SubscribeButton from "./SubscribeButton";
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
@@ -8,16 +10,49 @@ import Stack from "@mui/material/Stack";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { Helmet } from "react-helmet-async";
+import LoadingSpinner from "./LoadingSpinner";
+import Alert from "@mui/material/Alert";
+
+// --- Fetching Logic ---
+const fetchSubscriptionPlans = async () => {
+  const { data } = await apiClient.get("/subscriptions");
+  return data;
+};
 
 function SubscriptionPage() {
   const { t } = useTranslation();
   const [billingCycle, setBillingCycle] = useState('monthly');
+
+  const { data: plans, isLoading, isError, error } = useQuery({
+    queryKey: ['subscriptionPlans'],
+    queryFn: fetchSubscriptionPlans,
+  });
 
   const handleBillingCycleChange = (event, newBillingCycle) => {
     if (newBillingCycle !== null) {
       setBillingCycle(newBillingCycle);
     }
   };
+
+  // --- Helper to find plan price ---
+  const getPrice = (planName) => {
+    if (!plans) return null;
+    const plan = plans.find(p => p.plan_name === planName);
+    return plan ? plan.price_usd : null;
+  };
+
+  const offererMonthlyPrice = getPrice('ofertante_monthly');
+  const offererAnnualPrice = getPrice('ofertante_annual');
+  const applicantMonthlyPrice = getPrice('postulante_monthly');
+  const applicantAnnualPrice = getPrice('postulante_annual');
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <Alert severity="error">{error.message}</Alert>;
+  }
 
   return (
     <>
@@ -54,7 +89,9 @@ function SubscriptionPage() {
               <Typography variant="h6">{t("offerer_plan_title")}</Typography>
               <Typography>{t("offerer_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
-                {billingCycle === 'monthly' ? '$2/mes' : '$12/año'}
+                {billingCycle === 'monthly' 
+                  ? `$${offererMonthlyPrice}/mes` 
+                  : `$${offererAnnualPrice}/año`}
               </Typography>
               <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
             </CardContent>
@@ -64,7 +101,9 @@ function SubscriptionPage() {
               <Typography variant="h6">{t("applicant_plan_title")}</Typography>
               <Typography>{t("applicant_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
-                {billingCycle === 'monthly' ? '$2/mes' : '$12/año'}
+                {billingCycle === 'monthly' 
+                  ? `$${applicantMonthlyPrice}/mes` 
+                  : `$${applicantAnnualPrice}/año`}
               </Typography>
               <SubscribeButton planType="postulante" billingCycle={billingCycle} />
             </CardContent>

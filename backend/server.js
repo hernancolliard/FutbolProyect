@@ -13,7 +13,8 @@ const adminRoutes = require("./routes/admin.js");
 const termsRoutes = require("./routes/terms.js");
 const privacyRoutes = require("./routes/privacy.js");
 const contactRoutes = require("./routes/contact");
-const sitemapRoutes = require("./routes/sitemap"); // Importar la nueva ruta
+const sitemapRoutes = require("./routes/sitemap");
+const subscriptionRoutes = require("./routes/subscriptions");
 const app = express();
 
 // --- General Middleware ---
@@ -37,7 +38,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/terms", termsRoutes);
 app.use("/api/privacy", privacyRoutes);
 app.use("/api/contact", contactRoutes);
-app.use("/api/sitemap", sitemapRoutes); // Usar la nueva ruta
+app.use("/api/sitemap", sitemapRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 // --- PRERENDER.IO MIDDLEWARE ---
 app.use(require('prerender-node').set('prerenderToken', process.env.PRERENDER_TOKEN));

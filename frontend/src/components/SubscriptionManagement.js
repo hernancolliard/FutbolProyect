@@ -1,77 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import apiClient from '../services/api';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TextField, Button, CircularProgress } from '@mui/material';
+
+// --- Fetching Logic ---
+const fetchPlans = async () => {
+  const { data } = await apiClient.get('/admin/subscriptions');
+  return data;
+};
+
+// --- Mutation Logic ---
+const updatePlan = async ({ id, ...planData }) => {
+  const { data } = await apiClient.put(`/admin/subscriptions/${id}`, planData);
+  return data;
+};
 
 function SubscriptionManagement() {
   const { t } = useTranslation();
-  const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [editCache, setEditCache] = useState({});
 
-  const fetchPlans = async () => {
-    setLoading(true);
-    try {
-      const response = await apiClient.get('/admin/subscriptions');
-      setPlans(response.data);
-    } catch (error) {
-      toast.error(t('fetch_plans_error'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: plans, isLoading, isError } = useQuery({
+    queryKey: ['adminSubscriptionPlans'],
+    queryFn: fetchPlans,
+  });
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
+  const { mutate: savePlan, isPending: isSaving } = useMutation({
+    mutationFn: updatePlan,
+    onSuccess: () => {
+      toast.success(t('plan_updated_success'));
+      // Invalidate both admin and public queries
+      queryClient.invalidateQueries({ queryKey: ['adminSubscriptionPlans'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptionPlans'] });
+      setEditCache({}); // Clear local edits
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || t('update_plan_error'));
+    },
+  });
 
   const handlePriceChange = (id, field, value) => {
     setEditCache(prev => ({
       ...prev,
-      [id]: { ...prev[id], [field]: value },
+      [id]: { ...(prev[id] || {}), [field]: value },
     }));
   };
 
-  const handleSave = async (id) => {
+  const handleSave = (id) => {
     const originalPlan = plans.find(p => p.id === id);
     const editedValues = editCache[id];
     if (!editedValues || !originalPlan) return;
 
-    const planToUpdate = {
-        ...originalPlan,
-        ...editedValues,
-    };
-
-    const price_usd = parseFloat(planToUpdate.price_usd);
-    const price_mp = parseInt(planToUpdate.price_mp, 10);
+    const price_usd = parseFloat(editedValues.price_usd ?? originalPlan.price_usd);
+    const price_mp = parseInt(editedValues.price_mp ?? originalPlan.price_mp, 10);
 
     if (isNaN(price_usd) || isNaN(price_mp)) {
-        toast.error("Prices must be valid numbers.");
-        return;
+      toast.error("Prices must be valid numbers.");
+      return;
     }
 
-    const numericPlan = {
-        price_usd: price_usd,
-        price_mp: price_mp,
-    };
-
-    try {
-      await apiClient.put(`/admin/subscriptions/${id}`, numericPlan);
-      toast.success(t('plan_updated_success'));
-      setEditCache(prev => {
-        const newCache = { ...prev };
-        delete newCache[id];
-        return newCache;
-      });
-      fetchPlans(); // Refresh data
-    } catch (error) {
-      toast.error(error.response?.data?.message || t('update_plan_error'));
-    }
+    savePlan({ id, price_usd, price_mp });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <CircularProgress />;
+  }
+
+  if (isError) {
+    return <Typography color="error">{t('fetch_plans_error')}</Typography>;
   }
 
   return (
@@ -90,7 +88,7 @@ function SubscriptionManagement() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {plans.map((plan) => (
+          {plans?.map((plan) => (
             <TableRow key={plan.id}>
               <TableCell>{plan.plan_name}</TableCell>
               <TableCell>
@@ -112,9 +110,9 @@ function SubscriptionManagement() {
                 <Button 
                   variant="contained" 
                   onClick={() => handleSave(plan.id)}
-                  disabled={!editCache[plan.id]}
+                  disabled={!editCache[plan.id] || isSaving}
                 >
-                  {t('save_button')}
+                  {isSaving ? <CircularProgress size={24} /> : t('save_button')}
                 </Button>
               </TableCell>
             </TableRow>
