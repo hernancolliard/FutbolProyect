@@ -231,7 +231,7 @@ function OfferList({
           </Slider>
         ) : (
           <Stack direction="column" spacing={2} className="offers-list">
-            {normalOffers.map((offer) => renderOfferCard(offer))}
+            {offersToDisplay.map((offer) => renderOfferCard(offer))}
           </Stack>
         )}
       </div>
