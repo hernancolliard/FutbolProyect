@@ -158,7 +158,7 @@ CREATE INDEX idx_postulaciones_id_usuario_postulante ON postulaciones(id_usuario
 -- Índices en tablas de perfiles, fotos y videos (para búsquedas por usuario)
 CREATE INDEX idx_user_photos_user_id ON user_photos(user_id);
 CREATE INDEX idx_user_videos_user_id ON user_videos(user_id);
-
+select email from usuarios u where tipo_usuario = 'postulante';
 select * from usuarios u;
 select * from user_videos uv; 
 select * from subscription_plans sp ;
@@ -167,7 +167,12 @@ select * from perfiles_usuario pu ;
 INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('monthly', 2.00, 2000.00);
 INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('annual', 12.00, 12000.00);
 select * from subscription_plans sp;
-
+select * from ofertas_laborales ol ;
+ALTER TABLE ofertas_laborales
+ALTER COLUMN salario TYPE VARCHAR(255);
+UPDATE usuarios
+SET isadmin = true
+WHERE email = 'futbolproyect.arg@gmail.com';
 ALTER TABLE user_videos
 ADD COLUMN title_es VARCHAR(255),
 ADD COLUMN title_en VARCHAR(255);

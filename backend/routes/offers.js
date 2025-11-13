@@ -27,10 +27,7 @@ const offerSchema = z.object({
   descripcion: z.string().min(20),
   puesto: z.string().min(3).optional().or(z.literal("")),
   ubicacion: z.string().min(3).optional().or(z.literal("")),
-  salario: z.preprocess(
-    (val) => (val ? parseFloat(val) : undefined),
-    z.number().positive().optional()
-  ),
+  salario: z.string().optional(),
   horarios: z.string().optional(),
   nivel: z.string().optional(),
   detalles_adicionales: z.string().optional(),
@@ -119,9 +116,7 @@ router.get("/", async (req, res) => {
 
   const cacheKey = `offers:${puesto || "all"}:${ubicacion || "all"}:${
     nivel || "all"
-  }:${horarios || "all"}:${salarioMin || "none"}-${
-    salarioMax || "none"
-  }:${sort}:page${page}:limit${limit}`;
+  }:${horarios || "all"}:${sort}:page${page}:limit${limit}`;
 
   try {
     // 1. Intentar obtener los datos desde el caché en memoria
@@ -161,14 +156,7 @@ router.get("/", async (req, res) => {
       whereClauses.push(`o.horarios = @horarios`);
       queryParams.horarios = horarios;
     }
-    if (salarioMin) {
-      whereClauses.push(`o.salario >= @salarioMin`);
-      queryParams.salarioMin = salarioMin;
-    }
-    if (salarioMax) {
-      whereClauses.push(`o.salario <= @salarioMax`);
-      queryParams.salarioMax = salarioMax;
-    }
+
 
     const whereString = whereClauses.join(" AND ");
 

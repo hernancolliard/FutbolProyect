@@ -133,6 +133,12 @@ function OfferList({
               </Typography>
               <Typography
                 variant="body2"
+                color={!isHomePage ? "#fff" : "text.secondary"}
+              >
+                {t("salary")} {offer.salario || t("not_specified")}
+              </Typography>
+              <Typography
+                variant="body2"
                 sx={{
                   mt: 1,
                   color: !isHomePage ? "#fff" : "inherit",
