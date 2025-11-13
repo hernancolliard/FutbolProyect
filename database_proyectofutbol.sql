@@ -166,7 +166,7 @@ select * from postulaciones p ;
 select * from perfiles_usuario pu ;
 select * from ofertas_laborales ol  ;
 ALTER TABLE ofertas_laborales
-ALTER COLUMN salario TYPE VARCHAR(255);
+ALTER COLUMN salario TYPE numeric(10,2);
 ALTER TABLE ofertas_laborales
 ALTER COLUMN salario TYPE varchar(255);
 INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('monthly', 2.00, 2000.00);

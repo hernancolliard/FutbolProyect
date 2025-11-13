@@ -39,6 +39,8 @@ function AllOffersPage() {
     puesto: "",
     ubicacion: "",
     nivel: "",
+    salarioMin: "",
+    salarioMax: "",
     sort: "desc",
   });
 
@@ -122,6 +124,22 @@ function AllOffersPage() {
               <option value="Amateur">{t("level_amateur", "Amateur")}</option>
               <option value="Otro">{t("level_other", "Otro")}</option>
             </select>
+            <input
+              type="number"
+              name="salarioMin"
+              placeholder={t("filter_by_min_salary", "Salario Mín.")}
+              value={filters.salarioMin}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
+            <input
+              type="number"
+              name="salarioMax"
+              placeholder={t("filter_by_max_salary", "Salario Máx.")}
+              value={filters.salarioMax}
+              onChange={handleFilterChange}
+              className="filter-input"
+            />
 
             <select name="sort" value={filters.sort} onChange={handleFilterChange} className="filter-select">
               <option value="desc">{t("sort_by_recent", "Más recientes")}</option>
