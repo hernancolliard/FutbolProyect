@@ -1,4 +1,8 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// Forzar a que los tipos NUMERIC/DECIMAL se devuelvan como strings
+// para evitar errores de casteo si la librería tiene el schema cacheado.
+types.setTypeParser(1700, (val) => val);
 
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 

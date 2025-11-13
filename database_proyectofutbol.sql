@@ -164,12 +164,14 @@ select * from user_videos uv;
 select * from subscription_plans sp ;
 select * from postulaciones p ;
 select * from perfiles_usuario pu ;
+select * from ofertas_laborales ol  ;
+ALTER TABLE ofertas_laborales
+ALTER COLUMN salario TYPE VARCHAR(255);
+ALTER TABLE ofertas_laborales
+ALTER COLUMN salario TYPE varchar(255);
 INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('monthly', 2.00, 2000.00);
 INSERT INTO subscription_plans (plan_name, price_usd, price_mp) VALUES ('annual', 12.00, 12000.00);
 select * from subscription_plans sp;
-select * from ofertas_laborales ol ;
-ALTER TABLE ofertas_laborales
-ALTER COLUMN salario TYPE VARCHAR(255);
 UPDATE usuarios
 SET isadmin = true
 WHERE email = 'futbolproyect.arg@gmail.com';
