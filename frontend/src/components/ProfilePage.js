@@ -213,62 +213,77 @@ function ProfilePage() {
         <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>
           <CardContent>
             <Grid container spacing={4}>
-              {/* Columna Izquierda: Foto, Info General, Redes Sociales */}
+              {/* Columna Izquierda Principal */}
               <Grid item xs={12} md={8}>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={3}
-                  alignItems="flex-start"
-                  sx={{ mb: 4 }}
-                >
-                  {profile.foto_perfil_url && (
-                    <Box sx={{ flexShrink: 0 }}>
-                      <img
-                        src={profile.foto_perfil_url}
-                        alt={t("profile_picture_alt", { name: profile.nombre })}
-                        style={{
-                          width: 150,
-                          height: 150,
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "2px solid #ccc",
-                        }}
-                      />
-                    </Box>
-                  )}
-
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h4" sx={{ mb: 1 }}>
-                      {profile.nombre} {profile.apellido || ""}
-                    </Typography>
-                    <Typography>
-                      <strong>{t("email_label")}</strong> {profile.email}
-                    </Typography>
-                    <Typography>
-                      <strong>{t("phone_placeholder")}</strong>{" "}
-                      {profile.telefono || t("not_specified")}
-                    </Typography>
-                    <Typography>
-                      <strong>{t("nationality")}</strong>{" "}
-                      {nacionalidad || t("not_specified")}
-                    </Typography>
-                    <Typography>
-                      <strong>{t("position")}</strong>{" "}
-                      {posicion_principal || t("not_specified")}
-                    </Typography>
-                  </Box>
-                  {isMyProfile && (
-                    <Button
-                      variant="contained"
-                      sx={{ mt: 2 }}
-                      onClick={handleOpenEditProfileModal}
+                <Grid container spacing={3}>
+                  {/* Sub-columna Izquierda: Foto y Nombre */}
+                  <Grid item xs={12} sm={6}>
+                    <Stack
+                      direction="column"
+                      spacing={2}
+                      alignItems="center"
+                      sx={{ mb: 2 }}
                     >
-                      {t("edit_profile_button", "Editar Perfil")}
-                    </Button>
-                  )}
-                </Stack>
+                      {profile.foto_perfil_url && (
+                        <Box sx={{ flexShrink: 0 }}>
+                          <img
+                            src={profile.foto_perfil_url}
+                            alt={t("profile_picture_alt", {
+                              name: profile.nombre,
+                            })}
+                            style={{
+                              width: 150,
+                              height: 150,
+                              borderRadius: "50%",
+                              objectFit: "cover",
+                              border: "2px solid #ccc",
+                            }}
+                          />
+                        </Box>
+                      )}
+                      <Typography variant="h4">
+                        {profile.nombre} {profile.apellido || ""}
+                      </Typography>
+                      {isMyProfile && (
+                        <Button
+                          variant="contained"
+                          onClick={handleOpenEditProfileModal}
+                        >
+                          {t("edit_profile_button", "Editar Perfil")}
+                        </Button>
+                      )}
+                    </Stack>
+                  </Grid>
 
-                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                  {/* Sub-columna Derecha: Datos Personales */}
+                  <Grid item xs={12} sm={6}>
+                    <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+                      <Typography variant="h6" sx={{ mb: 1 }}>
+                        {t("personal_data", "Datos Personales")}
+                      </Typography>
+                      <Stack spacing={1}>
+                        <Typography>
+                          <strong>{t("email_label")}</strong> {profile.email}
+                        </Typography>
+                        <Typography>
+                          <strong>{t("phone_placeholder")}</strong>{" "}
+                          {profile.telefono || t("not_specified")}
+                        </Typography>
+                        <Typography>
+                          <strong>{t("nationality")}</strong>{" "}
+                          {nacionalidad || t("not_specified")}
+                        </Typography>
+                        <Typography>
+                          <strong>{t("position")}</strong>{" "}
+                          {posicion_principal || t("not_specified")}
+                        </Typography>
+                      </Stack>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                {/* Redes Sociales (debajo de las sub-columnas) */}
+                <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
                   {t("social_networks_links_title")}
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
@@ -363,7 +378,7 @@ function ProfilePage() {
                 </Stack>
               </Grid>
 
-              {/* Columna Derecha: Datos Físicos y Resumen Profesional */}
+              {/* Columna Derecha Principal: Datos Físicos y Resumen Profesional */}
               <Grid item xs={12} md={4}>
                 <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
                   <Typography variant="h6" sx={{ mb: 1 }}>
