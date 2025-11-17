@@ -11,49 +11,36 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Box, Grid } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import PublicIcon from "@mui/icons-material/Public";
-import { useAuth } from "../context/AuthContext";
-import useIsMobile from "../hooks/useIsMobile";
-import VideoCard from "./VideoCard";
-import VideoPlayerModal from "./VideoPlayerModal";
-import VideoFormModal from "./VideoFormModal";
-import EditProfileForm from "./EditProfileForm";
-import Modal from "@mui/material/Modal";
-import UserPhotosSection from "./UserPhotosSection";
-import MyOffersList from "./MyOffersList";
-
-const fetchProfile = async (userId) => {
-  const { data } = await apiClient.get(`/profiles/${userId}`);
-  return data;
-};
-
-const fetchUserVideos = async (userId) => {
-  const { data } = await apiClient.get(`/profiles/${userId}/videos`);
-  return data;
-};
-
-const fetchUserApplications = async (userId) => {
-  const { data } = await apiClient.get(`/applications/user/${userId}`);
-  return data;
-};
-
-const fetchUserOffers = async (userId) => {
-  const { data } = await apiClient.get(`/profiles/${userId}/offers`);
-  return data;
-};
+import { Box, Grid, Rating } from "@mui/material";
+// ... otras importaciones
 
 function ProfilePage() {
-  const { t, i18n } = useTranslation();
-  const { userId } = useParams();
-  const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
-  const queryClient = useQueryClient();
-  const isMobile = useIsMobile();
+  // ... otros hooks y estados
+  const handleRatingChange = async (event, newValue) => {
+    if (!newValue) return; // No hacer nada si la calificación es nula
+
+    try {
+      const response = await apiClient.post(`/profiles/${userId}/rate`, {
+        rating: newValue,
+      });
+      // Actualizar la caché de react-query para reflejar la nueva calificación
+      queryClient.setQueryData(["profile", userId], (oldProfileData) => {
+        return {
+          ...oldProfileData,
+          average_rating: response.data.average_rating,
+          total_ratings: response.data.total_ratings,
+        };
+      });
+      // Opcional: Mostrar un mensaje de éxito al usuario
+      // alert("¡Gracias por tu calificación!");
+    } catch (error) {
+      console.error("Error al enviar la calificación:", error);
+      // Opcional: Mostrar un mensaje de error al usuario
+      // alert("Hubo un error al calificar el perfil.");
+    }
+  };
+  // ... el resto del componente
+
 
   const [showVideoPlayerModal, setShowVideoPlayerModal] = useState(false);
   const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null);
