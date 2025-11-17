@@ -210,191 +210,203 @@ function ProfilePage() {
         <meta name="description" content={seoDescription} />
       </Helmet>
       <Stack alignItems="center" sx={{ mt: 4 }}>
-        <Card sx={{ maxWidth: 900, width: "100%" }} elevation={3}>
+        <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>
           <CardContent>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={3}
-              alignItems="flex-start"
-              sx={{ mb: 4 }}
-            >
-              {profile.foto_perfil_url && (
-                <Box sx={{ flexShrink: 0 }}>
-                  <img
-                    src={profile.foto_perfil_url}
-                    alt={t("profile_picture_alt", { name: profile.nombre })}
-                    style={{
-                      width: 150,
-                      height: 150,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid #ccc",
-                    }}
-                  />
-                </Box>
-              )}
-
-              <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h4" sx={{ mb: 1 }}>
-                  {profile.nombre} {profile.apellido || ""}
-                </Typography>
-                <Typography>
-                  <strong>{t("email_label")}</strong> {profile.email}
-                </Typography>
-                <Typography>
-                  <strong>{t("phone_placeholder")}</strong>{" "}
-                  {profile.telefono || t("not_specified")}
-                </Typography>
-                <Typography>
-                  <strong>{t("nationality")}</strong>{" "}
-                  {nacionalidad || t("not_specified")}
-                </Typography>
-                <Typography>
-                  <strong>{t("position")}</strong>{" "}
-                  {posicion_principal || t("not_specified")}
-                </Typography>
-              </Box>
-              {isMyProfile && (
-                <Button
-                  variant="contained"
-                  sx={{ mt: 2 }}
-                  onClick={handleOpenEditProfileModal}
+            <Grid container spacing={4}>
+              {/* Columna Izquierda: Foto, Info General, Redes Sociales */}
+              <Grid item xs={12} md={8}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={3}
+                  alignItems="flex-start"
+                  sx={{ mb: 4 }}
                 >
-                  {t("edit_profile_button", "Editar Perfil")}
-                </Button>
-              )}
-            </Stack>
+                  {profile.foto_perfil_url && (
+                    <Box sx={{ flexShrink: 0 }}>
+                      <img
+                        src={profile.foto_perfil_url}
+                        alt={t("profile_picture_alt", { name: profile.nombre })}
+                        style={{
+                          width: 150,
+                          height: 150,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid #ccc",
+                        }}
+                      />
+                    </Box>
+                  )}
 
-            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-              {t("social_networks_links_title")}
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-              {profile.linkedin_url &&
-                (isMobile ? (
-                  <IconButton
-                    component="a"
-                    href={profile.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="LinkedIn"
-                  >
-                    <LinkedInIcon />
-                  </IconButton>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={<LinkedInIcon />}
-                    href={profile.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn
-                  </Button>
-                ))}
-              {profile.instagram_url &&
-                (isMobile ? (
-                  <IconButton
-                    component="a"
-                    href={profile.instagram_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Instagram"
-                  >
-                    <InstagramIcon />
-                  </IconButton>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={<InstagramIcon />}
-                    href={profile.instagram_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Instagram
-                  </Button>
-                ))}
-              {profile.youtube_url &&
-                (isMobile ? (
-                  <IconButton
-                    component="a"
-                    href={profile.youtube_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="YouTube"
-                  >
-                    <YouTubeIcon />
-                  </IconButton>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={<YouTubeIcon />}
-                    href={profile.youtube_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    YouTube
-                  </Button>
-                ))}
-              {profile.transfermarkt_url &&
-                (isMobile ? (
-                  <IconButton
-                    component="a"
-                    href={profile.transfermarkt_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Transfermarkt"
-                  >
-                    <PublicIcon />
-                  </IconButton>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={<PublicIcon />}
-                    href={profile.transfermarkt_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Transfermarkt
-                  </Button>
-                ))}
-            </Stack>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="h4" sx={{ mb: 1 }}>
+                      {profile.nombre} {profile.apellido || ""}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("email_label")}</strong> {profile.email}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("phone_placeholder")}</strong>{" "}
+                      {profile.telefono || t("not_specified")}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("nationality")}</strong>{" "}
+                      {nacionalidad || t("not_specified")}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("position")}</strong>{" "}
+                      {posicion_principal || t("not_specified")}
+                    </Typography>
+                  </Box>
+                  {isMyProfile && (
+                    <Button
+                      variant="contained"
+                      sx={{ mt: 2 }}
+                      onClick={handleOpenEditProfileModal}
+                    >
+                      {t("edit_profile_button", "Editar Perfil")}
+                    </Button>
+                  )}
+                </Stack>
 
-            <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
-              {t("physical_data")}
-            </Typography>
-            <Stack spacing={1} sx={{ mb: 3 }}>
-              <Typography>
-                <strong>{t("height")}</strong>{" "}
-                {profile.altura_cm
-                  ? `${profile.altura_cm} cm`
-                  : t("not_specified")}
-              </Typography>
-              <Typography>
-                <strong>{t("weight")}</strong>{" "}
-                {profile.peso_kg ? `${profile.peso_kg} kg` : t("not_specified")}
-              </Typography>
-              <Typography>
-                <strong>{t("dominant_foot")}
-                </strong>{" "}
-                {pie_dominante || t("not_specified")}
-              </Typography>
-              <Typography>
-                <strong>{t("professional_summary")}</strong>{" "}
-                {resumen_profesional || t("no_summary_available")}
-              </Typography>
-              {profile.cv_url && (
-                <Button
-                  variant="outlined"
-                  sx={{ mt: 2 }}
-                  href={profile.cv_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("download_cv")}
-                </Button>
-              )}
-            </Stack>
+                <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                  {t("social_networks_links_title")}
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+                  {profile.linkedin_url &&
+                    (isMobile ? (
+                      <IconButton
+                        component="a"
+                        href={profile.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="LinkedIn"
+                      >
+                        <LinkedInIcon />
+                      </IconButton>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        startIcon={<LinkedInIcon />}
+                        href={profile.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        LinkedIn
+                      </Button>
+                    ))}
+                  {profile.instagram_url &&
+                    (isMobile ? (
+                      <IconButton
+                        component="a"
+                        href={profile.instagram_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Instagram"
+                      >
+                        <InstagramIcon />
+                      </IconButton>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        startIcon={<InstagramIcon />}
+                        href={profile.instagram_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Instagram
+                      </Button>
+                    ))}
+                  {profile.youtube_url &&
+                    (isMobile ? (
+                      <IconButton
+                        component="a"
+                        href={profile.youtube_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="YouTube"
+                      >
+                        <YouTubeIcon />
+                      </IconButton>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        startIcon={<YouTubeIcon />}
+                        href={profile.youtube_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        YouTube
+                      </Button>
+                    ))}
+                  {profile.transfermarkt_url &&
+                    (isMobile ? (
+                      <IconButton
+                        component="a"
+                        href={profile.transfermarkt_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Transfermarkt"
+                      >
+                        <PublicIcon />
+                      </IconButton>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        startIcon={<PublicIcon />}
+                        href={profile.transfermarkt_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Transfermarkt
+                      </Button>
+                    ))}
+                </Stack>
+              </Grid>
 
+              {/* Columna Derecha: Datos Físicos y Resumen Profesional */}
+              <Grid item xs={12} md={4}>
+                <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {t("physical_data")}
+                  </Typography>
+                  <Stack spacing={1} sx={{ mb: 3 }}>
+                    <Typography>
+                      <strong>{t("height")}</strong>{" "}
+                      {profile.altura_cm
+                        ? `${profile.altura_cm} cm`
+                        : t("not_specified")}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("weight")}</strong>{" "}
+                      {profile.peso_kg
+                        ? `${profile.peso_kg} kg`
+                        : t("not_specified")}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("dominant_foot")}</strong>{" "}
+                      {pie_dominante || t("not_specified")}
+                    </Typography>
+                    <Typography>
+                      <strong>{t("professional_summary")}</strong>{" "}
+                      {resumen_profesional || t("no_summary_available")}
+                    </Typography>
+                    {profile.cv_url && (
+                      <Button
+                        variant="outlined"
+                        sx={{ mt: 2 }}
+                        href={profile.cv_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t("download_cv")}
+                      </Button>
+                    )}
+                  </Stack>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Secciones de Fotos, Videos, Postulaciones y Ofertas (ya están debajo) */}
             <UserPhotosSection userId={userId} isMyProfile={isMyProfile} />
 
             <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
