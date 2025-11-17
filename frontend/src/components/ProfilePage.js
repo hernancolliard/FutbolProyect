@@ -212,6 +212,215 @@ function ProfilePage() {
       <Stack alignItems="center" sx={{ mt: 4 }}>
         <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>
           <CardContent>
+import { Box, Grid, Rating } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import PublicIcon from "@mui/icons-material/Public";
+import { useAuth } from "../context/AuthContext";
+import useIsMobile from "../hooks/useIsMobile";
+import VideoCard from "./VideoCard";
+import VideoPlayerModal from "./VideoPlayerModal";
+import VideoFormModal from "./VideoFormModal";
+import EditProfileForm from "./EditProfileForm";
+import Modal from "@mui/material/Modal";
+import UserPhotosSection from "./UserPhotosSection";
+import MyOffersList from "./MyOffersList";
+
+const fetchProfile = async (userId) => {
+  const { data } = await apiClient.get(`/profiles/${userId}`);
+  return data;
+};
+
+const fetchUserVideos = async (userId) => {
+  const { data } = await apiClient.get(`/profiles/${userId}/videos`);
+  return data;
+};
+
+const fetchUserApplications = async (userId) => {
+  const { data } = await apiClient.get(`/applications/user/${userId}`);
+  return data;
+};
+
+const fetchUserOffers = async (userId) => {
+  const { data } = await apiClient.get(`/profiles/${userId}/offers`);
+  return data;
+};
+
+function ProfilePage() {
+  const { t, i18n } = useTranslation();
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+
+  const [showVideoPlayerModal, setShowVideoPlayerModal] = useState(false);
+  const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null);
+  const [showVideoFormModal, setShowVideoFormModal] = useState(false);
+  const [videoToEdit, setVideoToEdit] = useState(null);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [profileRating, setProfileRating] = useState(0); // Estado para la calificación del perfil
+
+  const handleOpenEditProfileModal = () => setShowEditProfileModal(true);
+  const handleCloseEditProfileModal = () => setShowEditProfileModal(false);
+
+  const handleProfileSaved = () => {
+    queryClient.invalidateQueries(["profile", userId]);
+    handleCloseEditProfileModal();
+  };
+
+  const handleRatingChange = (event, newValue) => {
+    setProfileRating(newValue);
+    // Aquí iría la lógica para guardar la calificación en el backend
+    console.log(`Perfil ${userId} calificado con ${newValue} estrellas.`);
+    // Por ahora, solo mostramos un mensaje en consola.
+  };
+
+  const {
+    data: profile,
+    isLoading: isLoadingProfile,
+    isError: isErrorProfile,
+    error: errorProfile,
+  } = useQuery({
+    queryKey: ["profile", userId],
+    queryFn: () => fetchProfile(userId),
+  });
+
+  const {
+    data: userVideos,
+    isLoading: isLoadingVideos,
+    isError: isErrorVideos,
+    error: errorVideos,
+  } = useQuery({
+    queryKey: ["userVideos", userId],
+    queryFn: () => fetchUserVideos(userId),
+    enabled: !!userId, // Solo ejecutar si userId está presente
+    initialData: [],
+  });
+
+  const {
+    data: userApplications,
+    isLoading: isLoadingApplications,
+    isError: isErrorApplications,
+    error: errorApplications,
+  } = useQuery({
+    queryKey: ["userApplications", userId],
+    queryFn: () => fetchUserApplications(userId),
+    enabled:
+      !!currentUser &&
+      (currentUser.id === parseInt(userId, 10) || currentUser.isAdmin),
+    initialData: [], // Ensure it's always an array
+  });
+
+  const {
+    data: userOffers,
+    isLoading: isLoadingOffers,
+    isError: isErrorOffers,
+    error: errorOffers,
+  } = useQuery({
+    queryKey: ["userOffers", userId],
+    queryFn: () => fetchUserOffers(userId),
+    enabled:
+      !!profile &&
+      (profile.tipo_usuario === "ofertante" ||
+        profile.tipo_usuario === "agencia"),
+    initialData: [],
+  });
+
+  const isMyProfile = currentUser && currentUser.id === parseInt(userId, 10);
+
+  useEffect(() => {
+    if (userId && !isMyProfile) {
+      const recordView = async () => {
+        try {
+          await apiClient.post(`/profiles/${userId}/view`);
+        } catch (error) {
+          // No mostramos el error al usuario, solo en consola.
+          console.error("Failed to record profile view:", error);
+        }
+      };
+      recordView();
+    }
+  }, [userId, isMyProfile]);
+
+  const handleOpenVideoPlayer = (video) => {
+    setSelectedVideoToPlay(video);
+    setShowVideoPlayerModal(true);
+  };
+
+  const handleCloseVideoPlayer = () => {
+    setSelectedVideoToPlay(null);
+    setShowVideoPlayerModal(false);
+  };
+
+  const handleOpenVideoForm = (video = null) => {
+    setVideoToEdit(video);
+    setShowVideoFormModal(true);
+  };
+
+  const handleCloseVideoForm = () => {
+    setVideoToEdit(null);
+    setShowVideoFormModal(false);
+  };
+
+  const handleVideoSaved = () => {
+    queryClient.invalidateQueries(["userVideos", userId]);
+  };
+
+  if (isLoadingProfile) {
+    return (
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>{t("loading_profile")}</Typography>
+      </Stack>
+    );
+  }
+
+  if (isErrorProfile) {
+    return (
+      <Alert severity="error">
+        {errorProfile.message || t("error_loading_profile")}
+      </Alert>
+    );
+  }
+
+  if (!profile) {
+    return <Alert severity="warning">{t("profile_not_found")}</Alert>;
+  }
+
+  const videosToDisplay = Array(5).fill(null);
+  userVideos.forEach((video) => {
+    if (video.position >= 1 && video.position <= 5) {
+      videosToDisplay[video.position - 1] = video;
+    }
+  });
+
+  const lang = i18n.language;
+  const nacionalidad = profile[`nacionalidad_${lang}`] || profile.nacionalidad;
+  const posicion_principal =
+    profile[`posicion_principal_${lang}`] || profile.posicion_principal;
+  const pie_dominante =
+    profile[`pie_dominante_${lang}`] || profile.pie_dominante;
+  const resumen_profesional =
+    profile[`resumen_profesional_${lang}`] || profile.resumen_profesional;
+
+  // --- SEO Content ---
+  const seoTitle = `${profile.nombre || ""} ${profile.apellido || ""}${posicion_principal ? ` - ${posicion_principal}` : ""} | FutbolProyect`;
+  const seoDescription = resumen_profesional
+    ? resumen_profesional.substring(0, 160)
+    : `Perfil de ${profile.nombre || ""} ${profile.apellido || ""} en FutbolProyect. Explora estadísticas, videos y trayectoria profesional.`;
+
+  return (
+    <>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+      </Helmet>
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>
+          <CardContent>
             <Grid container spacing={4}>
               {/* Columna Izquierda Principal */}
               <Grid item xs={12} md={8}>
@@ -282,11 +491,16 @@ function ProfilePage() {
                   </Grid>
                 </Grid>
 
-                {/* Redes Sociales (debajo de las sub-columnas) */}
-                <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
-                  {t("social_networks_links_title")}
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+                {/* Redes Sociales y Calificación */}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  sx={{ mt: 4, mb: 3, flexWrap: "wrap" }}
+                >
+                  <Typography variant="h6" sx={{ mr: 2 }}>
+                    {t("social_networks_links_title")}
+                  </Typography>
                   {profile.linkedin_url &&
                     (isMobile ? (
                       <IconButton
@@ -375,6 +589,19 @@ function ProfilePage() {
                         Transfermarkt
                       </Button>
                     ))}
+                  {/* Componente de Calificación */}
+                  <Box sx={{ ml: isMobile ? 0 : 4, mt: isMobile ? 2 : 0 }}>
+                    <Typography component="legend">
+                      {t("rate_profile", "Calificar Perfil")}
+                    </Typography>
+                    <Rating
+                      name="profile-rating"
+                      value={profileRating}
+                      precision={0.5}
+                      onChange={handleRatingChange}
+                      readOnly={isMyProfile} // Solo el propietario no puede calificar su propio perfil
+                    />
+                  </Box>
                 </Stack>
               </Grid>
 
@@ -398,7 +625,8 @@ function ProfilePage() {
                         : t("not_specified")}
                     </Typography>
                     <Typography>
-                      <strong>{t("dominant_foot")}</strong>{" "}
+                      <strong>{t("dominant_foot")}
+                      </strong>{" "}
                       {pie_dominante || t("not_specified")}
                     </Typography>
                     <Typography>
