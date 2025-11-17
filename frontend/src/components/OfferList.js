@@ -224,7 +224,7 @@ function OfferList({
             className="offers-carousel"
           >
             {normalOffers.map((offer) => (
-              <div key={offer.id} style={{ padding: 8 }}>
+              <div key={offer.id} style={{ padding: 2 }}>
                 {renderOfferCard(offer)}
               </div>
             ))}
