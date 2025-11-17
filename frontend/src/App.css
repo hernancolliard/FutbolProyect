@@ -564,15 +564,17 @@ hr {
 
 .offers-list {
   display: flex;
-  flex-direction: column;
-  gap: 20px; /* Space between offer cards */
+  flex-direction: row; /* Cambiado a fila */
+  flex-wrap: wrap; /* Permitir que las tarjetas se envuelvan */
+  gap: 20px; /* Espacio entre las tarjetas */
   margin-top: 20px;
+  justify-content: center; /* Centrar las tarjetas */
 }
 
 .offers-list .offer-card {
-  width: 100%; /* Make each card take full width */
-  max-width: 800px; /* Optional: limit max width for very large screens */
-  margin: 0 auto; /* Center the cards if max-width is applied */
+  width: calc(50% - 10px); /* Para que entren dos tarjetas con un gap de 20px */
+  max-width: none; /* Eliminar el max-width para que calc(50% - 10px) funcione */
+  margin: 0; /* Eliminar el margin auto */
 }
 
 .offer-detail-page {
