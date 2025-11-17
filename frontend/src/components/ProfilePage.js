@@ -212,7 +212,6 @@ function ProfilePage() {
       <Stack alignItems="center" sx={{ mt: 4 }}>
         <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>
           <CardContent>
-          <CardContent>
             <Grid container spacing={4}>
               {/* Columna Izquierda Principal */}
               <Grid item xs={12} md={8}>
@@ -225,7 +224,7 @@ function ProfilePage() {
                       alignItems="center"
                       sx={{ mb: 2 }}
                     >
-                      {profile.foto_perfil_url && (
+                      {profile.foto_perfil_url ? (
                         <Box sx={{ flexShrink: 0 }}>
                           <img
                             src={profile.foto_perfil_url}
@@ -240,6 +239,24 @@ function ProfilePage() {
                               border: "2px solid #ccc",
                             }}
                           />
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 150,
+                            height: 150,
+                            borderRadius: "50%",
+                            bgcolor: "#e0e0e0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                            border: "2px solid #ccc",
+                          }}
+                        >
+                          <Typography variant="caption">
+                            {t("no_image")}
+                          </Typography>
                         </Box>
                       )}
                       <Typography variant="h4">
@@ -288,112 +305,122 @@ function ProfilePage() {
                   direction="row"
                   spacing={1}
                   alignItems="center"
-                  sx={{ mt: 4, mb: 3, flexWrap: "wrap" }}
+                  sx={{ mt: 4, mb: 3, flexWrap: "wrap", justifyContent: "space-between" }}
                 >
-                  <Typography variant="h6" sx={{ mr: 2 }}>
-                    {t("social_networks_links_title")}
-                  </Typography>
-                  {profile.linkedin_url &&
-                    (isMobile ? (
-                      <IconButton
-                        component="a"
-                        href={profile.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="LinkedIn"
-                      >
-                        <LinkedInIcon />
-                      </IconButton>
-                    ) : (
-                      <Button
-                        variant="outlined"
-                        startIcon={<LinkedInIcon />}
-                        href={profile.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        LinkedIn
-                      </Button>
-                    ))}
-                  {profile.instagram_url &&
-                    (isMobile ? (
-                      <IconButton
-                        component="a"
-                        href={profile.instagram_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Instagram"
-                      >
-                        <InstagramIcon />
-                      </IconButton>
-                    ) : (
-                      <Button
-                        variant="outlined"
-                        startIcon={<InstagramIcon />}
-                        href={profile.instagram_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Instagram
-                      </Button>
-                    ))}
-                  {profile.youtube_url &&
-                    (isMobile ? (
-                      <IconButton
-                        component="a"
-                        href={profile.youtube_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="YouTube"
-                      >
-                        <YouTubeIcon />
-                      </IconButton>
-                    ) : (
-                      <Button
-                        variant="outlined"
-                        startIcon={<YouTubeIcon />}
-                        href={profile.youtube_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        YouTube
-                      </Button>
-                    ))}
-                  {profile.transfermarkt_url &&
-                    (isMobile ? (
-                      <IconButton
-                        component="a"
-                        href={profile.transfermarkt_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Transfermarkt"
-                      >
-                        <PublicIcon />
-                      </IconButton>
-                    ) : (
-                      <Button
-                        variant="outlined"
-                        startIcon={<PublicIcon />}
-                        href={profile.transfermarkt_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Transfermarkt
-                      </Button>
-                    ))}
-                  {/* Componente de Calificación */}
-                  <Box sx={{ ml: isMobile ? 0 : 4, mt: isMobile ? 2 : 0 }}>
-                    <Typography component="legend">
-                      {t("rate_profile", "Calificar Perfil")}
+                  <Box>
+                    <Typography variant="h6" sx={{ mr: 2 }}>
+                      {t("social_networks_links_title")}
                     </Typography>
-                    <Rating
-                      name="profile-rating"
-                      value={profileRating}
-                      precision={0.5}
-                      onChange={handleRatingChange}
-                      readOnly={isMyProfile} // Solo el propietario no puede calificar su propio perfil
-                    />
+                    <Stack direction="row" spacing={1}>
+                      {profile.linkedin_url &&
+                        (isMobile ? (
+                          <IconButton
+                            component="a"
+                            href={profile.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="LinkedIn"
+                          >
+                            <LinkedInIcon />
+                          </IconButton>
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            startIcon={<LinkedInIcon />}
+                            href={profile.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            LinkedIn
+                          </Button>
+                        ))}
+                      {profile.instagram_url &&
+                        (isMobile ? (
+                          <IconButton
+                            component="a"
+                            href={profile.instagram_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Instagram"
+                          >
+                            <InstagramIcon />
+                          </IconButton>
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            startIcon={<InstagramIcon />}
+                            href={profile.instagram_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Instagram
+                          </Button>
+                        ))}
+                      {profile.youtube_url &&
+                        (isMobile ? (
+                          <IconButton
+                            component="a"
+                            href={profile.youtube_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="YouTube"
+                          >
+                            <YouTubeIcon />
+                          </IconButton>
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            startIcon={<YouTubeIcon />}
+                            href={profile.youtube_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            YouTube
+                          </Button>
+                        ))}
+                      {profile.transfermarkt_url &&
+                        (isMobile ? (
+                          <IconButton
+                            component="a"
+                            href={profile.transfermarkt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Transfermarkt"
+                          >
+                            <PublicIcon />
+                          </IconButton>
+                        ) : (
+                          <Button
+                            variant="outlined"
+                            startIcon={<PublicIcon />}
+                            href={profile.transfermarkt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Transfermarkt
+                          </Button>
+                        ))}
+                    </Stack>
                   </Box>
+                  {/* Componente de Calificación */}
+                  {!isMyProfile && ( // No mostrar la opción de calificar al propio usuario
+                    <Box sx={{ ml: isMobile ? 0 : 4, mt: isMobile ? 2 : 0 }}>
+                      <Typography component="legend">
+                        {t("rate_profile", "Calificar Perfil")}
+                      </Typography>
+                      <Rating
+                        name="profile-rating"
+                        value={profile?.average_rating || 0}
+                        precision={0.5}
+                        onChange={handleRatingChange}
+                      />
+                      {profile?.total_ratings > 0 && (
+                        <Typography variant="body2" color="text.secondary">
+                          ({profile.total_ratings} {t("ratings", "calificaciones")})
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
                 </Stack>
               </Grid>
 
@@ -440,6 +467,121 @@ function ProfilePage() {
                 </Card>
               </Grid>
             </Grid>
+
+            {/* Secciones de Fotos, Videos, Postulaciones y Ofertas (ya están debajo) */}
+            <UserPhotosSection userId={userId} isMyProfile={isMyProfile} />
+
+            <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+              {t("profile_videos_title", "Videos del Perfil")}
+            </Typography>
+            {isLoadingVideos ? (
+              <CircularProgress />
+            ) : isErrorVideos ? (
+              <Alert severity="error">
+                {errorVideos.message ||
+                  t("error_loading_videos", "Error al cargar videos.")}
+              </Alert>
+            ) : (
+              <Grid container spacing={2}>
+                {videosToDisplay.map((video, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <VideoCard
+                      video={video}
+                      isMyProfile={isMyProfile}
+                      onAdd={() =>
+                        isMyProfile &&
+                        handleOpenVideoForm({ position: index + 1 })
+                      }
+                      onEdit={handleOpenVideoForm}
+                      onPlay={handleOpenVideoPlayer}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+
+            {isMyProfile && (
+              <Button
+                variant="contained"
+                sx={{ mt: 3 }}
+                onClick={() => handleOpenVideoForm()}
+              >
+                {t("add_new_video", "Añadir nuevo video")}
+              </Button>
+            )}
+
+            {isMyProfile && (
+              <>
+                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+                  {t("my_applications_title", "Mis Postulaciones")}
+                </Typography>
+                {isLoadingApplications ? (
+                  <CircularProgress />
+                ) : isErrorApplications ? (
+                  <Alert severity="error">
+                    {errorApplications.message ||
+                      t(
+                        "error_loading_applications",
+                        "Error al cargar postulaciones."
+                      )}
+                  </Alert>
+                ) : Array.isArray(userApplications) &&
+                  userApplications.length > 0 ? (
+                  // Si es un array y tiene elementos, mapea y muestra las postulaciones
+                  <Stack spacing={1}>
+                    {userApplications.map((app) => (
+                      <Card key={app.id} variant="outlined" sx={{ p: 2 }}>
+                        <Typography variant="h6">{app.oferta_titulo}</Typography>
+                        <Typography variant="body2">
+                          <strong>{t("status")}:</strong> {app.estado}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>{t("date")}:</strong>{" "}
+                          {new Date(app.fecha_postulacion).toLocaleDateString()}
+                        </Typography>
+                        <Button
+                          size="small"
+                          onClick={() => navigate(`/offers/${app.oferta_id}`)}
+                        >
+                          {t("view_offer")}
+                        </Button>
+                      </Card>
+                    ))}
+                  </Stack>
+                ) : (
+                  // En cualquier otro caso (si no es un array, o está vacío), muestra el mensaje
+                  <Typography>
+                    {t("no_applications_yet", "Aún no tienes postulaciones.")}
+                  </Typography>
+                )}
+              </>
+            )}
+
+            {profile &&
+            (profile.tipo_usuario === "ofertante" ||
+              profile.tipo_usuario === "agencia") ? (
+              <>
+                <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
+                  {t("my_offers_title", "Mis Ofertas")}
+                </Typography>
+                {isLoadingOffers ? (
+                  <CircularProgress />
+                ) : isErrorOffers ? (
+                  <Alert severity="error">
+                    {errorOffers.message ||
+                      t("error_loading_offers", "Error al cargar las ofertas.")}
+                  </Alert>
+                ) : (
+                  <MyOffersList
+                    offers={userOffers || []}
+                    userId={userId}
+                    isOwnProfile={isMyProfile}
+                    isAdmin={currentUser?.isAdmin}
+                  />
+                )}
+              </>
+            ) : null}
+          </CardContent>
 
             {/* Secciones de Fotos, Videos, Postulaciones y Ofertas (ya están debajo) */}
             <UserPhotosSection userId={userId} isMyProfile={isMyProfile} />
