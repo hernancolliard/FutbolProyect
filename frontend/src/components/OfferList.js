@@ -230,9 +230,9 @@ function OfferList({
             ))}
           </Slider>
         ) : (
-          <Stack direction="column" spacing={2} className="offers-list">
+          <div className="offers-list">
             {offersToDisplay.map((offer) => renderOfferCard(offer))}
-          </Stack>
+          </div>
         )}
       </div>
     </FadeInOnScroll>
