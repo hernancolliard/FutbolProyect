@@ -3,6 +3,7 @@
   position: relative; /* Needed for arrow positioning */
   padding: 2rem 1rem;
   background-color: #f9f9f9;
+  margin-top: 3rem; /* Añadido para separar del elemento anterior */
 }
 
 .carousel-title {
