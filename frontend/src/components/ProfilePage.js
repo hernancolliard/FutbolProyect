@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Rating } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
@@ -54,6 +54,30 @@ function ProfilePage() {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+
+  const handleRatingChange = async (event, newValue) => {
+    if (!newValue) return; // No hacer nada si la calificación es nula
+
+    try {
+      const response = await apiClient.post(`/profiles/${userId}/rate`, {
+        rating: newValue,
+      });
+      // Actualizar la caché de react-query para reflejar la nueva calificación
+      queryClient.setQueryData(["profile", userId], (oldProfileData) => {
+        return {
+          ...oldProfileData,
+          average_rating: response.data.average_rating,
+          total_ratings: response.data.total_ratings,
+        };
+      });
+      // Opcional: Mostrar un mensaje de éxito al usuario
+      // alert("¡Gracias por tu calificación!");
+    } catch (error) {
+      console.error("Error al enviar la calificación:", error);
+      // Opcional: Mostrar un mensaje de error al usuario
+      // alert("Hubo un error al calificar el perfil.");
+    }
+  };
 
   const [showVideoPlayerModal, setShowVideoPlayerModal] = useState(false);
   const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null);
