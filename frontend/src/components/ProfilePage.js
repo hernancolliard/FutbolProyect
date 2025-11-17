@@ -48,13 +48,7 @@ const fetchUserOffers = async (userId) => {
 };
 
 function ProfilePage() {
-  const { t, i18n } = useTranslation();
-  const { userId } = useParams();
-  const navigate = useNavigate();
-  const { user: currentUser } = useAuth();
-  const queryClient = useQueryClient();
-  const isMobile = useIsMobile();
-
+  // ... otros hooks y estados
   const handleRatingChange = async (event, newValue) => {
     if (!newValue) return; // No hacer nada si la calificación es nula
 
@@ -78,6 +72,7 @@ function ProfilePage() {
       // alert("Hubo un error al calificar el perfil.");
     }
   };
+
 
   const [showVideoPlayerModal, setShowVideoPlayerModal] = useState(false);
   const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null);
