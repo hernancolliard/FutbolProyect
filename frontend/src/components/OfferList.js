@@ -202,7 +202,7 @@ function OfferList({
             {/* CORRECCIÓN 2: Se usa 'settings' en lugar de 'sliderSettings' */}
             <Slider {...settings} className="offers-carousel">
               {featuredOffers.map((offer) => (
-                <div key={offer.id} style={{ padding: 8 }}>
+                <div key={offer.id} style={{ padding: 4 }}>
                   {renderOfferCard(offer)}
                 </div>
               ))}
