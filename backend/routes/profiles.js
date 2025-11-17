@@ -108,40 +108,34 @@ router.post("/:profileId/rate", verificarToken, async (req, res) => {
       .json({ message: "La calificación debe ser un número entre 1 y 5." });
   }
 
-  try {
-    // Registrar o actualizar la calificación del usuario para este perfil
-    const upsertRatingQuery = `
-        INSERT INTO profile_ratings (profile_id, user_id, rating)
-        VALUES (@profileIdNum, @userId, @rating)
-        ON CONFLICT (profile_id, user_id) DO UPDATE SET
-            rating = EXCLUDED.rating,
-            created_at = CURRENT_TIMESTAMP
-        RETURNING *;
-    `;
-    await db.query(upsertRatingQuery, { profileIdNum, userId, rating });
-
-    // Recalcular el promedio y el total de calificaciones para el perfil
-    const recalculateRatingQuery = `
-        UPDATE profiles
-        SET
-            average_rating = (SELECT AVG(rating) FROM profile_ratings WHERE profile_id = @profileIdNum),
-            total_ratings = (SELECT COUNT(*) FROM profile_ratings WHERE profile_id = @profileIdNum)
-        WHERE id_usuario = @profileIdNum
-        RETURNING average_rating, total_ratings;
-    `;
-    const result = await db.query(recalculateRatingQuery, { profileIdNum });
-
-    res.status(200).json({
-      message: "Perfil calificado exitosamente.",
-      average_rating: result.rows[0].average_rating,
-      total_ratings: result.rows[0].total_ratings,
-    });
-  } catch (error) {
-    console.error("Error al calificar el perfil:", error);
-    res.status(500).json({ message: "Error del servidor al calificar." });
-  }
-});
-
+      try {
+      // Registrar o actualizar la calificación del usuario para este perfil
+      const upsertRatingQuery = `
+          INSERT INTO profile_ratings (profile_id, user_id, rating)
+          VALUES (@profileIdNum, @userId, @rating)
+          ON CONFLICT (profile_id, user_id) DO UPDATE SET
+              rating = EXCLUDED.rating,
+              updated_at = CURRENT_TIMESTAMP
+          RETURNING *;
+      `;
+      await db.query(upsertRatingQuery, { profileIdNum, userId, rating });
+  
+      // Obtener la calificación promedio y el total de calificaciones actualizados del perfil
+      const updatedProfileRatings = await db.query(
+        `SELECT average_rating, total_ratings FROM perfiles_usuario WHERE id_usuario = @profileIdNum`,
+        { profileIdNum }
+      );
+  
+      res.status(200).json({
+        message: "Perfil calificado exitosamente.",
+        average_rating: updatedProfileRatings.rows[0].average_rating,
+        total_ratings: updatedProfileRatings.rows[0].total_ratings,
+      });
+    } catch (error) {
+      console.error("Error al calificar el perfil:", error);
+      res.status(500).json({ message: "Error del servidor al calificar." });
+    }
+  });
 module.exports = router;
 
 // --- RUTA PROTEGIDA: ACTUALIZAR PERFIL DEL USUARIO AUTENTICADO ---
