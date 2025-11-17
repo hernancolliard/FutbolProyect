@@ -30,17 +30,20 @@ router.get("/destacados", async (req, res) => {
           u.apellido,
           p.foto_perfil_url,
           p.posicion_principal,
-          p.nacionalidad
+          p.nacionalidad,
+          p.average_rating, -- Añadir calificación promedio
+          p.total_ratings -- Añadir conteo total de calificaciones
       FROM
           usuarios u
       JOIN
           perfiles_usuario p ON u.id = p.id_usuario
-      JOIN
+      LEFT JOIN
           suscripciones s ON u.id = s.id_usuario
       WHERE
-          s.estado = 'activa' AND s.fecha_fin > NOW() AND u.tipo_usuario = 'postulante'
+          u.tipo_usuario = 'postulante' -- Mostrar todos los postulantes, no solo los suscritos
       ORDER BY
-          s.fecha_fin DESC;
+          p.average_rating DESC NULLS LAST, -- Ordenar por calificación promedio (los nulos al final)
+          s.fecha_fin DESC; -- Luego por fecha de fin de suscripción
     `;
     const result = await db.query(query);
     res.json(result.rows);
@@ -56,7 +59,8 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento
+      SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
+             p.average_rating, p.total_ratings -- Añadir calificación al SELECT
       FROM usuarios u
       LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
       WHERE u.id = @userId;
@@ -76,24 +80,69 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// --- RUTA PÚBLICA: INCREMENTAR VISTA DE PERFIL ---
-router.post("/:userId/view", async (req, res) => {
-  const { userId } = req.params;
+// ... (Otras rutas existentes)
+
+// --- RUTA PROTEGIDA: CALIFICAR UN PERFIL ---
+router.post("/:profileId/rate", verificarToken, async (req, res) => {
+  const { profileId } = req.params;
+  const { rating } = req.body;
+  const userId = req.user.id; // Usuario autenticado realizando la calificación
+
+  if (isNaN(parseInt(profileId, 10))) {
+    return res.status(400).json({ message: "El ID de perfil no es válido." });
+  }
+
+  const profileIdNum = parseInt(profileId, 10);
+
+  // No permitir que un usuario califique su propio perfil
+  if (userId === profileIdNum) {
+    return res
+      .status(403)
+      .json({ message: "No puedes calificar tu propio perfil." });
+  }
+
+  // Validar la calificación
+  if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    return res
+      .status(400)
+      .json({ message: "La calificación debe ser un número entre 1 y 5." });
+  }
 
   try {
-    const query = `
-      UPDATE usuarios
-      SET profile_views = profile_views + 1
-      WHERE id = @userId;
+    // Registrar o actualizar la calificación del usuario para este perfil
+    const upsertRatingQuery = `
+        INSERT INTO profile_ratings (profile_id, user_id, rating)
+        VALUES (@profileIdNum, @userId, @rating)
+        ON CONFLICT (profile_id, user_id) DO UPDATE SET
+            rating = EXCLUDED.rating,
+            created_at = CURRENT_TIMESTAMP
+        RETURNING *;
     `;
-    await db.query(query, { userId });
+    await db.query(upsertRatingQuery, { profileIdNum, userId, rating });
 
-    res.status(200).json({ message: "View count updated." });
+    // Recalcular el promedio y el total de calificaciones para el perfil
+    const recalculateRatingQuery = `
+        UPDATE profiles
+        SET
+            average_rating = (SELECT AVG(rating) FROM profile_ratings WHERE profile_id = @profileIdNum),
+            total_ratings = (SELECT COUNT(*) FROM profile_ratings WHERE profile_id = @profileIdNum)
+        WHERE id_usuario = @profileIdNum
+        RETURNING average_rating, total_ratings;
+    `;
+    const result = await db.query(recalculateRatingQuery, { profileIdNum });
+
+    res.status(200).json({
+      message: "Perfil calificado exitosamente.",
+      average_rating: result.rows[0].average_rating,
+      total_ratings: result.rows[0].total_ratings,
+    });
   } catch (error) {
-    console.error("Error updating view count:", error);
-    res.status(500).json({ message: "Error del servidor." });
+    console.error("Error al calificar el perfil:", error);
+    res.status(500).json({ message: "Error del servidor al calificar." });
   }
 });
+
+module.exports = router;
 
 // --- RUTA PROTEGIDA: ACTUALIZAR PERFIL DEL USUARIO AUTENTICADO ---
 router.put(
