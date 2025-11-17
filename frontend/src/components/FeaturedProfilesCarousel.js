@@ -51,10 +51,10 @@ function FeaturedProfilesCarousel() {
 
   const settings = {
     dots: true,
-    infinite: profiles && profiles.length > (isMobile ? 2 : 3),
+    infinite: profiles && profiles.length > (isMobile ? 2 : 4),
     speed: 500,
-    slidesToShow: isMobile ? 2 : 3,
-    slidesToScroll: isMobile ? 2 : 3,
+    slidesToShow: isMobile ? 2 : 4,
+    slidesToScroll: isMobile ? 2 : 4,
     initialSlide: 0,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,

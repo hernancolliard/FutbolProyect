@@ -187,8 +187,8 @@ function OfferList({
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: isMobile ? 2 : 3,
-    slidesToScroll: isMobile ? 2 : 3,
+    slidesToShow: isMobile ? 2 : 4,
+    slidesToScroll: isMobile ? 2 : 4,
     initialSlide: 0,
   };
   return (
