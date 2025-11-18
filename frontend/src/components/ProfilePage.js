@@ -48,7 +48,13 @@ const fetchUserOffers = async (userId) => {
 };
 
 function ProfilePage() {
-  // ... otros hooks y estados
+  const { t, i18n } = useTranslation();
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+
   const handleRatingChange = async (event, newValue) => {
     if (!newValue) return; // No hacer nada si la calificación es nula
 
