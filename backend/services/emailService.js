@@ -57,7 +57,7 @@ const sendWelcomeEmail = async (to, userName, userType) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
       html: htmlContent,
@@ -96,7 +96,7 @@ const sendSubscriptionConfirmationEmail = async (to, userName, plan, endDate) =>
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
       html: htmlContent,
@@ -133,7 +133,7 @@ const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
   try {
     // Usamos un try-catch para cada correo individualmente.
     const { data, error } = await resend.emails.send({
-      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
       html: htmlContent,
