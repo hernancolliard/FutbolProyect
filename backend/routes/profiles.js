@@ -84,6 +84,25 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
+// --- RUTA PARA REGISTRAR UNA VISTA DE PERFIL ---
+router.post('/:userId/view', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const query = `
+      UPDATE usuarios
+      SET profile_views = COALESCE(profile_views, 0) + 1
+      WHERE id = @userId;
+    `;
+    await db.query(query, { userId });
+    res.status(204).send(); // No content
+  } catch (error) {
+    // No enviar un error al cliente, solo registrarlo en el servidor
+    // para no interrumpir la experiencia del usuario si esto falla.
+    console.error(`Failed to record profile view for user ${userId}:`, error);
+    res.status(500).send(); // Enviar una respuesta para cerrar la conexión
+  }
+});
+
 // ... (Otras rutas existentes)
 
 // --- RUTA PROTEGIDA: CALIFICAR UN PERFIL ---
