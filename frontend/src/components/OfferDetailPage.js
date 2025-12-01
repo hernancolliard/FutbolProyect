@@ -148,16 +148,16 @@ function OfferDetailPage() {
       <Stack alignItems="center" sx={{ mt: 4 }}>
         <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
           {offer.imagen_url && (
-            <OptimizedImage
-              src={offer.imagen_url}
-              alt={titulo}
-              style={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "400px",
-                objectFit: "cover",
-              }}
-            />
+              <OptimizedImage
+                src={offer.imagen_url}
+                alt={titulo}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: "400px",
+                  objectFit: "contain",
+                }}
+              />
           )}
           <CardContent>
             <Typography variant="h4" sx={{ mb: 2 }}>{titulo}</Typography>
