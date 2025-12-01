@@ -149,6 +149,48 @@ const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
   }
 };
 
+/**
+ * Envía la respuesta de un administrador a un mensaje de contacto.
+ * @param {string} to - Email del usuario original.
+ * @param {string} subject - Asunto del correo.
+ * @param {string} replyMessage - El mensaje de respuesta del admin.
+ * @param {string} originalMessage - El mensaje original del usuario.
+ */
+const sendReplyToContactMessage = async (to, subject, replyMessage, originalMessage) => {
+  const htmlContent = `
+    <p>Hola,</p>
+    <p>Gracias por contactar a FutbolProyect. Aquí está la respuesta a tu consulta:</p>
+    <div style="padding: 15px; border-left: 4px solid #ccc; background-color: #f5f5f5; margin: 15px 0;">
+      <p>${replyMessage.replace(/\n/g, "<br>")}</p>
+    </div>
+    <hr>
+    <p><strong>Tu mensaje original:</strong></p>
+    <blockquote style="border-left: 4px solid #eee; padding-left: 15px; color: #666;">
+      <p><em>${originalMessage.replace(/\n/g, "<br>")}</em></p>
+    </blockquote>
+    <p>Saludos,<br>El equipo de FutbolProyect</p>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Respuesta de contacto enviada a ${to}.`);
+    return data;
+  } catch (error) {
+    console.error(`Error enviando respuesta de contacto a ${to}:`, error);
+    throw error; // Relanzar para que la ruta de la API pueda manejarlo
+  }
+};
+
 
 
 // Por ahora, solo exportamos esta función. Puedes añadir las otras después si las necesitas.
@@ -157,4 +199,5 @@ module.exports = {
   sendWelcomeEmail,
   sendSubscriptionConfirmationEmail,
   sendNewOfferNotificationEmail,
+  sendReplyToContactMessage,
 };

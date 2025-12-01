@@ -8,6 +8,7 @@ const {
 
 const {
   sendSubscriptionConfirmationEmail,
+  sendReplyToContactMessage,
 } = require("../services/emailService");
 
 // Todas las rutas en este archivo están protegidas y requieren ser admin
@@ -197,6 +198,71 @@ router.put(
     }
   }
 );
+
+// --- Contact Messages Management ---
+
+// GET /api/admin/contact-messages - Get all contact messages
+router.get('/contact-messages', [verificarToken, verificarAdmin], async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM contact_messages ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/admin/contact-messages/:id/reply - Reply to a contact message
+router.post('/contact-messages/:id/reply', [verificarToken, verificarAdmin], async (req, res) => {
+  const { id } = req.params;
+  const { replyMessage } = req.body;
+  const adminId = req.user.id;
+
+  if (!replyMessage) {
+    return res.status(400).json({ message: 'Reply message is required.' });
+  }
+
+  try {
+    // 1. Get the original message
+    const messageResult = await db.query('SELECT * FROM contact_messages WHERE id = @id', { id });
+    if (messageResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Message not found.' });
+    }
+    const originalMessage = messageResult.rows[0];
+
+    // Prevent replying to an already replied message
+    if (originalMessage.status === 'replied') {
+      return res.status(409).json({ message: 'This message has already been replied to.' });
+    }
+
+    // 2. Send the email
+    await sendReplyToContactMessage(
+      originalMessage.email,
+      `Re: Tu mensaje para FutbolProyect`,
+      replyMessage,
+      originalMessage.message
+    );
+
+    // 3. Update the database
+    const updateQuery = `
+      UPDATE contact_messages
+      SET status = 'replied',
+          replied_at = NOW(),
+          reply_message = @replyMessage,
+          replied_by_admin_id = @adminId
+      WHERE id = @id
+      RETURNING *;
+    `;
+    const updatedResult = await db.query(updateQuery, { replyMessage, adminId, id });
+
+    res.json(updatedResult.rows[0]);
+
+  } catch (error) {
+    console.error('Error replying to contact message:', error);
+    res.status(500).json({ message: 'Server error while sending reply.' });
+  }
+});
+
 
 module.exports = router;
 

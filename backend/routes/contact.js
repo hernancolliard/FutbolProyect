@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const db = require("../db");
 const { sendContactEmail } = require("../services/emailService");
 const { z } = require("zod");
 const validate = require("../middleware/validateMiddleware");
@@ -16,16 +17,25 @@ router.post("/", validate(contactSchema), async (req, res) => {
   const { name, email, message } = req.body;
 
   try {
-    // Llama a la función para enviar el correo
+    // Guardar el mensaje en la base de datos
+    const query = `
+      INSERT INTO contact_messages (name, email, message)
+      VALUES (@name, @email, @message)
+    `;
+    await db.query(query, { name, email, message });
+
+    // Llama a la función para enviar el correo al admin
     await sendContactEmail(name, email, message);
+    
     res.status(200).json({ message: "Mensaje enviado con éxito." });
   } catch (error) {
-    console.error("Error al enviar el correo de contacto:", error);
+    console.error("Error en la ruta de contacto:", error);
     res.status(500).json({
       message:
-        "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
+        "Hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo más tarde.",
     });
   }
 });
 
 module.exports = router;
+
