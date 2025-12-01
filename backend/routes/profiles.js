@@ -60,9 +60,13 @@ router.get("/:userId", async (req, res) => {
   try {
     const query = `
       SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
-             p.average_rating, p.total_ratings -- Añadir calificación al SELECT
+             p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
+             s.plan as subscription_plan,
+             s.fecha_fin as subscription_end_date,
+             s.estado as subscription_status
       FROM usuarios u
       LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
+      LEFT JOIN suscripciones s ON u.id = s.id_usuario
       WHERE u.id = @userId;
     `;
     const result = await db.query(query, { userId });

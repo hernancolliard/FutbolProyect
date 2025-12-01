@@ -12,7 +12,23 @@ const {
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, nombre, email, tipo_usuario, fecha_creacion, isadmin, profile_views FROM usuarios ORDER BY fecha_creacion DESC"
+      `SELECT
+        u.id,
+        u.nombre,
+        u.email,
+        u.tipo_usuario,
+        u.fecha_creacion,
+        u.isadmin,
+        u.profile_views,
+        s.plan as subscription_plan,
+        s.fecha_fin as subscription_end_date,
+        s.estado as subscription_status
+      FROM
+        usuarios u
+      LEFT JOIN
+        suscripciones s ON u.id = s.id_usuario
+      ORDER BY
+        u.fecha_creacion DESC`
     );
     res.json(result.rows);
   } catch (error) {

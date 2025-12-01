@@ -322,6 +322,30 @@ function ProfilePage() {
                         </Typography>
                       </Stack>
                     </Card>
+
+                    { (isMyProfile || (currentUser && currentUser.isAdmin)) && profile.subscription_status && (
+                      <Card variant="outlined" sx={{ p: 2, mt: 2, bgcolor: "#f5f5f5" }}>
+                          <Typography variant="h6" sx={{ mb: 1 }}>
+                              {t("subscription_details", "Detalles de Suscripción")}
+                          </Typography>
+                          <Stack spacing={1}>
+                              <Typography>
+                                  <strong>{t("plan_label", "Plan")}:</strong> {profile.subscription_plan || t('na')}
+                              </Typography>
+                              <Typography>
+                                  <strong>{t("status_label", "Estado")}:</strong> 
+                                  <span style={{ color: profile.subscription_status === 'activa' ? 'green' : 'red', fontWeight: 'bold' }}>
+                                      {' '}{profile.subscription_status}
+                                  </span>
+                              </Typography>
+                              {profile.subscription_end_date && (
+                                <Typography>
+                                    <strong>{t("end_date_label", "Fecha de Fin")}:</strong> {new Date(profile.subscription_end_date).toLocaleDateString()}
+                                </Typography>
+                              )}
+                          </Stack>
+                      </Card>
+                    )}
                   </Grid>
                 </Grid>
 

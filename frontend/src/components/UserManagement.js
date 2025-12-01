@@ -85,10 +85,13 @@ function UserManagement() {
             <TableCell>{t('name_header')}</TableCell>
             <TableCell>{t('email_header')}</TableCell>
             <TableCell>{t('user_type_header')}</TableCell>
+            <TableCell>{t('subscription_plan', 'Plan')}</TableCell>
+            <TableCell>{t('subscription_end_date', 'Subscription End')}</TableCell>
+            <TableCell>{t('subscription_status', 'Status')}</TableCell>
             <TableCell>{t('profile_views_header', 'Profile Views')}</TableCell>
             <TableCell>{t('is_admin_header')}</TableCell>
             <TableCell>{t('created_at_header')}</TableCell>
-            <TableCell>{t('actions_header')}</TableCell>
+            <TableCell sx={{ width: '220px' }}>{t('actions_header')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -98,6 +101,22 @@ function UserManagement() {
               <TableCell>{user.nombre}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.tipo_usuario}</TableCell>
+              <TableCell>{user.subscription_plan || t('na')}</TableCell>
+              <TableCell>
+                {user.subscription_end_date
+                  ? new Date(user.subscription_end_date).toLocaleDateString()
+                  : t('na')}
+              </TableCell>
+              <TableCell>
+                <span
+                  style={{
+                    color: user.subscription_status === 'activa' ? 'green' : 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {user.subscription_status || t('na')}
+                </span>
+              </TableCell>
               <TableCell>{user.profile_views}</TableCell>
               <TableCell>{user.isadmin ? t('yes') : t('no')}</TableCell>
               <TableCell>
@@ -107,13 +126,15 @@ function UserManagement() {
                 <Button
                   onClick={() => handleOpenModal(user)}
                   variant="outlined"
-                  sx={{ mr: 1 }}
+                  size="small"
+                  sx={{ mr: 1, mb: { xs: 1, sm: 0 } }}
                 >
                   {t('grant_subscription_button')}
                 </Button>
                 <Button
                   onClick={() => handleDelete(user.id)}
                   variant="outlined"
+                  size="small"
                   color="error"
                 >
                   {t('delete_button')}
