@@ -358,15 +358,22 @@ router.post(
       // Enviar notificación por correo electrónico a todos los postulantes
       (async () => {
         try {
+          console.log("Iniciando proceso de notificación de nueva oferta...");
           const userResult = await db.query("SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'");
           const applicants = userResult.rows;
-          const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
 
-          console.log(`Enviando notificación a ${applicants.length} postulantes...`);
+          if (applicants.length === 0) {
+            console.log("No se encontraron postulantes para notificar.");
+            return;
+          }
+
+          const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
+          console.log(`Se encontraron ${applicants.length} postulantes. Enviando notificaciones...`);
 
           for (const applicant of applicants) {
+            console.log(`Intentando enviar correo a: ${applicant.email}`);
             sendNewOfferNotificationEmail(applicant.email, titulo, offerLink)
-              .catch(err => console.error(`Error al enviar correo a ${applicant.email}:`, err));
+              .catch(err => console.error(`Error al enviar correo a ${applicant.email}:`, err.message));
           }
         } catch (emailError) {
           console.error("Error al obtener la lista de postulantes para enviar correos:", emailError);
