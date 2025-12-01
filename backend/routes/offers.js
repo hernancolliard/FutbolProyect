@@ -368,12 +368,19 @@ router.post(
           }
 
           const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
-          console.log(`Se encontraron ${applicants.length} postulantes. Enviando notificaciones...`);
+          console.log(`Se encontraron ${applicants.length} postulantes. Enviando notificaciones (con retardo para evitar límite de velocidad)...`);
+          
+          const delay = ms => new Promise(res => setTimeout(res, ms));
 
           for (const applicant of applicants) {
-            console.log(`Intentando enviar correo a: ${applicant.email}`);
+            console.log(`Enviando correo a: ${applicant.email}`);
+            // Se envía el correo pero no se espera (await) para no bloquear el loop, 
+            // solo se maneja el error si ocurre. El retardo se maneja por separado.
             sendNewOfferNotificationEmail(applicant.email, titulo, offerLink)
               .catch(err => console.error(`Error al enviar correo a ${applicant.email}:`, err.message));
+            
+            // Esperar 600ms para cumplir con el límite de 2 req/segundo de Resend
+            await delay(600);
           }
         } catch (emailError) {
           console.error("Error al obtener la lista de postulantes para enviar correos:", emailError);
