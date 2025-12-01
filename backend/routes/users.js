@@ -89,7 +89,7 @@ router.post("/register", validate(registerSchema), async (req, res) => {
     );
 
     try {
-      await sendWelcomeEmail(newUser.email, newUser.nombre);
+      await sendWelcomeEmail(newUser.email, newUser.nombre, newUser.tipo_usuario);
     } catch (emailError) {
       console.error("Error al enviar el correo de bienvenida:", emailError);
     }
@@ -189,6 +189,12 @@ router.post("/auth/google", async (req, res) => {
           foto_perfil_url: defaultProfilePhoto,
         }
       );
+
+      try {
+        await sendWelcomeEmail(newUser.email, newUser.nombre, 'postulante');
+      } catch (emailError) {
+        console.error("Error al enviar el correo de bienvenida:", emailError);
+      }
     }
 
     const user = result.rows[0];

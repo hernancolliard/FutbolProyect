@@ -6,6 +6,10 @@ const {
   verificarAdmin,
 } = require("../middleware/authMiddleware");
 
+const {
+  sendSubscriptionConfirmationEmail,
+} = require("../services/emailService");
+
 // Todas las rutas en este archivo están protegidas y requieren ser admin
 
 // GET /api/admin/users - Obtener todos los usuarios
@@ -98,6 +102,15 @@ router.post(
         planType: planType,
         fechaFin: fechaFin,
       });
+
+      // Get user info for email
+      const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId: parseInt(userId, 10) });
+      if (userResult.rows.length > 0) {
+        const user = userResult.rows[0];
+        // Send confirmation email (don't block the response)
+        sendSubscriptionConfirmationEmail(user.email, user.nombre, planType, fechaFin)
+          .catch(emailError => console.error("Failed to send subscription email:", emailError));
+      }
 
       res.status(200).json({ message: "Subscription granted successfully." });
     } catch (error) {

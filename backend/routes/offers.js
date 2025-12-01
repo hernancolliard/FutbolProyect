@@ -15,6 +15,7 @@ const {
 const validate = require("../middleware/validateMiddleware");
 const { translateText } = require("../services/translationService");
 const { uploadToS3 } = require("../services/s3Service");
+const { sendNewOfferNotificationEmail } = require("../services/emailService");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
@@ -353,6 +354,25 @@ router.post(
 
       // Invalidar el caché para que la nueva oferta aparezca inmediatamente
       myCache.flushAll();
+
+      // Enviar notificación por correo electrónico a todos los postulantes
+      (async () => {
+        try {
+          const userResult = await db.query("SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'");
+          const applicants = userResult.rows;
+          const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
+
+          console.log(`Enviando notificación a ${applicants.length} postulantes...`);
+
+          for (const applicant of applicants) {
+            sendNewOfferNotificationEmail(applicant.email, titulo, offerLink)
+              .catch(err => console.error(`Error al enviar correo a ${applicant.email}:`, err));
+          }
+        } catch (emailError) {
+          console.error("Error al obtener la lista de postulantes para enviar correos:", emailError);
+        }
+      })();
+
 
       res.status(201).json({
         message: "Oferta creada con éxito",

@@ -38,7 +38,123 @@ const sendContactEmail = async (name, fromEmail, message) => {
   }
 };
 
+/**
+ * Envía un correo de bienvenida a un nuevo usuario.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} userType - Tipo de usuario ('postulante', 'ofertante', etc.).
+ */
+const sendWelcomeEmail = async (to, userName, userType) => {
+  let subject = '¡Bienvenido a FutbolProyect!';
+  let htmlContent = `<h1>¡Hola ${userName}, te damos la bienvenida a FutbolProyect!</h1>
+                     <p>Gracias por unirte a nuestra comunidad. Estamos emocionados de tenerte con nosotros.</p>`;
+
+  if (userType === 'postulante') {
+    htmlContent += `<p><b>Importante:</b> Te recordamos que los perfiles con mayor puntuación y más completos son los que aparecen primero en nuestra plataforma. ¡Asegúrate de completar tu perfil al 100% para tener la máxima visibilidad!</p>`;
+  }
+
+  htmlContent += `<p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de bienvenida enviado con éxito a ${to}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error al enviar correo de bienvenida a ${to}:`, error);
+    // No relanzamos el error para no detener el flujo principal (ej. el registro)
+  }
+};
+
+/**
+ * Envía un correo de confirmación de suscripción.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} plan - Nombre del plan.
+ * @param {Date} endDate - Fecha de finalización de la suscripción.
+ */
+const sendSubscriptionConfirmationEmail = async (to, userName, plan, endDate) => {
+  const subject = 'Confirmación de Suscripción en FutbolProyect';
+  const formattedEndDate = new Date(endDate).toLocaleDateString('es-ES', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  const htmlContent = `<h1>¡Hola ${userName}, tu suscripción está activa!</h1>
+                     <p>Te confirmamos que tu suscripción al plan <strong>${plan}</strong> en FutbolProyect ha sido activada.</p>
+                     <p>Tu suscripción es válida hasta el <strong>${formattedEndDate}</strong>.</p>
+                     <p>Gracias por confiar en nosotros.</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de suscripción enviado con éxito a ${to}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error al enviar correo de suscripción a ${to}:`, error);
+  }
+};
+
+/**
+ * Envía un correo notificando sobre una nueva oferta laboral.
+ * @param {string} to - Email del destinatario.
+ * @param {string} offerTitle - Título de la oferta.
+ * @param {string} offerLink - Enlace a la oferta.
+ */
+const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
+  const subject = `¡Nueva Oferta Laboral en FutbolProyect: ${offerTitle}!`;
+  const htmlContent = `<h1>¡Hola!</h1>
+                     <p>Hay una nueva oferta laboral que podría interesarte en FutbolProyect:</p>
+                     <h2>${offerTitle}</h2>
+                     <p>Puedes ver los detalles y postularte haciendo clic en el siguiente botón:</p>
+                     <a href="${offerLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Ver Oferta</a>
+                     <br>
+                     <p>¡No dejes pasar esta oportunidad!</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    // Usamos un try-catch para cada correo individualmente.
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect Admin <admin@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      console.error(`Error enviando notificación de oferta a ${to}:`, error.message);
+    } else {
+      console.log(`Notificación de nueva oferta enviada a ${to}.`);
+    }
+  } catch (error) {
+    console.error(`Error catastrófico enviando notificación de oferta a ${to}:`, error);
+  }
+};
+
+
+
 // Por ahora, solo exportamos esta función. Puedes añadir las otras después si las necesitas.
 module.exports = {
   sendContactEmail,
+  sendWelcomeEmail,
+  sendSubscriptionConfirmationEmail,
+  sendNewOfferNotificationEmail,
 };

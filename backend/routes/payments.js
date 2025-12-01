@@ -1,4 +1,7 @@
 const express = require("express");
+const {
+  sendSubscriptionConfirmationEmail,
+} = require("../services/emailService");
 const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const paypal = require("@paypal/checkout-server-sdk");
 const db = require("../db");
@@ -154,6 +157,14 @@ router.post("/webhook-mp", async (req, res) => {
             plan,
             fechaFin,
           });
+
+          // Send confirmation email
+          const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId: parseInt(userId, 10) });
+          if (userResult.rows.length > 0) {
+            const user = userResult.rows[0];
+            sendSubscriptionConfirmationEmail(user.email, user.nombre, plan, fechaFin)
+              .catch(emailError => console.error("Failed to send subscription email for MP:", emailError));
+          }
         }
       }
     }
@@ -313,6 +324,15 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
           plan,
           fechaFin,
         });
+        
+        // Send confirmation email
+        const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId: parseInt(userId, 10) });
+        if (userResult.rows.length > 0) {
+          const user = userResult.rows[0];
+          sendSubscriptionConfirmationEmail(user.email, user.nombre, plan, fechaFin)
+            .catch(emailError => console.error("Failed to send subscription email for PayPal:", emailError));
+        }
+
         res.json({ success: true });
       }
     } else {
