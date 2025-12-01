@@ -218,13 +218,17 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
       )}
 
       {/* Photo View Modal */}
-      <Dialog open={!!selectedPhotoToView} onClose={handleClosePhotoView} maxWidth="md">
+      <Dialog open={!!selectedPhotoToView} onClose={handleClosePhotoView} maxWidth="lg" fullWidth>
         <DialogContent>
           {selectedPhotoToView && (
             <img
               src={selectedPhotoToView.url} // Use the full URL from the backend
               alt={selectedPhotoToView[`title_${lang}`] || selectedPhotoToView.title}
-              style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: 'auto' }}
+              style={{
+                width: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain',
+              }}
             />
           )}
         </DialogContent>
