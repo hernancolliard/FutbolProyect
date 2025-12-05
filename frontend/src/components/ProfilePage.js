@@ -86,6 +86,10 @@ function ProfilePage() {
   const [showVideoFormModal, setShowVideoFormModal] = useState(false);
   const [videoToEdit, setVideoToEdit] = useState(null);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  const handleOpenImageModal = () => setIsImageModalOpen(true);
+  const handleCloseImageModal = () => setIsImageModalOpen(false);
 
   const handleOpenEditProfileModal = () => setShowEditProfileModal(true);
   const handleCloseEditProfileModal = () => setShowEditProfileModal(false);
@@ -262,7 +266,7 @@ function ProfilePage() {
                       sx={{ mb: 2 }}
                     >
                       {profile.foto_perfil_url ? (
-                        <Box sx={{ flexShrink: 0 }}>
+                        <Box sx={{ flexShrink: 0, cursor: 'pointer' }} onClick={handleOpenImageModal}>
                           <img
                             src={profile.foto_perfil_url}
                             alt={t("profile_picture_alt", {
@@ -695,6 +699,38 @@ function ProfilePage() {
           </Modal>
         )}
       </Stack>
+      <Modal
+        open={isImageModalOpen}
+        onClose={handleCloseImageModal}
+        aria-labelledby="profile-image-modal"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 1,
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            src={profile.foto_perfil_url}
+            alt={t("profile_picture_alt", { name: profile.nombre })}
+            style={{
+              maxWidth: '100%',
+              maxHeight: 'calc(90vh - 16px)', // Accounting for padding
+              objectFit: 'contain',
+            }}
+          />
+        </Box>
+      </Modal>
     </>
   );
 }
