@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaFacebook, FaLinkedin, FaWhatsapp, FaLink } from 'react-icons/fa';
+import { FaFacebook, FaLinkedin, FaWhatsapp, FaInstagram } from 'react-icons/fa';
 import './ShareButtons.css';
 import { useTranslation } from 'react-i18next';
 
@@ -36,11 +36,11 @@ const ShareButtons = ({ title, url }) => {
         <a href={socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp">
           <FaWhatsapp size={32} />
         </a>
-        <button onClick={copyToClipboard} aria-label="Copy link">
-          <FaLink size={32} />
+        <button onClick={copyToClipboard} aria-label="Copy link for Instagram">
+          <FaInstagram size={32} />
         </button>
       </div>
-      {copied && <p className="copied-message">{t('linkCopied')}</p>}
+      {copied && <p className="copied-message">{t('linkCopiedInstagram')}</p>}
     </div>
   );
 };
