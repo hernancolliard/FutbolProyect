@@ -234,6 +234,17 @@ function ProfilePage() {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="profile" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={profile.foto_perfil_url || 'https://futbolproyect.com/images/logos/logofp.png'} />
+        <meta property="og:url" content={window.location.href} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={profile.foto_perfil_url || 'https://futbolproyect.com/images/logos/logofp.png'} />
       </Helmet>
       <Stack alignItems="center" sx={{ mt: 4 }}>
         <Card sx={{ maxWidth: 1350, width: "100%", p: 3 }} elevation={3}>

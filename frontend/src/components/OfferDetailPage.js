@@ -142,6 +142,17 @@ function OfferDetailPage() {
       <Helmet>
         <title>{`${titulo} - FutbolProyect`}</title>
         <meta name="description" content={descripcion ? descripcion.substring(0, 160) : ''} />
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={titulo} />
+        <meta property="og:description" content={descripcion ? descripcion.substring(0, 160) : ''} />
+        <meta property="og:image" content={offer.imagen_url || 'https://futbolproyect.com/images/logos/logofp.png'} />
+        <meta property="og:url" content={window.location.href} />
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={titulo} />
+        <meta name="twitter:description" content={descripcion ? descripcion.substring(0, 160) : ''} />
+        <meta name="twitter:image" content={offer.imagen_url || 'https://futbolproyect.com/images/logos/logofp.png'} />
         <script type="application/ld+json">
           {JSON.stringify(jobPostingSchema)}
         </script>
