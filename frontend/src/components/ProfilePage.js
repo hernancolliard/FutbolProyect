@@ -166,6 +166,13 @@ function ProfilePage() {
     }
   }, [userId, isMyProfile]);
 
+  useEffect(() => {
+    // Señal para el servicio de pre-renderizado cuando todo el contenido principal está cargado
+    if (!isLoadingProfile && !isErrorProfile && !isLoadingVideos && !isErrorVideos && !isLoadingOffers && !isErrorOffers) {
+      window.prerenderReady = true;
+    }
+  }, [isLoadingProfile, isErrorProfile, isLoadingVideos, isErrorVideos, isLoadingOffers, isErrorOffers]);
+
   const handleOpenVideoPlayer = (video) => {
     setSelectedVideoToPlay(video);
     setShowVideoPlayerModal(true);
