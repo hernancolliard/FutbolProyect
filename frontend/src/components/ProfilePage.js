@@ -26,6 +26,7 @@ import EditProfileForm from "./EditProfileForm";
 import Modal from "@mui/material/Modal";
 import UserPhotosSection from "./UserPhotosSection";
 import MyOffersList from "./MyOffersList";
+import ShareButtons from './ShareButtons';
 
 const fetchProfile = async (userId) => {
   const { data } = await apiClient.get(`/profiles/${userId}`);
@@ -295,6 +296,7 @@ function ProfilePage() {
                           {t("edit_profile_button", "Editar Perfil")}
                         </Button>
                       )}
+                      <ShareButtons title={`${profile.nombre} ${profile.apellido || ""}`} url={window.location.href} />
                     </Stack>
                   </Grid>
 

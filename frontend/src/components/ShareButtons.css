@@ -1,0 +1,38 @@
+.share-buttons-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.share-buttons-container h4 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.share-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.share-buttons a,
+.share-buttons button {
+  color: #007bff;
+  transition: transform 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.share-buttons a:hover,
+.share-buttons button:hover {
+  transform: scale(1.1);
+  color: #0056b3;
+}
+
+.copied-message {
+  margin-top: 10px;
+  color: green;
+  font-size: 0.9em;
+  font-weight: bold;
+}

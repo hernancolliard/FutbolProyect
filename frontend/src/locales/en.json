@@ -319,6 +319,8 @@
     "profile_views_header": "Profile Views",
     "applications_header": "Applications",
     "view_applicants_button": "View Applicants",
-    "featured_offers": "Featured Offers"
+    "featured_offers": "Featured Offers",
+    "share": "Share",
+    "linkCopied": "Link copied!"
   }
 }

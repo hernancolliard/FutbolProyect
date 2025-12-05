@@ -17,6 +17,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import FeatureOfferPaymentModal from "./FeatureOfferPaymentModal";
 import OfferActions from "./OfferActions"; // Importar el componente centralizado
 import OptimizedImage from "./OptimizedImage";
+import ShareButtons from './ShareButtons';
 
 // --- Función de Fetching para React Query ---
 const fetchOffer = async (offerId) => {
@@ -199,6 +200,9 @@ function OfferDetailPage() {
             offerId={offerId}
           />
         )}
+      </Stack>
+      <Stack alignItems="center" sx={{ mt: 2, mb: 4 }}>
+        <ShareButtons title={titulo} url={window.location.href} />
       </Stack>
     </>
   );
