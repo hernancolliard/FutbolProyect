@@ -10,9 +10,10 @@ import {
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from '@mui/icons-material/Delete';
 import apiClient from "../services/api";
 
-const VideoCard = ({ video, onAdd, onPlay, onEdit, isMyProfile }) => {
+const VideoCard = ({ video, onAdd, onPlay, onEdit, onDelete, isMyProfile }) => {
   if (!video) {
     return (
       <Card sx={{ height: "100%", display: "flex" }}>
@@ -67,6 +68,9 @@ const VideoCard = ({ video, onAdd, onPlay, onEdit, isMyProfile }) => {
         <CardActions sx={{ p: 0, justifyContent: "flex-end" }}>
           <IconButton aria-label="edit" size="small" onClick={() => onEdit(video)}>
             <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton aria-label="delete" size="small" onClick={() => onDelete(video.id)}>
+            <DeleteIcon fontSize="small" />
           </IconButton>
         </CardActions>
       )}

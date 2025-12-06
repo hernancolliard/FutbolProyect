@@ -322,6 +322,9 @@
     "featured_offers": "Featured Offers",
     "share": "Share",
     "linkCopied": "Link copied!",
-    "linkCopiedInstagram": "Link copied! Paste it in your Instagram story."
+    "linkCopiedInstagram": "Link copied! Paste it in your Instagram story.",
+    "are_you_sure_delete_video": "Are you sure you want to delete this video?",
+    "video_deleted_successfully": "Video deleted successfully.",
+    "video_delete_error": "Error deleting video."
   }
 }

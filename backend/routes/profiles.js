@@ -606,10 +606,6 @@ router.put(
       });
 
       const updatedVideo = result.rows[0];
-      updatedVideo.cover_image_url = getFullUrl(
-        req,
-        `uploads/${updatedVideo.cover_image_url}`
-      );
 
       res.json(updatedVideo);
     } catch (error) {

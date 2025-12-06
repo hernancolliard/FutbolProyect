@@ -27,7 +27,7 @@ import Modal from "@mui/material/Modal";
 import UserPhotosSection from "./UserPhotosSection";
 import MyOffersList from "./MyOffersList";
 import ShareButtons from './ShareButtons';
-
+import { toast } from 'react-toastify';
 const fetchProfile = async (userId) => {
   const { data } = await apiClient.get(`/profiles/${userId}`);
   return data;
@@ -195,6 +195,23 @@ function ProfilePage() {
 
   const handleVideoSaved = () => {
     queryClient.invalidateQueries(["userVideos", userId]);
+  };
+
+  const { mutate: deleteVideo } = useMutation({
+    mutationFn: (videoId) => apiClient.delete(`/profiles/videos/${videoId}`),
+    onSuccess: () => {
+      toast.success(t("video_deleted_successfully", "Video eliminado con éxito."));
+      queryClient.invalidateQueries(["userVideos", userId]);
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || t("video_delete_error", "Error al eliminar el video."));
+    },
+  });
+
+  const handleDeleteVideo = (videoId) => {
+    if (window.confirm(t('are_you_sure_delete_video', '¿Estás seguro de que quieres eliminar este video?'))) {
+      deleteVideo(videoId);
+    }
   };
 
   if (isLoadingProfile) {
@@ -567,6 +584,7 @@ function ProfilePage() {
                       }
                       onEdit={handleOpenVideoForm}
                       onPlay={handleOpenVideoPlayer}
+                      onDelete={handleDeleteVideo}
                     />
                   </Grid>
                 ))}
