@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FaFacebook, FaLinkedin, FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import { FaFacebook, FaLinkedin, FaWhatsapp, FaInstagram, FaDownload } from 'react-icons/fa';
 import './ShareButtons.css';
 import { useTranslation } from 'react-i18next';
 
-const ShareButtons = ({ title, url }) => {
+const ShareButtons = ({ title, url, onDownload }) => {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
@@ -38,6 +38,9 @@ const ShareButtons = ({ title, url }) => {
         </a>
         <button onClick={copyToClipboard} aria-label="Copy link for Instagram">
           <FaInstagram size={32} />
+        </button>
+        <button onClick={onDownload} aria-label="Download offer">
+          <FaDownload size={32} />
         </button>
       </div>
       {copied && <p className="copied-message">{t('linkCopiedInstagram')}</p>}
