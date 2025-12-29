@@ -46,4 +46,33 @@ module.exports = {
       throw error;
     }
   },
+  getClient: async () => {
+    const client = await pool.connect();
+    const originalQuery = client.query;
+    const originalRelease = client.release;
+
+    // Monkey-patch a new query method that handles named parameters
+    client.query = async (text, params) => {
+      if (!params) {
+        return originalQuery.call(client, text);
+      }
+
+      const pgValues = [];
+      const namedParams = {};
+
+      const newText = text.replace(/@(\w+)/g, (match, key) => {
+        if (!params.hasOwnProperty(key)) {
+          throw new Error(`Missing parameter value for key: ${key}`);
+        }
+        if (!namedParams.hasOwnProperty(key)) {
+          pgValues.push(params[key]);
+          namedParams[key] = `$${pgValues.length}`;
+        }
+        return namedParams[key];
+      });
+      return originalQuery.call(client, newText, pgValues);
+    };
+    
+    return client;
+  }
 };

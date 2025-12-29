@@ -48,6 +48,8 @@ router.delete(
   [verificarToken, verificarAdmin],
   async (req, res) => {
     const { id } = req.params;
+    const client = await db.getClient(); // Obtener un cliente del pool
+
     try {
       // Opcional: verificar que no se esté eliminando a sí mismo
       if (parseInt(id, 10) === req.user.id) {
@@ -55,11 +57,27 @@ router.delete(
           message: "No puedes eliminar tu propia cuenta de administrador.",
         });
       }
-      await db.query("DELETE FROM usuarios WHERE id = @id", { id });
+
+      await client.query("BEGIN"); // Iniciar transacción
+
+      // Eliminar referencias en 'postulaciones'
+      await client.query(
+        "DELETE FROM postulaciones WHERE id_usuario_postulante = @id",
+        { id }
+      );
+
+      // Eliminar al usuario
+      await client.query("DELETE FROM usuarios WHERE id = @id", { id });
+
+      await client.query("COMMIT"); // Finalizar transacción
+
       res.status(200).json({ message: "Usuario eliminado exitosamente." });
     } catch (error) {
+      await client.query("ROLLBACK"); // Revertir en caso de error
       console.error("Error al eliminar usuario:", error);
       res.status(500).json({ message: "Error del servidor." });
+    } finally {
+      client.release(); // Liberar el cliente
     }
   }
 );
