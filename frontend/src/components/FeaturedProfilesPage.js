@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import apiClient from '../services/api';
@@ -7,18 +6,50 @@ import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import './FeaturedProfilesPage.css';
+import { Select, MenuItem, FormControl, InputLabel, Button, Grid } from '@mui/material';
 
-const fetchFeaturedProfiles = async () => {
-  const { data } = await apiClient.get('/profiles/destacados');
+const fetchFeaturedProfiles = async (filters) => {
+  const { data } = await apiClient.get('/profiles/destacados', { params: filters });
   return data;
 };
 
+const fetchNacionalidades = async () => {
+    const { data } = await apiClient.get('/profiles/nacionalidades');
+    return data;
+}
+
+const fetchPuestos = async () => {
+    const { data } = await apiClient.get('/profiles/puestos');
+    return data;
+}
+
+
 function FeaturedProfilesPage() {
   const { t } = useTranslation();
+  const [filters, setFilters] = useState({ nacionalidad: '', puesto: '' });
+
   const { data: profiles, isLoading, isError, error } = useQuery({
-    queryKey: ['featuredProfiles'],
-    queryFn: fetchFeaturedProfiles,
+    queryKey: ['featuredProfiles', filters],
+    queryFn: () => fetchFeaturedProfiles(filters),
   });
+
+  const { data: nacionalidades, isLoading: isLoadingNacionalidades } = useQuery({
+      queryKey: ['nacionalidades'],
+      queryFn: fetchNacionalidades
+  })
+
+  const { data: puestos, isLoading: isLoadingPuestos } = useQuery({
+    queryKey: ['puestos'],
+    queryFn: fetchPuestos
+})
+
+  const handleFilterChange = (e) => {
+    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({ nacionalidad: '', puesto: '' });
+  };
 
   return (
     <>
@@ -32,6 +63,42 @@ function FeaturedProfilesPage() {
       <div className="featured-profiles-page">
         <h2 className="page-title">{t('featured_profiles_title', 'Perfiles Destacados')}</h2>
         <p className="page-description">{t('featured_profiles_desc', 'Estos son los profesionales que han decidido destacar su perfil en nuestra plataforma.')}</p>
+
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={5}>
+            <FormControl fullWidth>
+              <InputLabel>{t('filter_by_nationality', 'Filtrar por nacionalidad')}</InputLabel>
+              <Select
+                name="nacionalidad"
+                value={filters.nacionalidad}
+                onChange={handleFilterChange}
+                label={t('filter_by_nationality', 'Filtrar por nacionalidad')}
+                disabled={isLoadingNacionalidades}
+              >
+                <MenuItem value=""><em>{t('all_nationalities', 'Todas')}</em></MenuItem>
+                {nacionalidades?.map(nac => <MenuItem key={nac} value={nac}>{nac}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={5}>
+            <FormControl fullWidth>
+              <InputLabel>{t('filter_by_position', 'Filtrar por puesto')}</InputLabel>
+              <Select
+                name="puesto"
+                value={filters.puesto}
+                onChange={handleFilterChange}
+                label={t('filter_by_position', 'Filtrar por puesto')}
+                disabled={isLoadingPuestos}
+              >
+                <MenuItem value=""><em>{t('all_positions', 'Todos')}</em></MenuItem>
+                {puestos?.map(pos => <MenuItem key={pos} value={pos}>{pos}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button variant="outlined" onClick={clearFilters} fullWidth>{t('clear_filters', 'Limpiar')}</Button>
+          </Grid>
+        </Grid>
 
         {isLoading ? (
           <LoadingSpinner text={t('loading_profiles', 'Cargando perfiles...')} />
@@ -63,7 +130,7 @@ function FeaturedProfilesPage() {
                 </div>
               ))
             ) : (
-              <p>{t('no_featured_profiles', 'De momento no hay perfiles destacados.')}</p>
+              <p>{t('no_featured_profiles_filters', 'No hay perfiles destacados que coincidan con los filtros seleccionados.')}</p>
             )}
           </div>
         )}

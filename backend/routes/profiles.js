@@ -22,7 +22,21 @@ const getFullUrl = (req, filePath) => {
 
 // --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
 router.get("/destacados", async (req, res) => {
+  const { nacionalidad, puesto } = req.query;
+
   try {
+    let queryParams = [];
+    let whereClauses = ["u.tipo_usuario = 'postulante'"];
+
+    if (nacionalidad) {
+      queryParams.push(nacionalidad);
+      whereClauses.push(`p.nacionalidad = $${queryParams.length}`);
+    }
+    if (puesto) {
+      queryParams.push(puesto);
+      whereClauses.push(`p.posicion_principal = $${queryParams.length}`);
+    }
+
     const query = `
       SELECT
           u.id,
@@ -39,19 +53,45 @@ router.get("/destacados", async (req, res) => {
           perfiles_usuario p ON u.id = p.id_usuario
       LEFT JOIN
           suscripciones s ON u.id = s.id_usuario
-      WHERE
-          u.tipo_usuario = 'postulante' -- Mostrar todos los postulantes, no solo los suscritos
+      WHERE ${whereClauses.join(" AND ")}
       ORDER BY
           p.average_rating DESC NULLS LAST, -- Ordenar por calificación promedio (los nulos al final)
           s.fecha_fin DESC; -- Luego por fecha de fin de suscripción
     `;
-    const result = await db.query(query);
+
+    const result = await db.query(query, queryParams);
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los perfiles destacados:", error);
     res.status(500).json({ message: "Error del servidor." });
   }
 });
+
+
+// RUTA PÚBLICA: OBTENER TODAS LAS NACIONALIDADES ÚNICAS
+router.get('/nacionalidades', async (req, res) => {
+  try {
+    const query = "SELECT DISTINCT nacionalidad FROM perfiles_usuario WHERE nacionalidad IS NOT NULL ORDER BY nacionalidad ASC";
+    const result = await db.query(query);
+    res.json(result.rows.map(row => row.nacionalidad));
+  } catch (error) {
+    console.error('Error al obtener las nacionalidades:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+});
+
+// RUTA PÚBLICA: OBTENER TODOS LOS PUESTOS ÚNICOS
+router.get('/puestos', async (req, res) => {
+  try {
+    const query = "SELECT DISTINCT posicion_principal FROM perfiles_usuario WHERE posicion_principal IS NOT NULL ORDER BY posicion_principal ASC";
+    const result = await db.query(query);
+    res.json(result.rows.map(row => row.posicion_principal));
+  } catch (error) {
+    console.error('Error al obtener los puestos:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+});
+
 
 // --- RUTA PÚBLICA: OBTENER PERFIL DE USUARIO ---
 router.get("/:userId", async (req, res) => {
