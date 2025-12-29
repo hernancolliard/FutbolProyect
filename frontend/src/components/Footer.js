@@ -88,6 +88,17 @@ function Footer() {
             />
           </IconButton>
         </Stack>
+        <Typography variant="body2" color="inherit" sx={{ mt: 2 }}>
+          <Link
+            href="https://paranadev.onrender.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="inherit"
+            underline="hover"
+          >
+            Parana Dev - Desarrollo Web
+          </Link>
+        </Typography>
       </Stack>
     </Box>
   );
