@@ -12,14 +12,8 @@ function Register({ onClose, initialRole = 'player' }) {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     nombre: "",
-    apellido: "",
-    telefono: "",
     email: "",
     password: "",
-    dni: "",
-    direccion: "",
-    ciudad: "",
-    pais: "",
     tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante',
   });
   const [error, setError] = useState("");
@@ -44,17 +38,10 @@ function Register({ onClose, initialRole = 'player' }) {
       await apiClient.post("/users/register", formData);
       setSuccess(t("register_success"));
       // Limpiamos el formulario y no cerramos para que el usuario vea el mensaje.
-      // Opcionalmente, podríamos cerrar el modal después de unos segundos.
       setFormData({
         nombre: "",
-        apellido: "",
-        telefono: "",
         email: "",
         password: "",
-        dni: "",
-        direccion: "",
-        ciudad: "",
-        pais: "",
         tipo_usuario: "postulante",
       });
     } catch (err) {
@@ -95,24 +82,6 @@ function Register({ onClose, initialRole = 'player' }) {
             fullWidth
           />
           <TextField
-            type="text"
-            name="apellido"
-            label={t("lastname_placeholder")}
-            value={formData.apellido}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
-            type="text"
-            name="telefono"
-            label={t("phone_placeholder")}
-            value={formData.telefono}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
             type="email"
             name="email"
             label={t("email_placeholder")}
@@ -126,42 +95,6 @@ function Register({ onClose, initialRole = 'player' }) {
             name="password"
             label={t("password_placeholder")}
             value={formData.password}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
-            type="text"
-            name="dni"
-            label={t("dni_placeholder")}
-            value={formData.dni}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
-            type="text"
-            name="direccion"
-            label={t("address_placeholder")}
-            value={formData.direccion}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
-            type="text"
-            name="ciudad"
-            label={t("city_placeholder")}
-            value={formData.ciudad}
-            onChange={handleChange}
-            required
-            fullWidth
-          />
-          <TextField
-            type="text"
-            name="pais"
-            label={t("country_placeholder")}
-            value={formData.pais}
             onChange={handleChange}
             required
             fullWidth

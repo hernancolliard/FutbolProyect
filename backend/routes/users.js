@@ -19,32 +19,32 @@ const router = express.Router();
 // Esquema de validación para el registro
 const registerSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido."),
-  apellido: z.string().min(1, "El apellido es requerido."),
-  telefono: z.string().min(1, "El teléfono es requerido."),
   email: z.string().email("El correo electrónico no es válido."),
   password: z
     .string()
     .min(6, "La contraseña debe tener al menos 6 caracteres."),
-  dni: z.string().min(1, "El DNI es requerido."),
-  direccion: z.string().min(1, "La dirección es requerida."),
-  ciudad: z.string().min(1, "La ciudad es requerida."),
-  pais: z.string().min(1, "El país es requerido."),
   tipo_usuario: z.enum(["postulante", "ofertante", "agencia"]),
+  apellido: z.string().optional(),
+  telefono: z.string().optional(),
+  dni: z.string().optional(),
+  direccion: z.string().optional(),
+  ciudad: z.string().optional(),
+  pais: z.string().optional(),
 });
 
 // Endpoint de Registro
 router.post("/register", validate(registerSchema), async (req, res) => {
   const {
     nombre,
-    apellido,
-    telefono,
     email,
     password,
+    tipo_usuario,
+    apellido,
+    telefono,
     dni,
     direccion,
     ciudad,
     pais,
-    tipo_usuario,
   } = req.body;
 
   try {
@@ -66,15 +66,15 @@ router.post("/register", validate(registerSchema), async (req, res) => {
                                                       RETURNING id, nombre, apellido, email, tipo_usuario, isadmin`;
     const newUserResult = await db.query(queryText, {
       nombre,
-      apellido,
-      telefono,
       email,
       password_hash,
-      dni,
-      direccion,
-      ciudad,
-      pais,
       tipo_usuario,
+      apellido: apellido || null,
+      telefono: telefono || null,
+      dni: dni || null,
+      direccion: direccion || null,
+      ciudad: ciudad || null,
+      pais: pais || null,
     });
     const newUser = newUserResult.rows[0];
 

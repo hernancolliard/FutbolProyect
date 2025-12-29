@@ -107,6 +107,7 @@ function ProfilePage() {
   } = useQuery({
     queryKey: ["profile", userId],
     queryFn: () => fetchProfile(userId),
+    enabled: !!currentUser, // Solo ejecutar si el usuario está logueado
   });
 
   const {
@@ -117,7 +118,7 @@ function ProfilePage() {
   } = useQuery({
     queryKey: ["userVideos", userId],
     queryFn: () => fetchUserVideos(userId),
-    enabled: !!userId, // Solo ejecutar si userId está presente
+    enabled: !!userId && !!currentUser, // Solo ejecutar si userId está presente y hay usuario
     initialData: [],
   });
 
@@ -145,6 +146,7 @@ function ProfilePage() {
     queryFn: () => fetchUserOffers(userId),
     enabled:
       !!profile &&
+      !!currentUser &&
       (profile.tipo_usuario === "ofertante" ||
         profile.tipo_usuario === "agencia"),
     initialData: [],
@@ -153,7 +155,7 @@ function ProfilePage() {
   const isMyProfile = currentUser && currentUser.id === parseInt(userId, 10);
 
   useEffect(() => {
-    if (userId && !isMyProfile) {
+    if (userId && !isMyProfile && currentUser) {
       const recordView = async () => {
         try {
           await apiClient.post(`/profiles/${userId}/view`);
@@ -164,7 +166,7 @@ function ProfilePage() {
       };
       recordView();
     }
-  }, [userId, isMyProfile]);
+  }, [userId, isMyProfile, currentUser]);
 
   useEffect(() => {
     // Señal para el servicio de pre-renderizado cuando todo el contenido principal está cargado
@@ -213,6 +215,14 @@ function ProfilePage() {
       deleteVideo(videoId);
     }
   };
+
+  if (!currentUser) {
+    return (
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <Alert severity="warning">{t("must_be_logged_in_to_see_profile", "Debes iniciar sesión para ver este perfil.")}</Alert>
+      </Stack>
+    );
+  }
 
   if (isLoadingProfile) {
     return (

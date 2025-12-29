@@ -38,6 +38,7 @@ function OfferDetailPage() {
   const { data: offer, isLoading, isError, error } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: () => fetchOffer(offerId),
+    enabled: !!user, // Solo ejecutar la consulta si el usuario está logueado
   });
 
   const { mutate: deleteOffer } = useMutation({
@@ -74,9 +75,18 @@ function OfferDetailPage() {
     if (!isLoading && !isError) {
       window.prerenderReady = true;
     }
-  }, [isLoading, isError]);
+  }, [isLoading, isError, user]);
+
 
   // --- Renderizado condicional ---
+  if (!user) {
+    return (
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <Alert severity="warning">{t("must_be_logged_in_to_see_offer", "Debes iniciar sesión para ver los detalles de la oferta.")}</Alert>
+      </Stack>
+    );
+  }
+
   if (isLoading) {
     return (
       <Stack alignItems="center" sx={{ mt: 4 }}>
