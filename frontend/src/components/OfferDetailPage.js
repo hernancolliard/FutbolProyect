@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import apiClient from "../services/api";
 import { useTranslation } from "react-i18next";
@@ -6,7 +6,6 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet-async";
-import html2canvas from "html2canvas";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -34,7 +33,6 @@ function OfferDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const offerCardRef = useRef(null);
 
   // Query para obtener los datos de la oferta
   const { data: offer, isLoading, isError, error } = useQuery({
@@ -70,17 +68,6 @@ function OfferDetailPage() {
   const handleClosePaymentModal = () => {
     setShowPaymentModal(false);
     queryClient.invalidateQueries({ queryKey: ["offer", offerId] });
-  };
-
-  const handleDownload = () => {
-    if (offerCardRef.current) {
-      html2canvas(offerCardRef.current).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `offer-${offerId}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
-    }
   };
 
   useEffect(() => {
@@ -188,7 +175,7 @@ function OfferDetailPage() {
         </script>
       </Helmet>
       <Stack alignItems="center" sx={{ mt: 4 }}>
-        <Card ref={offerCardRef} sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
+        <Card sx={{ maxWidth: 800, width: "100%" }} elevation={3} className="offer-detail-page">
           {offer.imagen_url && (
               <OptimizedImage
                 src={offer.imagen_url}
@@ -243,7 +230,7 @@ function OfferDetailPage() {
         )}
       </Stack>
       <Stack alignItems="center" sx={{ mt: 2, mb: 4 }}>
-        <ShareButtons title={titulo} url={window.location.href} onDownload={handleDownload} />
+        <ShareButtons title={titulo} url={window.location.href} />
       </Stack>
     </>
   );
