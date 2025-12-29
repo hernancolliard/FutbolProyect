@@ -5,18 +5,25 @@ import { useAuth } from '../context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import apiClient from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const applyToOffer = async (offerId) => {
   const { data } = await apiClient.post(`/offers/${offerId}/apply`);
   return data;
 };
 
+const fetchUserProfile = async (userId) => {
+    const { data } = await apiClient.get(`/profiles/${userId}`);
+    return data;
+}
+
 function OfferActions({ offer, onOfferAction, isFetching }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  const { mutate: handleApply, isLoading: isApplying } = useMutation({
+  const { mutate: performApply, isLoading: isApplying } = useMutation({
     mutationFn: () => applyToOffer(offer.id),
     onMutate: async () => {
       // Cancelar queries para evitar sobreescribir la actualización optimista
@@ -69,6 +76,25 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
     },
   });
 
+  const handleApplyClick = async () => {
+    try {
+      const userProfile = await fetchUserProfile(user.id);
+      const { foto_perfil_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento } = userProfile;
+
+      const isProfileComplete = foto_perfil_url && altura_cm && peso_kg && pie_dominante && fecha_de_nacimiento;
+
+      if (!isProfileComplete) {
+        toast.error(t('complete_profile_to_apply', 'Debes completar tu perfil (foto y datos físicos) antes de postularte.'));
+        navigate(`/profile/${user.id}`);
+      } else {
+        performApply();
+      }
+    } catch (error) {
+      toast.error(t('profile_check_error', 'Error al verificar tu perfil. Inténtalo de nuevo.'));
+    }
+  };
+
+
   if (!user) {
     return null;
   }
@@ -98,7 +124,7 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
           variant="contained"
           onClick={(e) => {
             e.stopPropagation();
-            handleApply();
+            handleApplyClick();
           }}
           disabled={isApplying || hasApplied}
         >

@@ -606,6 +606,25 @@ router.post(
     const userId = req.user.id;
 
     try {
+      // 0. VERIFICAR PERFIL COMPLETO
+      const profileQuery = `
+        SELECT foto_perfil_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento 
+        FROM perfiles_usuario 
+        WHERE id_usuario = @userId
+      `;
+      const profileResult = await db.query(profileQuery, { userId });
+
+      if (profileResult.rows.length === 0) {
+        return res.status(400).json({ message: "Debes crear un perfil antes de postularte." });
+      }
+
+      const profile = profileResult.rows[0];
+      const isProfileComplete = profile.foto_perfil_url && profile.altura_cm && profile.peso_kg && profile.pie_dominante && profile.fecha_de_nacimiento;
+
+      if (!isProfileComplete) {
+        return res.status(400).json({ message: "Debes completar tu perfil (foto y datos físicos) antes de postularte." });
+      }
+
       // 1. Verificar que la oferta existe y no es del propio usuario
       const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
       const offerResult = await db.query(offerQuery, { offerId });
