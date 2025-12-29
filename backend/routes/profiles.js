@@ -25,16 +25,16 @@ router.get("/destacados", async (req, res) => {
   const { nacionalidad, puesto } = req.query;
 
   try {
-    let queryParams = [];
+    let queryParams = {}; // Usar un objeto para los parámetros nombrados
     let whereClauses = ["u.tipo_usuario = 'postulante'"];
 
     if (nacionalidad) {
-      queryParams.push(nacionalidad);
-      whereClauses.push(`p.nacionalidad = $${queryParams.length}`);
+      queryParams.nacionalidad = nacionalidad;
+      whereClauses.push(`p.nacionalidad = @nacionalidad`);
     }
     if (puesto) {
-      queryParams.push(puesto);
-      whereClauses.push(`p.posicion_principal = $${queryParams.length}`);
+      queryParams.puesto = puesto;
+      whereClauses.push(`p.posicion_principal = @puesto`);
     }
 
     const query = `
