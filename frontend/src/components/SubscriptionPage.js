@@ -88,8 +88,8 @@ function SubscriptionPage() {
               <Typography>{t("offerer_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
                 {billingCycle === 'monthly' 
-                  ? `$${monthlyPrice}/mes` 
-                  : `$${annualPrice}/año`}
+                  ? `U$D${monthlyPrice}/mes` 
+                  : `U$D${annualPrice}/año`}
               </Typography>
               <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
             </CardContent>
@@ -100,8 +100,8 @@ function SubscriptionPage() {
               <Typography>{t("applicant_plan_description")}</Typography>
               <Typography variant="h5" sx={{ my: 2 }}>
                 {billingCycle === 'monthly' 
-                  ? `$${monthlyPrice}/mes` 
-                  : `$${annualPrice}/año`}
+                  ? `U$D${monthlyPrice}/mes` 
+                  : `U$D${annualPrice}/año`}
               </Typography>
               <SubscribeButton planType="postulante" billingCycle={billingCycle} />
             </CardContent>
