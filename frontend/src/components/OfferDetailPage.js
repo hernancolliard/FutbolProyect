@@ -195,10 +195,10 @@ function OfferDetailPage() {
               <OptimizedImage
                 src={offer.imagen_url}
                 alt={titulo}
+                width="711"
+                height="400"
                 style={{
                   width: "100%",
-                  height: "auto",
-                  maxHeight: "400px",
                   objectFit: "contain",
                 }}
               />

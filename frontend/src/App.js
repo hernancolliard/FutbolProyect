@@ -6,9 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import OfferList from "./components/OfferList";
-import About from "./components/About";
-import Mission from "./components/Mission";
-import ContactSummary from "./components/ContactSummary";
 import Footer from "./components/Footer";
 import TrustedBy from "./components/TrustedBy";
 import FadeInOnScroll from "./components/FadeInOnScroll";
@@ -46,6 +43,9 @@ const TermsOfService = lazy(() => import("./components/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
 const FeaturedProfilesPage = lazy(() => import("./components/FeaturedProfilesPage"));
 const FeaturedProfilesCarousel = lazy(() => import("./components/FeaturedProfilesCarousel"));
+const About = lazy(() => import("./components/About"));
+const Mission = lazy(() => import("./components/Mission"));
+const ContactSummary = lazy(() => import("./components/ContactSummary"));
 
 // Create a client
 const queryClient = new QueryClient();

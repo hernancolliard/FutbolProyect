@@ -25,6 +25,7 @@ import VideoFormModal from "./VideoFormModal";
 import EditProfileForm from "./EditProfileForm";
 import Modal from "@mui/material/Modal";
 import UserPhotosSection from "./UserPhotosSection";
+import OptimizedImage from "./OptimizedImage";
 import MyOffersList from "./MyOffersList";
 import ShareButtons from './ShareButtons';
 import { toast } from 'react-toastify';
@@ -301,14 +302,14 @@ function ProfilePage() {
                     >
                       {profile.foto_perfil_url ? (
                         <Box sx={{ flexShrink: 0, cursor: 'pointer' }} onClick={handleOpenImageModal}>
-                          <img
+                          <OptimizedImage
                             src={profile.foto_perfil_url}
                             alt={t("profile_picture_alt", {
                               name: profile.nombre,
                             })}
+                            width="150"
+                            height="150"
                             style={{
-                              width: 150,
-                              height: 150,
                               borderRadius: "50%",
                               objectFit: "cover",
                               border: "2px solid #ccc",

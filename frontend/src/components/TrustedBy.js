@@ -50,7 +50,7 @@ function TrustedBy() {
       <Slider {...settings}>
         {logos.map((logo, index) => (
           <div key={index} className="logo-item">
-            <OptimizedImage src={logo.url} alt={logo.name} />
+            <OptimizedImage src={logo.url} alt={logo.name} width="120" height="120" />
           </div>
         ))}
       </Slider>

@@ -76,7 +76,9 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <OptimizedImage
               src="/images/logos/logofpblanco.png"
               alt="FP FutbolProyect"
-              style={{ height: "100%", maxHeight: "70px", marginRight: 16 }}
+              width="270"
+              height="70"
+              style={{ marginRight: 16 }}
             />
           </Link>
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>

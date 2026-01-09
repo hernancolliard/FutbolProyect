@@ -20,6 +20,7 @@ import apiClient from '../services/api';
 import FileUpload from './FileUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import OptimizedImage from './OptimizedImage';
 
 // --- API Calls ---
 const fetchUserPhotos = async (userId) => {
@@ -146,9 +147,11 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
                   }}
                   onClick={() => handleOpenPhotoView(photo)}
                 >
-                  <img
+                  <OptimizedImage
                     src={photo.url} // Use the full URL from the backend
                     alt={title}
+                    width="200"
+                    height="150"
                     style={{
                       width: '100%',
                       height: '100%',

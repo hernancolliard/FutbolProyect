@@ -8,7 +8,10 @@ import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from 'react-i18next';
 import useIsMobile from '../hooks/useIsMobile';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import OptimizedImage from './OptimizedImage';
 import './FeaturedProfilesCarousel.css';
+
+import OptimizedImage from './OptimizedImage';
 
 // --- Custom Arrow Components ---
 function NextArrow(props) {
@@ -80,11 +83,12 @@ function FeaturedProfilesCarousel() {
           <div key={profile.id} className="carousel-profile-card-wrapper" style={{ padding: 2 }}>
             <div className="carousel-profile-card">
               <Link to={`/profile/${profile.id}`} className="carousel-profile-card-link">
-                <img
+                <OptimizedImage
                   src={profile.foto_perfil_url || '/images/logos/logofp.png'}
                   alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                   className="carousel-profile-image"
-                  onError={(e) => { e.target.onerror = null; e.target.src = '/images/logos/logofp.png'; }}
+                  width="180"
+                  height="180"
                 />
                 <div className="carousel-profile-info">
                   <h3 className="carousel-profile-name">{`${profile.nombre} ${profile.apellido || ''}`}</h3>

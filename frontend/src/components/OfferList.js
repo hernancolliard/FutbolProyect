@@ -44,6 +44,9 @@ function OfferList({
 
     const isMobileHome = isHomePage && isMobile;
 
+    const imageWidth = isHomePage || isMobileHome ? 267 : 200;
+    const imageHeight = isHomePage || isMobileHome ? 150 : 113;
+
     return (
       <Card
         key={offer.id}
@@ -55,6 +58,7 @@ function OfferList({
           display: "flex",
           flexDirection: isHomePage || isMobileHome ? "column" : "row",
           height: "100%",
+          minHeight: isHomePage ? "420px" : "200px",
         }}
         elevation={2}
         className={`offer-card ${
@@ -81,6 +85,8 @@ function OfferList({
             <OptimizedImage
               src={offer.imagen_url}
               alt={titulo}
+              width={imageWidth}
+              height={imageHeight}
               style={{
                 width: "100%",
                 height: "100%",
