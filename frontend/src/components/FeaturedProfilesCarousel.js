@@ -11,8 +11,6 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import OptimizedImage from './OptimizedImage';
 import './FeaturedProfilesCarousel.css';
 
-import OptimizedImage from './OptimizedImage';
-
 // --- Custom Arrow Components ---
 function NextArrow(props) {
   const { className, style, onClick } = props;
