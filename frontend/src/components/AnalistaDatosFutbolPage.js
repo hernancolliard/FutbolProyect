@@ -4,6 +4,7 @@ import apiClient from '../services/api';
 import SeoPage from './SeoPage';
 import LoadingSpinner from './LoadingSpinner';
 import { useTranslation } from 'react-i18next';
+import OfferList from './OfferList'; // Import OfferList
 
 const fetchAnalystOffers = async () => {
   // Assuming the API can filter by position or a keyword
@@ -43,7 +44,8 @@ Si tenés conocimientos en herramientas como Excel, SQL, Power BI, Python o soft
   return (
     <SeoPage 
       {...pageContent}
-      offers={offers}
+      items={offers} // Pass offers as items
+      renderItems={(items) => <OfferList offers={items} isHomePage={false} />} // Pass OfferList as renderItems
     />
   );
 };

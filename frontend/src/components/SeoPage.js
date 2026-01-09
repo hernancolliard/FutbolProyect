@@ -1,9 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Typography, Container, Button, Box } from '@mui/material';
-import OfferList from './OfferList'; // Assuming OfferList can be reused
+// No longer directly importing OfferList or FeaturedProfilesCarousel here
 
-const SeoPage = ({ title, metaDescription, h1, mainText, h2, ctaText, ctaLink, offers }) => {
+const SeoPage = ({ title, metaDescription, h1, mainText, h2, ctaText, ctaLink, items, renderItems }) => {
   const paragraphs = mainText.split('\n\n');
 
   return (
@@ -28,9 +28,9 @@ const SeoPage = ({ title, metaDescription, h1, mainText, h2, ctaText, ctaLink, o
           </Typography>
         )}
 
-        {offers && offers.length > 0 && (
+        {items && items.length > 0 && renderItems && (
           <Box sx={{ mt: 4 }}>
-            <OfferList offers={offers} isHomePage={false} />
+            {renderItems(items)}
           </Box>
         )}
 
