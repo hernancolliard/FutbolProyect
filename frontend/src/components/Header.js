@@ -76,7 +76,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }) {
             <OptimizedImage
               src="/images/logos/logofpblanco.png"
               alt="FP FutbolProyect"
-              width="270"
+              width="120"
               height="70"
               style={{ marginRight: 16 }}
             />
