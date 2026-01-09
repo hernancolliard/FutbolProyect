@@ -47,6 +47,7 @@ const About = lazy(() => import("./components/About"));
 const Mission = lazy(() => import("./components/Mission"));
 const ContactSummary = lazy(() => import("./components/ContactSummary"));
 const OfertasTrabajoFutbolPage = lazy(() => import("./components/OfertasTrabajoFutbolPage"));
+const AnalistaDatosFutbolPage = lazy(() => import("./components/AnalistaDatosFutbolPage"));
 
 // Create a client
 const queryClient = new QueryClient();
@@ -182,6 +183,7 @@ function AppContent() {
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/ofertas-trabajo-futbol" element={<OfertasTrabajoFutbolPage />} />
+            <Route path="/trabajo-analista-datos-futbol" element={<AnalistaDatosFutbolPage />} />
           </Routes>
         </Suspense>
       </main>
