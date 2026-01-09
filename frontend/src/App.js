@@ -49,6 +49,7 @@ const ContactSummary = lazy(() => import("./components/ContactSummary"));
 const OfertasTrabajoFutbolPage = lazy(() => import("./components/OfertasTrabajoFutbolPage"));
 const AnalistaDatosFutbolPage = lazy(() => import("./components/AnalistaDatosFutbolPage"));
 const PerfilesJugadoresFutbolPage = lazy(() => import("./components/PerfilesJugadoresFutbolPage"));
+const EmpleoEntrenadoresFutbolPage = lazy(() => import("./components/EmpleoEntrenadoresFutbolPage"));
 
 // Create a client
 const queryClient = new QueryClient();
@@ -186,6 +187,7 @@ function AppContent() {
             <Route path="/ofertas-trabajo-futbol" element={<OfertasTrabajoFutbolPage />} />
             <Route path="/trabajo-analista-datos-futbol" element={<AnalistaDatosFutbolPage />} />
             <Route path="/perfiles-jugadores-futbol" element={<PerfilesJugadoresFutbolPage />} />
+            <Route path="/empleo-entrenadores-futbol" element={<EmpleoEntrenadoresFutbolPage />} />
           </Routes>
         </Suspense>
       </main>
