@@ -41,8 +41,8 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/sitemap", sitemapRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 
-// --- PRERENDER.IO MIDDLEWARE ---
-app.use(require('prerender-node').set('prerenderToken', process.env.PRERENDER_TOKEN));
+// --- PRERENDER.IO MIDDLEWARE (Desactivado) ---
+// app.use(require('prerender-node').set('prerenderToken', process.env.PRERENDER_TOKEN));
 
 // --- SERVIDOR DE ARCHIVOS ESTÁTICOS Y SPA HANDLER (Deben ir al final) ---
 app.use(express.static(path.join(__dirname, "../frontend/build")));
