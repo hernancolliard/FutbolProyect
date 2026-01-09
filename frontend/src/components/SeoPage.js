@@ -13,20 +13,23 @@ const SeoPage = ({ title, metaDescription, h1, mainText, h2, ctaText, ctaLink, i
         <meta name="description" content={metaDescription} />
       </Helmet>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h1" component="h1" sx={{ mb: 2, fontSize: '2.5rem', fontWeight: 'bold' }}>
-          {h1}
-        </Typography>
-        {paragraphs.map((paragraph, index) => (
-          <Typography variant="body1" paragraph key={index}>
-            {paragraph}
+        <section>
+          <Typography variant="h1" component="h1" sx={{ mb: 2, fontSize: '2.5rem', fontWeight: 'bold' }}>
+            {h1}
           </Typography>
-        ))}
-        
-        {h2 && (
-          <Typography variant="h2" component="h2" sx={{ mt: 4, mb: 2, fontSize: '2rem', fontWeight: 'bold' }}>
-            {h2}
-          </Typography>
-        )}
+          {paragraphs.map((paragraph, index) => (
+            <Typography variant="body1" paragraph key={index}>
+              {paragraph}
+            </Typography>
+          ))}
+          
+          {h2 && (
+            <Typography variant="h2" component="h2" sx={{ mt: 4, mb: 2, fontSize: '2rem', fontWeight: 'bold' }}>
+              {h2}
+            </Typography>
+          )}
+        </section>
+        </section>
 
         {items && items.length > 0 && renderItems && (
           <Box sx={{ mt: 4 }}>
