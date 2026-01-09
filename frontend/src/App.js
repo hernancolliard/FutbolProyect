@@ -46,6 +46,7 @@ const FeaturedProfilesCarousel = lazy(() => import("./components/FeaturedProfile
 const About = lazy(() => import("./components/About"));
 const Mission = lazy(() => import("./components/Mission"));
 const ContactSummary = lazy(() => import("./components/ContactSummary"));
+const OfertasTrabajoFutbolPage = lazy(() => import("./components/OfertasTrabajoFutbolPage"));
 
 // Create a client
 const queryClient = new QueryClient();
@@ -180,6 +181,7 @@ function AppContent() {
             <Route path="/edit-offer/:offerId" element={<CreateOffer />} />
             <Route path="/terms" element={<TermsOfService />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/ofertas-trabajo-futbol" element={<OfertasTrabajoFutbolPage />} />
           </Routes>
         </Suspense>
       </main>
