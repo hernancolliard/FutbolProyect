@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../../lib/registry";
-import { I18nProvider } from '../../components/I18nProvider';
-import Header from "../components/layout/Header";
-import { Box, Toolbar } from "@mui/material";
-import NextAuthSessionProvider from '../../components/SessionProvider'; // Import the new SessionProvider
+import NextAuthSessionProvider from '../../components/SessionProvider';
+import RootClientLayout from '../components/layout/RootClientLayout'; // Import RootClientLayout
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,24 +17,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Mock functions for login/register modals for now.
-  // These will be passed from a client component higher up in the tree
-  // once the Modal components are migrated.
-  const onShowLoginModal = () => console.log('Show Login Modal');
-  const onShowRegisterModal = (role: string) => console.log(`Show Register Modal for role: ${role}`);
-
   return (
     <html lang="es">
       <body className={inter.className}>
-        <NextAuthSessionProvider> {/* Wrap ThemeRegistry with SessionProvider */}
+        <NextAuthSessionProvider>
           <ThemeRegistry>
-            <I18nProvider>
-              <Header onShowLoginModal={onShowLoginModal} onShowRegisterModal={onShowRegisterModal} />
-              <Toolbar /> {/* Spacer for the fixed AppBar */}
-              <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                {children}
-              </Box>
-            </I18nProvider>
+            <RootClientLayout>{children}</RootClientLayout> {/* Use RootClientLayout */}
           </ThemeRegistry>
         </NextAuthSessionProvider>
       </body>
