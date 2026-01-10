@@ -4,7 +4,10 @@ import React from 'react';
 import { getTranslation } from '../../lib/i18n-server';
 import Hero from '../components/Hero';
 import TrustedBy from '../components/shared/TrustedBy';
-import OfferList from '../components/shared/OfferList'; // Import the new OfferList Client Component
+import OfferList from '../components/shared/OfferList';
+import FeaturedProfilesCarousel from '../components/shared/FeaturedProfilesCarousel'; // Import the new Client Component
+
+// Define metadata for the home page
 
 // Define metadata for the home page
 export const metadata: Metadata = {
@@ -12,10 +15,7 @@ export const metadata: Metadata = {
   description: 'Encuentra tu próxima oportunidad en el mundo del fútbol. FutbolProyect conecta a futbolistas, entrenadores, ojeadores y clubes. ¡Explora ofertas de empleo y perfiles de talento hoy!', // From old Hero.js
 };
 
-// Async function to fetch data for OfferList
 async function getHomePageOffers() {
-  // Replace with your actual API endpoint
-  // Ensure NEXT_PUBLIC_API_BASE_URL is defined in .env.local
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!apiBaseUrl) {
     throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
@@ -28,16 +28,23 @@ async function getHomePageOffers() {
   return [...(data.featuredOffers || []), ...(data.offers || [])];
 }
 
+// Async function to fetch featured profiles data
+async function getFeaturedProfiles() {
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!apiBaseUrl) {
+    throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
+  }
+  const res = await fetch(`${apiBaseUrl}/profiles/destacados`, { next: { revalidate: 3600 } }); // Revalidate every hour
+  if (!res.ok) {
+    throw new Error('Failed to fetch featured profiles');
+  }
+  return res.json();
+}
+
 // Mock components for now. These will be migrated properly later.
 // Defined outside the main component.
 
 // Removed mock TrustedBy component.
-const FeaturedProfilesCarousel = () => <section style={{ padding: '20px', textAlign: 'center' }}>Featured Profiles Carousel Section</section>;
-const About = () => <section style={{ padding: '20px', textAlign: 'center' }}>About Section</section>;
-const Mission = () => <section style={{ padding: '20px', textAlign: 'center' }}>Mission Section</section>;
-const ContactSummary = () => <section style={{ padding: '20px', textAlign: 'center' }}>Contact Summary Section</section>;
-
-
 export default async function HomePage() {
   const translations = await getTranslation('es'); // Fetch translations for 'es' locale
 
@@ -45,20 +52,23 @@ export default async function HomePage() {
   try {
     homePageOffers = await getHomePageOffers();
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching home page offers:", error);
     // You might want to display an error message on the page or fallback content
   }
 
-
-
-
+  let featuredProfiles = [];
+  try {
+    featuredProfiles = await getFeaturedProfiles();
+  } catch (error) {
+    console.error("Error fetching featured profiles:", error);
+  }
 
   return (
     <main>
       <Hero />
       <TrustedBy />
-      <OfferListMock offers={homePageOffers} />
-      <FeaturedProfilesCarousel />
+      <OfferList offers={homePageOffers} isHomePage={true} />
+      <FeaturedProfilesCarousel profiles={featuredProfiles} /> {/* Use actual component with data */}
       <About />
       <Mission />
       <ContactSummary />

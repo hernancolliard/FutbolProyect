@@ -1,0 +1,115 @@
+
+.featured-profiles-carousel-container {
+  position: relative; /* Needed for arrow positioning */
+  padding: 2rem 1rem;
+  background-color: #f9f9f9;
+  margin-top: 3rem; /* Añadido para separar del elemento anterior */
+}
+
+.carousel-title {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.profiles-carousel .slick-slide {
+  padding: 0 10px; /* Espacio entre las tarjetas */
+}
+
+.carousel-profile-card-wrapper {
+  padding: 10px;
+}
+
+.carousel-profile-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  min-height: 280px;
+}
+
+.carousel-profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.carousel-profile-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.carousel-profile-image {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+
+.carousel-profile-info {
+  padding: 1rem;
+}
+
+.carousel-profile-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.carousel-profile-detail {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Slick Carousel Dots */
+.profiles-carousel .slick-dots {
+  bottom: -25px;
+}
+
+.profiles-carousel .slick-dots li button:before {
+  font-size: 12px;
+  color: #007bff;
+}
+
+.profiles-carousel .slick-dots li.slick-active button:before {
+  color: #0056b3;
+}
+
+/* Custom Arrow Styling */
+.custom-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.custom-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.prev-arrow {
+  left: 25px;
+}
+
+.next-arrow {
+  right: 25px;
+}
+
+/* Hide default slick arrows as they are replaced by custom ones */
+.slick-prev, .slick-next {
+  display: none !important;
+}
+
