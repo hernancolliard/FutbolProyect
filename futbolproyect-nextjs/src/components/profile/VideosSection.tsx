@@ -5,8 +5,8 @@ import { Typography, Grid, Button, CircularProgress, Alert, Box } from '@mui/mat
 import { useTranslation } from 'react-i18next';
 import { Video } from '@/lib/types';
 import VideoCard from './VideoCard';
-// import VideoPlayerModal from './VideoPlayerModal'; // Placeholder
-// import VideoFormModal from './VideoFormModal'; // Placeholder
+import VideoPlayerModal from './VideoPlayerModal';
+import VideoFormModal from './VideoFormModal';
 
 interface VideosSectionProps {
     userId: number;
@@ -41,7 +41,7 @@ export default function VideosSection({ userId, isMyProfile }: VideosSectionProp
     const [showVideoFormModal, setShowVideoFormModal] = useState(false);
     const [videoToEdit, setVideoToEdit] = useState<Video | null>(null);
 
-    const loadVideos = async () => {
+    const loadVideos = React.useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
@@ -52,11 +52,11 @@ export default function VideosSection({ userId, isMyProfile }: VideosSectionProp
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [userId]);
 
     useEffect(() => {
         loadVideos();
-    }, [userId]);
+    }, [loadVideos]);
     
     // --- Modal Handlers ---
     const handleOpenVideoPlayer = (video: Video) => {
@@ -144,14 +144,14 @@ export default function VideosSection({ userId, isMyProfile }: VideosSectionProp
             )}
             
             {/* Player Modal */}
-            {/* {selectedVideoToPlay && (
+            {selectedVideoToPlay && (
                 <VideoPlayerModal open={showVideoPlayerModal} onClose={handleCloseVideoPlayer} youtubeUrl={selectedVideoToPlay.youtube_url} />
-            )} */}
+            )}
 
             {/* Form Modal */}
-            {/* {showVideoFormModal && (
+            {showVideoFormModal && (
                 <VideoFormModal open={showVideoFormModal} onClose={handleCloseVideoForm} video={videoToEdit} onSave={handleVideoSaved} />
-            )} */}
+            )}
         </Box>
     );
 }
