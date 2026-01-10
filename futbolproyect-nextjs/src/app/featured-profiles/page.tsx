@@ -8,20 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Typography, Box } from '@mui/material';
 import LoadingSpinner from '../../components/LoadingSpinner'; // Adjust path if necessary
 
-// Placeholder for apiClient - actual implementation might vary in Next.js
-// You would typically have a centralized API service that handles requests.
-const apiClient = {
-  get: async (url, config) => {
-    // In a real Next.js app, this might be a call to an API route
-    // or direct fetching from an external API.
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
-    const response = await fetch(`${baseUrl}${url}${config?.params ? `?${new URLSearchParams(config.params)}` : ''}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return { data: await response.json() };
-  },
-};
+import apiClient from '../../../lib/apiClient';
 
 const fetchFeaturedProfiles = async (filters) => {
   const { data } = await apiClient.get('/profiles/destacados', { params: filters });
