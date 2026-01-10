@@ -26,6 +26,7 @@ export interface Profile {
   subscription_end_date: string;
   average_rating: number;
   total_ratings: number;
+  fecha_de_nacimiento: string;
 }
 
 export interface Video {
