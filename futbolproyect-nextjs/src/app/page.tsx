@@ -1,9 +1,10 @@
 // futbolproyect-nextjs/src/app/page.tsx
 import { Metadata } from 'next';
 import React from 'react';
-import { getTranslation } from '../../lib/i18n-server'; // Import server-side translation helper
-import Hero from '../components/Hero'; // Import the new Hero Server Component
-import TrustedBy from '../components/shared/TrustedBy'; // Import the new TrustedBy Client Component
+import { getTranslation } from '../../lib/i18n-server';
+import Hero from '../components/Hero';
+import TrustedBy from '../components/shared/TrustedBy';
+import OfferList from '../components/shared/OfferList'; // Import the new OfferList Client Component
 
 // Define metadata for the home page
 export const metadata: Metadata = {
@@ -50,20 +51,7 @@ export default async function HomePage() {
 
 
 
-  const OfferListMock = ({ offers }) => (
-    <section style={{ padding: '20px', textAlign: 'center' }}>
-      <h2>{translations.available_offers}</h2>
-      {offers.length > 0 ? (
-        <ul>
-          {offers.map(offer => (
-            <li key={offer.id}>{offer.titulo}</li> // Simplified
-          ))}
-        </ul>
-      ) : (
-        <p>{translations.no_offers_available}</p>
-      )}
-    </section>
-  );
+
 
   return (
     <main>
