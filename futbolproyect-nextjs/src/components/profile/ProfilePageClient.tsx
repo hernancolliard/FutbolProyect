@@ -7,6 +7,7 @@ import { Paper, Typography, Alert, Stack, CircularProgress, Card, CardContent, G
 import VideosSection from './VideosSection';
 import UserPhotosSection from './UserPhotosSection';
 import ShareButtons from '@/components/ui/ShareButtons';
+import EditProfileModal from './EditProfileModal';
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
@@ -30,15 +31,14 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
-    // Local state for profile to reflect rating changes without a full reload if needed
     const [profile, setProfile] = useState(initialProfile);
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
     useEffect(() => {
         setProfile(initialProfile);
     }, [initialProfile]);
 
-    // This effect records a profile view.
     useEffect(() => {
         if (profile && currentUser && profile.id !== currentUser.id) {
             const recordView = async () => {
@@ -55,7 +55,6 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
 
     const handleRatingChange = async (event: any, newValue: number | null) => {
         if (!newValue || !profile) return;
-
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
             const res = await fetch(`${apiUrl}/api/profiles/${profile.id}/rate`, {
@@ -63,30 +62,26 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rating: newValue }),
             });
-
-            if (!res.ok) {
-                throw new Error('Failed to submit rating');
-            }
-
+            if (!res.ok) throw new Error('Failed to submit rating');
             const updatedProfile = await res.json();
-            
-            // Optimistic update of local state
             setProfile(prev => prev ? { ...prev, average_rating: updatedProfile.average_rating, total_ratings: updatedProfile.total_ratings } : null);
-
-            // Revalidate server data
-            startTransition(() => {
-                router.refresh();
-            });
-
+            startTransition(() => router.refresh());
         } catch (error) {
             console.error("Error submitting rating:", error);
             alert(t('rating_error', 'Hubo un error al enviar tu calificación.'));
         }
     };
     
-    // Handlers for image modal
     const handleOpenImageModal = () => setIsImageModalOpen(true);
     const handleCloseImageModal = () => setIsImageModalOpen(false);
+
+    const handleOpenEditModal = () => setIsEditModalOpen(true);
+    const handleCloseEditModal = () => setIsEditModalOpen(false);
+    
+    const handleProfileSave = () => {
+        handleCloseEditModal();
+        startTransition(() => router.refresh());
+    }
 
     if (!currentUser) {
         return (
@@ -135,7 +130,7 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
                                         )}
                                          <Typography variant="h4">{profile.nombre} {profile.apellido || ""}</Typography>
                                         {isMyProfile && (
-                                            <Button variant="contained">{t("edit_profile_button", "Editar Perfil")}</Button>
+                                            <Button variant="contained" onClick={handleOpenEditModal}>{t("edit_profile_button", "Editar Perfil")}</Button>
                                         )}
                                         <ShareButtons title={`${profile.nombre} ${profile.apellido || ""}`} url={pathname} />
                                     </Stack>
@@ -204,7 +199,15 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
                 </CardContent>
             </Card>
 
-            {/* Profile Image Modal */}
+            {isMyProfile && (
+                <EditProfileModal
+                    open={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    profileData={profile}
+                    onSave={handleProfileSave}
+                />
+            )}
+
             <Modal open={isImageModalOpen} onClose={handleCloseImageModal}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 1, maxWidth: '90vw', maxHeight: '90vh' }}>
                     <img src={profile.foto_perfil_url} alt={t("profile_picture_alt", { name: profile.nombre })} style={{ maxWidth: '100%', maxHeight: 'calc(90vh - 16px)', objectFit: 'contain' }} />
