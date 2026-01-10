@@ -27,3 +27,11 @@ export interface Profile {
   average_rating: number;
   total_ratings: number;
 }
+
+export interface Video {
+  id: number;
+  title: string;
+  youtube_url: string;
+  cover_image_url: string;
+  position: number;
+}
