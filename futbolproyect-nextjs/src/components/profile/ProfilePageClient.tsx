@@ -244,11 +244,18 @@ import VideosSection from './VideosSection';
                         </Grid>
                     </Grid>
                     
+import UserPhotosSection from './UserPhotosSection';
+// ... (rest of the imports)
+
+// ... (rest of the component before the return)
+                    
                     <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
+                    <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
+                    
                     {/* Placeholder for other sections */}
                     <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
-                        {t('stub_section_title', 'Más secciones (Fotos, etc.) vendrán aquí.')}
+                        {t('stub_section_title_2', 'Más secciones (Postulaciones, Ofertas, etc.) vendrán aquí.')}
                     </Typography>
                 </CardContent>
             </Card>

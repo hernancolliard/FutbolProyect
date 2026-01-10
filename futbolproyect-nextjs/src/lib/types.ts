@@ -35,3 +35,11 @@ export interface Video {
   cover_image_url: string;
   position: number;
 }
+
+export interface UserPhoto {
+    id: number;
+    url: string;
+    title: string;
+    title_es: string;
+    title_en: string;
+}
