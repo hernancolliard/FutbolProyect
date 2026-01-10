@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import React from 'react';
 import { getTranslation } from '../../lib/i18n-server'; // Import server-side translation helper
 import Hero from '../components/Hero'; // Import the new Hero Server Component
+import TrustedBy from '../components/shared/TrustedBy'; // Import the new TrustedBy Client Component
 
 // Define metadata for the home page
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ async function getHomePageOffers() {
 // Mock components for now. These will be migrated properly later.
 // Defined outside the main component.
 
-const TrustedBy = () => <section style={{ padding: '20px', textAlign: 'center' }}>Trusted By Section</section>;
+// Removed mock TrustedBy component.
 const FeaturedProfilesCarousel = () => <section style={{ padding: '20px', textAlign: 'center' }}>Featured Profiles Carousel Section</section>;
 const About = () => <section style={{ padding: '20px', textAlign: 'center' }}>About Section</section>;
 const Mission = () => <section style={{ padding: '20px', textAlign: 'center' }}>Mission Section</section>;
