@@ -2,6 +2,7 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { getTranslation } from '../../lib/i18n-server'; // Import server-side translation helper
+import Hero from '../components/Hero'; // Import the new Hero Server Component
 
 // Define metadata for the home page
 export const metadata: Metadata = {
@@ -46,13 +47,7 @@ export default async function HomePage() {
     // You might want to display an error message on the page or fallback content
   }
 
-  // Hero component using server-side fetched translations
-  const Hero = () => (
-    <section style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>{translations.hero_title}</h1>
-      <p>{translations.hero_subtitle}</p>
-    </section>
-  );
+
 
   const OfferListMock = ({ offers }) => (
     <section style={{ padding: '20px', textAlign: 'center' }}>
