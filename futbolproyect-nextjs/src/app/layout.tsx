@@ -3,8 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../../lib/registry";
 import { I18nProvider } from '../../components/I18nProvider';
-import Header from "../components/layout/Header"; // Import the new Header component
-import { Box, Toolbar } from "@mui/material"; // Import Box and Toolbar for layout
+import Header from "../components/layout/Header";
+import { Box, Toolbar } from "@mui/material";
+import NextAuthSessionProvider from '../../components/SessionProvider'; // Import the new SessionProvider
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,15 +28,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <ThemeRegistry>
-          <I18nProvider>
-            <Header onShowLoginModal={onShowLoginModal} onShowRegisterModal={onShowRegisterModal} />
-            <Toolbar /> {/* Spacer for the fixed AppBar */}
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-              {children}
-            </Box>
-          </I18nProvider>
-        </ThemeRegistry>
+        <NextAuthSessionProvider> {/* Wrap ThemeRegistry with SessionProvider */}
+          <ThemeRegistry>
+            <I18nProvider>
+              <Header onShowLoginModal={onShowLoginModal} onShowRegisterModal={onShowRegisterModal} />
+              <Toolbar /> {/* Spacer for the fixed AppBar */}
+              <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                {children}
+              </Box>
+            </I18nProvider>
+          </ThemeRegistry>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );
