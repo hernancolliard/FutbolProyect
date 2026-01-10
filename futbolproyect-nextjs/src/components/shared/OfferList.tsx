@@ -14,16 +14,10 @@ import {
 } from "@mui/material";
 import Slider from "react-slick";
 import FadeInOnScroll from "./FadeInOnScroll"; // Migrated FadeInOnScroll
-// import OfferActions from "./OfferActions"; // Not yet migrated
+import OfferActions from "./OfferActions"; // Now importing the real OfferActions
 import useIsMobile from "../../hooks/useIsMobile"; // Migrated useIsMobile
 import Image from "next/image"; // Use next/image
 import "../../styles/OfferList.css"; // Path to the copied CSS
-
-// Mock OfferActions for now
-const OfferActions = ({ offer, onOfferAction }: { offer: any, onOfferAction?: (action: string, id: string) => void }) => {
-  const { t } = useTranslation();
-  return <Button size="small">{t('apply')}</Button>;
-};
 
 
 // Define types for Offer
@@ -44,6 +38,8 @@ interface Offer {
   puesto_en?: string;
   puesto: string; // Fallback
   nombre_ofertante: string;
+  id_usuario_ofertante: string; // Added for OfferActions
+  applicants?: { user_id: string }[]; // Added for OfferActions
   // Add other offer properties as needed
 }
 
