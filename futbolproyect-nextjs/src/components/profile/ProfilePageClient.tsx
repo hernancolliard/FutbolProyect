@@ -1,23 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Profile } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
-import { Paper, Typography, Alert, Stack, CircularProgress, Card, CardContent, Grid, Box, Button } from '@mui/material';
-// import { useAuth } from '@/context/AuthContext'; // To be implemented
+import { Paper, Typography, Alert, Stack, CircularProgress, Card, CardContent, Grid, Box, Button, Rating, Modal, IconButton } from '@mui/material';
+import VideosSection from './VideosSection';
+import UserPhotosSection from './UserPhotosSection';
+import ShareButtons from '@/components/ui/ShareButtons';
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import PublicIcon from "@mui/icons-material/Public";
+import { usePathname } from 'next/navigation';
 
 // Mock AuthContext for now
 const useAuth = () => {
-  // Replace with actual auth context once migrated
-  const user = {
-    id: 1, // Make it dynamic for testing 'isMyProfile'
-    nombre: "MockUser",
-    isadmin: true,
-    tipo_usuario: "ofertante",
-  };
+  const user = { id: 1, nombre: "MockUser", isadmin: true, tipo_usuario: "ofertante" };
   return { user };
 };
-
 
 interface ProfilePageClientProps {
     profile: Profile | null;
@@ -25,21 +25,28 @@ interface ProfilePageClientProps {
 
 export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     const { t, i18n } = useTranslation();
-    const { user: currentUser } = useAuth(); // Using mock auth
+    const { user: currentUser } = useAuth();
+    const pathname = usePathname();
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-    // This effect would record a profile view. Needs API client.
-    // useEffect(() => {
-    //     if (profile && currentUser && profile.id !== currentUser.id) {
-    //         const recordView = async () => {
-    //             try {
-    //                 // await apiClient.post(`/profiles/${profile.id}/view`);
-    //             } catch (error) {
-    //                 console.error("Failed to record profile view:", error);
-    //             }
-    //         };
-    //         recordView();
-    //     }
-    // }, [profile, currentUser]);
+    // This effect would record a profile view.
+    useEffect(() => {
+        if (profile && currentUser && profile.id !== currentUser.id) {
+            const recordView = async () => {
+                try {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+                    await fetch(`${apiUrl}/api/profiles/${profile.id}/view`, { method: 'POST' });
+                } catch (error) {
+                    console.error("Failed to record profile view:", error);
+                }
+            };
+            recordView();
+        }
+    }, [profile, currentUser]);
+    
+    // Handlers for image modal
+    const handleOpenImageModal = () => setIsImageModalOpen(true);
+    const handleCloseImageModal = () => setIsImageModalOpen(false);
 
     if (!currentUser) {
         return (
@@ -49,8 +56,6 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
         );
     }
     
-    // The loading state should be handled by Suspense in the server component
-    // but we add this for cases where profile is null after fetch fails
     if (!profile) {
         return <Alert severity="warning">{t("profile_not_found", "Perfil no encontrado o error al cargar.")}</Alert>;
     }
@@ -59,206 +64,112 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
     const lang = i18n.language;
     const nacionalidad = profile[`nacionalidad_${lang}`] || profile.nacionalidad;
     const posicion_principal = profile[`posicion_principal_${lang}`] || profile.posicion_principal;
+    const pie_dominante = profile[`pie_dominante_${lang}`] || profile.pie_dominante;
+    const resumen_profesional = profile[`resumen_profesional_${lang}`] || profile.resumen_profesional;
 
     return (
-        <Stack alignItems="center" sx={{ mt: 4 }}>
+        <Stack alignItems="center" sx={{ mt: 4, mb: 4 }}>
             <Card sx={{ maxWidth: 1350, width: "100%", p: {xs: 1, sm: 2, md: 3} }} elevation={3}>
                 <CardContent>
                     <Grid container spacing={4}>
+                        {/* ==== LEFT COLUMN ==== */}
                         <Grid item xs={12} md={8}>
                             <Grid container spacing={3}>
+                                {/* Profile Header */}
                                 <Grid item xs={12} sm={6}>
-                                     <Stack
-                                        direction="column"
-                                        spacing={2}
-                                        alignItems="center"
-                                        sx={{ mb: 2 }}
-                                    >
+                                     <Stack direction="column" spacing={2} alignItems="center" sx={{ mb: 2 }}>
                                         {profile.foto_perfil_url ? (
-                                            <Box sx={{ flexShrink: 0, cursor: 'pointer' }}>
+                                            <Box sx={{ flexShrink: 0, cursor: 'pointer' }} onClick={handleOpenImageModal}>
                                                 <img
                                                     src={profile.foto_perfil_url}
-                                                    alt={t("profile_picture_alt", {
-                                                        name: profile.nombre,
-                                                    })}
+                                                    alt={t("profile_picture_alt", { name: profile.nombre })}
                                                     width="150"
                                                     height="150"
-                                                    style={{
-                                                        borderRadius: "50%",
-                                                        objectFit: "cover",
-                                                        border: "2px solid #ccc",
-                                                    }}
+                                                    style={{ borderRadius: "50%", objectFit: "cover", border: "2px solid #ccc" }}
                                                 />
                                             </Box>
                                         ) : (
-                                            <Box
-                                                sx={{
-                                                    width: 150,
-                                                    height: 150,
-                                                    borderRadius: "50%",
-                                                    bgcolor: "#e0e0e0",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    flexShrink: 0,
-                                                    border: "2px solid #ccc",
-                                                }}
-                                            >
-                                                <Typography variant="caption">
-                                                    {t("no_image")}
-                                                </Typography>
+                                            <Box sx={{ width: 150, height: 150, borderRadius: "50%", bgcolor: "#e0e0e0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "2px solid #ccc" }}>
+                                                <Typography variant="caption">{t("no_image")}</Typography>
                                             </Box>
                                         )}
-                                         <Typography variant="h4">
-                                            {profile.nombre} {profile.apellido || ""}
-                                        </Typography>
+                                         <Typography variant="h4">{profile.nombre} {profile.apellido || ""}</Typography>
                                         {isMyProfile && (
-                                            <Button
-                                            variant="contained"
-                                            >
-                                            {t("edit_profile_button", "Editar Perfil")}
-                                            </Button>
+                                            <Button variant="contained">{t("edit_profile_button", "Editar Perfil")}</Button>
                                         )}
-                                        {/* ShareButtons component will go here */}
+                                        <ShareButtons title={`${profile.nombre} ${profile.apellido || ""}`} url={pathname} />
                                     </Stack>
                                 </Grid>
+                                {/* Personal Data */}
                                 <Grid item xs={12} sm={6}>
                                      <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
-                                        <Typography variant="h6" sx={{ mb: 1 }}>
-                                            {t("personal_data", "Datos Personales")}
-                                        </Typography>
+                                        <Typography variant="h6" sx={{ mb: 1 }}>{t("personal_data", "Datos Personales")}</Typography>
                                         <Stack spacing={1}>
-                                            <Typography>
-                                            <strong>{t("email_label")}</strong> {profile.email}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("phone_placeholder")}</strong>{" "}
-                                            {profile.telefono || t("not_specified")}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("nationality")}</strong>{" "}
-                                            {nacionalidad || t("not_specified")}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("position")}</strong>{" "}
-                                            {posicion_principal || t("not_specified")}
-                                            </Typography>
+                                            <Typography><strong>{t("email_label")}</strong> {profile.email}</Typography>
+                                            <Typography><strong>{t("phone_placeholder")}</strong> {profile.telefono || t("not_specified")}</Typography>
+                                            <Typography><strong>{t("nationality")}</strong> {nacionalidad || t("not_specified")}</Typography>
+                                            <Typography><strong>{t("position")}</strong> {posicion_principal || t("not_specified")}</Typography>
                                         </Stack>
                                     </Card>
                                 </Grid>
                             </Grid>
-                        </Grid>
-                    </Grid>
-import VideosSection from './VideosSection';
-// ... (rest of the imports)
 
-// ... (rest of the component before the return)
-
-    return (
-        <Stack alignItems="center" sx={{ mt: 4 }}>
-            <Card sx={{ maxWidth: 1350, width: "100%", p: {xs: 1, sm: 2, md: 3} }} elevation={3}>
-                <CardContent>
-                    <Grid container spacing={4}>
-                        <Grid item xs={12} md={8}>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6}>
-                                     <Stack
-                                        direction="column"
-                                        spacing={2}
-                                        alignItems="center"
-                                        sx={{ mb: 2 }}
-                                    >
-                                        {profile.foto_perfil_url ? (
-                                            <Box sx={{ flexShrink: 0, cursor: 'pointer' }}>
-                                                <img
-                                                    src={profile.foto_perfil_url}
-                                                    alt={t("profile_picture_alt", {
-                                                        name: profile.nombre,
-                                                    })}
-                                                    width="150"
-                                                    height="150"
-                                                    style={{
-                                                        borderRadius: "50%",
-                                                        objectFit: "cover",
-                                                        border: "2px solid #ccc",
-                                                    }}
-                                                />
-                                            </Box>
-                                        ) : (
-                                            <Box
-                                                sx={{
-                                                    width: 150,
-                                                    height: 150,
-                                                    borderRadius: "50%",
-                                                    bgcolor: "#e0e0e0",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    flexShrink: 0,
-                                                    border: "2px solid #ccc",
-                                                }}
-                                            >
-                                                <Typography variant="caption">
-                                                    {t("no_image")}
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                         <Typography variant="h4">
-                                            {profile.nombre} {profile.apellido || ""}
-                                        </Typography>
-                                        {isMyProfile && (
-                                            <Button
-                                            variant="contained"
-                                            >
-                                            {t("edit_profile_button", "Editar Perfil")}
-                                            </Button>
-                                        )}
-                                        {/* ShareButtons component will go here */}
+                            {/* Social & Rating */}
+                            <Stack direction={{xs: 'column', sm: 'row'}} spacing={2} alignItems="center" sx={{ mt: 4, mb: 3, flexWrap: "wrap", justifyContent: "space-between" }}>
+                                <Box>
+                                    <Typography variant="h6" sx={{ mr: 2, mb: {xs: 1, sm: 0} }}>{t("social_networks_links_title")}</Typography>
+                                    <Stack direction="row" spacing={1}>
+                                        {profile.linkedin_url && <IconButton component="a" href={profile.linkedin_url} target="_blank"><LinkedInIcon /></IconButton>}
+                                        {profile.instagram_url && <IconButton component="a" href={profile.instagram_url} target="_blank"><InstagramIcon /></IconButton>}
+                                        {profile.youtube_url && <IconButton component="a" href={profile.youtube_url} target="_blank"><YouTubeIcon /></IconButton>}
+                                        {profile.transfermarkt_url && <IconButton component="a" href={profile.transfermarkt_url} target="_blank"><PublicIcon /></IconButton>}
                                     </Stack>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                     <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
-                                        <Typography variant="h6" sx={{ mb: 1 }}>
-                                            {t("personal_data", "Datos Personales")}
-                                        </Typography>
-                                        <Stack spacing={1}>
-                                            <Typography>
-                                            <strong>{t("email_label")}</strong> {profile.email}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("phone_placeholder")}</strong>{" "}
-                                            {profile.telefono || t("not_specified")}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("nationality")}</strong>{" "}
-                                            {nacionalidad || t("not_specified")}
-                                            </Typography>
-                                            <Typography>
-                                            <strong>{t("position")}</strong>{" "}
-                                            {posicion_principal || t("not_specified")}
-                                            </Typography>
-                                        </Stack>
-                                    </Card>
-                                </Grid>
-                            </Grid>
+                                </Box>
+                                {!isMyProfile && (
+                                    <Box sx={{ ml: {sm: 4}, mt: {xs: 2, sm: 0} }}>
+                                        <Typography component="legend">{t("rate_profile", "Calificar Perfil")}</Typography>
+                                        <Rating name="profile-rating" value={profile.average_rating || 0} precision={0.5} />
+                                        {profile.total_ratings > 0 && <Typography variant="body2" color="text.secondary">({profile.total_ratings} {t("ratings", "calificaciones")})</Typography>}
+                                    </Box>
+                                )}
+                            </Stack>
+                        </Grid>
+
+                        {/* ==== RIGHT COLUMN ==== */}
+                        <Grid item xs={12} md={4}>
+                            <Card variant="outlined" sx={{ p: 2, bgcolor: "#f5f5f5" }}>
+                                <Typography variant="h6" sx={{ mb: 1 }}>{t("physical_data")}</Typography>
+                                <Stack spacing={1} sx={{ mb: 3 }}>
+                                    <Typography><strong>{t("height")}</strong> {profile.altura_cm ? `${profile.altura_cm} cm` : t("not_specified")}</Typography>
+                                    <Typography><strong>{t("weight")}</strong> {profile.peso_kg ? `${profile.peso_kg} kg` : t("not_specified")}</Typography>
+                                    <Typography><strong>{t("dominant_foot")}</strong> {pie_dominante || t("not_specified")}</Typography>
+                                </Stack>
+                                <Typography variant="h6" sx={{ mb: 1 }}>{t("professional_summary")}</Typography>
+                                <Typography sx={{mb: 2}}>{resumen_profesional || t("no_summary_available")}</Typography>
+                                {profile.cv_url && (
+                                    <Button variant="outlined" href={profile.cv_url} target="_blank" rel="noopener noreferrer">
+                                        {t("download_cv")}
+                                    </Button>
+                                )}
+                            </Card>
                         </Grid>
                     </Grid>
                     
-import UserPhotosSection from './UserPhotosSection';
-// ... (rest of the imports)
-
-// ... (rest of the component before the return)
-                    
+                    <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
                     <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
-                    <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
-                    
-                    {/* Placeholder for other sections */}
                     <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
                         {t('stub_section_title_2', 'Más secciones (Postulaciones, Ofertas, etc.) vendrán aquí.')}
                     </Typography>
                 </CardContent>
             </Card>
+
+            {/* Profile Image Modal */}
+            <Modal open={isImageModalOpen} onClose={handleCloseImageModal}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', boxShadow: 24, p: 1, maxWidth: '90vw', maxHeight: '90vh' }}>
+                    <img src={profile.foto_perfil_url} alt={t("profile_picture_alt", { name: profile.nombre })} style={{ maxWidth: '100%', maxHeight: 'calc(90vh - 16px)', objectFit: 'contain' }} />
+                </Box>
+            </Modal>
         </Stack>
     );
 }
