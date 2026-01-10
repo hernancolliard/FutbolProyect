@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { Profile } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
 import { Paper, Typography, Alert, Stack, CircularProgress, Card, CardContent, Grid, Box, Button, Rating, Modal, IconButton } from '@mui/material';
@@ -11,7 +11,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import PublicIcon from "@mui/icons-material/Public";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 // Mock AuthContext for now
 const useAuth = () => {
@@ -23,13 +23,22 @@ interface ProfilePageClientProps {
     profile: Profile | null;
 }
 
-export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
+export default function ProfilePageClient({ profile: initialProfile }: ProfilePageClientProps) {
     const { t, i18n } = useTranslation();
     const { user: currentUser } = useAuth();
     const pathname = usePathname();
-    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
-    // This effect would record a profile view.
+    // Local state for profile to reflect rating changes without a full reload if needed
+    const [profile, setProfile] = useState(initialProfile);
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    
+    useEffect(() => {
+        setProfile(initialProfile);
+    }, [initialProfile]);
+
+    // This effect records a profile view.
     useEffect(() => {
         if (profile && currentUser && profile.id !== currentUser.id) {
             const recordView = async () => {
@@ -43,6 +52,37 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
             recordView();
         }
     }, [profile, currentUser]);
+
+    const handleRatingChange = async (event: any, newValue: number | null) => {
+        if (!newValue || !profile) return;
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+            const res = await fetch(`${apiUrl}/api/profiles/${profile.id}/rate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rating: newValue }),
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to submit rating');
+            }
+
+            const updatedProfile = await res.json();
+            
+            // Optimistic update of local state
+            setProfile(prev => prev ? { ...prev, average_rating: updatedProfile.average_rating, total_ratings: updatedProfile.total_ratings } : null);
+
+            // Revalidate server data
+            startTransition(() => {
+                router.refresh();
+            });
+
+        } catch (error) {
+            console.error("Error submitting rating:", error);
+            alert(t('rating_error', 'Hubo un error al enviar tu calificación.'));
+        }
+    };
     
     // Handlers for image modal
     const handleOpenImageModal = () => setIsImageModalOpen(true);
@@ -128,7 +168,7 @@ export default function ProfilePageClient({ profile }: ProfilePageClientProps) {
                                 {!isMyProfile && (
                                     <Box sx={{ ml: {sm: 4}, mt: {xs: 2, sm: 0} }}>
                                         <Typography component="legend">{t("rate_profile", "Calificar Perfil")}</Typography>
-                                        <Rating name="profile-rating" value={profile.average_rating || 0} precision={0.5} />
+                                        <Rating name="profile-rating" value={profile.average_rating || 0} precision={0.5} onChange={handleRatingChange} disabled={isPending} />
                                         {profile.total_ratings > 0 && <Typography variant="body2" color="text.secondary">({profile.total_ratings} {t("ratings", "calificaciones")})</Typography>}
                                     </Box>
                                 )}
