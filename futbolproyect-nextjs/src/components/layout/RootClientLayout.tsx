@@ -1,19 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-import { SessionProvider } from 'next-auth/react'; // Ensure this is imported if not already in layout
-import Header from './Header'; // Import the migrated Header
-import Modal from '../ui/Modal'; // Import the migrated Modal
-import Login from '../auth/Login'; // Import the migrated Login
-import Register from '../auth/Register'; // Import the migrated Register
-import { Box, Toolbar } from '@mui/material'; // For layout components
+import { SessionProvider } from 'next-auth/react';
+import Header from './Header';
+import Modal from '../ui/Modal';
+import Login from '../auth/Login';
+import Register from '../auth/Register';
+import { Box, Toolbar } from '@mui/material';
 import { ToastContainer } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
+import ReactQueryProvider from '../providers/ReactQueryProvider'; // Import ReactQueryProvider
+import { ParallaxProvider } from 'react-scroll-parallax'; // Import ParallaxProvider
 
 export default function RootClientLayout({ children }: { children: React.ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [registrationRole, setRegistrationRole] = useState('player'); // For Register modal
+  const [registrationRole, setRegistrationRole] = useState('player');
 
   const handleShowRegisterModal = (role: string) => {
     setRegistrationRole(role);
@@ -38,9 +40,13 @@ export default function RootClientLayout({ children }: { children: React.ReactNo
         onShowRegisterModal={handleShowRegisterModal}
         onShowCreateOfferModal={() => { /* Implement navigation to create offer page */ }}
       />
-      <Toolbar /> {/* Spacer for the fixed AppBar */}
+      <Toolbar />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {children}
+        <ReactQueryProvider>
+          <ParallaxProvider>
+            {children}
+          </ParallaxProvider>
+        </ReactQueryProvider>
       </Box>
 
       {/* Login Modal */}

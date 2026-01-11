@@ -1,90 +1,132 @@
-// futbolproyect-nextjs/src/app/page.tsx
-import { Metadata } from 'next';
-import React from 'react';
-import { getTranslation } from '../../lib/i18n-server';
-import Hero from '../components/Hero';
-import TrustedBy from '../components/shared/TrustedBy';
-import OfferList from '../components/shared/OfferList';
-import FeaturedProfilesCarousel from '../components/shared/FeaturedProfilesCarousel';
-import FadeInOnScroll from '../components/shared/FadeInOnScroll'; // Import FadeInOnScroll
-import About from '../components/shared/About'; // Import the new About Server Component
-import Mission from '../components/shared/Mission'; // Import the new Mission Server Component
-import ContactSummary from '../components/shared/ContactSummary'; // Import the new ContactSummary Server Component
+'use client';
 
-// Define metadata for the home page
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import Link from "next/link";
 
-// Define metadata for the home page
-export const metadata: Metadata = {
-  title: 'FutbolProyect | Conectando Talentos del Fútbol', // From old Hero.js
-  description: 'Encuentra tu próxima oportunidad en el mundo del fútbol. FutbolProyect conecta a futbolistas, entrenadores, ojeadores y clubes. ¡Explora ofertas de empleo y perfiles de talento hoy!', // From old Hero.js
+import { Box, Typography, Button, Toolbar } from "@mui/material";
+
+import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import TrustedBy from "../../components/TrustedBy"; // Migrated component
+import Hero from "../../components/Hero"; // Migrated component
+import OfferList from "../../components/OfferList"; // Migrated component
+import FeaturedProfilesCarousel from "../../components/FeaturedProfilesCarousel"; // Migrated component
+import About from "../../components/About"; // Migrated component
+import Mission from "../../components/Mission"; // Migrated component
+import ContactSummary from "../../components/ContactSummary"; // Migrated component
+import LoadingSpinner from "../../components/LoadingSpinner"; // Migrated component
+import PromotionModal from "../../components/PromotionModal"; // Migrated component
+import Modal from "../../components/ui/Modal"; // Migrated Modal (custom)
+import Login from "../../components/auth/Login"; // Migrated Login
+import Register from "../../components/auth/Register"; // Migrated Register
+import FadeInOnScroll from "../../components/FadeInOnScroll"; // Migrated FadeInOnScroll
+
+const fetchHomePageOffers = async () => {
+  const { data } = await apiClient.get("/offers?limit=6");
+  return [...(data.featuredOffers || []), ...(data.offers || [])];
 };
 
-async function getHomePageOffers() {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!apiBaseUrl) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
-  }
-  const res = await fetch(`${apiBaseUrl}/offers?limit=6`, { next: { revalidate: 3600 } }); // Revalidate every hour
-  if (!res.ok) {
-    throw new Error('Failed to fetch home page offers');
-  }
-  const data = await res.json();
-  return [...(data.featuredOffers || []), ...(data.offers || [])];
-}
+export default function HomePage() {
+  const { t } = useTranslation('common');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [registrationRole, setRegistrationRole] = useState('player');
+  const router = useRouter();
 
-// Async function to fetch featured profiles data
-async function getFeaturedProfiles() {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!apiBaseUrl) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not defined');
-  }
-  const res = await fetch(`${apiBaseUrl}/profiles/destacados`, { next: { revalidate: 3600 } }); // Revalidate every hour
-  if (!res.ok) {
-    throw new Error('Failed to fetch featured profiles');
-  }
-  return res.json();
-}
+  const handleShowRegisterModal = (role) => {
+    setRegistrationRole(role);
+    setShowRegisterModal(true);
+  };
 
-export default async function HomePage() {
-  const translations = await getTranslation('es'); // Fetch translations for 'es' locale
+  useEffect(() => {
+    const alreadyShown = sessionStorage.getItem('promotionModalShown');
+    const currentMonth = new Date().getMonth(); // 0-11 (enero-diciembre)
 
-  let homePageOffers = [];
-  try {
-    homePageOffers = await getHomePageOffers();
-  } catch (error) {
-    console.error("Error fetching home page offers:", error);
-    // You might want to display an error message on the page or fallback content
-  }
+    if (!alreadyShown && currentMonth === 10) { // 10 es Noviembre
+      setShowPromotionModal(true);
+      sessionStorage.setItem('promotionModalShown', 'true');
+    }
+  }, []);
 
-  let featuredProfiles = [];
-  try {
-    featuredProfiles = await getFeaturedProfiles();
-  } catch (error) {
-    console.error("Error fetching featured profiles:", error);
-  }
+  const { 
+    data: homePageOffers = [], 
+    isLoading, 
+    error 
+  } = useQuery({ 
+    queryKey: ['homePageOffers'], 
+    queryFn: fetchHomePageOffers 
+  });
+
+  const handleRefresh = () => {
+    // Invalidate queries if needed, though onHomePage is not directly used here for refresh
+  };
 
   return (
-    <main>
-      <Hero />
-      <FadeInOnScroll> {/* TrustedBy was originally wrapped in FadeInOnScroll */}
-        <TrustedBy />
-      </FadeInOnScroll>
-      <OfferList offers={homePageOffers} isHomePage={true} />
-      <FeaturedProfilesCarousel profiles={featuredProfiles} />
-      
-      {/* Wrap About, Mission, ContactSummary with FadeInOnScroll */}
-      <div className="info-sections-container">
+    <Box>
+      {/* Header and Footer are handled by RootClientLayout */}
+      <Box component="main">
         <FadeInOnScroll>
-          <About />
+          <TrustedBy />
         </FadeInOnScroll>
-        <FadeInOnScroll>
-          <Mission />
-        </FadeInOnScroll>
-      </div>
-      <hr />
-      <FadeInOnScroll>
-        <ContactSummary />
-      </FadeInOnScroll>
-    </main>
+        <Hero />
+        <Box sx={{ p: 3 }}>
+          {isLoading ? (
+            <LoadingSpinner text={t('loading_offers', 'Cargando ofertas...')} />
+          ) : error ? (
+            <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_offers', 'Error al cargar ofertas.')}: {error.message}</Typography>
+          ) : (
+            <OfferList
+              offers={homePageOffers}
+              onOfferAction={handleRefresh}
+              isHomePage={true}
+            />
+          )}
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Button component={Link} href="/all-offers" variant="contained" className="btn-main">
+              {t("view_all_offers", "Ver todas las ofertas")}
+            </Button>
+          </Box>
+
+          <FeaturedProfilesCarousel />
+          <Box sx={{ textAlign: 'center', padding: '2rem 0' }}>
+            <Button component={Link} href="/featured-profiles" variant="contained" className="btn-main">
+              {t("view_all_profiles", "Ver todos los perfiles")}
+            </Button>
+          </Box>
+
+          <hr />
+          <Box sx={{ mt: 4, mb: 4 }}>
+            <About />
+            <FadeInOnScroll>
+              <Mission />
+            </FadeInOnScroll>
+          </Box>
+          <hr />
+          <FadeInOnScroll>
+            <ContactSummary />
+          </FadeInOnScroll>
+        </Box>
+      </Box>
+
+      <PromotionModal 
+        isOpen={showPromotionModal} 
+        onClose={() => setShowPromotionModal(false)} 
+        onShowRegisterModal={handleShowRegisterModal} 
+      />
+
+      <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)}>
+        <Login onClose={() => setShowLoginModal(false)} />
+      </Modal>
+
+      <Modal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)}>
+        <Register 
+          onClose={() => setShowRegisterModal(false)} 
+          initialRole={registrationRole} 
+        />
+      </Modal>
+    </Box>
   );
 }
