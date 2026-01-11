@@ -44,3 +44,11 @@ export interface UserPhoto {
     title_es: string;
     title_en: string;
 }
+
+export interface Application {
+    id: number;
+    oferta_id: number;
+    oferta_titulo: string;
+    estado: string;
+    fecha_postulacion: string;
+}

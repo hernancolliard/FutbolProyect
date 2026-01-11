@@ -190,14 +190,23 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
                         </Grid>
                     </Grid>
                     
+import MyApplicationsSection from './MyApplicationsSection';
+
+// ... (imports)
+
+// ... (component code before return)
+
                     <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
                     <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
+                    {isMyProfile && <MyApplicationsSection userId={profile.id} />}
+
                     <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
-                        {t('stub_section_title_2', 'Más secciones (Postulaciones, Ofertas, etc.) vendrán aquí.')}
+                        {t('stub_section_title_3', 'Más secciones (Ofertas, etc.) vendrán aquí.')}
                     </Typography>
                 </CardContent>
             </Card>
+// ... (rest of the component)
 
             {isMyProfile && (
                 <EditProfileModal

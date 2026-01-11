@@ -1,191 +1,154 @@
 'use client';
 
-import React, { useState } from "react";
-// import { useAuth } from "../../context/AuthContext"; // Replaced by NextAuth.js
+import React, { useState, useEffect } from "react";
+import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-} from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
-import { signIn } from "next-auth/react"; // Import signIn from next-auth/react
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import MenuItem from "@mui/material/MenuItem";
+import { Box, Card, CardContent, Typography } from "@mui/material"; // Import additional Material UI components
 
-// Mock apiClient for now (will be migrated later)
-const apiClient = {
-  post: async (url: string, data: any) => {
-    console.log(`Mock API POST to ${url} with data:`, data);
-    if (data.email === "test@example.com") {
-      throw new Error("User already exists");
-    }
-    return { data: { message: "User registered successfully" } };
-  },
-};
+function Register({ onClose, initialRole = 'player' }) {
+  const { t } = useTranslation('common');
+  const [formData, setFormData] = useState({
+    nombre: "",
+    email: "",
+    password: "",
+    tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante',
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-interface RegisterProps {
-    onClose: () => void;
-    initialRole?: string;
-}
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante'
+    }));
+  }, [initialRole]);
 
-function Register({ onClose, initialRole = "postulante" }: RegisterProps) {
-  const { t } = useTranslation();
-  // const { register } = useAuth(); // No longer use useAuth
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [userType, setUserType] = useState(initialRole);
-  const [isLoading, setIsLoading] = useState(false);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      toast.error(t("passwords_do_not_match", "Las contraseñas no coinciden."));
-      return;
-    }
-    setIsLoading(true);
+    setError("");
+    setSuccess("");
     try {
-        // Replace with actual API call to your backend for registration
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name, lastName, userType }),
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-            toast.success(t("register_success", "¡Registro exitoso! Ahora puedes iniciar sesión."));
-            onClose();
-        } else {
-            toast.error(data.message || t("register_error", "Error en el registro."));
-        }
-    } catch (error: any) {
-      toast.error(error.message || t("register_error", "Error en el registro."));
-    } finally {
-      setIsLoading(false);
+      await apiClient.post("/users/register", formData);
+      setSuccess(t("register_success", "Registro exitoso. ¡Revisa tu correo para confirmar tu cuenta!"));
+      // Limpiamos el formulario y no cerramos para que el usuario vea el mensaje.
+      setFormData({
+        nombre: "",
+        email: "",
+        password: "",
+        tipo_usuario: "postulante",
+      });
+    } catch (err) {
+      setError(err.message || t("register_error", "Error en el registro."));
     }
   };
 
-  const handleGoogleRegister = async () => {
-    setIsLoading(true);
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
-        // Use signIn from next-auth/react for Google registration
-        const result = await signIn('google', {
-            redirect: false, // Do not redirect, handle client-side
-        });
-
-        if (result?.error) {
-            toast.error(result.error || t("register_with_google_error", "Error al registrarse con Google."));
-        } else {
-            toast.success(t("register_with_google_success", "¡Registro y sesión exitosos con Google!"));
-            onClose();
-            // router.push('/'); // No redirect needed if it's a modal
-        }
-    } catch (error: any) {
-      toast.error(error.message || t("register_with_google_error", "Error al registrarse con Google."));
-    } finally {
-      setIsLoading(false);
+      // In Next.js with next-auth, you might use signIn function here
+      await apiClient.post("/users/auth/google", {
+        id_token: credentialResponse.credential,
+      });
+      setSuccess(t("register_with_google_success", "Registro/Inicio de sesión con Google exitoso."));
+      onClose(); // Cierra el modal después del registro/login con Google
+    } catch (err) {
+      setError(err.message || t("register_with_google_error", "Error al registrarse/iniciar sesión con Google."));
     }
+  };
+
+  const handleGoogleError = () => {
+    setError(t("register_with_google_error_retry", "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo."));
   };
 
   return (
-    <Box className="form-card">
-      <Typography variant="h5" component="h2" sx={{ mb: 3 }}>
-        {t("register_title")}
-      </Typography>
-      <form onSubmit={handleRegister}>
-        <TextField
-          label={t("name_placeholder")}
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label={t("lastname_placeholder")}
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label={t("email_placeholder")}
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label={t("password_placeholder")}
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label={t("confirm_new_password_label")}
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <FormControl fullWidth margin="normal">
-          <InputLabel>{t("user_type_offerer")}</InputLabel>
-          <Select
-            value={userType}
-            label={t("user_type_offerer")}
-            onChange={(e) => setUserType(e.target.value as string)}
-          >
-            <MenuItem value="postulante">
-              {t("user_type_applicant")}
-            </MenuItem>
-            <MenuItem value="ofertante">
-              {t("user_type_offerer")}
-            </MenuItem>
-          </Select>
-        </FormControl>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: 2 }}
-          disabled={isLoading}
-        >
-          {isLoading ? <CircularProgress size={24} color="inherit" /> : t("register_button")}
-        </Button>
-      </form>
-      <Box sx={{ mt: 2, textAlign: "center" }}>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          {t("or_register_with")}
+    <Card sx={{ p: 2, maxWidth: 400, mx: 'auto', mt: 4 }}>
+      <CardContent>
+        <Typography variant="h5" component="h2" gutterBottom align="center">
+          {t("register_title", "Registrarse")}
         </Typography>
-        <IconButton color="primary" onClick={handleGoogleRegister} disabled={isLoading}>
-          <GoogleIcon />
-        </IconButton>
-      </Box>
-      <Box sx={{ mt: 2, textAlign: "right" }}>
-        <Button onClick={onClose}>{t("cancel_button")}</Button>
-      </Box>
-    </Box>
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              type="text"
+              name="nombre"
+              label={t("name_placeholder", "Nombre")}
+              value={formData.nombre}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+            <TextField
+              type="email"
+              name="email"
+              label={t("email_placeholder", "Correo Electrónico")}
+              value={formData.email}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+            <TextField
+              type="password"
+              name="password"
+              label={t("password_placeholder", "Contraseña")}
+              value={formData.password}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+            <TextField
+              select
+              name="tipo_usuario"
+              label={t("user_type_label", "Tipo de Usuario")}
+              value={formData.tipo_usuario}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value="postulante">{t("user_type_applicant", "Postulante")}</MenuItem>
+              <MenuItem value="ofertante">{t("user_type_offerer", "Oferente")}</MenuItem>
+            </TextField>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={onClose}
+                type="button"
+              >
+                {t("cancel_button", "Cancelar")}
+              </Button>
+              <Button variant="contained" color="primary" type="submit">
+                {t("register_button", "Registrarse")}
+              </Button>
+            </Stack>
+          </Stack>
+        </form>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            {success}
+          </Alert>
+        )}
+        <Box sx={{ mt: 2, textAlign: "center" }}>
+          <Typography variant="body2">{t("or_register_with", "O registrarse con:")}</Typography>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
 

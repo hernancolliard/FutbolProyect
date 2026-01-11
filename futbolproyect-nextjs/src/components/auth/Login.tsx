@@ -1,127 +1,120 @@
 'use client';
 
 import React, { useState } from "react";
-// import { useAuth } from "../../context/AuthContext"; // Replaced by NextAuth.js
+import Link from "next/link"; // Import next/link
+import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation"; // Use useRouter from next/navigation
-import { toast } from "react-toastify";
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  CircularProgress,
-  IconButton,
-} from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
-import { signIn } from "next-auth/react"; // Import signIn from next-auth/react
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
+import { useAuth } from "../../context/AuthContext"; // Migrated AuthContext
+import { Box, Card, CardContent, Typography } from "@mui/material"; // Import additional Material UI components
 
-function Login({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  // const { login } = useAuth(); // No longer use useAuth
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+function Login({ onClose }) {
+  const { t } = useTranslation('common');
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError("");
     try {
-      // Use signIn from next-auth/react
-      const result = await signIn('credentials', {
-        redirect: false, // Do not redirect, handle client-side
-        email,
-        password,
-      });
-
-      if (result?.error) {
-        toast.error(result.error || t("login_error"));
-      } else {
-        toast.success(t("¡Inicio de sesión exitoso!"));
-        onClose(); // Close modal on successful login
-        router.push('/'); // Redirect to home or dashboard
-      }
-    } catch (error: any) {
-      toast.error(error.message || t("login_error"));
-    } finally {
-      setIsLoading(false);
+      await apiClient.post("/users/login", formData);
+      login();
+      onClose();
+    } catch (err) {
+      setError(err.message || t("login_error", "Error al iniciar sesión."));
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const result = await signIn('google', {
-        redirect: false, // Do not redirect, handle client-side
+      await apiClient.post("/users/auth/google", {
+        id_token: credentialResponse.credential,
       });
-
-      if (result?.error) {
-        toast.error(result.error || t("login_with_google_error"));
-      } else {
-        toast.success(t("¡Inicio de sesión con Google exitoso!"));
-        onClose();
-        router.push('/');
-      }
-    } catch (error: any) {
-      toast.error(error.message || t("login_with_google_error"));
-    } finally {
-      setIsLoading(false);
+      login();
+      onClose();
+    } catch (err) {
+      setError(err.message || t("login_with_google_error", "Error al iniciar sesión con Google."));
     }
+  };
+
+  const handleGoogleError = () => {
+    setError(t("login_with_google_error_retry", "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo."));
   };
 
   return (
-    <Box className="form-card">
-      <Typography variant="h5" component="h2" sx={{ mb: 3 }}>
-        {t("login_title")}
-      </Typography>
-      <form onSubmit={handleLogin}>
-        <TextField
-          label={t("email_placeholder")}
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <TextField
-          label={t("password_placeholder")}
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          required
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: 2 }}
-          disabled={isLoading}
-        >
-          {isLoading ? <CircularProgress size={24} color="inherit" /> : t("login_button")}
-        </Button>
-      </form>
-      <Typography variant="body2" sx={{ mt: 2 }}>
-        <Link href="/forgot-password" style={{ textDecoration: "none" }}> {/* Use href for next/link */}
-          {t("forgot_your_password")}
-        </Link>
-      </Typography>
-      <Box sx={{ mt: 2, textAlign: "center" }}>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          {t("or_login_with")}
+    <Card sx={{ p: 2, maxWidth: 400, mx: 'auto', mt: 4 }}>
+      <CardContent>
+        <Typography variant="h5" component="h2" gutterBottom align="center">
+          {t("login_title", "Iniciar Sesión")}
         </Typography>
-        <IconButton color="primary" onClick={handleGoogleLogin} disabled={isLoading}>
-          <GoogleIcon />
-        </IconButton>
-      </Box>
-      <Box sx={{ mt: 2, textAlign: "right" }}>
-        <Button onClick={onClose}>{t("cancel_button")}</Button>
-      </Box>
-    </Box>
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            <TextField
+              type="email"
+              name="email"
+              label={t("email_placeholder", "Correo Electrónico")}
+              onChange={handleChange}
+              required
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              type="password"
+              name="password"
+              label={t("password_placeholder", "Contraseña")}
+              onChange={handleChange}
+              required
+              fullWidth
+              variant="outlined"
+            />
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={onClose}
+                type="button"
+              >
+                {t("cancel_button", "Cancelar")}
+              </Button>
+              <Button variant="contained" color="primary" type="submit">
+                {t("login_button", "Iniciar Sesión")}
+              </Button>
+            </Stack>
+          </Stack>
+        </form>
+        <Box sx={{ textAlign: "center", mt: 2 }}>
+          <Link href="/auth/forgot-password" passHref style={{ textDecoration: 'none' }}>
+            <MuiLink component="span" onClick={onClose}>
+              {t("forgot_your_password", "¿Olvidaste tu contraseña?")}
+            </MuiLink>
+          </Link>
+        </Box>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Box sx={{ mt: 2, textAlign: "center" }}>
+          <Typography variant="body2">{t("or_login_with", "O inicia sesión con:")}</Typography>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
 
