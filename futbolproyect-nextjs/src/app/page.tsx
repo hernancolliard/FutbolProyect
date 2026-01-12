@@ -15,7 +15,7 @@ import OfferList from "@/components/shared/OfferList"; // Migrated component
 import FeaturedProfilesCarousel from "@/components/shared/FeaturedProfilesCarousel"; // Migrated component
 import About from "@/components/shared/About"; // Migrated component
 import Mission from "@/components/shared/Mission"; // Migrated component
-import ContactSummary from "@/components/ContactSummary"; // Migrated component
+import ContactSummary from "@/components/shared/ContactSummary"; // Migrated component
 import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated component
 import PromotionModal from "@/components/PromotionModal"; // Migrated component
 import Modal from "@/components/ui/Modal"; // Migrated Modal (custom)

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient"; // Corrected path
-import OfferList from "@/components/OfferList"; // Corrected path
+import OfferList from "@/components/shared/OfferList"; // Corrected path
 import Pagination from "@/components/Pagination"; // Corrected path
 import { useTranslation } from "react-i18next";
 import LoadingSpinner from "@/components/LoadingSpinner"; // Corrected path
