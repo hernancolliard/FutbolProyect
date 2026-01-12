@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
 import { type Metadata } from 'next';
-import { getTranslation } from '@/lib/i18n-server';
-import { Profile } from '@/lib/types';
+import { getTranslation } from '../../lib/i18n-server';
+import { Profile } from '../../lib/types';
 import { Grid, Typography, Paper } from '@mui/material';
-import FilterControls from '@/components/profile/FilterControls';
-import ProfileCard from '@/components/profile/ProfileCard';
+import FilterControls from '../../components/profile/FilterControls';
+import ProfileCard from '../../components/profile/ProfileCard';
 
 const fetchFeaturedProfiles = async (filters: { nacionalidad?: string; puesto?: string; }): Promise<Profile[]> => {
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
