@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation"; // Import useParams and useRouter from next/navigation
-import apiClient from "../../../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useAuth } from "../../../../context/AuthContext"; // Migrated AuthContext
+import { useAuth } from "@/context/AuthContext"; // Migrated AuthContext
 import { toast } from "react-toastify";
 // import { Helmet } from "react-helmet-async"; // Replaced by Next.js metadata
 import html2canvas from "html2canvas"; // html2canvas for screenshot
@@ -17,10 +17,10 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import FeatureOfferPaymentModal from "../../../../components/FeatureOfferPaymentModal"; // Migrated FeatureOfferPaymentModal
-import OfferActions from "../../../../components/OfferActions"; // Migrated OfferActions
+import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal"; // Migrated FeatureOfferPaymentModal
+import OfferActions from "@/components/OfferActions"; // Migrated OfferActions
 import Image from "next/image"; // Replaced OptimizedImage
-import ShareButtons from "../../../../components/ShareButtons"; // Migrated ShareButtons
+import ShareButtons from "@/components/ShareButtons"; // Migrated ShareButtons
 
 // --- Función de Fetching para React Query ---
 const fetchOffer = async (offerId) => {
