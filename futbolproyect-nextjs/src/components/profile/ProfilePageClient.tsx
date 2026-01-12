@@ -13,6 +13,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import PublicIcon from "@mui/icons-material/Public";
 import { usePathname, useRouter } from 'next/navigation';
+import MyApplicationsSection from './MyApplicationsSection';
 
 // Mock AuthContext for now
 const useAuth = () => {
@@ -190,12 +191,6 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
                         </Grid>
                     </Grid>
                     
-import MyApplicationsSection from './MyApplicationsSection';
-
-// ... (imports)
-
-// ... (component code before return)
-
                     <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
                     <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
