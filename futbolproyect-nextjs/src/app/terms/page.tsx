@@ -1,17 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import apiClient from '../../lib/apiClient'; // Centralized apiClient
-import LoadingSpinner from '../../components/LoadingSpinner'; // Migrated LoadingSpinner
+import apiClient from '@/lib/apiClient'; // Centralized apiClient
+import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated LoadingSpinner
 import { useTranslation } from 'react-i18next';
 // import { Helmet } from 'react-helmet-async'; // Replaced by Next.js metadata
 import { Box, Typography, CircularProgress } from '@mui/material'; // Material UI components
 
-// SEO Metadata for the page (static part for server components)
-export const metadata = {
-  title: "Términos de Servicio - FutbolProyect",
-  description: "Lee los términos y condiciones de servicio para el uso de la plataforma FutbolProyect. Entiende tus derechos y obligaciones como usuario.",
-};
+
 
 export default function TermsOfService() {
   const [termsContent, setTermsContent] = useState('');

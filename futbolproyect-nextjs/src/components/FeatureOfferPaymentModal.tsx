@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from "react";
-import Modal from "./ui/Modal"; // Migrated Modal
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import Modal from "@/components/ui/Modal"; // Migrated Modal
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { useTranslation } from "react-i18next";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";

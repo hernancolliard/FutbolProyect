@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
-import SubscribeButton from "../../components/SubscribeButton"; // Migrated SubscribeButton
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
+import SubscribeButton from "@/components/SubscribeButton"; // Migrated SubscribeButton
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -12,7 +12,7 @@ import Stack from "@mui/material/Stack";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 // import { Helmet } from "react-helmet-async"; // Replaced by Next.js metadata
-import LoadingSpinner from "../../components/LoadingSpinner"; // Migrated LoadingSpinner
+import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated LoadingSpinner
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 
@@ -22,11 +22,7 @@ const fetchSubscriptionPlans = async () => {
   return data;
 };
 
-// SEO Metadata for the page (static part for server components)
-export const metadata = {
-  title: "Planes de Suscripción - FutbolProyect",
-  description: "Elige el plan de suscripción que mejor se adapte a tus necesidades en FutbolProyect. Opciones para ofertantes y para talentos que buscan oportunidades.",
-};
+
 
 export default function SubscriptionPage() {
   const { t } = useTranslation('common');
