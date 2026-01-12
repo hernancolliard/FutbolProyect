@@ -8,20 +8,20 @@ import Link from "next/link";
 
 import { Box, Typography, Button, Toolbar } from "@mui/material";
 
-import apiClient from "../lib/apiClient"; // Centralized apiClient
-import TrustedBy from "../components/TrustedBy"; // Migrated component
-import Hero from "../components/Hero"; // Migrated component
-import OfferList from "../components/OfferList"; // Migrated component
-import FeaturedProfilesCarousel from "../components/FeaturedProfilesCarousel"; // Migrated component
-import About from "../components/About"; // Migrated component
-import Mission from "../components/Mission"; // Migrated component
-import ContactSummary from "../components/ContactSummary"; // Migrated component
-import LoadingSpinner from "../components/LoadingSpinner"; // Migrated component
-import PromotionModal from "../components/PromotionModal"; // Migrated component
-import Modal from "../components/ui/Modal"; // Migrated Modal (custom)
-import Login from "../components/auth/Login"; // Migrated Login
-import Register from "../components/auth/Register"; // Migrated Register
-import FadeInOnScroll from "../components/FadeInOnScroll"; // Migrated FadeInOnScroll
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
+import TrustedBy from "@/components/TrustedBy"; // Migrated component
+import Hero from "@/components/Hero"; // Migrated component
+import OfferList from "@/components/OfferList"; // Migrated component
+import FeaturedProfilesCarousel from "@/components/FeaturedProfilesCarousel"; // Migrated component
+import About from "@/components/About"; // Migrated component
+import Mission from "@/components/Mission"; // Migrated component
+import ContactSummary from "@/components/ContactSummary"; // Migrated component
+import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated component
+import PromotionModal from "@/components/PromotionModal"; // Migrated component
+import Modal from "@/components/ui/Modal"; // Migrated Modal (custom)
+import Login from "@/components/auth/Login"; // Migrated Login
+import Register from "@/components/auth/Register"; // Migrated Register
+import FadeInOnScroll from "@/components/FadeInOnScroll"; // Migrated FadeInOnScroll
 
 const fetchHomePageOffers = async () => {
   const { data } = await apiClient.get("/offers?limit=6");
