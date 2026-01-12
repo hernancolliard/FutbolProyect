@@ -16,3 +16,7 @@ Deploying...
 Build
 Running
 start
+
+# Lockfiles - Ignore all, except for the main Next.js project
+**/package-lock.json
+!/futbolproyect-nextjs/package-lock.json
