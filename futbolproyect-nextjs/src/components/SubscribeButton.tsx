@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
-import { useAuth } from "../../context/AuthContext"; // Migrated AuthContext
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import { useAuth } from "@/context/AuthContext"; // Migrated AuthContext
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";

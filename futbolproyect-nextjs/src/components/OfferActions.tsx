@@ -3,10 +3,10 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../context/AuthContext'; // Migrated AuthContext
+import { useAuth } from "@/context/AuthContext"; // Migrated AuthContext // Migrated AuthContext
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import apiClient from '../../lib/apiClient'; // Centralized apiClient
+import apiClient from '@/lib/apiClient'; // Centralized apiClient
 import { useRouter } from 'next/navigation'; // Import useRouter
 
 const applyToOffer = async (offerId) => {
