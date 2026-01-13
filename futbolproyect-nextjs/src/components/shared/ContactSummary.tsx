@@ -1,22 +1,19 @@
-// futbolproyect-nextjs/src/components/shared/ContactSummary.tsx
-// This will be a Server Component.
+"use client";
 import React from 'react';
-import Link from 'next/link'; // Use next/link
-import { getTranslation } from '@/lib/i18n-server'; // Server-side translation helper
+import Link from 'next/link';
+import { useTranslation } from "react-i18next";
 
-const ContactSummary = async () => {
-  const { translations } = await getTranslation('es'); // Or dynamically determine locale
+const ContactSummary = () => {
+  const { t } = useTranslation();
 
   return (
-    // <FadeInOnScroll> // FadeInOnScroll is a Client Component and will wrap this in page.tsx
       <div className="contact-summary-container">
-        <h2>{translations.contact_title}</h2>
-        <p>{translations.contact_text}</p>
+        <h2>{t('contact_title')}</h2>
+        <p>{t('contact_text')}</p>
         <Link href="/contact" className="btn-main">
-          {translations.contact_form_button}
+          {t('contact_form_button')}
         </Link>
       </div>
-    // </FadeInOnScroll>
   );
 }
 
