@@ -210,7 +210,7 @@ const OfferCard = ({
           )}
         </CardActions>
       </Card>
-  );
+    );
 };
 
 
