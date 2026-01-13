@@ -1,5 +1,3 @@
-'use client';
-
 // futbolproyect-nextjs/src/components/shared/Mission.tsx
 // This is a Server Component.
 import React from 'react';
@@ -7,7 +5,7 @@ import Image from 'next/image'; // Use next/image
 import { getTranslation } from '@/lib/i18n-server'; // Server-side translation helper
 
 const Mission = async () => {
-  const translations = await getTranslation('es'); // Or dynamically determine locale
+  const { translations } = await getTranslation('es'); // Or dynamically determine locale
 
   // Images are referenced directly from /public
   const missionImageWebp = '/images/mision.webp';

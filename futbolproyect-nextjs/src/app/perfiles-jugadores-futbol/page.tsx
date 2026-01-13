@@ -1,8 +1,8 @@
 // futbolproyect-nextjs/src/app/perfiles-jugadores-futbol/page.tsx
 import React from 'react';
-import SeoPage from '../../components/shared/SeoPage'; // Adjust path
-import ProfileList from '../../components/shared/ProfileList'; // Adjust path
-import { getTranslation } from '../../../lib/i18n-server'; // Adjust path
+import SeoPage from '@/components/shared/SeoPage'; // Adjust path
+import ProfileList from '@/components/shared/ProfileList'; // Adjust path
+import { getTranslation } from '@/lib/i18n-server'; // Adjust path
 import { Metadata } from 'next'; // Import Metadata
 
 // Define types for Profile (re-using the one from ProfileList.tsx for consistency)
@@ -31,7 +31,7 @@ async function getProfiles(): Promise<Profile[]> {
 
 // Generate metadata for the page
 export async function generateMetadata(): Promise<Metadata> {
-  const translations = await getTranslation('es'); // Fetch translations for metadata
+  const { translations } = await getTranslation('es'); // Fetch translations for metadata
   return {
     title: translations['perfiles_jugadores_futbol_seo_title'],
     description: translations['perfiles_jugadores_futbol_seo_desc'],
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PerfilesJugadoresFutbolPage = async () => {
-  const translations = await getTranslation('es'); // Fetch translations for page content
+  const { translations } = await getTranslation('es'); // Fetch translations for page content
   const profiles = await getProfiles();
 
   const pageContent = {

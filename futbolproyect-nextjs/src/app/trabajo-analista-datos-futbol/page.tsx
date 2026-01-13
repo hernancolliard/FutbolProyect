@@ -1,9 +1,9 @@
 // futbolproyect-nextjs/src/app/trabajo-analista-datos-futbol/page.tsx
 import { Metadata } from 'next';
 import React from 'react';
-import SeoPage from '../../components/shared/SeoPage'; // Adjust path
-import OfferList from '../../components/shared/OfferList'; // Adjust path
-import { getTranslation } from '../../../lib/i18n-server'; // Adjust path
+import SeoPage from '@/components/shared/SeoPage'; // Adjust path
+import OfferList from '@/components/shared/OfferList'; // Adjust path
+import { getTranslation } from '@/lib/i18n-server'; // Adjust path
 
 // Define types for Offer (re-using the one from OfferList.tsx for consistency)
 interface Offer {
@@ -42,7 +42,7 @@ async function getAnalystOffers(): Promise<Offer[]> {
 
 // Generate metadata for the page
 export async function generateMetadata(): Promise<Metadata> {
-  const translations = await getTranslation('es'); // Fetch translations for metadata
+  const { translations } = await getTranslation('es'); // Fetch translations for metadata
   return {
     title: translations['trabajo_analista_datos_futbol_seo_title'] || "Trabajo para analista de datos en el fútbol | FutbolProyect",
     description: translations['trabajo_analista_datos_futbol_seo_desc'] || "Descubrí oportunidades de trabajo para analistas de datos en el fútbol. Clubes y academias buscan profesionales en análisis deportivo.",
@@ -50,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const TrabajoAnalistaDatosFutbolPage = async () => {
-  const translations = await getTranslation('es'); // Fetch translations for page content
+  const { translations } = await getTranslation('es'); // Fetch translations for page content
   const offers = await getAnalystOffers();
 
   const pageContent = {

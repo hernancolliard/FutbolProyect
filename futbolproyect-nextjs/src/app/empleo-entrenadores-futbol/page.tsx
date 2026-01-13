@@ -1,9 +1,9 @@
 // futbolproyect-nextjs/src/app/empleo-entrenadores-futbol/page.tsx
 import { Metadata } from 'next';
 import React from 'react';
-import SeoPage from '../../components/shared/SeoPage'; // Adjust path
-import OfferList from '../../components/shared/OfferList'; // Adjust path
-import { getTranslation } from '../../../lib/i18n-server'; // Adjust path
+import SeoPage from '@/components/shared/SeoPage'; // Adjust path
+import OfferList from '@/components/shared/OfferList'; // Adjust path
+import { getTranslation } from '@/lib/i18n-server'; // Adjust path
 
 // Define types for Offer (re-using the one from OfferList.tsx for consistency)
 interface Offer {
@@ -42,7 +42,7 @@ async function getCoachOffers(): Promise<Offer[]> {
 
 // Generate metadata for the page
 export async function generateMetadata(): Promise<Metadata> {
-  const translations = await getTranslation('es'); // Fetch translations for metadata
+  const { translations } = await getTranslation('es'); // Fetch translations for metadata
   return {
     title: translations['empleo_entrenadores_futbol_seo_title'] || "Empleo para entrenadores de fútbol | Oportunidades en clubes",
     description: translations['empleo_entrenadores_futbol_seo_desc'] || "Encontrá empleo para entrenadores de fútbol en clubes y academias. Publicá tu perfil y accedé a nuevas oportunidades laborales.",
@@ -50,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const EmpleoEntrenadoresFutbolPage = async () => {
-  const translations = await getTranslation('es'); // Fetch translations for page content
+  const { translations } = await getTranslation('es'); // Fetch translations for page content
   const offers = await getCoachOffers();
 
   const pageContent = {
