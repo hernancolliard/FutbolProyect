@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "../styles/OfferList.css";
 import ThemeRegistry from "../../lib/registry";
-import NextAuthSessionProvider from '../../components/SessionProvider';
+import NextAuthSessionProvider from '@/components/SessionProvider';
 import RootClientLayout from '../components/layout/RootClientLayout'; // Import RootClientLayout
 
 const inter = Inter({ subsets: ["latin"] });

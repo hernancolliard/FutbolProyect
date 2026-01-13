@@ -17,7 +17,7 @@ import FadeInOnScroll from "./FadeInOnScroll"; // Migrated FadeInOnScroll
 import OfferActions from "./OfferActions"; // Now importing the real OfferActions
 import useIsMobile from "../../hooks/useIsMobile"; // Migrated useIsMobile
 import Image from "next/image"; // Use next/image
-import "../../styles/OfferList.css"; // Path to the copied CSS
+
 
 
 // Define types for Offer
@@ -51,12 +51,12 @@ interface OfferListProps {
 }
 
 
-function OfferList({
+const OfferList = ({
   offers = [],
   onOfferAction,
   isHomePage = false,
   showApplyButton = true,
-}: OfferListProps) {
+}: OfferListProps) => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const [offersToDisplay, setOffersToDisplay] = useState<Offer[]>([]); // Use Offer type
