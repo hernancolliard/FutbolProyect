@@ -1,3 +1,5 @@
+'use client';
+
 // futbolproyect-nextjs/src/components/shared/Mission.tsx
 // This is a Server Component.
 import React from 'react';
