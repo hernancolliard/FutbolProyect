@@ -51,6 +51,169 @@ interface OfferListProps {
 }
 
 
+const OfferCard = ({
+  offer,
+  isHomePage,
+  isMobile,
+  showApplyButton,
+  onOfferAction,
+  t,
+  i18n,
+  handleViewOffer,
+}: {
+  offer: Offer;
+  isHomePage: boolean;
+  isMobile: boolean;
+  showApplyButton: boolean;
+  onOfferAction?: (action: string, id: string) => void;
+  t: any;
+  i18n: any;
+  handleViewOffer: (id: string) => void;
+}) => {
+  const lang = i18n.language;
+  const titulo = (offer as any)[`titulo_${lang}`] || offer.titulo;
+  const descripcion = (offer as any)[`descripcion_${lang}`] || offer.descripcion;
+  const ubicacion = (offer as any)[`ubicacion_${lang}`] || offer.ubicacion;
+  const puesto = (offer as any)[`puesto_${lang}`] || offer.puesto;
+
+  const isMobileHome = isHomePage && isMobile;
+  const imageWidth = isHomePage || isMobileHome ? 267 : 200;
+  const imageHeight = isHomePage || isMobileHome ? 150 : 113;
+
+  return (
+    <Card
+      sx={{
+        width: "100%",
+        position: "relative",
+        bgcolor: !isHomePage ? "primary.main" : "background.paper",
+        color: !isHomePage ? "#fff" : "inherit",
+        display: "flex",
+        flexDirection: isHomePage || isMobileHome ? "column" : "row",
+        height: "100%",
+        minHeight: isHomePage ? "420px" : "200px",
+      }}
+      elevation={2}
+      className={`offer-card ${isHomePage ? "home-offer-card" : "offer-card-all-offers"}`}
+      onClick={isHomePage ? () => handleViewOffer(offer.id) : undefined}
+    >
+      <Box
+        sx={{ // Changed div to Box for Material UI consistency
+          width: isMobileHome ? "100%" : isHomePage ? "100%" : "200px",
+          height: isHomePage || isMobileHome ? "150px" : "100%",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          marginRight: isMobileHome ? 0 : isHomePage ? 16 : 0,
+          background: "#e0e0e0",
+          padding: "1rem",
+          boxSizing: "border-box",
+        }}
+      >
+        {offer.imagen_url ? (
+          <Image
+            src={offer.imagen_url}
+            alt={titulo}
+            width={imageWidth}
+            height={imageHeight}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <Typography component="span" sx={{ color: "#888", fontSize: 16 }}>{t("no_image")}</Typography> // Changed span to Typography
+        )}
+      </Box>
+
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          p: isMobileHome ? 1 : 2,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box> {/* Changed div to Box */}
+          <Typography
+            variant={isMobileHome ? "body1" : "h6"}
+            sx={{
+              color: !isHomePage ? "#fff" : "inherit",
+              fontWeight: isMobileHome ? "bold" : "regular",
+            }}
+          >
+            {titulo}
+          </Typography>
+
+          <React.Fragment> {/* Changed <> to React.Fragment */}
+            <Typography
+              variant="subtitle2"
+              color={!isHomePage ? "#fff" : "text.secondary"}
+            >
+              {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
+            </Typography>
+            <Typography
+              variant="body2"
+              color={!isHomePage ? "#fff" : "text.secondary"}
+            >
+              {t("location")} {ubicacion || t("not_specified")}
+            </Typography>
+            <Typography
+              variant="body2"
+              color={!isHomePage ? "#fff" : "text.secondary"}
+            >
+              {t("position")} {puesto || t("not_specified")}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                mt: 1,
+                color: !isHomePage ? "#fff" : "inherit",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {descripcion}
+            </Typography>
+          </React.Fragment>
+        </Box>
+
+        <CardActions
+          sx={{
+            p: 0,
+            mt: isMobileHome ? 1 : 2,
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
+            "& > :not(style)": {
+              width: { xs: "100%", sm: "auto" },
+            },
+          }}
+        >
+          <Button
+            variant="contained"
+            color={isHomePage ? "primary" : "secondary"}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewOffer(offer.id);
+            }}
+          >
+            {t("view_offer")}
+          </Button>
+          {showApplyButton && (
+            <OfferActions onOfferAction={onOfferAction} offer={offer} />
+          )}
+        </CardActions>
+      </Card>
+  );
+};
+
+
 const OfferList = ({
   offers = [],
   onOfferAction,
@@ -70,153 +233,7 @@ const OfferList = ({
     router.push(`/offers/${id}`);
   };
 
-  const renderOfferCard = (offer: Offer) => { // Use Offer type
-    const lang = i18n.language;
-    const titulo = offer[`titulo_${lang}` as keyof Offer] || offer.titulo;
-    const descripcion = offer[`descripcion_${lang}` as keyof Offer] || offer.descripcion;
-    const ubicacion = offer[`ubicacion_${lang}` as keyof Offer] || offer.ubicacion;
-    const puesto = offer[`puesto_${lang}` as keyof Offer] || offer.puesto;
 
-    const isMobileHome = isHomePage && isMobile;
-    const imageWidth = isHomePage || isMobileHome ? 267 : 200;
-    const imageHeight = isHomePage || isMobileHome ? 150 : 113;
-
-    return (
-      <Card
-        key={offer.id}
-        sx={{
-          width: "100%",
-          position: "relative",
-          bgcolor: !isHomePage ? "primary.main" : "background.paper",
-          color: !isHomePage ? "#fff" : "inherit",
-          display: "flex",
-          flexDirection: isHomePage || isMobileHome ? "column" : "row",
-          height: "100%",
-          minHeight: isHomePage ? "420px" : "200px",
-        }}
-        elevation={2}
-        className={`offer-card ${
-          isHomePage ? "home-offer-card" : "offer-card-all-offers"
-        }`}
-        onClick={isHomePage ? () => handleViewOffer(offer.id) : undefined}
-      >
-        <Box
-          sx={{ // Changed div to Box for Material UI consistency
-            width: isMobileHome ? "100%" : isHomePage ? "100%" : "200px",
-            height: isHomePage || isMobileHome ? "150px" : "100%",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            marginRight: isMobileHome ? 0 : isHomePage ? 16 : 0,
-            background: "#e0e0e0",
-            padding: "1rem",
-            boxSizing: "border-box",
-          }}
-        >
-          {offer.imagen_url ? (
-            <Image
-              src={offer.imagen_url}
-              alt={titulo}
-              width={imageWidth}
-              height={imageHeight}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-              }}
-            />
-          ) : (
-            <Typography component="span" sx={{ color: "#888", fontSize: 16 }}>{t("no_image")}</Typography> // Changed span to Typography
-          )}
-        </Box>
-
-        <CardContent
-          sx={{
-            flexGrow: 1,
-            p: isMobileHome ? 1 : 2,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
-          <Box> {/* Changed div to Box */}
-            <Typography
-              variant={isMobileHome ? "body1" : "h6"}
-              sx={{
-                color: !isHomePage ? "#fff" : "inherit",
-                fontWeight: isMobileHome ? "bold" : "regular",
-              }}
-            >
-              {titulo}
-            </Typography>
-
-            <React.Fragment> {/* Changed <> to React.Fragment */}
-              <Typography
-                variant="subtitle2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
-              </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("location")} {ubicacion || t("not_specified")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color={!isHomePage ? "#fff" : "text.secondary"}
-              >
-                {t("position")} {puesto || t("not_specified")}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  mt: 1,
-                  color: !isHomePage ? "#fff" : "inherit",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {descripcion}
-              </Typography>
-            </React.Fragment>
-          </Box>
-
-          <CardActions
-            sx={{
-              p: 0,
-              mt: isMobileHome ? 1 : 2,
-              flexDirection: { xs: "column", sm: "row" },
-              alignItems: { xs: "stretch", sm: "center" },
-              "& > :not(style)": {
-                width: { xs: "100%", sm: "auto" },
-              },
-            }}
-          >
-            <Button
-              variant="contained"
-              color={isHomePage ? "primary" : "secondary"}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewOffer(offer.id);
-              }}
-            >
-              {t("view_offer")}
-            </Button>
-            {showApplyButton && (
-              <OfferActions onOfferAction={onOfferAction} offer={offer} /> {/* onOfferAction and offer props */}
-            )}
-          </CardActions>
-        </CardContent>
-      </Card>
-    );
-  };
 
   const featuredOffers = offersToDisplay.filter((o) => o.is_featured);
   const normalOffers = offersToDisplay.filter((o) => !o.is_featured);
@@ -240,7 +257,16 @@ const OfferList = ({
             <Slider {...settings} className="offers-carousel">
               {featuredOffers.map((offer) => (
                 <div key={offer.id} style={{ padding: 2 }}>
-                  {renderOfferCard(offer)}
+                  <OfferCard
+                  offer={offer}
+                  isHomePage={isHomePage}
+                  isMobile={isMobile}
+                  showApplyButton={showApplyButton}
+                  onOfferAction={onOfferAction}
+                  t={t}
+                  i18n={i18n}
+                  handleViewOffer={handleViewOffer}
+                />
                 </div>
               ))}
             </Slider>
@@ -262,7 +288,16 @@ const OfferList = ({
           >
             {normalOffers.map((offer) => (
               <div key={offer.id} style={{ padding: 2 }}>
-                {renderOfferCard(offer)}
+                <OfferCard
+                  offer={offer}
+                  isHomePage={isHomePage}
+                  isMobile={isMobile}
+                  showApplyButton={showApplyButton}
+                  onOfferAction={onOfferAction}
+                  t={t}
+                  i18n={i18n}
+                  handleViewOffer={handleViewOffer}
+                />
               </div>
             ))}
           </Slider>
