@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from 'next/navigation'; // Import useRouter from next/navigation
-import apiClient from '../../lib/apiClient';
+import apiClient from '@/lib/apiClient';
 
 const AuthContext = createContext(null);
 
