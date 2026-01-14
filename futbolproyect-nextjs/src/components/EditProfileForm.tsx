@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from "react";
-import apiClient from '../../../lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";

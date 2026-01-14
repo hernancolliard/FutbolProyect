@@ -14,10 +14,10 @@ import {
 import Slider from "react-slick";
 import FadeInOnScroll from "./FadeInOnScroll";
 import OfferActions from "./OfferActions";
-import useIsMobile from "../../hooks/useIsMobile";
+import useIsMobile from "@/hooks/useIsMobile";
 import Image from "next/image";
 
-import { Offer } from "../../lib/types";
+import { Offer } from "@/lib/types";
 
 /* ============================
    TYPES

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import Image from "next/image"; // Use next/image
 import { Grid, Typography, Button, Box } from '@mui/material'; // Using Material UI components
 
-import { Profile } from '../../lib/types';
+import { Profile } from '@/lib/types';
 
 interface ProfileListProps {
     profiles: Profile[];

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation"; // Import useParams and useRouter from next/navigation
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import TextField from "@mui/material/TextField";
@@ -12,8 +12,8 @@ import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import FileUpload from "./FileUpload"; // Migrated FileUpload
-import LoadingSpinner from "./LoadingSpinner"; // Migrated LoadingSpinner
+import FileUpload from "@/components/FileUpload"; // Migrated FileUpload
+import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated LoadingSpinner
 import Image from "next/image"; // Import next/image
 
 const fetchOffer = async (offerId) => {

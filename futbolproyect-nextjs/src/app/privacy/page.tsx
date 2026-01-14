@@ -49,7 +49,7 @@ export default function PrivacyPolicy() {
   return (
     <Box sx={{ p: 3, margin: '0 auto', maxWidth: '800px' }}>
       {loading ? (
-        <LoadingSpinner />
+        <LoadingSpinner text={t('loading_privacy_policy', 'Cargando política de privacidad...')} />
       ) : (
         <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontFamily: 'inherit', fontSize: 'inherit', color: 'white' }}>
           {privacyContent}
