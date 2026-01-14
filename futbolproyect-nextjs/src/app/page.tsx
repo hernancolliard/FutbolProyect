@@ -28,6 +28,11 @@ const fetchHomePageOffers = async () => {
   return [...(data.featuredOffers || []), ...(data.offers || [])];
 };
 
+const fetchFeaturedProfiles = async () => {
+  const { data } = await apiClient.get("/profiles/featured");
+  return data.profiles || [];
+};
+
 export default function HomePage() {
   const { t } = useTranslation('common');
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -53,11 +58,20 @@ export default function HomePage() {
 
   const { 
     data: homePageOffers = [], 
-    isLoading, 
-    error 
+    isLoading: isLoadingOffers, 
+    error: errorOffers 
   } = useQuery({ 
     queryKey: ['homePageOffers'], 
     queryFn: fetchHomePageOffers 
+  });
+
+  const { 
+    data: featuredProfiles = [], 
+    isLoading: isLoadingProfiles, 
+    error: errorProfiles 
+  } = useQuery({ 
+    queryKey: ['featuredProfiles'], 
+    queryFn: fetchFeaturedProfiles 
   });
 
   const handleRefresh = () => {
@@ -73,10 +87,10 @@ export default function HomePage() {
         </FadeInOnScroll>
         <Hero />
         <Box sx={{ p: 3 }}>
-          {isLoading ? (
+          {isLoadingOffers ? (
             <LoadingSpinner text={t('loading_offers', 'Cargando ofertas...')} />
-          ) : error ? (
-            <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_offers', 'Error al cargar ofertas.')}: {error.message}</Typography>
+          ) : errorOffers ? (
+            <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_offers', 'Error al cargar ofertas.')}: {errorOffers.message}</Typography>
           ) : (
             <OfferList
               offers={homePageOffers}
@@ -90,7 +104,13 @@ export default function HomePage() {
             </Button>
           </Box>
 
-          <FeaturedProfilesCarousel />
+          {isLoadingProfiles ? (
+            <LoadingSpinner text={t('loading_profiles', 'Cargando perfiles...')} />
+          ) : errorProfiles ? (
+            <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_profiles', 'Error al cargar perfiles.')}: {errorProfiles.message}</Typography>
+          ) : (
+            <FeaturedProfilesCarousel profiles={featuredProfiles} />
+          )}
           <Box sx={{ textAlign: 'center', padding: '2rem 0' }}>
             <Button component={Link} href="/featured-profiles" variant="contained" className="btn-main">
               {t("view_all_profiles", "Ver todos los perfiles")}

@@ -38,16 +38,7 @@ function PrevArrow(props: any) { // Use any for props for now
   );
 }
 
-// Define types for Profile
-interface Profile {
-    id: string;
-    foto_perfil_url?: string;
-    nombre: string;
-    apellido?: string;
-    posicion_principal?: string;
-    nacionalidad?: string;
-    // Add other profile properties as needed
-}
+import { Profile } from '../../lib/types';
 
 interface FeaturedProfilesCarouselProps {
     profiles: Profile[];
