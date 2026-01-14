@@ -25,7 +25,7 @@ export async function generateMetadata({ params, searchParams }: { params: { id:
 
     if (!profile) {
         return {
-            title: t('profile_not_found', 'Perfil no encontrado'),
+            title: t('profile_not_found'),
         };
     }
 

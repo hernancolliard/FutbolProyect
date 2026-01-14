@@ -1,20 +1,10 @@
 // futbolproyect-nextjs/src/app/perfiles-jugadores-futbol/page.tsx
 import React from 'react';
+import { Profile } from '@/lib/types';
 import SeoPage from '@/components/shared/SeoPage'; // Adjust path
 import ProfileList from '@/components/shared/ProfileList'; // Adjust path
 import { getTranslation } from '@/lib/i18n-server'; // Adjust path
 import { Metadata } from 'next'; // Import Metadata
-
-// Define types for Profile (re-using the one from ProfileList.tsx for consistency)
-interface Profile {
-    id: string;
-    foto_perfil_url?: string;
-    nombre: string;
-    apellido?: string;
-    posicion_principal?: string;
-    nacionalidad?: string;
-    // Add other profile properties as needed
-}
 
 // Function to fetch profiles
 async function getProfiles(): Promise<Profile[]> {
@@ -54,7 +44,7 @@ const PerfilesJugadoresFutbolPage = async () => {
     <SeoPage 
       {...pageContent}
       items={profiles}
-      renderItems={(items) => <ProfileList profiles={items as Profile[]} />}
+      renderItems={(items) => <ProfileList profiles={items} />}
     />
   );
 };

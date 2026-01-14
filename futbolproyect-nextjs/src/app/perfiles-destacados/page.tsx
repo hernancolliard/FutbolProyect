@@ -37,8 +37,8 @@ const fetchPuestos = async (): Promise<string[]> => {
 export async function generateMetadata({ searchParams } : { searchParams: { [key: string]: string | string[] | undefined } }): Promise<Metadata> {
     const { t } = await getTranslation(searchParams?.lang as string);
     return {
-        title: t('featured_profiles_seo_title', 'Perfiles Destacados | FutbolProyect'),
-        description: t('featured_profiles_seo_desc', 'Descubre a los futbolistas, entrenadores y profesionales destacados en FutbolProyect. Perfiles verificados y con suscripción activa.'),
+        title: t('featured_profiles_seo_title'),
+        description: t('featured_profiles_seo_desc'),
     };
 }
 
@@ -48,7 +48,7 @@ async function ProfilesList({ nacionalidad, puesto, lang }: { nacionalidad?: str
     const { t } = await getTranslation(lang);
 
     if (profiles.length === 0) {
-        return <Typography>{t('no_featured_profiles_filters', 'No hay perfiles destacados que coincidan con los filtros seleccionados.')}</Typography>
+        return <Typography>{t('no_featured_profiles_filters')}</Typography>
     }
 
     return (
@@ -78,10 +78,10 @@ export default async function FeaturedProfilesPage({
     return (
         <Paper sx={{ p: {xs: 2, md: 4}, m: {xs: 1, md: 2} }}>
             <Typography variant="h4" component="h1" gutterBottom>
-                {t('featured_profiles_title', 'Perfiles Destacados')}
+                {t('featured_profiles_title')}
             </Typography>
             <Typography paragraph>
-                {t('featured_profiles_desc', 'Estos son los profesionales que han decidido destacar su perfil en nuestra plataforma.')}
+                {t('featured_profiles_desc')}
             </Typography>
 
             <FilterControls
@@ -90,7 +90,7 @@ export default async function FeaturedProfilesPage({
                 initialFilters={{ nacionalidad, puesto }}
             />
 
-            <Suspense fallback={<Typography>{t('loading_profiles', 'Cargando perfiles...')}</Typography>}>
+            <Suspense fallback={<Typography>{t('loading_profiles')}</Typography>}>
                 <ProfilesList nacionalidad={nacionalidad} puesto={puesto} lang={lang} />
             </Suspense>
         </Paper>
