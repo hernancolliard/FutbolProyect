@@ -7,24 +7,18 @@ import React from 'react';
 import { Typography, Container, Button, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next'; // Client-side translation
 
-// Define types for item
-interface Item {
-  id: string;
-  // Add other common item properties as needed
-}
-
-interface SeoPageProps {
+interface SeoPageProps<T> {
   // title and metaDescription are handled by Next.js metadata API
   h1: string;
   mainText: string;
   h2?: string;
   ctaText?: string;
   ctaLink?: string;
-  items?: Item[];
-  renderItems?: (items: Item[]) => React.ReactNode;
+  items?: T[];
+  renderItems?: (items: T[]) => React.ReactNode;
 }
 
-const SeoPage: React.FC<SeoPageProps> = ({ h1, mainText, h2, ctaText, ctaLink, items, renderItems }) => {
+const SeoPage = <T,>({ h1, mainText, h2, ctaText, ctaLink, items, renderItems }: SeoPageProps<T>) => {
   const { t } = useTranslation(); // Use client-side translation here
 
   const paragraphs = mainText.split('\n\n');
