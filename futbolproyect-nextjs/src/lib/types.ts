@@ -52,3 +52,24 @@ export interface Application {
     estado: string;
     fecha_postulacion: string;
 }
+
+export interface Offer {
+  id: string;
+  is_featured: boolean;
+  imagen_url?: string;
+  titulo_es?: string;
+  titulo_en?: string;
+  titulo: string;
+  descripcion_es?: string;
+  descripcion_en?: string;
+  descripcion: string;
+  ubicacion_es?: string;
+  ubicacion_en?: string;
+  ubicacion: string;
+  puesto_es?: string;
+  puesto_en?: string;
+  puesto: string;
+  nombre_ofertante: string;
+  id_usuario_ofertante: string;
+  applicants?: { user_id: string }[];
+}
