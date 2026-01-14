@@ -1,30 +1,10 @@
 // futbolproyect-nextjs/src/app/ofertas-trabajo-futbol/page.tsx
 import { Metadata } from 'next';
 import React from 'react';
+import { Offer } from '@/lib/types';
 import SeoPage from '@/components/shared/SeoPage'; // Adjust path
 import OfferList from '@/components/shared/OfferList'; // Adjust path
 import { getTranslation } from '@/lib/i18n-server'; // Adjust path
-
-// Define types for Offer (re-using the one from OfferList.tsx for consistency)
-interface Offer {
-  id: string;
-  is_featured: boolean;
-  imagen_url?: string;
-  titulo_es?: string;
-  titulo_en?: string;
-  titulo: string; // Fallback
-  descripcion_es?: string;
-  descripcion_en?: string;
-  descripcion: string; // Fallback
-  ubicacion_es?: string;
-  ubicacion_en?: string;
-  ubicacion: string; // Fallback
-  puesto_es?: string;
-  puesto_en?: string;
-  puesto: string; // Fallback
-  nombre_ofertante: string;
-  // Add other offer properties as needed
-}
 
 // Function to fetch offers
 async function getOffers(): Promise<Offer[]> {
@@ -65,7 +45,7 @@ const OfertasTrabajoFutbolPage = async () => {
     <SeoPage 
       {...pageContent}
       items={offers}
-      renderItems={(items) => <OfferList offers={items as Offer[]} isHomePage={false} />}
+      renderItems={(items) => <OfferList offers={items} isHomePage={false} />}
     />
   );
 };

@@ -28,13 +28,7 @@ const useAuth = () => {
     return { user };
 };
 
-// Define types for Offer
-interface Offer {
-  id: string;
-  id_usuario_ofertante: string;
-  applicants?: { user_id: string }[];
-  // Add other offer properties as needed
-}
+import { Offer } from "../../lib/types";
 
 interface OfferActionsProps {
     offer: Offer;
