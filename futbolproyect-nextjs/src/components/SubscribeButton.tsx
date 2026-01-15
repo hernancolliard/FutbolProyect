@@ -95,7 +95,7 @@ function SubscribeButton({ planType, billingCycle }) {
 
       <PayPalScriptProvider
         options={{
-          "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "YOUR_PAYPAL_CLIENT_ID", // Use NEXT_PUBLIC prefix
+          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "YOUR_PAYPAL_CLIENT_ID", // Use NEXT_PUBLIC prefix
           currency: "USD",
         }}
       >
