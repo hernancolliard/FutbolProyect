@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link"; // Import next/link
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";

@@ -5,7 +5,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, S
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import apiClient from '../../../lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import FileUpload from './FileUpload'; // Reutilizamos el componente de subida de archivos
 
 const saveVideo = async ({ videoData, isEdit, videoId }) => {

@@ -18,7 +18,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import apiClient from '../../../lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import FileUpload from './FileUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button } from "@mui/material";

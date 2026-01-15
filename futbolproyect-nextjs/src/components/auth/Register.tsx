@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";

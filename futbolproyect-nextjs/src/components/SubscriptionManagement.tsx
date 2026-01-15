@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import apiClient from '../../lib/apiClient'; // Centralized apiClient
+import apiClient from '@/lib/apiClient'; // Centralized apiClient
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation'; // Import useSearchParams and useRouter
-import apiClient from '../../../lib/apiClient'; // Centralized apiClient
+import apiClient from '@/lib/apiClient'; // Centralized apiClient
 import { useTranslation } from 'react-i18next';
 import { TextField, Button, Stack, Typography, Alert, CircularProgress, Box, Card, CardContent } from '@mui/material'; // Material UI components
 

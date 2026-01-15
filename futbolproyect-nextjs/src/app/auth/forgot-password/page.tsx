@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import apiClient from '../../../lib/apiClient'; // Centralized apiClient
+import apiClient from '@/lib/apiClient'; // Centralized apiClient
 import { useTranslation } from 'react-i18next';
 import { TextField, Button, Stack, Typography, Alert, CircularProgress, Box, Card, CardContent } from '@mui/material'; // Import Material UI components
 
