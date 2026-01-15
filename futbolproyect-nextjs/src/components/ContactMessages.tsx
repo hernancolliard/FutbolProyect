@@ -115,7 +115,7 @@ function ContactMessages() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1">{msg.name} ({msg.email})</Typography>
                     <Chip
-                      label={t(msg.status, msg.status)}
+                      label={String(t(msg.status, msg.status))}
                       color={msg.status === 'replied' ? 'success' : 'primary'}
                       size="small"
                     />
