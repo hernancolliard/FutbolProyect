@@ -189,7 +189,7 @@ function CreateOffer({ onOfferCreated, onClose }) {
           <TextField name="horarios" label={t("schedule_placeholder", "Horarios")} value={formData.horarios} onChange={handleChange} fullWidth />
           <TextField name="detalles_adicionales" label={t("additional_details_placeholder", "Detalles Adicionales")} value={formData.detalles_adicionales} onChange={handleChange} fullWidth multiline rows={3} />
           
-          <FileUpload onFilesChange={setFiles} uploadProgress={uploadProgress} initialFiles={existingOffer?.imagen_url ? [{ preview: existingOffer.imagen_url, name: 'current_image' }] : []} />
+          <FileUpload onFilesChange={setFiles} uploadProgress={uploadProgress} multiple={false} initialFiles={existingOffer?.imagen_url ? [{ preview: existingOffer.imagen_url, name: 'current_image' }] : []} />
 
           {imagePreview && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>

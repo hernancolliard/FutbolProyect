@@ -1,6 +1,0 @@
-# Permitir a todos los robots de búsqueda rastrear todo el sitio.
-User-agent: *
-Allow: /
-
-# Ubicación del sitemap para que los bots encuentren todas tus páginas.
-Sitemap: https://futbolproyect.com/sitemap.xml
