@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import apiClient from "../../lib/apiClient"; // Centralized apiClient
+import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import Link from "next/link"; // Import next/link
 import { useTranslation } from "react-i18next";
 import Card from "@mui/material/Card";
