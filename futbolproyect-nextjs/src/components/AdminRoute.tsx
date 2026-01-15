@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter
 import { useAuth } from '../context/AuthContext';
-import LoadingSpinner from '../LoadingSpinner'; // Migrated LoadingSpinner
+import LoadingSpinner from './LoadingSpinner';
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
