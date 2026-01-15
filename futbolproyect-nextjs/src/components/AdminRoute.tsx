@@ -10,7 +10,7 @@ const AdminRoute = ({ children }) => {
   const router = useRouter();
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner text="Cargando..." />;
   }
 
   if (!user || !user.isadmin) {
