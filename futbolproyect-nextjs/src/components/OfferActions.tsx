@@ -34,7 +34,7 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
 
       // Guardar el estado previo
       const previousOfferDetail = queryClient.getQueryData(['offer', offer.id]);
-      const previousOfferLists = queryClient.getQueriesData(['offers']);
+      const previousOfferLists = queryClient.getQueriesData({ queryKey: ['offers'] });
 
       // Actualización optimista para la página de detalle
       if (previousOfferDetail) {
