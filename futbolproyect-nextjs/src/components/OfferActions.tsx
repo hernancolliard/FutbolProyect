@@ -38,19 +38,26 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
 
       // Actualización optimista para la página de detalle
       if (previousOfferDetail) {
-        queryClient.setQueryData(['offer', offer.id], (old) => ({
-          ...old,
-          is_applied_optimistic: true,
-        }));
+        queryClient.setQueryData(['offer', offer.id], (old) => {
+          if (old && typeof old === 'object') {
+            return {
+              ...old,
+              is_applied_optimistic: true,
+            };
+          }
+          return old;
+        });
       }
 
       // Actualización optimista para todas las listas de ofertas
-      queryClient.setQueriesData({ queryKey: ['offers'] }, (oldData) => {
-        if (!oldData || !oldData.offers) return oldData;
-        const newOffers = oldData.offers.map(o => 
-            o.id === offer.id ? { ...o, is_applied_optimistic: true } : o
-        );
-        return { ...oldData, offers: newOffers };
+      queryClient.setQueriesData({ queryKey: ['offers'] }, (oldData: any) => {
+        if (oldData && Array.isArray(oldData.offers)) {
+          const newOffers = oldData.offers.map(o =>
+              o.id === offer.id ? { ...o, is_applied_optimistic: true } : o
+          );
+          return { ...oldData, offers: newOffers };
+        }
+        return oldData;
       });
 
       return { previousOfferDetail, previousOfferLists };
@@ -79,6 +86,10 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
   });
 
   const handleApplyClick = async () => {
+    if (!user) {
+      toast.error(t('must_be_logged_in_to_apply', 'Debes iniciar sesión para postularte.'));
+      return;
+    }
     try {
       const userProfile = await fetchUserProfile(user.id);
       const { foto_perfil_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento } = userProfile;
