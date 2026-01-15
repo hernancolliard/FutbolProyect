@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 const DropzoneContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isDragActive',
-})(({ theme, isDragActive }) => ({
+})<{ isDragActive?: boolean }>(({ theme, isDragActive }) => ({
   border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(3),
