@@ -25,7 +25,7 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
   const queryClient = useQueryClient();
   const router = useRouter(); // Initialize useRouter
 
-  const { mutate: performApply, isLoading: isApplying } = useMutation({
+  const { mutate: performApply, isPending: isApplying } = useMutation({
     mutationFn: () => applyToOffer(offer.id),
     onMutate: async () => {
       // Cancelar queries para evitar sobreescribir la actualización optimista
