@@ -41,7 +41,7 @@ export default function ProfilePageClient({ profile: initialProfile }: ProfilePa
     }, [initialProfile]);
 
     useEffect(() => {
-        if (profile && currentUser && profile.id !== currentUser.id) {
+        if (profile && currentUser && Number(profile.id) !== Number(currentUser.id)) {
             const recordView = async () => {
                 try {
                     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
