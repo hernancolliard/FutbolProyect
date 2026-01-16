@@ -1,73 +1,101 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { SessionProvider } from 'next-auth/react';
-import Header from '@/components/layout/Header';
-import Modal from '../ui/Modal';
-import Login from '../auth/Login';
-import Register from '../auth/Register';
-import { Box, Toolbar } from '@mui/material';
-import { ToastContainer } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
-import ReactQueryProvider from '../providers/ReactQueryProvider'; // Import ReactQueryProvider
-import { ParallaxProvider } from 'react-scroll-parallax'; // Import ParallaxProvider
+import React, { useState } from "react";
+import Header from "./Header";
+import Footer from "./Footer";
+import Login from "@/components/auth/Login";
+import Register from "@/components/auth/Register";
+import CreateOffer from "@/components/CreateOffer";
+import { Modal } from "@mui/material"; // O tu componente Modal personalizado si usas uno diferente
+import { Box } from "@mui/material";
 
-import I18nProvider from '../I18nProvider';
+interface RootClientLayoutProps {
+  children: React.ReactNode;
+}
 
-export default function RootClientLayout({ children }: { children: React.ReactNode }) {
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [registrationRole, setRegistrationRole] = useState('player');
+export default function RootClientLayout({ children }: RootClientLayoutProps) {
+  // Estados para controlar los modales
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isCreateOfferOpen, setIsCreateOfferOpen] = useState(false);
+  const [registerRole, setRegisterRole] = useState<string>("user"); // Rol por defecto para registro
 
-  const handleShowRegisterModal = (role: string) => {
-    setRegistrationRole(role);
-    setShowRegisterModal(true);
+  // Handlers
+  const handleShowLogin = () => setIsLoginOpen(true);
+  const handleCloseLogin = () => setIsLoginOpen(false);
+
+  const handleShowRegister = (role: string = "user") => {
+    setRegisterRole(role);
+    setIsRegisterOpen(true);
   };
+  const handleCloseRegister = () => setIsRegisterOpen(false);
+
+  const handleShowCreateOffer = () => setIsCreateOfferOpen(true);
+  const handleCloseCreateOffer = () => setIsCreateOfferOpen(false);
 
   return (
     <>
-      <I18nProvider>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-        <Header
-          onShowLoginModal={() => setShowLoginModal(true)}
-          onShowRegisterModal={handleShowRegisterModal}
-          onShowCreateOfferModal={() => {
-            /* Implement navigation to create offer page */
-          }}
-        />
-        <Toolbar />
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-          <ReactQueryProvider>
-            <ParallaxProvider>{children}</ParallaxProvider>
-          </ReactQueryProvider>
-        </Box>
+      {/* Pasamos las funciones al Header para que los botones funcionen */}
+      <Header
+        onShowLoginModal={handleShowLogin}
+        onShowRegisterModal={handleShowRegister}
+        onShowCreateOfferModal={handleShowCreateOffer}
+      />
 
-        {/* Login Modal */}
-        <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)}>
-          <Login onClose={() => setShowLoginModal(false)} />
-        </Modal>
+      <main className="min-h-screen">{children}</main>
 
-        {/* Register Modal */}
-        <Modal
-          isOpen={showRegisterModal}
-          onClose={() => setShowRegisterModal(false)}
-        >
-          <Register
-            onClose={() => setShowRegisterModal(false)}
-            initialRole={registrationRole}
-          />
+      <Footer />
+
+      {/* --- MODALES --- */}
+
+      {/* Modal de Login */}
+      {isLoginOpen && (
+        <Modal open={isLoginOpen} onClose={handleCloseLogin}>
+          <Box sx={{ outline: "none" }}>
+            {/* Login ya tiene su propio Card/Estilos, solo lo renderizamos */}
+            <Login onClose={handleCloseLogin} />
+          </Box>
         </Modal>
-      </I18nProvider>
+      )}
+
+      {/* Modal de Registro */}
+      {isRegisterOpen && (
+        <Modal open={isRegisterOpen} onClose={handleCloseRegister}>
+          <Box sx={{ outline: "none" }}>
+            <Register
+              onClose={handleCloseRegister}
+              initialRole={registerRole} // Pasamos el rol seleccionado
+              onSwitchToLogin={() => {
+                handleCloseRegister();
+                handleShowLogin();
+              }}
+            />
+          </Box>
+        </Modal>
+      )}
+
+      {/* Modal de Crear Oferta */}
+      {isCreateOfferOpen && (
+        <Modal open={isCreateOfferOpen} onClose={handleCloseCreateOffer}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: 600 },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <CreateOffer onClose={handleCloseCreateOffer} />
+          </Box>
+        </Modal>
+      )}
     </>
   );
 }

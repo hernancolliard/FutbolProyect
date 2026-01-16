@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css"; // <--- ESTA LÍNEA ES OBLIGATORIA
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-// ... otros imports
+import RootClientLayout from "@/components/layout/RootClientLayout"; // <--- Importamos el layout cliente
+import { I18nProvider } from "@/components/I18nProvider"; // Aseguramos las traducciones
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,11 +20,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <AuthProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            {/* Usamos el wrapper cliente que maneja el Header y los Modales */}
+            <RootClientLayout>{children}</RootClientLayout>
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );
