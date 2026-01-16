@@ -300,7 +300,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }: { onShowLoginModal: (
             ) : user ? (
               <>
                 <MenuItem disabled>
-                  | {t("welcome_user", { name: user.name })}
+                  | {t("welcome_user", { name: user.nombre })}
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ color: "error.main" }}>
                   {t("logout")}
