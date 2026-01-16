@@ -6,6 +6,7 @@ declare module "next-auth" {
     accessToken?: string;
     isadmin?: boolean;
     tipo_usuario?: string;
+    nombre?: string;
   }
 
   interface Session {
@@ -25,5 +26,6 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     isadmin?: boolean;
     tipo_usuario?: string;
+    nombre?: string;
   }
 }
