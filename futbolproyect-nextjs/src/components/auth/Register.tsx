@@ -11,7 +11,13 @@ import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
 import { Box, Card, CardContent, Typography } from "@mui/material"; // Import additional Material UI components
 
-function Register({ onClose, initialRole = 'player' }) {
+interface RegisterProps {
+  onClose: () => void;
+  initialRole?: 'player' | 'club';
+  onSwitchToLogin: () => void;
+}
+
+function Register({ onClose, initialRole = 'player', onSwitchToLogin }: RegisterProps) {
   const { t } = useTranslation('common');
   const [formData, setFormData] = useState({
     nombre: "",
@@ -29,11 +35,11 @@ function Register({ onClose, initialRole = 'player' }) {
     }));
   }, [initialRole]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -47,12 +53,12 @@ function Register({ onClose, initialRole = 'player' }) {
         password: "",
         tipo_usuario: "postulante",
       });
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || t("register_error", "Error en el registro."));
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       // In Next.js with next-auth, you might use signIn function here
       await apiClient.post("/users/auth/google", {
@@ -60,7 +66,7 @@ function Register({ onClose, initialRole = 'player' }) {
       });
       setSuccess(t("register_with_google_success", "Registro/Inicio de sesión con Google exitoso."));
       onClose(); // Cierra el modal después del registro/login con Google
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message || t("register_with_google_error", "Error al registrarse/iniciar sesión con Google."));
     }
   };
@@ -146,6 +152,18 @@ function Register({ onClose, initialRole = 'player' }) {
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
           />
+        </Box>
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography variant="body2">
+            {t('already_have_account', '¿Ya tienes cuenta? ')}
+            <Typography
+              component="span"
+              onClick={onSwitchToLogin}
+              sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
+            >
+              {t('login_here', 'Inicia sesión aquí')}
+            </Typography>
+          </Typography>
         </Box>
       </CardContent>
     </Card>
