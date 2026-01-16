@@ -230,6 +230,7 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
           <FileUpload
             onFilesChange={handleFileUploadChange}
             multiple={false}
+            uploadProgress={0} // Añadir la prop uploadProgress
           />
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button onClick={() => setShowPhotoUpload(false)} variant="outlined">{t('cancel', 'Cancelar')}</Button>
