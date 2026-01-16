@@ -137,12 +137,12 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
               ))}
             </TextField>
             
-            <FileUpload 
-              onFilesChange={handleFileChange} 
-              // uploadProgress={uploadProgress} // This prop is not used in VideoFormModal, only in FileUpload for display
-              initialFiles={video?.cover_image_url ? [{ preview: video.cover_image_url, name: 'current_cover_image' }] : []}
-            />
-
+                        <FileUpload
+                          onFilesChange={handleFileChange}
+                          uploadProgress={0} // Añadido para satisfacer el requisito de tipo
+                          multiple={false} // Añadido para satisfacer el requisito de tipo
+                          initialFiles={video?.cover_image_url ? [{ preview: video.cover_image_url, name: 'current_cover_image' }] : []}
+                        />
             {isSaving && (
               <Stack direction="row" alignItems="center" spacing={1}>
                 <CircularProgress size={20} />
