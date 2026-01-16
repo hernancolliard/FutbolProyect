@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   createContext,
@@ -7,8 +7,8 @@ import React, {
   useContext,
   useCallback,
 } from "react";
-import { useRouter } from 'next/navigation'; // Import useRouter from next/navigation
-import apiClient from '@/lib/apiClient';
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
+import apiClient from "@/lib/apiClient";
 
 const AuthContext = createContext(null);
 
@@ -33,14 +33,53 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, [fetchUser]);
 
-  const login = () => {
-    // Después de un login exitoso, el backend ya ha establecido la cookie.
-    // Volvemos a obtener los datos del usuario para actualizar el estado.
-    setLoading(true); // Opcional: mostrar un spinner mientras se recargan los datos
-    fetchUser();
+  // En src/context/AuthContext.tsx
+
+  // ... imports
+
+  const login = async (email, password) => {
+    setLoading(true);
+    try {
+      // 1. Hacemos la petición al backend
+      // Al usar apiClient con withCredentials, la cookie se guarda sola automáticamente.
+      await apiClient.post("/users/login", { email, password });
+
+      // 2. Si no dio error, pedimos los datos del usuario para actualizar la app
+      await fetchUser();
+
+      return true; // Indicamos éxito
+    } catch (error) {
+      console.error("Error en login:", error);
+      throw error; // Lanzamos el error para que el componente Login lo muestre
+    } finally {
+      setLoading(false);
+    }
+  };
+  // Agregar dentro del AuthProvider, junto a login y logout
+
+  const loginWithGoogle = async (id_token: string) => {
+    setLoading(true);
+    try {
+      // 1. Enviamos el token al backend (que seteará la cookie)
+      await apiClient.post("/users/auth/google", { id_token });
+
+      // 2. Actualizamos el estado del usuario
+      await fetchUser();
+
+      return true;
+    } catch (error) {
+      console.error("Error en Google Login:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = async () => { // Removed 'navigate' parameter
+  // ¡No olvides agregar loginWithGoogle al objeto value que retorna el Provider!
+  // value={{ user, login, logout, loginWithGoogle, ... }}
+
+  const logout = async () => {
+    // Removed 'navigate' parameter
     try {
       await apiClient.post("/users/logout");
     } catch (error) {
@@ -55,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     user,
     setUser, // Exponer setUser para permitir actualizaciones de perfil
     login,
+    loginWithGoogle,
     logout,
     isAuthenticated: !!user,
     loading,

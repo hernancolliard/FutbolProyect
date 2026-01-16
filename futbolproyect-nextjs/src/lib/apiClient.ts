@@ -1,27 +1,15 @@
 import axios from "axios";
 
-const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+// En producción (Render), al estar en el mismo dominio, la URL base puede ser relativa o la de entorno.
+// Usar una ruta relativa "/api" es lo más seguro en tu arquitectura de servidor único.
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 const apiClient = axios.create({
-  baseURL: apiBaseUrl,
-  withCredentials: true, // Allows axios to send cookies for session management.
-});
-
-// Interceptor to prepend /api to all request URLs
-apiClient.interceptors.request.use(
-  (config) => {
-    const url = config.url || "";
-    // Only prepend /api if it's not already part of the URL path.
-    if (!url.startsWith("/api")) {
-      // Ensure there's a leading slash
-      const path = url.startsWith('/') ? url : `/${url}`;
-      config.url = `/api${path}`;
-    }
-    return config;
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+  withCredentials: true, // ¡CRÍTICO! Esto permite enviar/recibir cookies de sesión
+});
 
 export default apiClient;
