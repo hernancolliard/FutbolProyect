@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
-                token.name = user.name; // Assuming user has a name
+                token.nombre = user.nombre;
                 token.accessToken = user.accessToken; // Assuming your backend returns an accessToken
                 token.isadmin = user.isadmin;
                 token.tipo_usuario = user.tipo_usuario;
@@ -73,7 +73,7 @@ export const authOptions: NextAuthOptions = {
             if (token) {
                 session.user.id = token.id as string;
                 session.user.email = token.email;
-                session.user.name = token.name;
+                session.user.nombre = token.nombre;
                 session.accessToken = token.accessToken as string;
                 session.user.isadmin = token.isadmin as boolean;
                 session.user.tipo_usuario = token.tipo_usuario as string;
