@@ -10,7 +10,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import { useAuth } from "../../context/AuthContext"; // Migrated AuthContext
-import { Box, Card, CardContent, Typography } from "@mui/material"; // Import additional Material UI components
+import { Box, Card, CardContent, Typography, Link as MuiLink } from "@mui/material"; // Import additional Material UI components and MuiLink
 
 function Login({ onClose }) {
   const { t } = useTranslation('common');
