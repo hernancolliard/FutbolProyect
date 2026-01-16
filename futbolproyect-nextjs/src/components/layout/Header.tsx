@@ -35,7 +35,7 @@ import Image from "next/image"; // Using next/image for optimized images
 // };
 
 
-function Header({ onShowLoginModal, onShowRegisterModal }: { onShowLoginModal: () => void, onShowRegisterModal: (role: string) => void }) {
+function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal }: { onShowLoginModal: () => void, onShowRegisterModal: (role: string) => void, onShowCreateOfferModal: () => void }) {
   const { t, i18n } = useTranslation();
   const user = null; // Temporarily set user to null to fix build error
   // console.log("User object in Header:", user); // Temporarily commented out
