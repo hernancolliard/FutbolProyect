@@ -1,19 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const next = require("next"); // Importante
+const next = require("next");
 const path = require("path");
 require("dotenv").config({ quiet: true });
 
 // --- Configuración de Next.js ---
-// Define si estamos en desarrollo o producción
 const dev = process.env.NODE_ENV !== "production";
-// Apuntamos a la carpeta donde está Next.js (ajusta la ruta relativa si es necesario)
+// Ajustamos la ruta para asegurarnos de que encuentre el nextjs compilado
 const dir = path.join(__dirname, "../futbolproyect-nextjs");
+
 const appNext = next({ dev, dir });
 const handle = appNext.getRequestHandler();
 
-// Inicializamos Next.js antes que Express
 appNext
   .prepare()
   .then(() => {
@@ -22,7 +21,6 @@ appNext
     // --- Middlewares Generales ---
     app.use(
       cors({
-        // En producción, usa la variable de entorno, sino permite todo o localhost
         origin: process.env.FRONTEND_URL || true,
         credentials: true,
       }),
@@ -30,7 +28,8 @@ appNext
     app.use(express.json({ limit: "10mb" }));
     app.use(cookieParser());
 
-    // --- RUTAS API (Tus rutas existentes) ---
+    // --- RUTAS API ---
+    // (Asegúrate de que estas rutas existan o comenta las que no uses)
     app.use("/api/users", require("./routes/users.js"));
     app.use("/api/payments", require("./routes/payments.js"));
     app.use("/api/offers", require("./routes/offers.js"));
@@ -47,8 +46,9 @@ appNext
     app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 
     // --- MANEJO DE NEXT.JS (SEO y Vistas) ---
-    // Cualquier petición que NO sea /api, la maneja Next.js
-    app.all("*", (req, res) => {
+    // CORRECCIÓN: Usamos regex /(.*)/ en lugar de "*" para evitar el error de "Missing parameter name"
+    // Esta línea captura cualquier ruta que no haya sido atrapada por las APIs de arriba
+    app.all(/(.*)/, (req, res) => {
       return handle(req, res);
     });
 
