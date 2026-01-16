@@ -4,11 +4,9 @@ import React, { useState, useEffect, useTransition } from "react";
 import { Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import {
-  Paper,
   Typography,
   Alert,
   Stack,
-  CircularProgress,
   Card,
   CardContent,
   Grid,
@@ -28,19 +26,7 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import PublicIcon from "@mui/icons-material/Public";
 import { usePathname, useRouter } from "next/navigation";
 import MyApplicationsSection from "./MyApplicationsSection";
-
-// Mock AuthContext for now
-const useAuth = () => {
-  // CORRECCIÓN: Idealmente el ID debería ser string para coincidir con el sistema,
-  // pero lo manejaremos en la comparación.
-  const user = {
-    id: 1,
-    nombre: "MockUser",
-    isadmin: true,
-    tipo_usuario: "ofertante",
-  };
-  return { user };
-};
+import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -50,7 +36,10 @@ export default function ProfilePageClient({
   profile: initialProfile,
 }: ProfilePageClientProps) {
   const { t, i18n } = useTranslation();
+
+  // CORRECCIÓN: Usamos el usuario real del contexto, no el mock
   const { user: currentUser } = useAuth();
+
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -64,17 +53,17 @@ export default function ProfilePageClient({
   }, [initialProfile]);
 
   useEffect(() => {
-    // CORRECCIÓN: Convertir ambos a Number para la comparación segura en el useEffect
+    // Validación segura de IDs
     if (
       profile &&
       currentUser &&
-      Number(profile.id) !== Number(currentUser.id)
+      String(profile.id) !== String(currentUser.id)
     ) {
       const recordView = async () => {
         try {
-          const apiUrl =
-            process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-          await fetch(`${apiUrl}/api/profiles/${profile.id}/view`, {
+          const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+          // Usamos sendBeacon si es posible para no bloquear, o fetch simple
+          await fetch(`${apiUrl}/profiles/${profile.id}/view`, {
             method: "POST",
           });
         } catch (error) {
@@ -88,9 +77,8 @@ export default function ProfilePageClient({
   const handleRatingChange = async (event: any, newValue: number | null) => {
     if (!newValue || !profile) return;
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-      const res = await fetch(`${apiUrl}/api/profiles/${profile.id}/rate`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+      const res = await fetch(`${apiUrl}/profiles/${profile.id}/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating: newValue }),
@@ -124,37 +112,21 @@ export default function ProfilePageClient({
     startTransition(() => router.refresh());
   };
 
-  if (!currentUser) {
-    return (
-      <Stack alignItems="center" sx={{ mt: 4 }}>
-        <Alert severity="warning">
-          {t(
-            "must_be_logged_in_to_see_profile",
-            "Debes iniciar sesión para ver este perfil.",
-          )}
-        </Alert>
-      </Stack>
-    );
-  }
-
   if (!profile) {
     return (
       <Alert severity="warning">
-        {t("profile_not_found", "Perfil no encontrado o error al cargar.")}
+        {t("profile_not_found", "Perfil no encontrado.")}
       </Alert>
     );
   }
 
-  // --- CORRECCIÓN CRÍTICA AQUÍ ---
-  // TypeScript fallaba porque currentUser.id es number y profile.id es string.
-  // Convertimos ambos a String para asegurar la compatibilidad.
+  // Comparación segura de IDs
   const isMyProfile =
     currentUser && String(currentUser.id) === String(profile.id);
 
   const lang = i18n.language;
 
-  // --- CORRECCIÓN DE ACCESO DINÁMICO ---
-  // Usamos (profile as any) porque claves como 'nacionalidad_es' no existen en la interfaz Profile
+  // Acceso seguro a propiedades dinámicas
   const p = profile as any;
   const nacionalidad = p[`nacionalidad_${lang}`] || profile.nacionalidad;
   const posicion_principal =
@@ -223,11 +195,14 @@ export default function ProfilePageClient({
                     <Typography variant="h4">
                       {profile.nombre} {profile.apellido || ""}
                     </Typography>
+
+                    {/* Botón de Editar solo si es mi perfil */}
                     {isMyProfile && (
                       <Button variant="contained" onClick={handleOpenEditModal}>
                         {t("edit_profile_button", "Editar Perfil")}
                       </Button>
                     )}
+
                     <ShareButtons
                       title={`${profile.nombre} ${profile.apellido || ""}`}
                       url={pathname}
@@ -387,13 +362,6 @@ export default function ProfilePageClient({
           <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
           {isMyProfile && <MyApplicationsSection userId={profile.id} />}
-
-          <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>
-            {t(
-              "stub_section_title_3",
-              "Más secciones (Ofertas, etc.) vendrán aquí.",
-            )}
-          </Typography>
         </CardContent>
       </Card>
 
