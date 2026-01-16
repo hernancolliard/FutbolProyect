@@ -59,24 +59,25 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             // Persist the user data (from authorize) into the JWT
             if (user) {
-                token.id = user.id;
-                token.email = user.email;
-                token.nombre = user.nombre;
-                token.accessToken = user.accessToken; // Assuming your backend returns an accessToken
-                token.isadmin = user.isadmin;
-                token.tipo_usuario = user.tipo_usuario;
+                const extendedUser = user as User; // Explicit casting
+                token.id = extendedUser.id;
+                token.email = extendedUser.email;
+                token.nombre = extendedUser.nombre;
+                token.accessToken = extendedUser.accessToken;
+                token.isadmin = extendedUser.isadmin;
+                token.tipo_usuario = extendedUser.tipo_usuario;
             }
             return token;
         },
         async session({ session, token }) {
-            // Send properties to the client, like an access_token from a provider.
             if (token) {
-                session.user.id = token.id as string;
-                session.user.email = token.email;
-                session.user.nombre = token.nombre;
-                session.accessToken = token.accessToken as string;
-                session.user.isadmin = token.isadmin as boolean;
-                session.user.tipo_usuario = token.tipo_usuario as string;
+                const extendedToken = token as JWT; // Explicit casting
+                session.user.id = extendedToken.id as string;
+                session.user.email = extendedToken.email;
+                session.user.nombre = extendedToken.nombre;
+                session.accessToken = extendedToken.accessToken as string;
+                session.user.isadmin = extendedToken.isadmin as boolean;
+                session.user.tipo_usuario = extendedToken.tipo_usuario as string;
             }
             return session;
         }
