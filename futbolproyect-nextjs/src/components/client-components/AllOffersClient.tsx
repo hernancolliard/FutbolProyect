@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient"; // Corrected path
 import OfferList from "@/components/shared/OfferList"; // Corrected path
 import Pagination from "@/components/Pagination"; // Corrected path
@@ -11,12 +11,12 @@ import useIsMobile from "@/hooks/useIsMobile"; // Corrected path
 import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Button, Grid, Collapse, SelectChangeEvent } from "@mui/material";
 
 // --- Fetching Logic for React Query ---
-const fetchOffers = async ({ queryKey }: { queryKey: [string, object, number] }) => {
+const fetchOffers = async ({ queryKey }: QueryFunctionContext<[string, object, number]>) => {
   const [, filters, page] = queryKey;
   const params = new URLSearchParams({
     page: page.toString(),
     limit: '10',
-    ...filters,
+    ...(filters as Record<string, string>), // Cast filters to a Record<string, string>
   });
 
   // Clean empty params for a cleaner URL
