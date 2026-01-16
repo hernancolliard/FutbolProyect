@@ -18,13 +18,13 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isCreateOfferOpen, setIsCreateOfferOpen] = useState(false);
-  const [registerRole, setRegisterRole] = useState<string>("user"); // Rol por defecto para registro
+  const [registerRole, setRegisterRole] = useState<'player' | 'club'>("player"); // Rol por defecto para registro
 
   // Handlers
   const handleShowLogin = () => setIsLoginOpen(true);
   const handleCloseLogin = () => setIsLoginOpen(false);
 
-  const handleShowRegister = (role: string = "user") => {
+  const handleShowRegister = (role: 'player' | 'club' = "player") => {
     setRegisterRole(role);
     setIsRegisterOpen(true);
   };
