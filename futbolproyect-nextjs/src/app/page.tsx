@@ -38,10 +38,10 @@ export default function HomePage() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
-  const [registrationRole, setRegistrationRole] = useState('player');
+  const [registrationRole, setRegistrationRole] = useState<'player' | 'club'>('player');
   const router = useRouter();
 
-  const handleShowRegisterModal = (role) => {
+  const handleShowRegisterModal = (role: 'player' | 'club') => {
     setRegistrationRole(role);
     setShowRegisterModal(true);
   };
@@ -142,9 +142,13 @@ export default function HomePage() {
       </Modal>
 
       <Modal isOpen={showRegisterModal} onClose={() => setShowRegisterModal(false)}>
-        <Register 
-          onClose={() => setShowRegisterModal(false)} 
-          initialRole={registrationRole} 
+        <Register
+          onClose={() => setShowRegisterModal(false)}
+          initialRole={registrationRole}
+          onSwitchToLogin={() => {
+            setShowRegisterModal(false);
+            setShowLoginModal(true);
+          }}
         />
       </Modal>
     </Box>
