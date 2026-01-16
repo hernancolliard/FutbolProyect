@@ -6,28 +6,34 @@ import Footer from "./Footer";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
 import CreateOffer from "@/components/CreateOffer";
-import { Modal } from "@mui/material"; // O tu componente Modal personalizado si usas uno diferente
-import { Box } from "@mui/material";
+import { Modal, Box } from "@mui/material";
 
 interface RootClientLayoutProps {
   children: React.ReactNode;
 }
 
+// Definimos un tipo para los roles permitidos en el registro
+type RegisterRole = "player" | "club" | "scout" | "agent" | "user";
+
 export default function RootClientLayout({ children }: RootClientLayoutProps) {
-  // Estados para controlar los modales
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isCreateOfferOpen, setIsCreateOfferOpen] = useState(false);
-  const [registerRole, setRegisterRole] = useState<'player' | 'club'>("player"); // Rol por defecto para registro
 
-  // Handlers
+  const [registerRole, setRegisterRole] = useState<RegisterRole>("user");
+
   const handleShowLogin = () => setIsLoginOpen(true);
   const handleCloseLogin = () => setIsLoginOpen(false);
 
-  const handleShowRegister = (role: 'player' | 'club' = "player") => {
-    setRegisterRole(role);
+  const handleShowRegister = (role: string = "user") => {
+    if (["player", "club", "scout", "agent"].includes(role)) {
+      setRegisterRole(role as RegisterRole);
+    } else {
+      setRegisterRole("user");
+    }
     setIsRegisterOpen(true);
   };
+
   const handleCloseRegister = () => setIsRegisterOpen(false);
 
   const handleShowCreateOffer = () => setIsCreateOfferOpen(true);
@@ -35,7 +41,6 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
 
   return (
     <>
-      {/* Pasamos las funciones al Header para que los botones funcionen */}
       <Header
         onShowLoginModal={handleShowLogin}
         onShowRegisterModal={handleShowRegister}
@@ -48,23 +53,20 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
 
       {/* --- MODALES --- */}
 
-      {/* Modal de Login */}
       {isLoginOpen && (
         <Modal open={isLoginOpen} onClose={handleCloseLogin}>
           <Box sx={{ outline: "none" }}>
-            {/* Login ya tiene su propio Card/Estilos, solo lo renderizamos */}
             <Login onClose={handleCloseLogin} />
           </Box>
         </Modal>
       )}
 
-      {/* Modal de Registro */}
       {isRegisterOpen && (
         <Modal open={isRegisterOpen} onClose={handleCloseRegister}>
           <Box sx={{ outline: "none" }}>
             <Register
               onClose={handleCloseRegister}
-              initialRole={registerRole} // Pasamos el rol seleccionado
+              initialRole={registerRole}
               onSwitchToLogin={() => {
                 handleCloseRegister();
                 handleShowLogin();
@@ -74,7 +76,6 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
         </Modal>
       )}
 
-      {/* Modal de Crear Oferta */}
       {isCreateOfferOpen && (
         <Modal open={isCreateOfferOpen} onClose={handleCloseCreateOffer}>
           <Box
@@ -92,7 +93,11 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
               overflowY: "auto",
             }}
           >
-            <CreateOffer onClose={handleCloseCreateOffer} />
+            {/* CORRECCIÓN: Agregamos onOfferCreated */}
+            <CreateOffer
+              onClose={handleCloseCreateOffer}
+              onOfferCreated={handleCloseCreateOffer}
+            />
           </Box>
         </Modal>
       )}

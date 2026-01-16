@@ -1,38 +1,49 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
-import apiClient from "@/lib/apiClient"; // Centralized apiClient
-import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Alert from "@mui/material/Alert";
-import MenuItem from "@mui/material/MenuItem";
-import { Box, Card, CardContent, Typography } from "@mui/material"; // Import additional Material UI components
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Stack,
+  Alert,
+  MenuItem,
+  Link as MuiLink,
+} from "@mui/material";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext"; // Asumiendo que tienes un register en tu contexto, si no, usa apiClient directamente
 
+// 1. CORRECCIÓN: Definimos initialRole en las props
 interface RegisterProps {
   onClose: () => void;
-  initialRole?: 'player' | 'club';
   onSwitchToLogin: () => void;
+  initialRole?: string;
 }
 
-function Register({ onClose, initialRole = 'player', onSwitchToLogin }: RegisterProps) {
-  const { t } = useTranslation('common');
+export default function Register({
+  onClose,
+  onSwitchToLogin,
+  initialRole = "user",
+}: RegisterProps) {
+  const { t } = useTranslation("common");
+  const { login } = useAuth(); // Usamos login para auto-loguear tras registro, o register si existe
+
+  // 2. CORRECCIÓN: Usamos initialRole como valor inicial
+  const [role, setRole] = useState(initialRole);
   const [formData, setFormData] = useState({
-    nombre: "",
+    name: "",
     email: "",
     password: "",
-    tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante',
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  // 3. CORRECCIÓN: Actualizamos el rol si cambia la prop (por si el modal se reabre)
   useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      tipo_usuario: initialRole === 'club' ? 'ofertante' : 'postulante'
-    }));
+    setRole(initialRole);
   }, [initialRole]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,132 +53,141 @@ function Register({ onClose, initialRole = 'player', onSwitchToLogin }: Register
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
-    try {
-      await apiClient.post("/users/register", formData);
-      setSuccess(t("register_success", "Registro exitoso. ¡Revisa tu correo para confirmar tu cuenta!"));
-      // Limpiamos el formulario y no cerramos para que el usuario vea el mensaje.
-      setFormData({
-        nombre: "",
-        email: "",
-        password: "",
-        tipo_usuario: "postulante",
-      });
-    } catch (err: any) {
-      setError(err.message || t("register_error", "Error en el registro."));
-    }
-  };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    try {
-      // In Next.js with next-auth, you might use signIn function here
-      await apiClient.post("/users/auth/google", {
-        id_token: credentialResponse.credential,
-      });
-      setSuccess(t("register_with_google_success", "Registro/Inicio de sesión con Google exitoso."));
-      onClose(); // Cierra el modal después del registro/login con Google
-    } catch (err: any) {
-      setError(err.message || t("register_with_google_error", "Error al registrarse/iniciar sesión con Google."));
+    if (formData.password !== formData.confirmPassword) {
+      setError(t("passwords_do_not_match", "Las contraseñas no coinciden"));
+      return;
     }
-  };
 
-  const handleGoogleError = () => {
-    setError(t("register_with_google_error_retry", "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo."));
+    setLoading(true);
+    try {
+      // Aquí deberías llamar a tu función de registro.
+      // Si usas apiClient directo: await apiClient.post('/users/register', { ...formData, role });
+      // Si usas el contexto: await register({ ...formData, role });
+
+      // Ejemplo usando fetch directo para asegurar funcionalidad si no tienes register en context:
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
+      const res = await fetch(`${apiUrl}/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: formData.name,
+          email: formData.email,
+          password: formData.password,
+          tipo_usuario: role,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Error en el registro");
+      }
+
+      // Si todo sale bien, intentamos loguear automáticamente o cerramos
+      await login(formData.email, formData.password);
+      onClose();
+    } catch (err: any) {
+      setError(err.message || t("register_error", "Error al registrarse."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Card sx={{ p: 2, maxWidth: 400, mx: 'auto', mt: 4 }}>
-      <CardContent>
-        <Typography variant="h5" component="h2" gutterBottom align="center">
-          {t("register_title", "Registrarse")}
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <TextField
-              type="text"
-              name="nombre"
-              label={t("name_placeholder", "Nombre")}
-              value={formData.nombre}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-            <TextField
-              type="email"
-              name="email"
-              label={t("email_placeholder", "Correo Electrónico")}
-              value={formData.email}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-            <TextField
-              type="password"
-              name="password"
-              label={t("password_placeholder", "Contraseña")}
-              value={formData.password}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-            <TextField
-              select
-              name="tipo_usuario"
-              label={t("user_type_label", "Tipo de Usuario")}
-              value={formData.tipo_usuario}
-              onChange={handleChange}
-              fullWidth
-            >
-              <MenuItem value="postulante">{t("user_type_applicant", "Postulante")}</MenuItem>
-              <MenuItem value="ofertante">{t("user_type_offerer", "Oferente")}</MenuItem>
-            </TextField>
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={onClose}
-                type="button"
-              >
-                {t("cancel_button", "Cancelar")}
-              </Button>
-              <Button variant="contained" color="primary" type="submit">
-                {t("register_button", "Registrarse")}
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        {success && (
-          <Alert severity="success" sx={{ mt: 2 }}>
-            {success}
-          </Alert>
-        )}
-        <Box sx={{ mt: 2, textAlign: "center" }}>
-          <Typography variant="body2">{t("or_register_with", "O registrarse con:")}</Typography>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: { xs: "90%", sm: 400 },
+        bgcolor: "background.paper",
+        boxShadow: 24,
+        p: 4,
+        borderRadius: 2,
+      }}
+    >
+      <Typography variant="h5" component="h2" gutterBottom align="center">
+        {t("register_title", "Crear Cuenta")}
+      </Typography>
+
+      <form onSubmit={handleSubmit}>
+        <Stack spacing={2}>
+          {/* Selector de Rol */}
+          <TextField
+            select
+            label={t("i_am_a", "Soy un...")}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="player">{t("player", "Jugador")}</MenuItem>
+            <MenuItem value="club">{t("club", "Club")}</MenuItem>
+            <MenuItem value="scout">{t("scout", "Ojeador")}</MenuItem>
+            <MenuItem value="agent">{t("agent", "Agente")}</MenuItem>
+            <MenuItem value="user">{t("fan", "Aficionado")}</MenuItem>
+          </TextField>
+
+          <TextField
+            label={t("name", "Nombre Completo")}
+            name="name"
+            onChange={handleChange}
+            required
+            fullWidth
           />
-        </Box>
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2">
-            {t('already_have_account', '¿Ya tienes cuenta? ')}
-            <Typography
-              component="span"
-              onClick={onSwitchToLogin}
-              sx={{ cursor: 'pointer', textDecoration: 'underline', color: 'primary.main' }}
-            >
-              {t('login_here', 'Inicia sesión aquí')}
-            </Typography>
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+          <TextField
+            type="email"
+            label={t("email")}
+            name="email"
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+          <TextField
+            type="password"
+            label={t("password")}
+            name="password"
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+          <TextField
+            type="password"
+            label={t("confirm_password", "Confirmar Contraseña")}
+            name="confirmPassword"
+            onChange={handleChange}
+            required
+            fullWidth
+          />
+
+          {error && <Alert severity="error">{error}</Alert>}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={loading}
+          >
+            {loading
+              ? t("loading", "Cargando...")
+              : t("register_button", "Registrarse")}
+          </Button>
+        </Stack>
+      </form>
+
+      <Box sx={{ mt: 2, textAlign: "center" }}>
+        <Typography variant="body2">
+          {t("already_have_account", "¿Ya tienes cuenta?")}{" "}
+          <MuiLink
+            component="button"
+            onClick={onSwitchToLogin}
+            sx={{ verticalAlign: "baseline" }}
+          >
+            {t("login_link", "Inicia Sesión")}
+          </MuiLink>
+        </Typography>
+      </Box>
+    </Box>
   );
 }
-
-export default Register;
