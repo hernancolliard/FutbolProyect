@@ -77,7 +77,7 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
     mutationFn: (data: { videoData: any; isEdit: boolean; videoId: number | null }) => saveVideo(data),
     onSuccess: (data) => {
       toast.success(data.message || t('video_saved_success', 'Video guardado con éxito.'));
-      queryClient.invalidateQueries(['userVideos', video?.user_id]); // Invalida la caché de videos del usuario
+      queryClient.invalidateQueries({ queryKey: ['userVideos', video?.user_id] }); // Invalida la caché de videos del usuario
       onSave(); // Llama a la función onSave del padre
       onClose();
     },
