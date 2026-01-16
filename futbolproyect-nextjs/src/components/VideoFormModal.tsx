@@ -74,7 +74,7 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
   };
 
   const { mutate, isPending: isSaving } = useMutation({
-    mutationFn: (data) => saveVideo(data),
+    mutationFn: (data: { videoData: any; isEdit: boolean; videoId: number | null }) => saveVideo(data),
     onSuccess: (data) => {
       toast.success(data.message || t('video_saved_success', 'Video guardado con éxito.'));
       queryClient.invalidateQueries(['userVideos', video?.user_id]); // Invalida la caché de videos del usuario
