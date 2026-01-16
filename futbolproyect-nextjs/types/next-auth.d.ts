@@ -16,6 +16,7 @@ declare module "next-auth" {
       accessToken?: string;
       isadmin?: boolean;
       tipo_usuario?: string;
+      nombre?: string; // Add this line
     } & DefaultSession["user"];
   }
 }
