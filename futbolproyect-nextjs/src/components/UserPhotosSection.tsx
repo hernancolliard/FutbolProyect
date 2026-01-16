@@ -65,8 +65,9 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
     mutationFn: uploadPhoto,
     onSuccess: (newPhoto) => {
       toast.success(t('photo_upload_success', 'Foto subida con éxito.'));
-      queryClient.setQueryData(['userPhotos', userId], (oldData) => {
-        return oldData ? [...oldData, newPhoto] : [newPhoto];
+      queryClient.setQueryData(['userPhotos', userId], (oldData: any) => {
+        const photos = Array.isArray(oldData) ? oldData : [];
+        return [...photos, newPhoto];
       });
       setShowPhotoUpload(false);
       setPhotoTitle("");
@@ -82,8 +83,11 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
     mutationFn: deletePhoto,
     onSuccess: (data, variables) => {
       toast.success(data.message || t('photo_delete_success', 'Foto eliminada con éxito.'));
-      queryClient.setQueryData(['userPhotos', userId], (oldData) => {
-        return oldData ? oldData.filter(photo => photo.id !== variables.photoId) : [];
+      queryClient.setQueryData(['userPhotos', userId], (oldData: any) => {
+        if (Array.isArray(oldData)) {
+            return oldData.filter(photo => photo.id !== variables.photoId);
+        }
+        return [];
       });
     },
     onError: (err) => {
@@ -229,8 +233,8 @@ const UserPhotosSection = ({ userId, isMyProfile }) => {
           />
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button onClick={() => setShowPhotoUpload(false)} variant="outlined">{t('cancel', 'Cancelar')}</Button>
-            <Button onClick={handleUploadButtonClick} variant="contained" disabled={uploadPhotoMutation.isLoading || !fileToUpload}>
-              {uploadPhotoMutation.isLoading ? t('uploading', 'Subiendo...') : t('upload', 'Subir')}
+            <Button onClick={handleUploadButtonClick} variant="contained" disabled={uploadPhotoMutation.isPending || !fileToUpload}>
+              {uploadPhotoMutation.isPending ? t('uploading', 'Subiendo...') : t('upload', 'Subir')}
             </Button>
           </Stack>
         </Box>
