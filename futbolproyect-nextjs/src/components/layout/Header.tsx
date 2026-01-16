@@ -17,27 +17,28 @@ import { useTranslation } from "react-i18next";
 // import { useAuth } from "../context/AuthContext"; // AuthContext not yet migrated
 import Image from "next/image"; // Using next/image for optimized images
 
-// Mock AuthContext for now
-const useAuth = () => {
-  // Replace with actual auth context once migrated
-  const user = {
-    id: 1,
-    nombre: "MockUser",
-    isadmin: true,
-    tipo_usuario: "ofertante",
-  };
-  const logout = (navigate: any) => {
-    console.log("Mock logout");
-    navigate("/");
-  };
-  return { user, logout };
-};
+// import { useAuth } from "../context/AuthContext"; // AuthContext not yet migrated
+
+// Mock AuthContext for now - TEMPORARILY DISABLED TO FIX BUILD ERROR
+// const useAuth = () => {
+//   const user = {
+//     id: 1,
+//     nombre: "MockUser",
+//     isadmin: true,
+//     tipo_usuario: "ofertante",
+//   };
+//   const logout = (navigate: any) => {
+//     console.log("Mock logout");
+//     navigate("/");
+//   };
+//   return { user, logout };
+// };
 
 
 function Header({ onShowLoginModal, onShowRegisterModal }: { onShowLoginModal: () => void, onShowRegisterModal: (role: string) => void }) {
   const { t, i18n } = useTranslation();
-  const { user, logout } = useAuth(); // Using mock auth for now
-  console.log("User object in Header:", user);
+  const user = null; // Temporarily set user to null to fix build error
+  // console.log("User object in Header:", user); // Temporarily commented out
   const router = useRouter(); // Use useRouter from next/navigation
   const pathname = usePathname(); // Get pathname
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -70,7 +71,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }: { onShowLoginModal: (
   };
 
   const handleLogout = () => {
-    logout(router); // Pass router to mock logout
+    // logout(router); // Temporarily commented out
     handleMobileMenuClose();
   };
 
@@ -171,7 +172,7 @@ function Header({ onShowLoginModal, onShowRegisterModal }: { onShowLoginModal: (
           ) : user ? (
             <>
               <Typography variant="body2" sx={{ mx: 1 }}>
-                {t("welcome_user", { name: user.name })}
+                {t("welcome_user", { name: user.nombre })}
               </Typography>
               <Button color="error" variant="outlined" onClick={handleLogout}>
                 {t("logout")}
