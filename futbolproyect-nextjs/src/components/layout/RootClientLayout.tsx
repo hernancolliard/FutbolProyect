@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { SessionProvider } from 'next-auth/react';
-import Header from './Header';
+import Header from '@/components/layout/Header';
 import Modal from '../ui/Modal';
 import Login from '../auth/Login';
 import Register from '../auth/Register';
