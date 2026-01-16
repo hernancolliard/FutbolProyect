@@ -73,7 +73,7 @@ const VideoFormModal = ({ open, onClose, video, onSave }) => {
     setFormData((prev) => ({ ...prev, coverImageFile: files[0] || null }));
   };
 
-  const { mutate, isLoading: isSaving } = useMutation({
+  const { mutate, isPending: isSaving } = useMutation({
     mutationFn: (data) => saveVideo(data),
     onSuccess: (data) => {
       toast.success(data.message || t('video_saved_success', 'Video guardado con éxito.'));
