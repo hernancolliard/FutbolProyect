@@ -1,57 +1,64 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const next = require("next"); // Importante
 const path = require("path");
 require("dotenv").config({ quiet: true });
 
-const userRoutes = require("./routes/users.js");
-const paymentRoutes = require("./routes/payments.js");
-const offerRoutes = require("./routes/offers.js");
-const applicationRoutes = require("./routes/applications.js");
-const profileRoutes = require("./routes/profiles.js");
-const adminRoutes = require("./routes/admin.js");
-const termsRoutes = require("./routes/terms.js");
-const privacyRoutes = require("./routes/privacy.js");
-const contactRoutes = require("./routes/contact");
-const sitemapRoutes = require("./routes/sitemap");
-const subscriptionRoutes = require("./routes/subscriptions");
-const app = express();
+// --- Configuración de Next.js ---
+// Define si estamos en desarrollo o producción
+const dev = process.env.NODE_ENV !== "production";
+// Apuntamos a la carpeta donde está Next.js (ajusta la ruta relativa si es necesario)
+const dir = path.join(__dirname, "../futbolproyect-nextjs");
+const appNext = next({ dev, dir });
+const handle = appNext.getRequestHandler();
 
-// --- General Middleware ---
-app.use(
-  cors({
-    origin: "https://futbolproyect.com",
-    credentials: true,
+// Inicializamos Next.js antes que Express
+appNext
+  .prepare()
+  .then(() => {
+    const app = express();
+
+    // --- Middlewares Generales ---
+    app.use(
+      cors({
+        // En producción, usa la variable de entorno, sino permite todo o localhost
+        origin: process.env.FRONTEND_URL || true,
+        credentials: true,
+      }),
+    );
+    app.use(express.json({ limit: "10mb" }));
+    app.use(cookieParser());
+
+    // --- RUTAS API (Tus rutas existentes) ---
+    app.use("/api/users", require("./routes/users.js"));
+    app.use("/api/payments", require("./routes/payments.js"));
+    app.use("/api/offers", require("./routes/offers.js"));
+    app.use("/api/applications", require("./routes/applications.js"));
+    app.use("/api/profiles", require("./routes/profiles.js"));
+    app.use("/api/admin", require("./routes/admin.js"));
+    app.use("/api/terms", require("./routes/terms.js"));
+    app.use("/api/privacy", require("./routes/privacy.js"));
+    app.use("/api/contact", require("./routes/contact"));
+    app.use("/api/sitemap", require("./routes/sitemap"));
+    app.use("/api/subscriptions", require("./routes/subscriptions"));
+
+    // Webhook raw body
+    app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
+
+    // --- MANEJO DE NEXT.JS (SEO y Vistas) ---
+    // Cualquier petición que NO sea /api, la maneja Next.js
+    app.all("*", (req, res) => {
+      return handle(req, res);
+    });
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, (err) => {
+      if (err) throw err;
+      console.log(`> Servidor listo en el puerto ${PORT}`);
+    });
   })
-);
-app.use(express.json({ limit: "10mb" }));
-app.use(cookieParser());
-
-// --- API ROUTES (Deben ir primero) ---
-app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
-app.use("/api/users", userRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/offers", offerRoutes);
-app.use("/api/applications", applicationRoutes);
-app.use("/api/profiles", profileRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/terms", termsRoutes);
-app.use("/api/privacy", privacyRoutes);
-app.use("/api/contact", contactRoutes);
-app.use("/api/sitemap", sitemapRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
-
-// --- PRERENDER.IO MIDDLEWARE (Desactivado) ---
-// app.use(require('prerender-node').set('prerenderToken', process.env.PRERENDER_TOKEN));
-
-// --- SERVIDOR DE ARCHIVOS ESTÁTICOS Y SPA HANDLER (Deben ir al final) ---
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+  .catch((ex) => {
+    console.error("Error al iniciar Next.js", ex.stack);
+    process.exit(1);
+  });

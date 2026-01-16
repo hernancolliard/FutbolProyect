@@ -1,7 +1,5 @@
 const { Pool } = require("pg");
 
-console.log("DATABASE_URL:", process.env.DATABASE_URL);
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -34,13 +32,12 @@ module.exports = {
       });
 
       return await pool.query(newText, pgValues);
-
     } catch (error) {
       // Loguear el error con más contexto antes de que se propague
-      console.error("Error ejecutando la consulta:", { 
-        query: text, 
-        params: params, 
-        error: error.message 
+      console.error("Error ejecutando la consulta:", {
+        query: text,
+        params: params,
+        error: error.message,
       });
       // Re-lanzar el error para que el manejador de la ruta lo capture
       throw error;
@@ -72,7 +69,7 @@ module.exports = {
       });
       return originalQuery.call(client, newText, pgValues);
     };
-    
+
     return client;
-  }
+  },
 };
