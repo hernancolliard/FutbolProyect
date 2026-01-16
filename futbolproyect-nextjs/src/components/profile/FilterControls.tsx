@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
-import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Box } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Box, SelectChangeEvent } from '@mui/material';
 
 interface FilterControlsProps {
     nacionalidades: string[];
