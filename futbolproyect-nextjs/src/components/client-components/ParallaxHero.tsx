@@ -34,7 +34,7 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({ heroTitle, heroSubtitle }) 
   };
 
   const headline = {
-    translateY: [0, 30],
+    translateY: [0, 30] as [number, number],
     shouldAlwaysCompleteAnimation: true,
     children: (
       <div className="hero-content">
