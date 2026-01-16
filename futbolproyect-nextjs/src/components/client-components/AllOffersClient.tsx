@@ -59,7 +59,12 @@ export default function AllOffersClient() {
     };
   }, [filters]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement> | SelectChangeEvent<string>) => {
+  const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
   };
@@ -102,7 +107,7 @@ export default function AllOffersClient() {
               name="puesto"
               label={t("filter_by_position", "Filtrar por puesto")}
               value={filters.puesto}
-              onChange={handleFilterChange}
+              onChange={handleTextFieldChange}
               sx={{
                 '& .MuiInputBase-root': { color: 'white' },
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
@@ -119,7 +124,7 @@ export default function AllOffersClient() {
               name="ubicacion"
               label={t("filter_by_location", "Filtrar por ubicación")}
               value={filters.ubicacion}
-              onChange={handleFilterChange}
+              onChange={handleTextFieldChange}
               sx={{
                 '& .MuiInputBase-root': { color: 'white' },
                 '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
@@ -136,7 +141,7 @@ export default function AllOffersClient() {
               <Select
                 name="nivel"
                 value={filters.nivel}
-                onChange={handleFilterChange}
+                onChange={handleSelectChange}
                 label={t("filter_by_level", "Nivel")}
                 sx={{
                   color: 'white',
@@ -161,7 +166,7 @@ export default function AllOffersClient() {
               name="salarioMin"
               label={t("filter_by_min_salary", "Salario Mín.")}
               value={filters.salarioMin}
-              onChange={handleFilterChange}
+              onChange={handleTextFieldChange}
               InputLabelProps={{ shrink: true }}
               sx={{
                 '& .MuiInputBase-root': { color: 'white' },
@@ -180,7 +185,7 @@ export default function AllOffersClient() {
               name="salarioMax"
               label={t("filter_by_max_salary", "Salario Máx.")}
               value={filters.salarioMax}
-              onChange={handleFilterChange}
+              onChange={handleTextFieldChange}
               InputLabelProps={{ shrink: true }}
               sx={{
                 '& .MuiInputBase-root': { color: 'white' },
@@ -198,7 +203,7 @@ export default function AllOffersClient() {
               <Select
                 name="sort"
                 value={filters.sort}
-                onChange={handleFilterChange}
+                onChange={handleSelectChange}
                 label={t("sort_by", "Ordenar por")}
                 sx={{
                   color: 'white',
