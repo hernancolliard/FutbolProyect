@@ -25,7 +25,7 @@ export default function FilterControls({ nacionalidades, puestos, initialFilters
         puesto: initialFilters.puesto || '',
     });
 
-    const handleFilterChange = (e: SelectChangeEvent<string>) => {
+    const handleFilterChange = (e: SelectChangeEvent<string>, child?: React.ReactNode) => {
         const { name, value } = e.target;
         const newFilters = { ...filters, [name as string]: value as string };
         setFilters(newFilters);
