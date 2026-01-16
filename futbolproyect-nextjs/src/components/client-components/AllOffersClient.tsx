@@ -75,7 +75,7 @@ export default function AllOffersClient() {
   const { data, isLoading, isError, error } = useQuery<any, Error>({
     queryKey: ["offers", debouncedFilters, currentPage],
     queryFn: fetchOffers,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   return (
