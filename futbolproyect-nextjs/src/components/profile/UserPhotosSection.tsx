@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Button,
@@ -14,231 +14,295 @@ import {
   DialogActions,
   IconButton,
   TextField,
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { UserPhoto } from '@/lib/types';
-import FileUpload from '@/components/ui/FileUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import Image from 'next/image';
+} from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { UserPhoto } from "@/lib/types";
+import FileUpload from "@/components/ui/FileUpload";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import Image from "next/image";
 
+// CORRECCIÓN: userId ahora acepta string | number
 interface UserPhotosSectionProps {
-    userId: number;
-    isMyProfile: boolean;
+  userId: string | number;
+  isMyProfile: boolean;
 }
 
-const fetchUserPhotos = async (userId: number): Promise<UserPhoto[]> => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`);
-    if (!res.ok) {
-        throw new Error('Failed to fetch photos');
-    }
-    return res.json();
+// CORRECCIÓN: fetchUserPhotos acepta string | number
+const fetchUserPhotos = async (
+  userId: string | number,
+): Promise<UserPhoto[]> => {
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch photos");
+  }
+  return res.json();
 };
 
-const uploadPhoto = async ({ userId, file, title }: { userId: number, file: File, title: string }) => {
-    const formData = new FormData();
-    formData.append('photo', file);
-    formData.append('title', title);
-    
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`, {
-        method: 'POST',
-        body: formData,
-    });
+const uploadPhoto = async ({
+  userId,
+  file,
+  title,
+}: {
+  userId: string | number;
+  file: File;
+  title: string;
+}) => {
+  const formData = new FormData();
+  formData.append("photo", file);
+  formData.append("title", title);
 
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to upload photo');
-    }
-    return res.json();
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to upload photo");
+  }
+  return res.json();
 };
 
-const deletePhoto = async ({ userId, photoId }: { userId: number, photoId: number }) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos/${photoId}`, {
-        method: 'DELETE',
-    });
+const deletePhoto = async ({
+  userId,
+  photoId,
+}: {
+  userId: string | number;
+  photoId: number;
+}) => {
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const res = await fetch(
+    `${apiUrl}/api/profiles/${userId}/photos/${photoId}`,
+    {
+      method: "DELETE",
+    },
+  );
 
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to delete photo');
-    }
-    return res.json();
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete photo");
+  }
+  return res.json();
 };
 
+export default function UserPhotosSection({
+  userId,
+  isMyProfile,
+}: UserPhotosSectionProps) {
+  const { t, i18n } = useTranslation();
+  const [photos, setPhotos] = useState<UserPhoto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [selectedPhotoToView, setSelectedPhotoToView] =
+    useState<UserPhoto | null>(null);
+  const [photoTitle, setPhotoTitle] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
-export default function UserPhotosSection({ userId, isMyProfile }: UserPhotosSectionProps) {
-    const { t, i18n } = useTranslation();
-    const [photos, setPhotos] = useState<UserPhoto[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-    const [selectedPhotoToView, setSelectedPhotoToView] = useState<UserPhoto | null>(null);
-    const [photoTitle, setPhotoTitle] = useState("");
-    const [isUploading, setIsUploading] = useState(false);
+  const loadPhotos = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchUserPhotos(userId);
+      setPhotos(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
-    const loadPhotos = useCallback(async () => {
-        setIsLoading(true);
+  useEffect(() => {
+    loadPhotos();
+  }, [loadPhotos]);
+
+  const handleFileUpload = useCallback(
+    async (files: File[]) => {
+      if (files.length > 0) {
+        if (photos.length >= 5) {
+          alert(t("max_photos_reached", "You can only upload up to 5 photos."));
+          return;
+        }
+        setIsUploading(true);
         try {
-            const data = await fetchUserPhotos(userId);
-            setPhotos(data);
+          await uploadPhoto({ userId, file: files[0], title: photoTitle });
+          await loadPhotos(); // Refresh list
+          setShowPhotoUpload(false);
+          setPhotoTitle("");
         } catch (err: any) {
-            setError(err.message);
+          alert(err.message);
         } finally {
-            setIsLoading(false);
+          setIsUploading(false);
         }
-    }, [userId]);
+      }
+    },
+    [userId, photos, loadPhotos, t, photoTitle],
+  );
 
-    useEffect(() => {
-        loadPhotos();
-    }, [loadPhotos]);
+  const handleDeletePhoto = async (photoId: number) => {
+    if (
+      window.confirm(
+        t(
+          "confirm_delete_photo",
+          "Are you sure you want to delete this photo?",
+        ),
+      )
+    ) {
+      try {
+        await deletePhoto({ userId, photoId });
+        await loadPhotos(); // Refresh list
+      } catch (err: any) {
+        alert(err.message);
+      }
+    }
+  };
 
-    const handleFileUpload = useCallback(async (files: File[]) => {
-        if (files.length > 0) {
-            if (photos.length >= 5) {
-                alert(t('max_photos_reached', 'You can only upload up to 5 photos.'));
-                return;
-            }
-            setIsUploading(true);
-            try {
-                await uploadPhoto({ userId, file: files[0], title: photoTitle });
-                await loadPhotos(); // Refresh list
-                setShowPhotoUpload(false);
-                setPhotoTitle("");
-            } catch (err: any) {
-                alert(err.message);
-            } finally {
-                setIsUploading(false);
-            }
-        }
-    }, [userId, photos, loadPhotos, t, photoTitle]);
+  const handleOpenPhotoView = (photo: UserPhoto) =>
+    setSelectedPhotoToView(photo);
+  const handleClosePhotoView = () => setSelectedPhotoToView(null);
 
-    const handleDeletePhoto = async (photoId: number) => {
-        if (window.confirm(t('confirm_delete_photo', 'Are you sure you want to delete this photo?'))) {
-            try {
-                await deletePhoto({ userId, photoId });
-                await loadPhotos(); // Refresh list
-            } catch (err: any) {
-                alert(err.message);
-            }
-        }
-    };
+  const lang = i18n.language;
 
-    const handleOpenPhotoView = (photo: UserPhoto) => setSelectedPhotoToView(photo);
-    const handleClosePhotoView = () => setSelectedPhotoToView(null);
+  return (
+    <Stack sx={{ mt: 4, mb: 2 }}>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        {t("profile_photos_title", "Fotos del Perfil")}
+      </Typography>
 
-    const lang = i18n.language;
-
-    return (
-        <Stack sx={{ mt: 4, mb: 2 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
-                {t('profile_photos_title', 'Fotos del Perfil')}
-            </Typography>
-
-            {isLoading ? (
-                <CircularProgress />
-            ) : error ? (
-                <Alert severity="error">{error}</Alert>
-            ) : (
-                <Grid container spacing={2}>
-                {photos.map((photo) => {
-                    const title = photo[`title_${lang}`] || photo.title;
-                    return (
-                    <Grid item key={photo.id} xs={6} sm={4} md={3}>
-                        <Box
-                            sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: 150,
-                                overflow: 'hidden',
-                                borderRadius: 1,
-                                cursor: 'pointer',
-                                '&:hover .delete-button': { opacity: 1 },
-                            }}
-                            onClick={() => handleOpenPhotoView(photo)}
-                        >
-                            <Image
-                                src={photo.url}
-                                alt={title}
-                                layout="fill"
-                                objectFit="cover"
-                            />
-                            {isMyProfile && (
-                                <IconButton
-                                    color="error"
-                                    size="small"
-                                    sx={{
-                                        position: 'absolute', top: 4, right: 4,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                                        opacity: 0,
-                                        transition: 'opacity 0.2s',
-                                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 1)'},
-                                    }}
-                                    className="delete-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeletePhoto(photo.id);
-                                    }}
-                                >
-                                    <DeleteIcon fontSize="small" />
-                                </IconButton>
-                            )}
-                        </Box>
-                        <Typography variant="caption" display="block" gutterBottom noWrap>
-                            {title}
-                        </Typography>
-                    </Grid>
-                    );
-                })}
-                {isMyProfile && photos.length < 5 && !showPhotoUpload && (
-                    <Grid item xs={12}>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddPhotoAlternateIcon />}
-                            onClick={() => setShowPhotoUpload(true)}
-                            sx={{ mt: 1 }}
-                        >
-                            {t('add_photo', 'Añadir Foto')}
-                        </Button>
-                    </Grid>
-                )}
-                </Grid>
-            )}
-
-            {isMyProfile && showPhotoUpload && (
-                <Box sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>{t('upload_new_photo', 'Subir nueva foto')}</Typography>
-                    <TextField
-                        label={t("photo_title", "Título de la foto")}
-                        value={photoTitle}
-                        onChange={(e) => setPhotoTitle(e.target.value)}
-                        fullWidth
-                        sx={{ mb: 2 }}
-                    />
-                    <FileUpload
-                        onFilesChange={handleFileUpload}
-                        multiple={false}
-                    />
-                    {isUploading && <CircularProgress size={24} sx={{mt: 1}} />}
-                    <Button onClick={() => setShowPhotoUpload(false)} sx={{ mt: 1 }}>{t('cancel', 'Cancelar')}</Button>
+      {isLoading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <Grid container spacing={2}>
+          {photos.map((photo) => {
+            const title = photo[`title_${lang}`] || photo.title;
+            return (
+              <Grid item key={photo.id} xs={6} sm={4} md={3}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "100%",
+                    height: 150,
+                    overflow: "hidden",
+                    borderRadius: 1,
+                    cursor: "pointer",
+                    "&:hover .delete-button": { opacity: 1 },
+                  }}
+                  onClick={() => handleOpenPhotoView(photo)}
+                >
+                  <Image
+                    src={photo.url}
+                    alt={title}
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                  {isMyProfile && (
+                    <IconButton
+                      color="error"
+                      size="small"
+                      sx={{
+                        position: "absolute",
+                        top: 4,
+                        right: 4,
+                        backgroundColor: "rgba(255, 255, 255, 0.7)",
+                        opacity: 0,
+                        transition: "opacity 0.2s",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 1)",
+                        },
+                      }}
+                      className="delete-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePhoto(photo.id);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
-            )}
+                <Typography
+                  variant="caption"
+                  display="block"
+                  gutterBottom
+                  noWrap
+                >
+                  {title}
+                </Typography>
+              </Grid>
+            );
+          })}
+          {isMyProfile && photos.length < 5 && !showPhotoUpload && (
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                startIcon={<AddPhotoAlternateIcon />}
+                onClick={() => setShowPhotoUpload(true)}
+                sx={{ mt: 1 }}
+              >
+                {t("add_photo", "Añadir Foto")}
+              </Button>
+            </Grid>
+          )}
+        </Grid>
+      )}
 
-            <Dialog open={!!selectedPhotoToView} onClose={handleClosePhotoView} maxWidth="lg" fullWidth>
-                <DialogContent>
-                    {selectedPhotoToView && (
-                        <img
-                            src={selectedPhotoToView.url}
-                            alt={selectedPhotoToView[`title_${lang}`] || selectedPhotoToView.title}
-                            style={{ width: '100%', maxHeight: '80vh', objectFit: 'contain' }}
-                        />
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClosePhotoView}>{t('close', 'Cerrar')}</Button>
-                </DialogActions>
-            </Dialog>
-        </Stack>
-    );
-};
+      {isMyProfile && showPhotoUpload && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 1,
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            {t("upload_new_photo", "Subir nueva foto")}
+          </Typography>
+          <TextField
+            label={t("photo_title", "Título de la foto")}
+            value={photoTitle}
+            onChange={(e) => setPhotoTitle(e.target.value)}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <FileUpload onFilesChange={handleFileUpload} multiple={false} />
+          {isUploading && <CircularProgress size={24} sx={{ mt: 1 }} />}
+          <Button onClick={() => setShowPhotoUpload(false)} sx={{ mt: 1 }}>
+            {t("cancel", "Cancelar")}
+          </Button>
+        </Box>
+      )}
+
+      <Dialog
+        open={!!selectedPhotoToView}
+        onClose={handleClosePhotoView}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogContent>
+          {selectedPhotoToView && (
+            <img
+              src={selectedPhotoToView.url}
+              alt={
+                selectedPhotoToView[`title_${lang}`] ||
+                selectedPhotoToView.title
+              }
+              style={{ width: "100%", maxHeight: "80vh", objectFit: "contain" }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClosePhotoView}>{t("close", "Cerrar")}</Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
+  );
+}
