@@ -45,6 +45,7 @@ function SubscribeButton({ planType, billingCycle }) {
   };
 
   const createOrder = async (data, actions) => {
+    console.log("createOrder called"); // Add this log
     try {
       const response = await apiClient.post("/payments/create-paypal-order", {
         planType,
@@ -65,6 +66,7 @@ function SubscribeButton({ planType, billingCycle }) {
   };
 
   const onApprove = async (data, actions) => {
+    console.log("onApprove called"); // Add this log
     try {
       await apiClient.post("/payments/capture-paypal-order", {
         orderID: data.orderID,
@@ -101,6 +103,7 @@ function SubscribeButton({ planType, billingCycle }) {
           currency: "USD",
         }}
       >
+        <Typography>PayPal Buttons should be here</Typography> {/* Add this line */}
         <PayPalButtons
           style={{ layout: "vertical" }}
           createOrder={createOrder}
