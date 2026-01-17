@@ -201,6 +201,7 @@ const OfferList = ({
   };
 
   const featuredOffers = offersToDisplay.filter((o) => o.is_featured);
+  console.log("Featured Offers Length:", featuredOffers.length);
   const normalOffers = offersToDisplay.filter((o) => !o.is_featured);
 
   const slides = Math.min(isMobile ? 2 : 4, offersToDisplay.length);
