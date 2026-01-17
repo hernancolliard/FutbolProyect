@@ -107,16 +107,14 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             <Button color="inherit" component={Link} href="/">
               {t("home")}
             </Button>
-            <Button color="inherit" component={Link} href="/offers">
-              {t("offers")}
-            </Button>
-            <Button color="inherit" component={Link} href="/perfiles-destacados">
+                            <Button color="inherit" component={Link} href="/all-offers">
+                              {t("offers")}
+                            </Button>            <Button color="inherit" component={Link} href="/perfiles-destacados">
               {t("featured_profiles", "Perfiles Destacados")}
             </Button>
-            <Button color="inherit" component={Link} href="/subscribe">
-              {t("subscriptions")}
-            </Button>
-            {user && user.isadmin && (
+                            <Button color="inherit" component={Link} href="/suscripcion">
+                              {t("subscriptions")}
+                            </Button>            {user && user.isadmin && (
               <Button color="inherit" component={Link} href="/admin">
                 Admin
               </Button>
@@ -234,7 +232,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             </MenuItem>
             <MenuItem
               component={Link}
-              href="/offers"
+              href="/all-offers"
               onClick={handleMobileMenuClose}
             >
               {t("offers")}
@@ -248,7 +246,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             </MenuItem>
             <MenuItem
               component={Link}
-              href="/subscribe"
+              href="/suscripcion"
               onClick={handleMobileMenuClose}
             >
               {t("subscriptions")}
