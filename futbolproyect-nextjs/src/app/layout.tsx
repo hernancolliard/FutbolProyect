@@ -7,6 +7,7 @@ import I18nProvider from "@/components/I18nProvider";
 // 1. Importamos el nuevo Registry
 import ThemeRegistry from "@/components/providers/ThemeRegistry";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import ParallaxClientProvider from "@/components/providers/ParallaxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,16 +24,18 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <ReactQueryProvider>
-          {/* 2. Envolvemos TODO con ThemeRegistry */}
-          <ThemeRegistry>
-            <I18nProvider>
-              <AuthProvider>
-                <RootClientLayout>{children}</RootClientLayout>
-              </AuthProvider>
-            </I18nProvider>
-          </ThemeRegistry>
-        </ReactQueryProvider>
+        <ParallaxClientProvider>
+          <ReactQueryProvider>
+            {/* 2. Envolvemos TODO con ThemeRegistry */}
+            <ThemeRegistry>
+              <I18nProvider>
+                <AuthProvider>
+                  <RootClientLayout>{children}</RootClientLayout>
+                </AuthProvider>
+              </I18nProvider>
+            </ThemeRegistry>
+          </ReactQueryProvider>
+        </ParallaxClientProvider>
       </body>
     </html>
   );

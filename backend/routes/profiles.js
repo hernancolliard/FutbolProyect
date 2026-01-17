@@ -21,7 +21,7 @@ const getFullUrl = (req, filePath) => {
 };
 
 // --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
-router.get("/destacados", async (req, res) => {
+router.get("/featured", async (req, res) => {
   const { nacionalidad, puesto } = req.query;
 
   try {
