@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend'; // Import the backend to load translations
 
+console.log('i18n.ts: Initializing i18next with backend');
 i18n
   .use(Backend) // Use the backend to load translations
   .use(initReactI18next)

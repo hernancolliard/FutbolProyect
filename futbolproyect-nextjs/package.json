@@ -35,6 +35,9 @@
     "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1"
   },
+  "scripts": {
+    "postinstall": "npm rebuild sharp"
+  },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.45.1",
     "@types/node": "^20.14.2",
