@@ -34,7 +34,7 @@ const fetchFeaturedProfiles = async () => {
 };
 
 export default function HomePage() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(); // Usar el namespace por defecto 'translation'
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
