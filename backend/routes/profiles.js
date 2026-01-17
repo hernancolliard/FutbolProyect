@@ -97,6 +97,13 @@ router.get('/puestos', async (req, res) => {
 router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
+  // Validar que userId sea un número
+  if (isNaN(parseInt(userId, 10))) {
+    return res.status(400).json({ message: "El ID de usuario debe ser un número válido." });
+  }
+
+  const userIdNum = parseInt(userId, 10); // Convertir a número una vez validado
+
   try {
     const query = `
       SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
@@ -109,7 +116,7 @@ router.get("/:userId", async (req, res) => {
       LEFT JOIN suscripciones s ON u.id = s.id_usuario
       WHERE u.id = @userId;
     `;
-    const result = await db.query(query, { userId });
+    const result = await db.query(query, { userId: userIdNum }); // Usar userIdNum aquí
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Usuario no encontrado." });
