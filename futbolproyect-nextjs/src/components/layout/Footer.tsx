@@ -22,7 +22,7 @@ function Footer() {
         <Typography variant="body2" color="inherit">
           &copy; 2025 FutbolProyect. {t("all_rights_reserved", "Todos los derechos reservados.")}
         </Typography>
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
           <MuiLink component={Link} href="/privacy" color="inherit" underline="hover">
             {t("privacy_policy", "Política de Privacidad")}
           </MuiLink>
@@ -33,7 +33,7 @@ function Footer() {
             {t("terms_of_service", "Términos de Servicio")}
           </MuiLink>
         </Stack>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
           <IconButton
             component={MuiLink} // Use MuiLink for IconButton component prop
             href="https://www.facebook.com/profile.php?id=61583277031848"
