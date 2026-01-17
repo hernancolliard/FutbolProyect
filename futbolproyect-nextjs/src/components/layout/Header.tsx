@@ -112,28 +112,16 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                             </Button>            <Button color="inherit" component={Link} href="/perfiles-destacados">
               {t("featured_profiles", "Perfiles Destacados")}
             </Button>
-                            <Button color="inherit" component={Link} href="/suscripcion">
-                              {t("subscriptions")}
-                            </Button>            {user && user.isadmin && (
-              <Button color="inherit" component={Link} href="/admin">
-                Admin
-              </Button>
-            )}
-            {/* New SEO pages links */}
-            <Button color="inherit" component={Link} href="/ofertas-trabajo-futbol">
-              {t("ofertas_trabajo_futbol_seo_title", "Ofertas de Trabajo Fútbol")}
-            </Button>
-            <Button color="inherit" component={Link} href="/trabajo-analista-datos-futbol">
-              {t("trabajo_analista_seo_title", "Trabajo Analista Datos Fútbol")}
-            </Button>
-            <Button color="inherit" component={Link} href="/perfiles-jugadores-futbol">
-              {t("perfiles_jugadores_seo_title", "Perfiles Jugadores Fútbol")}
-            </Button>
-            <Button color="inherit" component={Link} href="/empleo-entrenadores-futbol">
-              {t("empleo_entrenadores_seo_title", "Empleo Entrenadores Fútbol")}
-            </Button>
-          </Box>
-        </Box>
+                                        <Button color="inherit" component={Link} href="/suscripcion">
+                                          {t("subscriptions")}
+                                        </Button>
+                                        {user && user.isadmin && (
+                                          <Button color="inherit" component={Link} href="/admin">
+                                            Admin
+                                          </Button>
+                                        )}
+                                      </Box>
+                                    </Box>
         <Box
           sx={{
             display: { xs: "none", md: "flex" },
@@ -260,20 +248,6 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                 Admin
               </MenuItem>
             )}
-            {/* New SEO pages links in mobile menu */}
-            <MenuItem component={Link} href="/ofertas-trabajo-futbol" onClick={handleMobileMenuClose}>
-              {t("ofertas_trabajo_futbol_seo_title", "Ofertas de Trabajo Fútbol")}
-            </MenuItem>
-            <MenuItem component={Link} href="/trabajo-analista-datos-futbol" onClick={handleMobileMenuClose}>
-              {t("trabajo_analista_seo_title", "Trabajo Analista Datos Fútbol")}
-            </MenuItem>
-            <MenuItem component={Link} href="/perfiles-jugadores-futbol" onClick={handleMobileMenuClose}>
-              {t("perfiles_jugadores_seo_title", "Perfiles Jugadores Fútbol")}
-            </MenuItem>
-            <MenuItem component={Link} href="/empleo-entrenadores-futbol" onClick={handleMobileMenuClose}>
-              {t("empleo_entrenadores_seo_title", "Empleo Entrenadores Fútbol")}
-            </MenuItem>
-
             <Box sx={{ my: 1 }} />
             {user && user.id ? (
               <>
