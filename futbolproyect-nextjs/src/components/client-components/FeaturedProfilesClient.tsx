@@ -173,7 +173,7 @@ export default function FeaturedProfilesClient() {
                 >
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <img
-                      src={profile.foto_perfil_url || '/images/logos/logofp.png'}
+                      src={profile.foto_perfil_url || 'images/logos/logofp.png'}
                       alt={`Perfil de ${profile.nombre} ${profile.apellido}`}
                       width="180"
                       height="180"

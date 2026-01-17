@@ -27,7 +27,7 @@ const ProfileList = ({ profiles }: ProfileListProps) => {
           <Box className="profile-card" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
             <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <img
-                src={profile.foto_perfil_url || '/images/logos/logofp.png'}
+                src={profile.foto_perfil_url || 'images/logos/logofp.png'}
                 alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                 width="180" // Assuming fixed size for consistency
                 height="180" // Assuming fixed size for consistency
