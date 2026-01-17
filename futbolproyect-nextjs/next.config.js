@@ -3,7 +3,10 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
-
+  i18n: {
+    locales: ["es", "en"],
+    defaultLocale: "es",
+  },
   images: {
     remotePatterns: [
       {
