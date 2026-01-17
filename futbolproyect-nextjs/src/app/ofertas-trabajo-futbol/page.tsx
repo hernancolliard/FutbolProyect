@@ -50,11 +50,9 @@ const OfertasTrabajoFutbolPage = async () => {
   };
 
   return (
-    <SeoPage
-      {...pageContent}
-      items={offers}
-      renderItems={(items) => <OfferList offers={items} isHomePage={false} />}
-    />
+    <SeoPage {...pageContent}>
+      <OfferList offers={offers} isHomePage={false} />
+    </SeoPage>
   );
 };
 

@@ -7,18 +7,17 @@ import React from 'react';
 import { Typography, Container, Button, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next'; // Client-side translation
 
-interface SeoPageProps<T> {
+interface SeoPageProps {
   // title and metaDescription are handled by Next.js metadata API
   h1: string;
   mainText: string;
   h2?: string;
   ctaText?: string;
   ctaLink?: string;
-  items?: T[];
-  renderItems?: (items: T[]) => React.ReactNode;
+  children?: React.ReactNode;
 }
 
-const SeoPage = <T,>({ h1, mainText, h2, ctaText, ctaLink, items, renderItems }: SeoPageProps<T>) => {
+const SeoPage = ({ h1, mainText, h2, ctaText, ctaLink, children }: SeoPageProps) => {
   const { t } = useTranslation(); // Use client-side translation here
 
   const paragraphs = mainText.split('\n\n');
@@ -44,9 +43,9 @@ const SeoPage = <T,>({ h1, mainText, h2, ctaText, ctaLink, items, renderItems }:
           )}
         </section>
 
-        {items && items.length > 0 && renderItems && (
+        {children && (
           <Box sx={{ mt: 4 }}>
-            {renderItems(items)}
+            {children}
           </Box>
         )}
 
@@ -61,5 +60,6 @@ const SeoPage = <T,>({ h1, mainText, h2, ctaText, ctaLink, items, renderItems }:
     </>
   );
 };
+
 
 export default SeoPage;

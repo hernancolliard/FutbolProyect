@@ -12,7 +12,7 @@ i18n
       escapeValue: false, // not needed for react as it escapes by default
     },
     backend: {
-      loadPath: '/locales/{{lng}}/translation.json', // Path to your translation files in public folder
+      loadPath: '/locales/{{lng}}.json', // Path to your translation files in public folder
     },
   });
 

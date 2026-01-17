@@ -44,11 +44,9 @@ const PerfilesJugadoresFutbolPage = async () => {
   };
 
   return (
-    <SeoPage
-      {...pageContent}
-      items={profiles}
-      renderItems={(items) => <ProfileList profiles={items} />}
-    />
+    <SeoPage {...pageContent}>
+      <ProfileList profiles={profiles} />
+    </SeoPage>
   );
 };
 
