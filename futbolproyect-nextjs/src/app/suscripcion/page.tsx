@@ -98,7 +98,7 @@ export default function SubscriptionPage() {
         spacing={4}
         className="plans"
       >
-        <Card sx={{ minWidth: 300, bgcolor: '#1a1a1a', color: 'white' }}>
+        <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
           <CardContent>
             <Typography variant="h6">{t("offerer_plan_title", "Plan para Ofertantes")}</Typography>
             <Typography>{t("offerer_plan_description", "Para clubes y agencias que buscan talento.")}</Typography>
@@ -110,7 +110,7 @@ export default function SubscriptionPage() {
             <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
           </CardContent>
         </Card>
-        <Card sx={{ minWidth: 300, bgcolor: '#1a1a1a', color: 'white' }}>
+        <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
           <CardContent>
             <Typography variant="h6">{t("applicant_plan_title", "Plan para Postulantes")}</Typography>
             <Typography>{t("applicant_plan_description", "Para futbolistas que buscan oportunidades.")}</Typography>

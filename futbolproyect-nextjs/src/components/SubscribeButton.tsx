@@ -18,6 +18,8 @@ function SubscribeButton({ planType, billingCycle }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  console.log("PayPal Client ID:", process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
+
   const handleSubscribeMP = async () => {
     setLoading(true);
     setError("");
