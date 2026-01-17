@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "postinstall": "npm rebuild sharp"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -34,9 +31,6 @@
     "react-toastify": "^10.0.5",
     "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1"
-  },
-  "scripts": {
-    "postinstall": "npm rebuild sharp"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.45.1",
