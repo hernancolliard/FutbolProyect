@@ -60,6 +60,7 @@ router.get("/featured", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
+    console.log("Datos de perfiles destacados obtenidos del backend:", result.rows); // Añadir este log
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los perfiles destacados:", error);
