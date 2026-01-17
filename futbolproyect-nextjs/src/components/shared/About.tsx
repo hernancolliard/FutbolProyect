@@ -7,7 +7,7 @@ import { Box, Typography, Card, CardContent } from "@mui/material"; // Importar 
 const About = () => {
   const { t } = useTranslation();
 
-  const aboutImageWebp = '/images/images/nosotros.webp'; // Ruta corregida
+  const aboutImageWebp = '/images/nosotros.webp'; // Ruta corregida
 
   return (
     <Card
@@ -18,7 +18,7 @@ const About = () => {
         boxShadow: 3, // Leve sombra
         p: 2, // Padding interno
         mb: 4, // Margen inferior
-        backgroundColor: 'background.paper', // Fondo de la tarjeta
+        backgroundColor: 'primary.main', // Fondo azul
       }}
     >
       <Box
@@ -48,7 +48,7 @@ const About = () => {
         sx={{
           flexGrow: 1, // El texto ocupa el espacio restante
           textAlign: { xs: 'center', md: 'left' }, // Centrado en móvil, izquierda en PC
-          color: 'text.primary',
+          color: 'white', // Texto blanco
         }}
       >
         <Typography variant="h4" component="h2" gutterBottom>

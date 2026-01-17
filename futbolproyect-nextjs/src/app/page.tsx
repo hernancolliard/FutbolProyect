@@ -15,7 +15,7 @@ import OfferList from "@/components/shared/OfferList"; // Migrated component
 import FeaturedProfilesCarousel from "@/components/shared/FeaturedProfilesCarousel"; // Migrated component
 import About from "@/components/shared/About"; // Migrated component
 import Mission from "@/components/shared/Mission"; // Migrated component
-import ContactSummary from "@/components/shared/ContactSummary"; // Migrated component
+import ContactPageClient from "@/components/client-components/ContactPageClient"; // Importar el componente de contacto
 import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated component
 import PromotionModal from "@/components/PromotionModal"; // Migrated component
 import Modal from "@/components/ui/Modal"; // Migrated Modal (custom)
@@ -125,9 +125,18 @@ export default function HomePage() {
             </FadeInOnScroll>
           </Box>
           <hr />
-          <FadeInOnScroll>
-            <ContactSummary />
-          </FadeInOnScroll>
+          <Box
+            id="contact-section" // Añadir un ID para navegación si es necesario
+            sx={{
+              backgroundColor: 'primary.main', // Fondo azul
+              py: 8, // Padding vertical
+              px: 2, // Padding horizontal
+              mt: 4, // Margen superior
+              mb: 4, // Margen inferior
+            }}
+          >
+            <ContactPageClient />
+          </Box>
         </Box>
       </Box>
 
