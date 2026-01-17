@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import RootClientLayout from "@/components/layout/RootClientLayout"; // <--- Importamos el layout cliente
-import I18nProvider from "@/components/I18nProvider"; // Aseguramos las traducciones
+import RootClientLayout from "@/components/layout/RootClientLayout";
+import I18nProvider from "@/components/I18nProvider";
+// 1. Importamos el nuevo Registry
+import ThemeRegistry from "@/components/providers/ThemeRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,12 +22,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <I18nProvider>
-          <AuthProvider>
-            {/* Usamos el wrapper cliente que maneja el Header y los Modales */}
-            <RootClientLayout>{children}</RootClientLayout>
-          </AuthProvider>
-        </I18nProvider>
+        {/* 2. Envolvemos TODO con ThemeRegistry */}
+        <ThemeRegistry>
+          <I18nProvider>
+            <AuthProvider>
+              <RootClientLayout>{children}</RootClientLayout>
+            </AuthProvider>
+          </I18nProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );
