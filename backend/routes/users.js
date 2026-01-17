@@ -212,6 +212,7 @@ router.post("/auth/google", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
+      path: "/", // Asegura que la cookie esté disponible para todas las rutas
       maxAge: 60 * 60 * 1000, // 1 hora
     });
 
