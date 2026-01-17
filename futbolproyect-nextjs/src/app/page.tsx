@@ -118,21 +118,14 @@ export default function HomePage() {
           </Box>
 
           <hr />
-          <Box sx={{ mt: 4, mb: 4 }}>
-            <About />
-            <FadeInOnScroll>
-              <Mission />
-            </FadeInOnScroll>
-          </Box>
-          <hr />
           <Box
-            id="contact-section" // Añadir un ID para navegación si es necesario
+            id="contact-section"
             sx={{
-              backgroundColor: 'primary.main', // Fondo azul
-              py: 8, // Padding vertical
-              px: 2, // Padding horizontal
-              mt: 4, // Margen superior
-              mb: 4, // Margen inferior
+              backgroundColor: 'primary.main',
+              py: 8,
+              px: 2,
+              mt: 4,
+              mb: 4,
             }}
           >
             <ContactPageClient />
