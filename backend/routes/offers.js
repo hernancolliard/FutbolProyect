@@ -143,7 +143,7 @@ router.get("/", async (req, res) => {
     await db.query(unfeatureQuery);
 
     // 3. Construir la consulta dinámica para ofertas regulares
-    let whereClauses = ["o.estado = 'abierta'"];
+    let whereClauses = ["o.estado = 'abierta'", "o.is_featured = FALSE"];
     let queryParams = {};
 
     if (puesto) {
