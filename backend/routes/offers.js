@@ -219,6 +219,8 @@ router.get("/", async (req, res) => {
       currentPage: parseInt(page),
     };
 
+    console.log('Response Data:', responseData);
+
     // 8. Guardar en caché en memoria
     myCache.set(cacheKey, responseData);
 

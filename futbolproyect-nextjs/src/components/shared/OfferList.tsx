@@ -61,47 +61,24 @@ const OfferCard = ({
   const ubicacion = (offer as any)[`ubicacion_${lang}`] || offer.ubicacion;
   const puesto = (offer as any)[`puesto_${lang}`] || offer.puesto;
 
-  const isMobileHome = isHomePage && isMobile;
-  const imageWidth = isHomePage || isMobileHome ? 267 : 200;
-  const imageHeight = isHomePage || isMobileHome ? 150 : 113;
+  // Los estilos unificados ahora siempre reflejan el diseño que se usaba para isHomePage
+  const imageWidth = 267; // Siempre usar el ancho de imagen de la homepage
+  const imageHeight = 150; // Siempre usar el alto de imagen de la homepage
 
   return (
     <Card
       sx={{
         width: "100%",
         position: "relative",
-        bgcolor: !isHomePage ? "primary.main" : "background.paper",
-        color: !isHomePage ? "#fff" : "inherit",
-        display: "flex",
-        flexDirection: isHomePage || isMobileHome ? "column" : "row",
-        height: "100%",
-        minHeight: isHomePage ? "420px" : "200px",
-      }}
-      elevation={2}
-      onClick={isHomePage ? () => handleViewOffer(offer.id) : undefined}
-    >
-      <Box
-        sx={{
-          width: isMobileHome || isHomePage ? "100%" : "200px",
-          height: isHomePage || isMobileHome ? "150px" : "100%",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-    <Card
-      sx={{
-        width: "100%",
-        position: "relative",
-        bgcolor: "background.paper",
+        bgcolor: "background.paper", // Fondo blanco para todas las tarjetas
         color: "inherit",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column", // Siempre en columna para diseño unificado
         height: "100%",
-        minHeight: "420px",
+        minHeight: "420px", // Altura mínima unificada
       }}
       elevation={2}
-      onClick={() => handleViewOffer(offer.id)}
+      onClick={() => handleViewOffer(offer.id)} // Siempre clickeable
     >
       <Box
         sx={{
@@ -112,7 +89,7 @@ const OfferCard = ({
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
-          background: "#e0e0e0",
+          background: "#e0e0e0", // Fondo gris claro para el contenedor de la imagen
           p: 1,
         }}
       >
@@ -120,8 +97,8 @@ const OfferCard = ({
           <Image
             src={offer.imagen_url}
             alt={titulo}
-            width={267}
-            height={150}
+            width={imageWidth}
+            height={imageHeight}
             sizes="(max-width: 768px) 100vw, 300px"
             style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
@@ -143,7 +120,7 @@ const OfferCard = ({
           <Typography
             variant="h6"
             sx={{
-              color: "inherit",
+              color: "inherit", // Color de texto normal
               fontWeight: 400,
             }}
           >
@@ -179,91 +156,7 @@ const OfferCard = ({
         <CardActions sx={{ p: 0, mt: 2 }}>
           <Button
             variant="contained"
-            color="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewOffer(offer.id);
-            }}
-          >
-            {t("view_offer")}
-          </Button>
-
-          {showApplyButton && (
-            <OfferActions
-              onOfferAction={onOfferAction}
-              offer={{ ...offer, applicants: offer.applicants ?? [] }}
-            />
-          )}
-        </CardActions>
-      </CardContent>
-    </Card>
-          p: 1,
-        }}
-      >
-        {offer.imagen_url ? (
-          <Image
-            src={offer.imagen_url}
-            alt={titulo}
-            width={imageWidth}
-            height={imageHeight}
-            sizes="(max-width: 768px) 100vw, 300px"
-            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-          />
-        ) : (
-          <Typography color="text.secondary">{t("no_image")}</Typography>
-        )}
-      </Box>
-
-      <CardContent
-        sx={{
-          flexGrow: 1,
-          p: isMobileHome ? 1 : 2,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box>
-          <Typography
-            variant={isMobileHome ? "body1" : "h6"}
-            sx={{
-              color: !isHomePage ? "#fff" : "inherit",
-              fontWeight: isMobileHome ? 700 : 400,
-            }}
-          >
-            {titulo}
-          </Typography>
-
-          <Typography variant="subtitle2" color="text.secondary">
-            {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            {t("location")} {ubicacion || t("not_specified")}
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            {t("position")} {puesto || t("not_specified")}
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              mt: 1,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {descripcion}
-          </Typography>
-        </Box>
-
-        <CardActions sx={{ p: 0, mt: 2 }}>
-          <Button
-            variant="contained"
-            color={isHomePage ? "primary" : "secondary"}
+            color="primary" // Usar color primario para todos los botones de ver oferta
             onClick={(e) => {
               e.stopPropagation();
               handleViewOffer(offer.id);
