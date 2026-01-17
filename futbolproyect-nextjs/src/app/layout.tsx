@@ -6,6 +6,7 @@ import RootClientLayout from "@/components/layout/RootClientLayout";
 import I18nProvider from "@/components/I18nProvider";
 // 1. Importamos el nuevo Registry
 import ThemeRegistry from "@/components/providers/ThemeRegistry";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,14 +23,16 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        {/* 2. Envolvemos TODO con ThemeRegistry */}
-        <ThemeRegistry>
-          <I18nProvider>
-            <AuthProvider>
-              <RootClientLayout>{children}</RootClientLayout>
-            </AuthProvider>
-          </I18nProvider>
-        </ThemeRegistry>
+        <ReactQueryProvider>
+          {/* 2. Envolvemos TODO con ThemeRegistry */}
+          <ThemeRegistry>
+            <I18nProvider>
+              <AuthProvider>
+                <RootClientLayout>{children}</RootClientLayout>
+              </AuthProvider>
+            </I18nProvider>
+          </ThemeRegistry>
+        </ReactQueryProvider>
       </body>
     </html>
   );
