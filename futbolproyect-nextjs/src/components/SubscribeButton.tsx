@@ -10,6 +10,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import { PayPalButtons } from "@paypal/react-paypal-js"; // Import PayPalButtons
 
 function SubscribeButton({ planType, billingCycle }) {
   const { user } = useAuth();
@@ -17,8 +18,6 @@ function SubscribeButton({ planType, billingCycle }) {
   const { t } = useTranslation('common');
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  console.log("PayPal Client ID:", process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
 
   const handleSubscribeMP = async () => {
     setLoading(true);
@@ -45,7 +44,6 @@ function SubscribeButton({ planType, billingCycle }) {
   };
 
   const createOrder = async (data, actions) => {
-    console.log("createOrder called"); // Add this log
     try {
       const response = await apiClient.post("/payments/create-paypal-order", {
         planType,
@@ -66,7 +64,6 @@ function SubscribeButton({ planType, billingCycle }) {
   };
 
   const onApprove = async (data, actions) => {
-    console.log("onApprove called"); // Add this log
     try {
       await apiClient.post("/payments/capture-paypal-order", {
         orderID: data.orderID,
@@ -97,19 +94,11 @@ function SubscribeButton({ planType, billingCycle }) {
         {loading ? <CircularProgress size={24} /> : "Mercado Pago"}
       </Button>
 
-      <PayPalScriptProvider
-        options={{
-          clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "YOUR_PAYPAL_CLIENT_ID", // Use NEXT_PUBLIC prefix
-          currency: "USD",
-        }}
-      >
-        <Typography>PayPal Buttons should be here</Typography> {/* Add this line */}
-        <PayPalButtons
-          style={{ layout: "vertical" }}
-          createOrder={createOrder}
-          onApprove={onApprove}
-        />
-      </PayPalScriptProvider>
+      <PayPalButtons
+        style={{ layout: "vertical" }}
+        createOrder={createOrder}
+        onApprove={onApprove}
+      />
     </Box>
   );
 }

@@ -15,6 +15,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated LoadingSpinner
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js"; // Import PayPalScriptProvider
 
 // --- Fetching Logic ---
 const fetchSubscriptionPlans = async () => {
@@ -74,55 +75,62 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <Stack
-      className="subscription-container"
-      spacing={4}
-      sx={{ mt: 5, alignItems: "center" }}
+    <PayPalScriptProvider
+      options={{
+        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "YOUR_PAYPAL_CLIENT_ID",
+        currency: "USD",
+      }}
     >
-      <Typography variant="h4" sx={{ color: 'white' }}>{t("subscription_plans_title", "Planes de Suscripción")}</Typography>
-      <Typography sx={{ color: 'white' }}>{t("subscription_plans_subtitle", "Elige el plan que mejor se adapte a ti.")}</Typography>
-      
-      <ToggleButtonGroup
-        color="primary"
-        value={billingCycle}
-        exclusive
-        onChange={handleBillingCycleChange}
-        aria-label="Billing Cycle"
-      >
-        <ToggleButton value="monthly" sx={{ color: 'white' }}>{t('monthly', 'Mensual')}</ToggleButton>
-        <ToggleButton value="annual" sx={{ color: 'white' }}>{t('annual', 'Anual')}</ToggleButton>
-      </ToggleButtonGroup>
-
       <Stack
-        direction={{ xs: "column", md: "row" }}
+        className="subscription-container"
         spacing={4}
-        className="plans"
+        sx={{ mt: 5, alignItems: "center" }}
       >
-        <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="h6">{t("offerer_plan_title", "Plan para Ofertantes")}</Typography>
-            <Typography>{t("offerer_plan_description", "Para clubes y agencias que buscan talento.")}</Typography>
-            <Typography variant="h5" sx={{ my: 2 }}>
-              {billingCycle === 'monthly' 
-                ? `U$D${monthlyPrice}/mes` 
-                : `U$D${annualPrice}/año`}
-            </Typography>
-            <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
-          </CardContent>
-        </Card>
-        <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="h6">{t("applicant_plan_title", "Plan para Postulantes")}</Typography>
-            <Typography>{t("applicant_plan_description", "Para futbolistas que buscan oportunidades.")}</Typography>
-            <Typography variant="h5" sx={{ my: 2 }}>
-              {billingCycle === 'monthly' 
-                ? `U$D${monthlyPrice}/mes` 
-                : `U$D${annualPrice}/año`}
-            </Typography>
-            <SubscribeButton planType="postulante" billingCycle={billingCycle} />
-          </CardContent>
-        </Card>
+        <Typography variant="h4" sx={{ color: 'white' }}>{t("subscription_plans_title", "Planes de Suscripción")}</Typography>
+        <Typography sx={{ color: 'white' }}>{t("subscription_plans_subtitle", "Elige el plan que mejor se adapte a ti.")}</Typography>
+        
+        <ToggleButtonGroup
+          color="primary"
+          value={billingCycle}
+          exclusive
+          onChange={handleBillingCycleChange}
+          aria-label="Billing Cycle"
+        >
+          <ToggleButton value="monthly" sx={{ color: 'white' }}>{t('monthly', 'Mensual')}</ToggleButton>
+          <ToggleButton value="annual" sx={{ color: 'white' }}>{t('annual', 'Anual')}</ToggleButton>
+        </ToggleButtonGroup>
+
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={4}
+          className="plans"
+        >
+          <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
+            <CardContent>
+              <Typography variant="h6">{t("offerer_plan_title", "Plan para Ofertantes")}</Typography>
+              <Typography>{t("offerer_plan_description", "Para clubes y agencias que buscan talento.")}</Typography>
+              <Typography variant="h5" sx={{ my: 2 }}>
+                {billingCycle === 'monthly' 
+                  ? `U$D${monthlyPrice}/mes` 
+                  : `U$D${annualPrice}/año`}
+              </Typography>
+              <SubscribeButton planType="ofertante" billingCycle={billingCycle} />
+            </CardContent>
+          </Card>
+          <Card sx={{ minWidth: 300, bgcolor: 'background.paper', color: 'text.primary', boxShadow: 3 }}>
+            <CardContent>
+              <Typography variant="h6">{t("applicant_plan_title", "Plan para Postulantes")}</Typography>
+              <Typography>{t("applicant_plan_description", "Para futbolistas que buscan oportunidades.")}</Typography>
+              <Typography variant="h5" sx={{ my: 2 }}>
+                {billingCycle === 'monthly' 
+                  ? `U$D${monthlyPrice}/mes` 
+                  : `U$D${annualPrice}/año`}
+              </Typography>
+              <SubscribeButton planType="postulante" billingCycle={billingCycle} />
+            </CardContent>
+          </Card>
+        </Stack>
       </Stack>
-    </Stack>
+    </PayPalScriptProvider>
   );
 }
