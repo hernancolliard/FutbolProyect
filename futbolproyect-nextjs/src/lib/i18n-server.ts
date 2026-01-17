@@ -13,7 +13,7 @@ export async function getTranslation(locale?: string) {
     return { t, translations: cached };
   }
 
-  const filePath = path.join(process.cwd(), 'public', 'locales', lang, 'translation.json');
+  const filePath = path.join(process.cwd(), 'public', 'locales', `${lang}.json`);
 
   try {
     const fileContent = await fs.readFile(filePath, 'utf8');
