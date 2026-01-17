@@ -23,6 +23,6 @@
     "zod": "^4.1.9"
   },
   "devDependencies": {
-    "sharp": "^0.34.3"
+    "sharp": "^0.34.5"
   }
 }

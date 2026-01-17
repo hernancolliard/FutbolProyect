@@ -32,10 +32,11 @@
     "react-scroll-parallax": "^3.4.5",
     "react-slick": "^0.30.2",
     "react-toastify": "^10.0.5",
-    "sharp": "^0.34.3",
+    "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.45.1",
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -45,8 +46,7 @@
     "eslint-config-next": "14.2.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5.4.5",
-    "@tanstack/react-query-devtools": "^5.45.1"
+    "typescript": "^5.4.5"
   },
   "engines": {
     "node": "20.x"
