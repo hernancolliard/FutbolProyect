@@ -135,14 +135,13 @@ router.post("/login", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/", // <-- ESTA ES LA LÍNEA CLAVE QUE SOLUCIONA EL PROBLEMA
       expires: new Date(Date.now() + 3600000), // Opcional: la cookie expira en 1 hora
     });
 
-    // Devolver datos del usuario sin el hash de la contraseña
     const { password_hash, ...userWithoutPassword } = user;
-    res.json(userWithoutPassword);
+    res.json({ user: userWithoutPassword, token });
   } catch (error) {
     console.error("Error en el login:", error);
     res.status(500).json({ message: "Error en el servidor." });
@@ -211,13 +210,13 @@ router.post("/auth/google", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/", // Asegura que la cookie esté disponible para todas las rutas
       maxAge: 60 * 60 * 1000, // 1 hora
     });
 
     const { password_hash, ...userWithoutPassword } = user;
-    res.json(userWithoutPassword);
+    res.json({ user: userWithoutPassword, token });
   } catch (error) {
     console.error("Error en la autenticación de Google:", error);
     res

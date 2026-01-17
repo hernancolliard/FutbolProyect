@@ -14,8 +14,18 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter(); // Initialize useRouter
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+    }
+    fetchUser();
+  }, []);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -24,29 +34,23 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data);
     } catch (error) {
       setUser(null);
+      setToken(null);
+      localStorage.removeItem('token');
+      delete apiClient.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  // En src/context/AuthContext.tsx
-
-  // ... imports
-
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // 1. Hacemos la petición al backend
-      // Al usar apiClient con withCredentials, la cookie se guarda sola automáticamente.
-      await apiClient.post("/users/login", { email, password });
-
-      // 2. Si no dio error, pedimos los datos del usuario para actualizar la app
-      await fetchUser();
-
+      const response = await apiClient.post("/users/login", { email, password });
+      const { user, token } = response.data;
+      setUser(user);
+      setToken(token);
+      localStorage.setItem('token', token);
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return true; // Indicamos éxito
     } catch (error) {
       console.error("Error en login:", error);
@@ -55,17 +59,17 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
-  // Agregar dentro del AuthProvider, junto a login y logout
 
   const loginWithGoogle = async (id_token: string) => {
     setLoading(true);
     try {
-      // 1. Enviamos el token al backend (que seteará la cookie)
-      await apiClient.post("/users/auth/google", { id_token });
-
-      // 2. Actualizamos el estado del usuario
-      await fetchUser();
-
+      // Assuming google login also returns user and token
+      const response = await apiClient.post("/users/auth/google", { id_token });
+      const { user, token } = response.data;
+      setUser(user);
+      setToken(token);
+      localStorage.setItem('token', token);
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       return true;
     } catch (error) {
       console.error("Error en Google Login:", error);
@@ -75,23 +79,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ¡No olvides agregar loginWithGoogle al objeto value que retorna el Provider!
-  // value={{ user, login, logout, loginWithGoogle, ... }}
-
   const logout = async () => {
-    // Removed 'navigate' parameter
     try {
       await apiClient.post("/users/logout");
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
       setUser(null);
+      setToken(null);
+      localStorage.removeItem('token');
+      delete apiClient.defaults.headers.common['Authorization'];
       router.push("/"); // Redirect to the home page using useRouter
     }
   };
 
   const authContextValue = {
     user,
+    token,
     setUser, // Exponer setUser para permitir actualizaciones de perfil
     login,
     loginWithGoogle,
