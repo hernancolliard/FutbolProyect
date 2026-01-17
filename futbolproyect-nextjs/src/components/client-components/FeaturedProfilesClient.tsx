@@ -10,8 +10,11 @@ import LoadingSpinner from '@/components/LoadingSpinner'; // Corrected path
 import apiClient from '@/lib/apiClient'; // Corrected path
 
 const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: string; }) => {
-  const { data } = await apiClient.get('/profiles/destacados', { params: filters });
+
+  const { data } = await apiClient.get('/profiles/featured', { params: filters });
+
   return data;
+
 };
 
 const fetchNacionalidades = async () => {
