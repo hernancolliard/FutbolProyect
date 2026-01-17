@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "install-all": "npm install && cd backend && npm install && cd .. && cd futbolproyect-nextjs && npm install",
-    "build": "cd futbolproyect-nextjs && npm run build",
+    "build": "cd futbolproyect-nextjs && npx next build",
     "start": "node backend/server.js"
   },
   "dependencies": {
