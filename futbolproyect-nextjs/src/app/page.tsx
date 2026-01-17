@@ -13,8 +13,6 @@ import TrustedBy from "@/components/shared/TrustedBy"; // Migrated component
 import Hero from "@/components/Hero"; // Migrated component
 import OfferList from "@/components/shared/OfferList"; // Migrated component
 import FeaturedProfilesCarousel from "@/components/shared/FeaturedProfilesCarousel"; // Migrated component
-import About from "@/components/shared/About"; // Migrated component
-import Mission from "@/components/shared/Mission"; // Migrated component
 import ContactPageClient from "@/components/client-components/ContactPageClient"; // Importar el componente de contacto
 import LoadingSpinner from "@/components/LoadingSpinner"; // Migrated component
 import PromotionModal from "@/components/PromotionModal"; // Migrated component
