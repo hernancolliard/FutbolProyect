@@ -48,14 +48,14 @@ const PromotionModal = ({ isOpen, onClose, onShowRegisterModal }) => {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => handleRegisterClick('player')}
+                        onClick={() => handleRegisterClick('postulante')}
                     >
                         {t('promotionModal.registerPlayer', 'Registrarse como Jugador')}
                     </Button>
                     <Button
                         variant="contained"
                         color="secondary"
-                        onClick={() => handleRegisterClick('club')}
+                        onClick={() => handleRegisterClick('ofertante')}
                     >
                         {t('promotionModal.registerClub', 'Registrarse como Club/Agencia')}
                     </Button>

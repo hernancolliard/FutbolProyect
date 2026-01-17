@@ -121,11 +121,8 @@ export default function Register({
             onChange={(e) => setRole(e.target.value)}
             fullWidth
           >
-            <MenuItem value="player">{t("player", "Jugador")}</MenuItem>
-            <MenuItem value="club">{t("club", "Club")}</MenuItem>
-            <MenuItem value="scout">{t("scout", "Ojeador")}</MenuItem>
-            <MenuItem value="agent">{t("agent", "Agente")}</MenuItem>
-            <MenuItem value="user">{t("fan", "Aficionado")}</MenuItem>
+            <MenuItem value="postulante">{t("player", "Jugador")}</MenuItem>
+            <MenuItem value="ofertante">{t("club", "Club/Agencia")}</MenuItem>
           </TextField>
 
           <TextField
