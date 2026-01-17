@@ -10,7 +10,7 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2", // Azul estándar
+      main: "#192634", // Color solicitado por el usuario
     },
     secondary: {
       main: "#dc004e", // Rosa/Rojo estándar
