@@ -22,25 +22,27 @@ const getFullUrl = (req, filePath) => {
 
 // --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
 router.get("/featured", async (req, res) => {
-  const { nacionalidad, puesto } = req.query;
-
-  try {
-    let queryParams = {}; // Usar un objeto para los parámetros nombrados
-    let whereClauses = ["u.tipo_usuario = 'postulante'"];
-
-    if (nacionalidad) {
-      queryParams.nacionalidad = nacionalidad;
-      whereClauses.push(`p.nacionalidad = @nacionalidad`);
-    }
-    if (puesto) {
-      queryParams.puesto = puesto;
-      whereClauses.push(`p.posicion_principal = @puesto`);
-    }
-
-    const query = `
-      SELECT
-          u.id,
-          u.nombre,
+      const { nacionalidad, puesto } = req.query;
+  
+    try {
+      let queryParams = {}; // Usar un objeto para los parámetros nombrados
+      let whereClauses = ["u.tipo_usuario = 'postulante'"];
+  
+      if (nacionalidad) {
+        queryParams.nacionalidad = nacionalidad;
+        whereClauses.push(`p.nacionalidad = @nacionalidad`);
+      }
+      if (puesto) {
+        queryParams.puesto = puesto;
+        whereClauses.push(`p.posicion_principal = @puesto`);
+      }
+  
+      console.log("Featured Profiles Query - whereClauses:", whereClauses);
+      console.log("Featured Profiles Query - queryParams:", queryParams);
+  
+      const query = `
+        SELECT
+            u.id,          u.nombre,
           u.apellido,
           p.foto_perfil_url,
           p.posicion_principal,
