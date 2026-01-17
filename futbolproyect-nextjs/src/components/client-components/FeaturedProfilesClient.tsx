@@ -12,6 +12,8 @@ const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: st
 
   const { data } = await apiClient.get('/profiles/featured', { params: filters });
 
+  console.log("Featured Profiles API response:", data); // Add this line
+
   return data;
 
 };
