@@ -134,8 +134,7 @@ router.post("/login", async (req, res) => {
     // CÓDIGO CORREGIDO Y MEJORADO
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: "lax",
       path: "/", // <-- ESTA ES LA LÍNEA CLAVE QUE SOLUCIONA EL PROBLEMA
       expires: new Date(Date.now() + 3600000), // Opcional: la cookie expira en 1 hora
     });
@@ -210,8 +209,7 @@ router.post("/auth/google", async (req, res) => {
     console.log("Setting token cookie in /auth/google");
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      sameSite: "lax",
       path: "/", // Asegura que la cookie esté disponible para todas las rutas
       maxAge: 60 * 60 * 1000, // 1 hora
     });
