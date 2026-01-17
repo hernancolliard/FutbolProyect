@@ -20,7 +20,8 @@ declare module '@mui/material/Button' {
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#4A90E2', // Un azul que combina con colores tierra
+      main: '#192634', // Azul oscuro principal
+      light: '#455a64', // Un tono más claro para hover
     },
     secondary: {
       main: '#F5A623', // Un naranja terroso
@@ -79,12 +80,17 @@ const theme = createTheme({
           borderRadius: 8,
           padding: '8px 16px',
         },
+        containedPrimary: {
+          '&:hover': {
+            backgroundColor: '#455a64', // Usando el 'light' de la paleta
+          },
+        },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         colorPrimary: {
-          backgroundColor: '#2C3E50', // Azul oscuro para el AppBar
+          backgroundColor: '#192634', // Azul oscuro para el AppBar
         },
       },
     },

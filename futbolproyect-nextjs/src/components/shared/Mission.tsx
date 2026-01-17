@@ -7,7 +7,7 @@ import { Box, Typography, Card, CardContent } from "@mui/material"; // Importar 
 const Mission = () => {
   const { t } = useTranslation();
 
-  const missionImageWebp = '/images/mision.webp'; // Ruta corregida
+  const missionImageWebp = '/mision.webp'; // Ruta corregida
 
   return (
     <Card

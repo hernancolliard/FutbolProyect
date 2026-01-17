@@ -57,7 +57,7 @@ export default function ContactPageClient() {
         {t("contact_page_title", "Contáctanos")}
       </Typography>
       <Typography sx={{ mb: 3, color: 'white' }}>{t("contact_page_subtitle", "Estamos aquí para ayudarte.")}</Typography>
-      <Card sx={{ maxWidth: 500, width: "100%", bgcolor: '#1a1a1a' }}>
+      <Card sx={{ maxWidth: 500, width: "100%", bgcolor: 'primary.main' }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
             {t("contact_form_title", "Envíanos un mensaje")}
@@ -104,7 +104,7 @@ export default function ContactPageClient() {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
+                color="secondary"
                 disabled={loading}
               >
                 {loading ? (

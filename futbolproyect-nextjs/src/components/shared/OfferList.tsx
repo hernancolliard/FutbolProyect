@@ -89,7 +89,114 @@ const OfferCard = ({
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+    <Card
+      sx={{
+        width: "100%",
+        position: "relative",
+        bgcolor: "background.paper",
+        color: "inherit",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: "420px",
+      }}
+      elevation={2}
+      onClick={() => handleViewOffer(offer.id)}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          height: "150px",
+          overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
           background: "#e0e0e0",
+          p: 1,
+        }}
+      >
+        {offer.imagen_url ? (
+          <Image
+            src={offer.imagen_url}
+            alt={titulo}
+            width={267}
+            height={150}
+            sizes="(max-width: 768px) 100vw, 300px"
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        ) : (
+          <Typography color="text.secondary">{t("no_image")}</Typography>
+        )}
+      </Box>
+
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          p: 2,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "inherit",
+              fontWeight: 400,
+            }}
+          >
+            {titulo}
+          </Typography>
+
+          <Typography variant="subtitle2" color="text.secondary">
+            {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary">
+            {t("location")} {ubicacion || t("not_specified")}
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary">
+            {t("position")} {puesto || t("not_specified")}
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              mt: 1,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {descripcion}
+          </Typography>
+        </Box>
+
+        <CardActions sx={{ p: 0, mt: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewOffer(offer.id);
+            }}
+          >
+            {t("view_offer")}
+          </Button>
+
+          {showApplyButton && (
+            <OfferActions
+              onOfferAction={onOfferAction}
+              offer={{ ...offer, applicants: offer.applicants ?? [] }}
+            />
+          )}
+        </CardActions>
+      </CardContent>
+    </Card>
           p: 1,
         }}
       >
