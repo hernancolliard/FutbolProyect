@@ -157,7 +157,9 @@ export default function FeaturedProfilesClient() {
       ) : (
         <Grid container spacing={2}>
           {profiles && profiles.length > 0 ? (
-            profiles.map((profile: any) => (
+            profiles.map((profile: any) => {
+              console.log('Profile Image URL:', profile.foto_perfil_url);
+              return (
               <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
                 <Box
                   className="profile-card"
@@ -208,7 +210,7 @@ export default function FeaturedProfilesClient() {
                   </Button>
                 </Box>
               </Grid>
-            ))
+            )})
           ) : (
             <Typography sx={{ mt: 2, ml: 2, color: 'white' }}>
               {t('no_featured_profiles_filters', 'No hay perfiles destacados que coincidan con los filtros seleccionados.')}
