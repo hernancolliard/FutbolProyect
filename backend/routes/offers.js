@@ -180,6 +180,7 @@ router.get("/", async (req, res) => {
     // 4. Obtener el conteo total de ofertas para la paginación
     const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o WHERE ${whereString}`;
     const countResult = await db.query(countQuery, queryParams);
+    console.log("Count Query Result:", countResult.rows[0].total); // Add this log
     const totalOffers = countResult.rows[0].total;
     const totalPages = Math.ceil(totalOffers / limit);
 
@@ -197,6 +198,7 @@ router.get("/", async (req, res) => {
     queryParams.limit = parseInt(limit);
 
     const regularResult = await db.query(regularQuery, queryParams);
+    console.log("Regular Offers Query Result:", regularResult.rows.length, regularResult.rows); // Add this log
     const regularOffers = regularResult.rows;
 
     // 6. Obtener las ofertas destacadas (estas no se filtran, siempre son las mismas)
