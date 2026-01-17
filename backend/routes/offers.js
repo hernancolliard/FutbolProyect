@@ -173,12 +173,13 @@ router.get("/", async (req, res) => {
 
 
     const whereString = whereClauses.join(" AND ");
+    console.log("WHERE String:", whereString); // Add this log
 
     const orderBy =
       sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
 
     // 4. Obtener el conteo total de ofertas para la paginación
-    const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o WHERE ${whereString}`;
+    const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o JOIN usuarios u ON o.id_usuario_ofertante = u.id WHERE ${whereString}`;
     const countResult = await db.query(countQuery, queryParams);
     console.log("Count Query Result:", countResult.rows[0].total); // Add this log
     const totalOffers = countResult.rows[0].total;
@@ -194,6 +195,7 @@ router.get("/", async (req, res) => {
       ORDER BY ${orderBy}
       OFFSET @offset LIMIT @limit;
     `;
+    console.log("Regular Query:", regularQuery); // Add this log
     queryParams.offset = offset;
     queryParams.limit = parseInt(limit);
 
