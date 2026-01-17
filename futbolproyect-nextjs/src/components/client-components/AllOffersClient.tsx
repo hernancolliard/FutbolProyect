@@ -27,6 +27,7 @@ const fetchOffers = async ({ queryKey }: QueryFunctionContext<[string, object, n
   }
 
   const { data } = await apiClient.get(`/offers?${params.toString()}`);
+  console.log("All Offers API response:", data); // Add this line
   return data;
 };
 
