@@ -28,7 +28,7 @@ const fetchHomePageOffers = async () => {
 
 const fetchFeaturedProfiles = async () => {
   const { data } = await apiClient.get("/profiles/featured");
-  return data.profiles || [];
+  return data || [];
 };
 
 export default function HomePage() {
