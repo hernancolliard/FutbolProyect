@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link'; // Use next/link
 import { useTranslation } from 'react-i18next';
+import Image from "next/image";
 import { Grid, Typography, Button, Box } from '@mui/material'; // Using Material UI components
 
 import { Profile } from '@/lib/types';
@@ -26,11 +27,11 @@ const ProfileList = ({ profiles }: ProfileListProps) => {
         <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
           <Box className="profile-card" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
             <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <img
+              <Image
                 src={profile.foto_perfil_url || 'images/logos/logofp.png'}
                 alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
-                width="180" // Assuming fixed size for consistency
-                height="180" // Assuming fixed size for consistency
+                width={180} // Assuming fixed size for consistency
+                height={180} // Assuming fixed size for consistency
                 style={{ width: '100%', height: '180px', objectFit: 'contain' }}
               />
               <Box className="profile-info" sx={{ padding: '1rem' }}>

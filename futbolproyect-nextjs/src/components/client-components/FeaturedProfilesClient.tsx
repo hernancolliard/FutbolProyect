@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Typography, Box, SelectChangeEvent } from '@mui/material';
@@ -174,11 +175,11 @@ export default function FeaturedProfilesClient() {
                   }}
                 >
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <img
+                    <Image
                       src={profile.foto_perfil_url || 'images/logos/logofp.png'}
                       alt={`Perfil de ${profile.nombre} ${profile.apellido}`}
-                      width="180"
-                      height="180"
+                      width={180}
+                      height={180}
                       style={{ width: '100%', height: '180px', objectFit: 'contain' }}
                     />
                     <Box className="profile-info" sx={{ p: 1 }}>

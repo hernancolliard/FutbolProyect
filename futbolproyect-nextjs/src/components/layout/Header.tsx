@@ -17,28 +17,11 @@ import { useTranslation } from "react-i18next";
 // import { useAuth } from "../context/AuthContext"; // AuthContext not yet migrated
 import Image from "next/image"; // Using next/image for optimized images
 
-// import { useAuth } from "../context/AuthContext"; // AuthContext not yet migrated
-
-// Mock AuthContext for now - TEMPORARILY DISABLED TO FIX BUILD ERROR
-// const useAuth = () => {
-//   const user = {
-//     id: 1,
-//     nombre: "MockUser",
-//     isadmin: true,
-//     tipo_usuario: "ofertante",
-//   };
-//   const logout = (navigate: any) => {
-//     console.log("Mock logout");
-//     navigate("/");
-//   };
-//   return { user, logout };
-// };
-
+import { useAuth } from "@/context/AuthContext"; // Import AuthContext
 
 function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal }: { onShowLoginModal: () => void, onShowRegisterModal: (role: string) => void, onShowCreateOfferModal: () => void }) {
   const { t, i18n } = useTranslation();
-  const user = null; // Temporarily set user to null to fix build error
-  // console.log("User object in Header:", user); // Temporarily commented out
+  const { user, logout } = useAuth(); // Use AuthContext
   const router = useRouter(); // Use useRouter from next/navigation
   const pathname = usePathname(); // Get pathname
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -71,7 +54,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
   };
 
   const handleLogout = () => {
-    // logout(router); // Temporarily commented out
+    logout(); // Temporarily commented out
     handleMobileMenuClose();
   };
 
