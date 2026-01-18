@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
@@ -10,12 +10,10 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import { PayPalButtons } from "@paypal/react-paypal-js"; // Import PayPalButtons
-
 function SubscribeButton({ planType, billingCycle }) {
   const { user } = useAuth();
   const router = useRouter(); // Initialize useRouter
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,12 +28,20 @@ function SubscribeButton({ planType, billingCycle }) {
       window.open(response.data.init_point, "_blank");
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setError(t("must_be_logged_in_to_subscribe", "Debes iniciar sesión para suscribirte."));
+        setError(
+          t(
+            "must_be_logged_in_to_subscribe",
+            "Debes iniciar sesión para suscribirte.",
+          ),
+        );
       } else {
         console.error("Error al crear la preferencia de MP:", error);
         setError(
           error.message ||
-            t("payment_error_mp", "Error al iniciar el proceso de pago con Mercado Pago.")
+            t(
+              "payment_error_mp",
+              "Error al iniciar el proceso de pago con Mercado Pago.",
+            ),
         );
       }
     } finally {
@@ -52,11 +58,19 @@ function SubscribeButton({ planType, billingCycle }) {
       return response.data.orderID;
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setError(t("must_be_logged_in_to_subscribe", "Debes iniciar sesión para suscribirte."));
+        setError(
+          t(
+            "must_be_logged_in_to_subscribe",
+            "Debes iniciar sesión para suscribirte.",
+          ),
+        );
       } else {
         console.error("Error creating PayPal order:", error);
         setError(
-          t("payment_error_paypal_generic", "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo.")
+          t(
+            "payment_error_paypal_generic",
+            "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo.",
+          ),
         );
       }
       throw new Error(error);
