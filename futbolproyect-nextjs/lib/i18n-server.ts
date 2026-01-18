@@ -3,7 +3,7 @@ import path from 'path';
 
 // Function to load translations from JSON files
 export async function getTranslation(locale: string, namespace: string = 'translation') {
-  const filePath = path.join(process.cwd(), 'public', 'locales', locale, `${namespace}.json`);
+  const filePath = path.join(process.cwd(), 'public', 'locales', `${locale}.json`);
   try {
     const fileContents = await fsPromises.readFile(filePath, 'utf8');
     return JSON.parse(fileContents);

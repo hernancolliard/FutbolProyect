@@ -327,5 +327,6 @@
   "linkCopiedInstagram": "¡Enlace copiado! Pégalo en tu historia de Instagram.",
   "are_you_sure_delete_video": "¿Estás seguro de que quieres eliminar este video?",
   "video_deleted_successfully": "Video eliminado con éxito.",
-  "video_delete_error": "Error al eliminar el video."
+  "video_delete_error": "Error al eliminar el video.",
+  "featured_profiles": "Perfiles Destacados"
 }
