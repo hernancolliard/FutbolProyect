@@ -4,6 +4,13 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import { useEffect } from 'react';
 
+// Augment the Window interface to include dataLayer
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 const pageview = (url: string) => {
