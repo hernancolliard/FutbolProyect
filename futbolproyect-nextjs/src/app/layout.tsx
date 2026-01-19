@@ -9,6 +9,8 @@ import ThemeRegistry from "@/components/providers/ThemeRegistry";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import ParallaxClientProvider from "@/components/providers/ParallaxProvider";
 import { GoogleOAuthProvider } from '@react-oauth/google'; // Importar GoogleOAuthProvider
+import GoogleTagManager from "@/components/GoogleTagManager";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +29,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
+        <Suspense fallback={<></>}>
+          <GoogleTagManager />
+        </Suspense>
         <ParallaxClientProvider>
           <ReactQueryProvider>
             <ThemeRegistry>
