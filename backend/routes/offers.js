@@ -215,6 +215,11 @@ router.get("/", async (req, res) => {
     const featuredResult = await db.query(featuredQuery);
     const featuredOffers = featuredResult.rows;
 
+    // DEBUG LOGGING
+    console.log(`[DEBUG] Se encontraron ${featuredOffers.length} ofertas destacadas.`);
+    console.log("[DEBUG] Contenido de ofertas destacadas:", JSON.stringify(featuredOffers, null, 2));
+
+
     // 7. Preparar los datos para enviar y cachear
     const responseData = {
       featuredOffers,
