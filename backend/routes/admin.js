@@ -290,19 +290,58 @@ router.patch(
   [verificarToken, verificarAdmin],
   async (req, res) => {
     const { id } = req.params;
+    const client = await db.getClient();
+
     try {
-      const result = await db.query(
-        "UPDATE ofertas_laborales SET is_featured = NOT is_featured WHERE id = @id RETURNING id, is_featured",
+      await client.query("BEGIN");
+
+      // 1. Get the current status of the offer
+      const currentOfferResult = await client.query(
+        "SELECT is_featured FROM ofertas_laborales WHERE id = @id",
         { id: parseInt(id, 10) }
       );
-      if (result.rows.length === 0) {
+
+      if (currentOfferResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+        client.release();
         return res.status(404).json({ message: "Offer not found." });
       }
+
+      const isCurrentlyFeatured = currentOfferResult.rows[0].is_featured;
+      let newFeaturedStatus;
+      let query;
+
+      // 2. Decide the new state and construct the query
+      if (isCurrentlyFeatured) {
+        // Un-feature the offer
+        newFeaturedStatus = false;
+        query = {
+          text: "UPDATE ofertas_laborales SET is_featured = FALSE, featured_until = NULL WHERE id = $1 RETURNING id, is_featured",
+          values: [parseInt(id, 10)],
+        };
+      } else {
+        // Feature the offer for 30 days
+        newFeaturedStatus = true;
+        query = {
+          text: "UPDATE ofertas_laborales SET is_featured = TRUE, featured_until = NOW() + INTERVAL '30 days' WHERE id = $1 RETURNING id, is_featured",
+          values: [parseInt(id, 10)],
+        };
+      }
+
+      // 3. Execute the update
+      const result = await client.query(query);
+      
+      await client.query("COMMIT");
+      client.release();
+
       res.status(200).json({
-        message: "Offer feature status toggled successfully.",
+        message: `Offer ${newFeaturedStatus ? 'featured' : 'un-featured'} successfully.`,
         offer: result.rows[0],
       });
+
     } catch (error) {
+      await client.query("ROLLBACK");
+      client.release();
       console.error("Error toggling offer feature status:", error);
       res.status(500).json({ message: "Server error." });
     }
