@@ -1,4 +1,3 @@
-// futbolproyect-nextjs/src/app/perfiles-jugadores-futbol/page.tsx
 import React from "react";
 import { Profile } from "@/lib/types";
 import SeoPage from "@/components/shared/SeoPage";
@@ -6,7 +5,6 @@ import ProfileList from "@/components/shared/ProfileList";
 import { getTranslation } from "@/lib/i18n-server";
 import { Metadata } from "next";
 
-// CORRECCIÓN: Forzamos renderizado dinámico
 export const dynamic = "force-dynamic";
 
 async function getProfiles(): Promise<Profile[]> {
@@ -24,7 +22,7 @@ async function getProfiles(): Promise<Profile[]> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { translations } = await getTranslation("es");
+  const translations = await getTranslation("es");
   return {
     title: translations["perfiles_jugadores_futbol_seo_title"],
     description: translations["perfiles_jugadores_futbol_seo_desc"],
@@ -32,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const PerfilesJugadoresFutbolPage = async () => {
-  const { translations } = await getTranslation("es");
+  const translations = await getTranslation("es");
   const profiles = await getProfiles();
 
   const pageContent = {

@@ -1,4 +1,3 @@
-// futbolproyect-nextjs/src/app/empleo-entrenadores-futbol/page.tsx
 import { Metadata } from "next";
 import React from "react";
 import { Offer } from "@/lib/types";
@@ -6,27 +5,17 @@ import SeoPage from "@/components/shared/SeoPage";
 import OfferList from "@/components/shared/OfferList";
 import { getTranslation } from "@/lib/i18n-server";
 
-// 1. IMPORTANTE: Esto le dice a Next.js que no intente generar la página estática en el build
 export const dynamic = "force-dynamic";
 
-// Function to fetch offers for coaches
 async function getCoachOffers(): Promise<Offer[]> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!apiBaseUrl) {
-    // Si no hay URL (en build time), devolvemos array vacío en lugar de romper
-    return [];
-  }
+  if (!apiBaseUrl) return [];
 
   try {
-    // 2. Usamos cache: 'no-store' para asegurar datos frescos y evitamos revalidate en modo dinámico
     const res = await fetch(`${apiBaseUrl}/offers?puesto=entrenador`, {
       cache: "no-store",
     });
-
-    if (!res.ok) {
-      console.warn("Failed to fetch coach offers during render");
-      return [];
-    }
+    if (!res.ok) return [];
     const data = await res.json();
     return data.offers || [];
   } catch (error) {
@@ -35,9 +24,10 @@ async function getCoachOffers(): Promise<Offer[]> {
   }
 }
 
-// Generate metadata for the page
 export async function generateMetadata(): Promise<Metadata> {
-  const { translations } = await getTranslation("es");
+  // CORRECCIÓN: Obtenemos el objeto directo sin desestructurar
+  const translations = await getTranslation("es");
+
   return {
     title:
       translations["empleo_entrenadores_futbol_seo_title"] ||
@@ -49,22 +39,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const EmpleoEntrenadoresFutbolPage = async () => {
-  const { translations } = await getTranslation("es");
+  // CORRECCIÓN: Obtenemos el objeto directo
+  const translations = await getTranslation("es");
   const offers = await getCoachOffers();
 
+  // Ahora 'translations' tiene todos los datos, por lo que se mostrará el texto largo de common.json
   const pageContent = {
     h1:
       translations["empleo_entrenadores_futbol_h1"] ||
       "Empleo para entrenadores de fútbol",
-    mainText:
-      translations["empleo_entrenadores_futbol_main_text"] ||
-      `Los entrenadores de fútbol cumplen un rol central...`,
+    mainText: translations["empleo_entrenadores_futbol_main_text"] || "",
     h2:
       translations["empleo_entrenadores_futbol_h2"] ||
       "Trabajo para entrenadores de fútbol",
-    ctaText:
-      translations["empleo_entrenadores_futbol_cta"] ||
-      "Registrate y accedé a empleo para entrenadores de fútbol",
+    ctaText: translations["empleo_entrenadores_futbol_cta"] || "Registrate",
     ctaLink: "/register",
   };
 
