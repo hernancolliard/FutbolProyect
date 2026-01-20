@@ -1,41 +1,117 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import MuiLink from "@mui/material/Link"; // Renamed to MuiLink to avoid conflict with next/link
-import Link from "next/link"; // Import next/link
+import MuiLink from "@mui/material/Link";
+import Link from "next/link";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
-import Image from "next/image"; // Replaced OptimizedImage
+import Image from "next/image";
+import Divider from "@mui/material/Divider"; // Importamos Divider
 
 function Footer() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
+
+  // Definimos los enlaces SEO aquí para mantener el código limpio
+  const seoLinks = [
+    { href: "/ofertas-trabajo-futbol", label: "Trabajos de Fútbol" },
+    { href: "/empleo-entrenadores-futbol", label: "Empleo Entrenadores" },
+    { href: "/trabajo-analista-datos-futbol", label: "Analista de Datos" },
+    { href: "/perfiles-jugadores-futbol", label: "Perfiles de Jugadores" },
+  ];
 
   return (
     <Box
       component="footer"
-      sx={{ bgcolor: "primary.main", color: "white", py: 3, mt: 6 }}
+      sx={{ bgcolor: "primary.main", color: "white", py: 4, mt: 6 }}
     >
-      <Stack spacing={2} alignItems="center">
-        <Typography variant="body2" color="inherit">
-          &copy; 2025 FutbolProyect. {t("all_rights_reserved", "Todos los derechos reservados.")}
-        </Typography>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-          <MuiLink component={Link} href="/privacy" color="inherit" underline="hover">
-            {t("privacy_policy", "Política de Privacidad")}
-          </MuiLink>
-          <Typography variant="body2" color="inherit">
-            |
+      <Stack
+        spacing={3}
+        alignItems="center"
+        sx={{ maxWidth: "lg", mx: "auto", px: 2 }}
+      >
+        {/* SECCIÓN 1: Enlaces SEO (Lo nuevo) */}
+        <Box sx={{ width: "100%", textAlign: "center" }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              opacity: 0.8,
+              mb: 1,
+              textTransform: "uppercase",
+              letterSpacing: 1,
+            }}
+          >
+            Explorar Oportunidades
           </Typography>
-          <MuiLink component={Link} href="/terms" color="inherit" underline="hover">
-            {t("terms_of_service", "Términos de Servicio")}
-          </MuiLink>
+          <Stack
+            direction="row"
+            spacing={{ xs: 2, md: 4 }}
+            flexWrap="wrap"
+            justifyContent="center"
+            useFlexGap
+          >
+            {seoLinks.map((link) => (
+              <MuiLink
+                key={link.href}
+                component={Link}
+                href={link.href}
+                color="inherit"
+                underline="hover"
+                variant="body2"
+                sx={{ py: 0.5 }}
+              >
+                {link.label}
+              </MuiLink>
+            ))}
+          </Stack>
+        </Box>
+
+        <Divider sx={{ width: "50%", borderColor: "rgba(255,255,255,0.2)" }} />
+
+        {/* SECCIÓN 2: Legales y Copyright */}
+        <Stack spacing={1} alignItems="center">
+          <Typography variant="body2" color="inherit">
+            &copy; 2025 FutbolProyect.{" "}
+            {t("all_rights_reserved", "Todos los derechos reservados.")}
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            sx={{ flexWrap: "wrap", justifyContent: "center" }}
+          >
+            <MuiLink
+              component={Link}
+              href="/privacy"
+              color="inherit"
+              underline="hover"
+            >
+              {t("privacy_policy", "Política de Privacidad")}
+            </MuiLink>
+            <Typography variant="body2" color="inherit">
+              |
+            </Typography>
+            <MuiLink
+              component={Link}
+              href="/terms"
+              color="inherit"
+              underline="hover"
+            >
+              {t("terms_of_service", "Términos de Servicio")}
+            </MuiLink>
+          </Stack>
         </Stack>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+
+        {/* SECCIÓN 3: Redes Sociales */}
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ flexWrap: "wrap", justifyContent: "center" }}
+        >
           <IconButton
-            component={MuiLink} // Use MuiLink for IconButton component prop
+            component={MuiLink}
             href="https://www.facebook.com/profile.php?id=61583277031848"
             target="_blank"
             rel="noopener noreferrer"
@@ -91,7 +167,9 @@ function Footer() {
             />
           </IconButton>
         </Stack>
-        <Typography variant="body2" color="inherit" sx={{ mt: 2 }}>
+
+        {/* SECCIÓN 4: Developer */}
+        <Typography variant="caption" color="inherit" sx={{ opacity: 0.7 }}>
           <MuiLink
             href="https://paranadev.onrender.com/"
             target="_blank"
