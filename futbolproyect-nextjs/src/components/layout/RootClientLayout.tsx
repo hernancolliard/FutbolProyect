@@ -47,7 +47,7 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
         onShowCreateOfferModal={handleShowCreateOffer}
       />
 
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen" style={{ paddingTop: '80px' }}>{children}</main>
 
       <Footer />
 

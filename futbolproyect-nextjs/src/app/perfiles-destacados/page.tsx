@@ -26,7 +26,7 @@ const fetchAllProfiles = async (filters: {
 
   try {
     // Cambiado de /api/profiles/destacados a /api/profiles/all
-    const res = await fetch(`${apiUrl}/api/profiles/all?${query}`, {
+    const res = await fetch(`${apiUrl}/profiles/all?${query}`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) {

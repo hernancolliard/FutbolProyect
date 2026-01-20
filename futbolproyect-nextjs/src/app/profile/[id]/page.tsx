@@ -11,10 +11,10 @@ const fetchProfile = async (userId: string): Promise<Profile | null> => {
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
   
   console.log(`[fetchProfile] Fetching profile for userId: ${userId}`);
-  console.log(`[fetchProfile] API URL: ${apiUrl}/api/profiles/${userId}`);
+  console.log(`[fetchProfile] API URL: ${apiUrl}/profiles/${userId}`);
 
   try {
-    const res = await fetch(`${apiUrl}/api/profiles/${userId}`, {
+    const res = await fetch(`${apiUrl}/profiles/${userId}`, {
       cache: "no-store",
     });
 
