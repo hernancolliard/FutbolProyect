@@ -321,12 +321,16 @@
   "applications_header": "Postulaciones",
   "view_applicants_button": "Ver Postulantes",
   "featured_offers": "Ofertas Destacadas",
-  "featured_profiles_title": "Publicá tu perfil y conectá con clubes",
+  "all_profiles_title": "Todos los Perfiles",
   "share": "Compartir",
   "linkCopied": "¡Enlace copiado!",
   "linkCopiedInstagram": "¡Enlace copiado! Pégalo en tu historia de Instagram.",
   "are_you_sure_delete_video": "¿Estás seguro de que quieres eliminar este video?",
   "video_deleted_successfully": "Video eliminado con éxito.",
   "video_delete_error": "Error al eliminar el video.",
-  "featured_profiles": "Perfiles Destacados"
+  "all_profiles": "Todos los Perfiles",
+  "all_profiles_seo_title": "Todos los Perfiles - FutbolProyect",
+  "all_profiles_seo_desc": "Explora todos los perfiles de jugadores, entrenadores y analistas en FutbolProyect.",
+  "all_profiles_desc": "Aquí puedes encontrar todos los perfiles de los talentos registrados en nuestra plataforma.",
+  "no_profiles_filters": "No se encontraron perfiles con los filtros seleccionados."
 }

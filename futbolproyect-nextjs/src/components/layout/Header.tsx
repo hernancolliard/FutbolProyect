@@ -92,8 +92,8 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             </Button>
                             <Button color="inherit" component={Link} href="/all-offers">
                               {t("offers")}
-                            </Button>            <Button color="inherit" component={Link} href="/perfiles-destacados">
-              {t("featured_profiles", "Perfiles Destacados")}
+                            </Button>            <Button color="inherit" component={Link} href="/perfiles">
+              {t("all_profiles", "Todos los Perfiles")}
             </Button>
                                         <Button color="inherit" component={Link} href="/suscripcion">
                                           {t("subscriptions")}
@@ -210,10 +210,10 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             </MenuItem>
             <MenuItem
               component={Link}
-              href="/perfiles-destacados"
+              href="/perfiles"
               onClick={handleMobileMenuClose}
             >
-              {t("featured_profiles", "Perfiles Destacados")}
+              {t("all_profiles", "Todos los Perfiles")}
             </MenuItem>
             <MenuItem
               component={Link}

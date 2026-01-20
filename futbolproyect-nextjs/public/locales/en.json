@@ -319,11 +319,16 @@
   "applications_header": "Applications",
   "view_applicants_button": "View Applicants",
   "featured_offers": "Featured Offers",
-  "featured_profiles_title": "Publish your profile and connect with clubs",
+  "all_profiles_title": "All Profiles",
   "share": "Share",
   "linkCopied": "Link copied!",
   "linkCopiedInstagram": "Link copied! Paste it in your Instagram story.",
   "are_you_sure_delete_video": "Are you sure you want to delete this video?",
   "video_deleted_successfully": "Video deleted successfully.",
-  "video_delete_error": "Error deleting video."
+  "video_delete_error": "Error deleting video.",
+  "all_profiles": "All Profiles",
+  "all_profiles_seo_title": "All Profiles - FutbolProyect",
+  "all_profiles_seo_desc": "Explore all player, coach, and analyst profiles on FutbolProyect.",
+  "all_profiles_desc": "Here you can find all the profiles of the talents registered on our platform.",
+  "no_profiles_filters": "No profiles found with the selected filters."
 }
