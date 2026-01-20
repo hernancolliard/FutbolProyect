@@ -51,7 +51,7 @@ export default function PrivacyPolicy() {
       {loading ? (
         <LoadingSpinner text={t('loading_privacy_policy', 'Cargando política de privacidad...')} />
       ) : (
-        <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontFamily: 'inherit', fontSize: 'inherit', color: 'white' }}>
+        <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontFamily: 'inherit', fontSize: 'inherit', color: 'black' }}>
           {privacyContent}
         </Typography>
       )}

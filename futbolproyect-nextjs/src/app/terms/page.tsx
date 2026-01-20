@@ -51,7 +51,7 @@ export default function TermsOfService() {
       {loading ? (
         <LoadingSpinner text={t('loading_content', 'Cargando contenido...')} />
       ) : (
-        <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontFamily: 'inherit', fontSize: 'inherit', color: 'white' }}>
+        <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word', fontFamily: 'inherit', fontSize: 'inherit', color: 'black' }}>
           {termsContent}
         </Typography>
       )}

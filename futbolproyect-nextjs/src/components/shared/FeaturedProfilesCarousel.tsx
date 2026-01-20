@@ -66,7 +66,7 @@ function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
 
   return (
     <div className="featured-profiles-carousel-container">
-      <h2 className="carousel-title">{t('featured_profiles_title')}</h2>
+      <h2 className="carousel-title">{t('all_profiles_title')}</h2>
       <Slider {...settings} className="profiles-carousel">
         {profiles.map((profile) => (
           <div key={profile.id} className="carousel-profile-card-wrapper" style={{ padding: 2 }}>
