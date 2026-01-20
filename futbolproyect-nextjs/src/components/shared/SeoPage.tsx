@@ -27,7 +27,7 @@ const SeoPage = ({ h1, mainText, h2, ctaText, ctaLink, children }: SeoPageProps)
       {/* Metadata will be handled by Next.js metadata API in page.tsx, not here */}
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <section>
-          <Typography variant="h1" component="h1" sx={{ mb: 2, fontSize: '2.5rem', fontWeight: 'bold' }}>
+          <Typography variant="h1" component="h1" sx={{ mb: 2, fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center' }}>
             {h1}
           </Typography>
           {paragraphs.map((paragraph, index) => (
@@ -37,7 +37,7 @@ const SeoPage = ({ h1, mainText, h2, ctaText, ctaLink, children }: SeoPageProps)
           ))}
           
           {h2 && (
-            <Typography variant="h2" component="h2" sx={{ mt: 4, mb: 2, fontSize: '2rem', fontWeight: 'bold' }}>
+            <Typography variant="h2" component="h2" sx={{ mt: 4, mb: 2, fontSize: '2rem', fontWeight: 'bold', textAlign: 'center' }}>
               {h2}
             </Typography>
           )}

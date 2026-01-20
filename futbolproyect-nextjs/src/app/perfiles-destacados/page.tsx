@@ -114,7 +114,7 @@ export default async function FeaturedProfilesPage({
 
   return (
     <Paper sx={{ p: { xs: 2, md: 4 }, m: { xs: 1, md: 2 } }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
         {t("featured_profiles_title")}
       </Typography>
       <Typography paragraph>{t("featured_profiles_desc")}</Typography>

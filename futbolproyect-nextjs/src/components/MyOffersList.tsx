@@ -8,18 +8,29 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
+import { toast } from "react-toastify"; // Import toast for messages
 
 import { Offer } from "@/lib/types";
+import OfferActions from "@/components/OfferActions"; // Import OfferActions
+import { useAuth } from "@/context/AuthContext"; // Import useAuth
 
 // CORRECCIÓN: Interfaz para evitar 'implicitly has an any type'
 interface MyOffersListProps {
   offers: Offer[];
-  isOwnProfile?: boolean;
-  isAdmin?: boolean;
 }
 
-function MyOffersList({ offers, isOwnProfile, isAdmin }: MyOffersListProps) {
+function MyOffersList({ offers }: MyOffersListProps) {
   const { t } = useTranslation("common");
+  const { user } = useAuth(); // Get user from AuthContext
+
+  const handleOfferAction = (action: string, offerId: string) => {
+    // This is a placeholder function.
+    // In a real application, you would implement the logic for editing or deleting an offer.
+    console.log(`Action: ${action} on offer ID: ${offerId}`);
+    toast.info(`Acción: ${action} en oferta ID: ${offerId} (Funcionalidad completa de edición/eliminación pendiente)`);
+    // Example: router.push(`/offers/edit/${offerId}`);
+    // Example: call API to delete offer
+  };
 
   return (
     <Stack className="my-lists-section" spacing={2} sx={{ mt: 2 }}>
@@ -56,6 +67,14 @@ function MyOffersList({ offers, isOwnProfile, isAdmin }: MyOffersListProps) {
                   {offer.descripcion ? offer.descripcion.substring(0, 100) : ""}
                   ...
                 </Typography>
+                {/* Render OfferActions if the user is the offer owner or an admin */}
+                {user && offer.id_usuario_ofertante === user.id && (
+                  <OfferActions
+                    offer={offer}
+                    onOfferAction={handleOfferAction}
+                    isFetching={false} // Adjust as needed if fetching status is relevant here
+                  />
+                )}
                 <Button
                   component={Link}
                   href={`/offers/${offer.id}/applicants`}

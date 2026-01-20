@@ -47,14 +47,22 @@ const Mission = () => {
       <CardContent
         sx={{
           flexGrow: 1, // El texto ocupa el espacio restante
-          textAlign: 'center', // Centrado en móvil, derecha en PC
+          textAlign: 'center', // Centrado en todas las pantallas
           color: 'text.primary',
         }}
       >
-        <Typography variant="h4" component="h2" gutterBottom>
+        <Typography variant="h4" component="h2" gutterBottom
+          sx={{
+            fontSize: { xs: '1.8rem', md: '2.5rem' }, // Ajustar tamaño de título en PC
+          }}
+        >
           {t('mission_title')}
         </Typography>
-        <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
+        <Typography variant="body1"
+          sx={{
+            fontSize: { xs: '1rem', md: '1.2rem' }, // Ajustar tamaño de texto en PC
+          }}
+        >
           {t('mission_text')}
         </Typography>
       </CardContent>
