@@ -35,7 +35,7 @@ const OfertasTrabajoFutbolPage = async () => {
 
   const pageContent = {
     h1: translations["ofertas_trabajo_futbol_h1"],
-    mainText: translations["ofertas_trabajo_futbol_main_text"],
+    mainText: translations["ofertas_trabajo_futbol_main_text"] || "",
     h2: translations["ofertas_trabajo_futbol_h2"],
     ctaText: translations["ofertas_trabajo_futbol_cta"],
     ctaLink: "/register",

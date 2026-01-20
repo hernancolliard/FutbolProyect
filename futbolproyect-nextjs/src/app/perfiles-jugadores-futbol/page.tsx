@@ -35,7 +35,7 @@ const PerfilesJugadoresFutbolPage = async () => {
 
   const pageContent = {
     h1: translations["perfiles_jugadores_futbol_h1"],
-    mainText: translations["perfiles_jugadores_futbol_main_text"],
+    mainText: translations["perfiles_jugadores_futbol_main_text"] || "",
     h2: translations["perfiles_jugadores_futbol_h2"],
     ctaText: translations["perfiles_jugadores_futbol_cta"],
     ctaLink: "/register",

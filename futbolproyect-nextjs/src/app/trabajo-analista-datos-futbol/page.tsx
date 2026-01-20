@@ -25,22 +25,32 @@ async function getAnalystOffers(): Promise<Offer[]> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  // SIN LLAVES {}
   const translations = await getTranslation("es");
   return {
-    title: translations["trabajo_analista_datos_futbol_seo_title"],
-    description: translations["trabajo_analista_datos_futbol_seo_desc"],
+    title:
+      translations["trabajo_analista_datos_futbol_seo_title"] ||
+      "Trabajo para analista de datos | FutbolProyect",
+    description:
+      translations["trabajo_analista_datos_futbol_seo_desc"] ||
+      "Oportunidades para analistas de datos en fútbol.",
   };
 }
 
 const TrabajoAnalistaDatosFutbolPage = async () => {
+  // SIN LLAVES {}
   const translations = await getTranslation("es");
   const offers = await getAnalystOffers();
 
   const pageContent = {
-    h1: translations["trabajo_analista_datos_futbol_h1"],
-    mainText: translations["trabajo_analista_datos_futbol_main_text"],
-    h2: translations["trabajo_analista_datos_futbol_h2"],
-    ctaText: translations["trabajo_analista_datos_futbol_cta"],
+    h1:
+      translations["trabajo_analista_datos_futbol_h1"] ||
+      "Trabajo para analista de datos en el fútbol",
+    mainText: translations["trabajo_analista_datos_futbol_main_text"] || "",
+    h2:
+      translations["trabajo_analista_datos_futbol_h2"] ||
+      "Clubes que buscan analistas",
+    ctaText: translations["trabajo_analista_datos_futbol_cta"] || "Registrate",
     ctaLink: "/register",
   };
 

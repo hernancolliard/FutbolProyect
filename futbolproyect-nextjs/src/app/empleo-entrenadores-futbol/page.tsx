@@ -25,34 +25,24 @@ async function getCoachOffers(): Promise<Offer[]> {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  // CORRECCIÓN: Obtenemos el objeto directo sin desestructurar
   const translations = await getTranslation("es");
-
   return {
-    title:
-      translations["empleo_entrenadores_futbol_seo_title"] ||
-      "Empleo para entrenadores de fútbol | Oportunidades en clubes",
-    description:
-      translations["empleo_entrenadores_futbol_seo_desc"] ||
-      "Encontrá empleo para entrenadores de fútbol en clubes y academias.",
+    title: translations["empleo_entrenadores_futbol_seo_title"],
+    description: translations["empleo_entrenadores_futbol_seo_desc"],
   };
 }
 
 const EmpleoEntrenadoresFutbolPage = async () => {
-  // CORRECCIÓN: Obtenemos el objeto directo
   const translations = await getTranslation("es");
   const offers = await getCoachOffers();
 
-  // Ahora 'translations' tiene todos los datos, por lo que se mostrará el texto largo de common.json
   const pageContent = {
     h1:
       translations["empleo_entrenadores_futbol_h1"] ||
-      "Empleo para entrenadores de fútbol",
+      "Empleo para entrenadores",
     mainText: translations["empleo_entrenadores_futbol_main_text"] || "",
-    h2:
-      translations["empleo_entrenadores_futbol_h2"] ||
-      "Trabajo para entrenadores de fútbol",
-    ctaText: translations["empleo_entrenadores_futbol_cta"] || "Registrate",
+    h2: translations["empleo_entrenadores_futbol_h2"],
+    ctaText: translations["empleo_entrenadores_futbol_cta"],
     ctaLink: "/register",
   };
 
