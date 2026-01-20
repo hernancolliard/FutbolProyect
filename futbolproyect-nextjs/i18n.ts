@@ -12,16 +12,18 @@ i18n
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },
+    ns: ['common'],
+    defaultNS: 'common',
     backend: {
-      loadPath: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/locales/{{lng}}.json`, // Path to your translation files in public folder
+      loadPath: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/locales/{{lng}}/common.json`, // Path to your translation files in public folder
     },
   }, (err, t) => {
     if (err) {
       console.error('Error al inicializar i18next:', err);
     } else {
       console.log('i18next inicializado. Idioma actual:', i18n.language);
-      console.log('Recursos cargados para "es":', i18n.hasResourceBundle('es', 'translation'));
-      console.log('Recursos cargados para "en":', i18n.hasResourceBundle('en', 'translation'));
+      console.log('Recursos cargados para "es":', i18n.hasResourceBundle('es', 'common'));
+      console.log('Recursos cargados para "en":', i18n.hasResourceBundle('en', 'common'));
     }
   });
 
