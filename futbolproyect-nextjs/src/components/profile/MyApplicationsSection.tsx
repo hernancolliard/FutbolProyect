@@ -24,8 +24,7 @@ const fetchUserApplications = async (
 ): Promise<Application[]> => {
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-  const res = await fetch(`${apiUrl}/api/applications/user/${userId}`);
-  if (!res.ok) {
+      const res = await fetch(`${apiUrl}/applications/user/${userId}`);  if (!res.ok) {
     throw new Error("Failed to fetch applications");
   }
   return res.json();

@@ -178,3 +178,9 @@ WHERE email = 'futbolproyect.arg@gmail.com';
 ALTER TABLE user_videos
 ADD COLUMN title_es VARCHAR(255),
 ADD COLUMN title_en VARCHAR(255);
+select*from usuarios u ;
+select*from perfiles_usuario pu ;
+select*from ofertas_laborales;
+UPDATE ofertas_laborales
+SET featured_until = '2026-03-30'
+WHERE is_featured = TRUE;
