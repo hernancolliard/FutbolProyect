@@ -47,14 +47,14 @@ const About = () => {
       <CardContent
         sx={{
           flexGrow: 1, // El texto ocupa el espacio restante
-          textAlign: { xs: 'center', md: 'left' }, // Centrado en móvil, izquierda en PC
+          textAlign: 'center', // Centrado en móvil, izquierda en PC
           color: 'white', // Texto blanco
         }}
       >
         <Typography variant="h4" component="h2" gutterBottom>
           {t('about_us_title')}
         </Typography>
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{ fontSize: '1.1rem' }}>
           {t('about_us_text')}
         </Typography>
       </CardContent>

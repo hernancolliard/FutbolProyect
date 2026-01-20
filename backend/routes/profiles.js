@@ -52,7 +52,7 @@ router.get("/featured", async (req, res) => {
   
     try {
       let queryParams = {}; // Usar un objeto para los parámetros nombrados
-      let whereClauses = ["u.tipo_usuario = 'postulante'"];
+      let whereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
   
       if (nacionalidad) {
         queryParams.nacionalidad = nacionalidad;

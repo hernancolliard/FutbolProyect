@@ -120,7 +120,7 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
   return (
     <>
       {/* Los botones de editar/eliminar siguen usando la prop para acciones del padre */}
-      {(isOwner || isAdmin) && onOfferAction && (
+      {isAdmin && onOfferAction && (
         <>
           <Button size="small" onClick={() => onOfferAction('edit', offer.id)} disabled={isFetching}>
             {t('edit', 'Editar')}

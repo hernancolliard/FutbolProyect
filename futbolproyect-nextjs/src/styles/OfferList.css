@@ -17,3 +17,16 @@
   outline: none;
   border: none;
 }
+
+/* Grid layout for the /all-offers page */
+.offers-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .offers-list {
+    grid-template-columns: 1fr;
+  }
+}

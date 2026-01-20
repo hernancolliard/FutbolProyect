@@ -219,7 +219,7 @@ const OfferList = ({
       <div className="offer-list-container">
         {isHomePage && featuredOffers.length > 0 && (
           <>
-            <Typography variant="h5" sx={{ mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
               {t("featured_offers")}
             </Typography>
             <Slider {...settings}>
@@ -244,7 +244,7 @@ const OfferList = ({
         {/* Nueva sección para ofertas normales en la página de inicio */}
         {isHomePage && normalOffers.length > 0 && (
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>
+            <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
               {t("available_offers", "Ofertas Disponibles")}
             </Typography>
             <Slider {...settings}>
