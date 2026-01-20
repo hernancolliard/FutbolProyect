@@ -30,7 +30,8 @@ export async function getTranslation(locale?: string) {
     );
   }
 
-  const filePath = path.join(localesPath, `${lang}.json`);
+  const filePath = path.join(localesPath, lang, "common.json");
+
   // -----------------------------
 
   try {

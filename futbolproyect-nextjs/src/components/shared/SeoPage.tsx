@@ -31,13 +31,19 @@ const SeoPage = ({
             fontSize: "2.5rem",
             fontWeight: "bold",
             textAlign: "center",
+            color: "text.primary",
           }}
         >
           {h1}
         </Typography>
 
         {paragraphs.map((paragraph, index) => (
-          <Typography variant="body1" paragraph key={index}>
+          <Typography
+            variant="body1"
+            paragraph
+            key={index}
+            sx={{ color: "text.primary" }}
+          >
             {paragraph}
           </Typography>
         ))}
@@ -52,6 +58,7 @@ const SeoPage = ({
               fontSize: "2rem",
               fontWeight: "bold",
               textAlign: "center",
+              color: "text.primary",
             }}
           >
             {h2}
