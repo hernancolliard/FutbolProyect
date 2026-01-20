@@ -1,22 +1,36 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/apiClient"; // Corrected path
-import OfferList from "@/components/shared/OfferList"; // Corrected path
-import Pagination from "@/components/Pagination"; // Corrected path
+import apiClient from "@/lib/apiClient";
+import OfferList from "@/components/shared/OfferList";
+import Pagination from "@/components/Pagination";
 import { useTranslation } from "react-i18next";
-import LoadingSpinner from "@/components/LoadingSpinner"; // Corrected path
-import useIsMobile from "@/hooks/useIsMobile"; // Corrected path
-import { Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Button, Grid, Collapse, SelectChangeEvent } from "@mui/material";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import useIsMobile from "@/hooks/useIsMobile";
+import {
+  Box,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+  Grid,
+  Collapse,
+  SelectChangeEvent,
+} from "@mui/material";
 
 // --- Fetching Logic for React Query ---
-const fetchOffers = async ({ queryKey }: QueryFunctionContext<[string, object, number]>) => {
+const fetchOffers = async ({
+  queryKey,
+}: QueryFunctionContext<[string, object, number]>) => {
   const [, filters, page] = queryKey;
   const params = new URLSearchParams({
     page: page.toString(),
-    limit: '10',
-    ...(filters as Record<string, string>), // Cast filters to a Record<string, string>
+    limit: "10",
+    ...(filters as Record<string, string>),
   });
 
   // Clean empty params for a cleaner URL
@@ -27,13 +41,13 @@ const fetchOffers = async ({ queryKey }: QueryFunctionContext<[string, object, n
   }
 
   const { data } = await apiClient.get(`/offers?${params.toString()}`);
-  console.log("All Offers API response:", data); // Add this line
+  console.log("All Offers API response:", data);
   return data;
 };
 
 // --- Main Component for All Offers Page ---
 export default function AllOffersClient() {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
   const isMobile = useIsMobile();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -85,8 +99,14 @@ export default function AllOffersClient() {
   });
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'white' }}>
+    <Box sx={{ p: 3, maxWidth: "1200px", mx: "auto" }}>
+      {/* CAMBIO 1: Color del título a text.primary y negrita */}
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{ color: "text.primary", fontWeight: "bold", mb: 4 }}
+      >
         {t("all_offers_title", "Todas las Ofertas de Empleo")}
       </Typography>
 
@@ -96,27 +116,22 @@ export default function AllOffersClient() {
           onClick={toggleMobileFilters}
           sx={{ mb: 2 }}
         >
-          {showMobileFilters ? t("hide_filters", "Ocultar Filtros") : t("show_filters", "Mostrar Filtros")}
+          {showMobileFilters
+            ? t("hide_filters", "Ocultar Filtros")
+            : t("show_filters", "Mostrar Filtros")}
         </Button>
       )}
 
       <Collapse in={!isMobile || showMobileFilters}>
+        {/* CAMBIO 2: Eliminados los estilos 'white' de todos los inputs */}
         <Grid container spacing={2} sx={{ mb: 4 }}>
-           <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
               name="puesto"
               label={t("filter_by_position", "Filtrar por puesto")}
               value={filters.puesto}
               onChange={handleTextFieldChange}
-              sx={{
-                '& .MuiInputBase-root': { color: 'white' },
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '& .MuiInputLabel-root': { color: 'white' },
-                '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -126,36 +141,29 @@ export default function AllOffersClient() {
               label={t("filter_by_location", "Filtrar por ubicación")}
               value={filters.ubicacion}
               onChange={handleTextFieldChange}
-              sx={{
-                '& .MuiInputBase-root': { color: 'white' },
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '& .MuiInputLabel-root': { color: 'white' },
-                '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
-              <InputLabel sx={{ color: 'white' }}>{t("filter_by_level", "Nivel")}</InputLabel>
+              <InputLabel>{t("filter_by_level", "Nivel")}</InputLabel>
               <Select
                 name="nivel"
                 value={filters.nivel}
                 onChange={handleSelectChange}
                 label={t("filter_by_level", "Nivel")}
-                sx={{
-                  color: 'white',
-                  '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '.MuiSvgIcon-root': { color: 'white' },
-                }}
               >
-                <MenuItem value="">{t("select_level", "Seleccionar Nivel")}</MenuItem>
-                <MenuItem value="Profesional">{t("level_professional", "Profesional")}</MenuItem>
-                <MenuItem value="Semi-Profesional">{t("level_semi_professional", "Semi-Profesional")}</MenuItem>
-                <MenuItem value="Amateur">{t("level_amateur", "Amateur")}</MenuItem>
+                <MenuItem value="">
+                  {t("select_level", "Seleccionar Nivel")}
+                </MenuItem>
+                <MenuItem value="Profesional">
+                  {t("level_professional", "Profesional")}
+                </MenuItem>
+                <MenuItem value="Semi-Profesional">
+                  {t("level_semi_professional", "Semi-Profesional")}
+                </MenuItem>
+                <MenuItem value="Amateur">
+                  {t("level_amateur", "Amateur")}
+                </MenuItem>
                 <MenuItem value="Otro">{t("level_other", "Otro")}</MenuItem>
               </Select>
             </FormControl>
@@ -169,14 +177,6 @@ export default function AllOffersClient() {
               value={filters.salarioMin}
               onChange={handleTextFieldChange}
               InputLabelProps={{ shrink: true }}
-              sx={{
-                '& .MuiInputBase-root': { color: 'white' },
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '& .MuiInputLabel-root': { color: 'white' },
-                '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
@@ -188,34 +188,23 @@ export default function AllOffersClient() {
               value={filters.salarioMax}
               onChange={handleTextFieldChange}
               InputLabelProps={{ shrink: true }}
-              sx={{
-                '& .MuiInputBase-root': { color: 'white' },
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                '& .MuiInputLabel-root': { color: 'white' },
-                '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
-              <InputLabel sx={{ color: 'white' }}>{t("sort_by", "Ordenar por")}</InputLabel>
+              <InputLabel>{t("sort_by", "Ordenar por")}</InputLabel>
               <Select
                 name="sort"
                 value={filters.sort}
                 onChange={handleSelectChange}
                 label={t("sort_by", "Ordenar por")}
-                sx={{
-                  color: 'white',
-                  '.MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  '.MuiSvgIcon-root': { color: 'white' },
-                }}
               >
-                <MenuItem value="desc">{t("sort_by_recent", "Más recientes")}</MenuItem>
-                <MenuItem value="asc">{t("sort_by_oldest", "Más antiguos")}</MenuItem>
+                <MenuItem value="desc">
+                  {t("sort_by_recent", "Más recientes")}
+                </MenuItem>
+                <MenuItem value="asc">
+                  {t("sort_by_oldest", "Más antiguos")}
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -226,7 +215,8 @@ export default function AllOffersClient() {
         <LoadingSpinner text={t("loading_offers", "Cargando ofertas...")} />
       ) : isError ? (
         <Typography color="error" sx={{ mt: 2 }}>
-          {t("error_loading_offers", "Error al cargar ofertas")}: {error.message}
+          {t("error_loading_offers", "Error al cargar ofertas")}:{" "}
+          {error.message}
         </Typography>
       ) : (
         <>
