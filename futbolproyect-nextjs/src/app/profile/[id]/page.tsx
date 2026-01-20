@@ -9,19 +9,28 @@ export const dynamic = "force-dynamic";
 const fetchProfile = async (userId: string): Promise<Profile | null> => {
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  
+  console.log(`[fetchProfile] Fetching profile for userId: ${userId}`);
+  console.log(`[fetchProfile] API URL: ${apiUrl}/api/profiles/${userId}`);
+
   try {
     const res = await fetch(`${apiUrl}/api/profiles/${userId}`, {
       cache: "no-store",
     });
+
+    console.log(`[fetchProfile] Response status for ${userId}: ${res.status}`);
+
     if (!res.ok) {
       console.error(
-        `Failed to fetch profile for user ${userId}: ${res.statusText}`,
+        `[fetchProfile] Failed to fetch profile for user ${userId}: ${res.statusText}`,
       );
       return null;
     }
-    return res.json();
+    const data = await res.json();
+    console.log(`[fetchProfile] Data for user ${userId}:`, data);
+    return data;
   } catch (error) {
-    console.error(`Network error fetching profile for user ${userId}:`, error);
+    console.error(`[fetchProfile] Network error fetching profile for user ${userId}:`, error);
     return null;
   }
 };

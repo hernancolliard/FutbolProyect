@@ -21,7 +21,7 @@ async function getOffers(): Promise<Offer[]> {
     const res = await fetch(`${apiBaseUrl}/offers`, { cache: "no-store" });
     if (!res.ok) return [];
     const data = await res.json();
-    return data.offers || [];
+    return [...(data.featuredOffers || []), ...(data.offers || [])];
   } catch (error) {
     console.error("Error fetching offers:", error);
     return [];

@@ -85,6 +85,8 @@ async function ProfilesList({
   const profiles = await fetchAllProfiles({ nacionalidad, puesto });
   const { t } = await getTranslation(lang);
 
+  console.log("Profiles in ProfilesList:", profiles); // DEBUG LOG
+
   if (profiles.length === 0) {
     return <Typography>{t("no_featured_profiles_filters")}</Typography>;
   }
