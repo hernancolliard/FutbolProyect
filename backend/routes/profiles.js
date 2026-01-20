@@ -45,14 +45,61 @@ router.get("/", async (req, res) => {
   }
 });
 
+// --- RUTA PÚBLICA: OBTENER TODOS LOS PERFILES CON FILTROS ---
+router.get("/all", async (req, res) => {
+  const { nacionalidad, puesto } = req.query;
 
-// --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS (AHORA TODOS LOS PERFILES CON FILTROS) ---
+  try {
+    let queryParams = {};
+    let whereClauses = ["u.tipo_usuario = 'postulante'"];
+
+    if (nacionalidad) {
+      queryParams.nacionalidad = nacionalidad;
+      whereClauses.push(`p.nacionalidad = @nacionalidad`);
+    }
+    if (puesto) {
+      queryParams.puesto = puesto;
+      whereClauses.push(`p.posicion_principal = @puesto`);
+    }
+
+    console.log("All Profiles Query - whereClauses:", whereClauses);
+    console.log("All Profiles Query - queryParams:", queryParams);
+
+    const query = `
+      SELECT
+          u.id, u.nombre,
+          u.apellido,
+          p.foto_perfil_url,
+          p.posicion_principal,
+          p.nacionalidad,
+          p.average_rating,
+          p.total_ratings
+      FROM
+          usuarios u
+      JOIN
+          perfiles_usuario p ON u.id = p.id_usuario
+      WHERE ${whereClauses.join(" AND ")}
+      ORDER BY
+          u.id DESC;
+    `;
+
+    const result = await db.query(query, queryParams);
+    console.log("Datos de todos los perfiles obtenidos del backend:", result.rows);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener todos los perfiles:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+
+// --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
 router.get("/featured", async (req, res) => {
       const { nacionalidad, puesto } = req.query;
   
     try {
       let queryParams = {}; // Usar un objeto para los parámetros nombrados
-      let whereClauses = ["u.tipo_usuario = 'postulante'"]; // Eliminar s.estado = 'activa'
+      let whereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
   
       if (nacionalidad) {
         queryParams.nacionalidad = nacionalidad;
@@ -63,32 +110,35 @@ router.get("/featured", async (req, res) => {
         whereClauses.push(`p.posicion_principal = @puesto`);
       }
   
-      console.log("Featured Profiles (All) Query - whereClauses:", whereClauses);
-      console.log("Featured Profiles (All) Query - queryParams:", queryParams);
+      console.log("Featured Profiles Query - whereClauses:", whereClauses);
+      console.log("Featured Profiles Query - queryParams:", queryParams);
   
       const query = `
         SELECT
-            u.id, u.nombre,
-            u.apellido,
-            p.foto_perfil_url,
-            p.posicion_principal,
-            p.nacionalidad,
-            p.average_rating,
-            p.total_ratings
-        FROM
-            usuarios u
-        JOIN
-            perfiles_usuario p ON u.id = p.id_usuario
-        WHERE ${whereClauses.join(" AND ")}
-        ORDER BY
-            u.id DESC; 
-      `;
+            u.id,          u.nombre,
+          u.apellido,
+          p.foto_perfil_url,
+          p.posicion_principal,
+          p.nacionalidad,
+          p.average_rating, -- Añadir calificación promedio
+          p.total_ratings -- Añadir conteo total de calificaciones
+      FROM
+          usuarios u
+      JOIN
+          perfiles_usuario p ON u.id = p.id_usuario
+      LEFT JOIN
+          suscripciones s ON u.id = s.id_usuario
+      WHERE ${whereClauses.join(" AND ")}
+      ORDER BY
+          p.average_rating DESC NULLS LAST, -- Ordenar por calificación promedio (los nulos al final)
+          s.fecha_fin DESC; -- Luego por fecha de fin de suscripción
+    `;
 
     const result = await db.query(query, queryParams);
-    console.log("Datos de perfiles (todos) obtenidos del backend:", result.rows); 
+    console.log("Datos de perfiles destacados obtenidos del backend:", result.rows); // Añadir este log
     res.json(result.rows);
   } catch (error) {
-    console.error("Error al obtener los perfiles (todos):", error);
+    console.error("Error al obtener los perfiles destacados:", error);
     res.status(500).json({ message: "Error del servidor." });
   }
 });

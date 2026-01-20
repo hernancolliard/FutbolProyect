@@ -222,50 +222,49 @@ const OfferList = ({
             <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
               {t("featured_offers")}
             </Typography>
-            <Slider {...settings}>
-              {featuredOffers.map((offer) => (
-                <div key={offer.id}>
-                  <OfferCard
-                    offer={offer}
-                    isHomePage={isHomePage}
-                    isMobile={isMobile}
-                    showApplyButton={showApplyButton}
-                    onOfferAction={onOfferAction}
-                    t={t}
-                    i18n={i18n}
-                    handleViewOffer={handleViewOffer}
-                  />
-                </div>
-              ))}
-            </Slider>
-          </>
-        )}
-
-        {/* Nueva sección para ofertas normales en la página de inicio */}
-        {isHomePage && normalOffers.length > 0 && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
-              {t("available_offers", "Ofertas Disponibles")}
-            </Typography>
-            <Slider {...settings}>
-              {normalOffers.map((offer) => (
-                <div key={offer.id}>
-                  <OfferCard
-                    offer={offer}
-                    isHomePage={isHomePage} // Mantener como isHomePage true para este render
-                    isMobile={isMobile}
-                    showApplyButton={showApplyButton}
-                    onOfferAction={onOfferAction}
-                    t={t}
-                    i18n={i18n}
-                    handleViewOffer={handleViewOffer}
-                  />
-                </div>
-              ))}
-            </Slider>
-          </Box>
-        )}
-
+                      <Slider {...settings}>
+                        {featuredOffers.map((offer) => (
+                          <div key={offer.id}>
+                            <OfferCard
+                              offer={offer}
+                              isHomePage={isHomePage}
+                              isMobile={isMobile}
+                              showApplyButton={false} // Override to false for homepage
+                              onOfferAction={onOfferAction}
+                              t={t}
+                              i18n={i18n}
+                              handleViewOffer={handleViewOffer}
+                            />
+                          </div>
+                        ))}
+                      </Slider>
+                    </>
+                    )}
+            
+                    {/* Nueva sección para ofertas normales en la página de inicio */}
+                    {isHomePage && normalOffers.length > 0 && (
+                      <Box sx={{ mt: 4 }}>
+                        <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
+                          {t("available_offers", "Ofertas Disponibles")}
+                        </Typography>
+                        <Slider {...settings}>
+                          {normalOffers.map((offer) => (
+                            <div key={offer.id}>
+                              <OfferCard
+                                offer={offer}
+                                isHomePage={isHomePage} // Mantener como isHomePage true para este render
+                                isMobile={isMobile}
+                                showApplyButton={false} // Override to false for homepage
+                                onOfferAction={onOfferAction}
+                                t={t}
+                                i18n={i18n}
+                                handleViewOffer={handleViewOffer}
+                              />
+                            </div>
+                          ))}
+                        </Slider>
+                      </Box>
+                    )}
         {!isHomePage && (
           <div className="offers-list">
             {offersToDisplay.map((offer) => ( // Aquí mapeamos todas las ofertas si no es HomePage

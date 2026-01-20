@@ -15,7 +15,7 @@ const getBaseUrl = () => {
   const port = process.env.PORT || 5000;
   return `http://localhost:${port}`;
 };
-const fetchFeaturedProfiles = async (filters: {
+const fetchAllProfiles = async (filters: {
   nacionalidad?: string;
   puesto?: string;
 }): Promise<Profile[]> => {
@@ -25,7 +25,8 @@ const fetchFeaturedProfiles = async (filters: {
   ).toString();
 
   try {
-    const res = await fetch(`${apiUrl}/api/profiles/destacados?${query}`, {
+    // Cambiado de /api/profiles/destacados a /api/profiles/all
+    const res = await fetch(`${apiUrl}/api/profiles/all?${query}`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) {
@@ -81,7 +82,7 @@ async function ProfilesList({
   puesto?: string;
   lang?: string;
 }) {
-  const profiles = await fetchFeaturedProfiles({ nacionalidad, puesto });
+  const profiles = await fetchAllProfiles({ nacionalidad, puesto });
   const { t } = await getTranslation(lang);
 
   if (profiles.length === 0) {
