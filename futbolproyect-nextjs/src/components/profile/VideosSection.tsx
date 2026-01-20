@@ -26,7 +26,7 @@ const fetchUserVideos = async (userId: string | number): Promise<Video[]> => {
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
   try {
-    const res = await fetch(`${apiUrl}/api/profiles/${userId}/videos`);
+    const res = await fetch(`${apiUrl}/profiles/${userId}/videos`);
     if (!res.ok) {
       console.error(
         `Failed to fetch videos for user ${userId}: ${res.statusText}`,

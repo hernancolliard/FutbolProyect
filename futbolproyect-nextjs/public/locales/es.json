@@ -332,5 +332,15 @@
   "all_profiles_seo_title": "Todos los Perfiles - FutbolProyect",
   "all_profiles_seo_desc": "Explora todos los perfiles de jugadores, entrenadores y analistas en FutbolProyect.",
   "all_profiles_desc": "Aquí puedes encontrar todos los perfiles de los talentos registrados en nuestra plataforma.",
-  "no_profiles_filters": "No se encontraron perfiles con los filtros seleccionados."
+  "no_profiles_filters": "No se encontraron perfiles con los filtros seleccionados.",
+  "loading_profiles": "Cargando perfiles...",
+  "rate_profile": "Calificar Perfil",
+  "ratings": "calificaciones",
+  "copy_link_for_instagram": "Copiar enlace para Instagram",
+  "close": "Cerrar",
+  "filter_by_nationality": "Filtrar por nacionalidad",
+  "all_nationalities": "Todas",
+  "all_positions": "Todos",
+  "clear_filters": "Limpiar",
+  "view_profile": "Ver Perfil"
 }

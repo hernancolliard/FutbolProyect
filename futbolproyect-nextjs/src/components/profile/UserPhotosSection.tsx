@@ -34,7 +34,7 @@ const fetchUserPhotos = async (
 ): Promise<UserPhoto[]> => {
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-  const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`);
+  const res = await fetch(`${apiUrl}/profiles/${userId}/photos`);
   if (!res.ok) {
     throw new Error("Failed to fetch photos");
   }
@@ -56,7 +56,7 @@ const uploadPhoto = async ({
 
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-  const res = await fetch(`${apiUrl}/api/profiles/${userId}/photos`, {
+  const res = await fetch(`${apiUrl}/profiles/${userId}/photos`, {
     method: "POST",
     body: formData,
   });
@@ -77,9 +77,8 @@ const deletePhoto = async ({
 }) => {
   const apiUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-  const res = await fetch(
-    `${apiUrl}/api/profiles/${userId}/photos/${photoId}`,
-    {
+      const res = await fetch(
+        `${apiUrl}/profiles/${userId}/photos/${photoId}`,    {
       method: "DELETE",
     },
   );
