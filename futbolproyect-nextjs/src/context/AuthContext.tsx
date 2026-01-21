@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import apiClient from "@/lib/apiClient";
 
 const AuthContext = createContext(null);
@@ -48,6 +49,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      const result = await signIn("google");
+      if (result?.ok) {
+        // Después de un inicio de sesión exitoso con Google,
+        // NextAuth se encarga de la sesión.
+        // Forzamos un refetch del usuario para sincronizar el estado.
+        await fetchUser();
+      }
+      return result;
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await apiClient.post("/users/logout");
@@ -63,6 +80,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     logout,
+    loginWithGoogle,
     isAuthenticated: !!user,
     loading,
   };
