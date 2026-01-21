@@ -23,7 +23,7 @@ interface CreateOfferProps {
 }
 
 const fetchOffer = async (offerId: string) => {
-  const { data } = await apiClient.get(`/api/offers/${offerId}`);
+  const { data } = await apiClient.get(`/offers/${offerId}`);
   return data;
 };
 
@@ -142,10 +142,10 @@ function CreateOffer({ onOfferCreated, onClose }: CreateOfferProps) {
 
     try {
       if (isEditMode) {
-        await apiClient.put(`/api/offers/${offerId}`, data, config);
+        await apiClient.put(`/offers/${offerId}`, data, config);
         setSuccess(t("offer_updated_success", "Oferta actualizada con éxito."));
       } else {
-        await apiClient.post("/api/offers", data, config);
+        await apiClient.post("/offers", data, config);
         setSuccess(t("offer_published_success", "Oferta publicada con éxito."));
       }
 
