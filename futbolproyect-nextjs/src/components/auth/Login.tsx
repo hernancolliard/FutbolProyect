@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
-import { useAuth } from "@/context/AuthContext"; // Asegúrate de que la ruta sea correcta
+import GoogleIcon from "@mui/icons-material/Google";
+import { useAuth } from "@/context/AuthContext";
 import {
   Box,
   Card,
@@ -23,8 +23,6 @@ interface LoginProps {
 
 function Login({ onClose }: LoginProps) {
   const { t } = useTranslation("common");
-  // Extraemos las funciones del contexto.
-  // Nota: Si 'loginWithGoogle' no existe aún en tu contexto, mira el paso 2 más abajo.
   const { login, loginWithGoogle } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -41,12 +39,10 @@ function Login({ onClose }: LoginProps) {
     e.preventDefault();
     setError("");
     try {
-      // CORRECCIÓN: Delegamos la petición al contexto pasando credenciales
       await login(formData.email, formData.password);
       onClose(); // Cerramos el modal solo si hubo éxito
     } catch (err: any) {
       console.error(err);
-      // Intentamos mostrar el mensaje que viene del backend o uno genérico
       setError(
         err.response?.data?.message ||
           t("login_error", "Error al iniciar sesión."),
@@ -54,15 +50,13 @@ function Login({ onClose }: LoginProps) {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleLogin = async () => {
     try {
-      // CORRECCIÓN: Delegamos también el login de Google al contexto
-      if (loginWithGoogle) {
-        await loginWithGoogle(credentialResponse.credential);
+      const result = await loginWithGoogle();
+      // En el flujo de next-auth con redirección, es posible que el onClose no se ejecute
+      // si la página se recarga por completo. Pero lo dejamos por si acaso.
+      if (result?.ok) {
         onClose();
-      } else {
-        console.error("loginWithGoogle no está implementado en AuthContext");
-        setError("Error de configuración interno.");
       }
     } catch (err: any) {
       setError(
@@ -70,15 +64,6 @@ function Login({ onClose }: LoginProps) {
           t("login_with_google_error", "Error al iniciar sesión con Google."),
       );
     }
-  };
-
-  const handleGoogleError = () => {
-    setError(
-      t(
-        "login_with_google_error_retry",
-        "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo.",
-      ),
-    );
   };
 
   return (
@@ -147,10 +132,13 @@ function Login({ onClose }: LoginProps) {
             {t("or_login_with", "O inicia sesión con:")}
           </Typography>
           <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-            />
+            <Button
+              variant="outlined"
+              startIcon={<GoogleIcon />}
+              onClick={handleGoogleLogin}
+            >
+              Google
+            </Button>
           </Box>
         </Box>
       </CardContent>
@@ -159,3 +147,4 @@ function Login({ onClose }: LoginProps) {
 }
 
 export default Login;
+
