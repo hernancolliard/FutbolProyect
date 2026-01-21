@@ -253,8 +253,11 @@ router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
   try {
+    console.log("Forgot password request received for email:", email);
     const userResult = await db.query("SELECT id, email, nombre FROM usuarios WHERE email = @email", { email });
     const user = userResult.rows[0];
+
+    console.log("User search result:", user);
 
     if (!user) {
       // Devolver un 200 OK incluso si el usuario no existe para evitar enumeración de usuarios
@@ -266,15 +269,23 @@ router.post("/forgot-password", async (req, res) => {
     const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
     const resetTokenExpiry = Date.now() + 3600000; // 1 hora en milisegundos
 
+    console.log("Generated reset token hash:", resetTokenHash);
+    console.log("Reset token expiry:", new Date(resetTokenExpiry));
+
     // Guardar el token hasheado y su expiración en la base de datos
-    await db.query(
+    console.log("Attempting to update user with reset token in DB...");
+    const updateResult = await db.query(
       "UPDATE usuarios SET reset_password_token = @resetTokenHash, reset_password_expires = @resetTokenExpiry WHERE id = @id",
       { resetTokenHash, resetTokenExpiry, id: user.id }
     );
+    console.log("DB update result:", updateResult);
 
     // Enviar correo electrónico con el enlace de restablecimiento
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    console.log("Reset link generated:", resetLink);
+    console.log("Attempting to send password reset email...");
     await sendPasswordResetEmail(user.email, user.nombre, resetLink);
+    console.log("Password reset email sent successfully.");
 
     res.status(200).json({ message: "Si tu correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña." });
   } catch (error) {
