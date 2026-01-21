@@ -8,7 +8,6 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import apiClient from "@/lib/apiClient";
 
 const AuthContext = createContext(null);
@@ -36,10 +35,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // IMPORTANTE: no guardamos token, backend lo guarda en cookie
       await apiClient.post("/users/login", { email, password });
-
-      // Luego traemos el usuario (ya autenticado por cookie)
       await fetchUser();
       return true;
     } catch (error) {
@@ -49,19 +45,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (token: string) => {
+    setLoading(true);
     try {
-      const result = await signIn("google");
-      if (result?.ok) {
-        // Después de un inicio de sesión exitoso con Google,
-        // NextAuth se encarga de la sesión.
-        // Forzamos un refetch del usuario para sincronizar el estado.
-        await fetchUser();
-      }
-      return result;
+      // Backend se encargará de validar el token y crear/loguear al usuario
+      await apiClient.post("/users/google-login", { token });
+      // Luego traemos el usuario (ya autenticado por cookie)
+      await fetchUser();
+      return true;
     } catch (error) {
-      console.error("Error during Google login:", error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

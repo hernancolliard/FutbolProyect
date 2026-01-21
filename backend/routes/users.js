@@ -141,6 +141,70 @@ router.post("/login", async (req, res) => {
 });
 
 /* =========================
+   LOGIN CON GOOGLE
+========================= */
+
+router.post("/google-login", async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { name, email, picture } = ticket.getPayload();
+
+    // Buscar si el usuario ya existe
+    let result = await db.query("SELECT * FROM usuarios WHERE email = @email", {
+      email,
+    });
+    let user = result.rows[0];
+
+    // Si el usuario no existe, crearlo
+    if (!user) {
+      // Para nuevos usuarios de Google, no tenemos contraseña.
+      // Y debemos asumir un tipo de usuario por defecto. 'postulante' es lo más seguro.
+      const newUserResult = await db.query(
+        `INSERT INTO usuarios (nombre, email, foto_perfil, tipo_usuario)
+         VALUES (@name, @email, @picture, 'postulante')
+         RETURNING *`,
+        { name, email, picture },
+      );
+      user = newUserResult.rows[0];
+
+      // Opcional: Enviar email de bienvenida para usuarios de Google
+      await sendWelcomeEmail(user.email, user.nombre, user.tipo_usuario);
+    }
+
+    // Crear el payload y el token JWT para la sesión
+    const payload = {
+      id: user.id,
+      tipo_usuario: user.tipo_usuario,
+    };
+
+    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // Establecer la cookie de sesión
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      path: "/",
+      maxAge: 60 * 60 * 1000,
+    });
+
+    const { password_hash, ...userSafe } = user;
+
+    res.json({ user: userSafe, token: jwtToken });
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(401).json({ message: "Error en la autenticación con Google." });
+  }
+});
+
+/* =========================
    USUARIO AUTENTICADO
 ========================= */
 
