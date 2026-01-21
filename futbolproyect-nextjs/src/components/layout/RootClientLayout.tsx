@@ -7,6 +7,8 @@ import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
 import CreateOffer from "@/components/CreateOffer";
 import { Modal, Box } from "@mui/material";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface RootClientLayoutProps {
   children: React.ReactNode;
@@ -41,6 +43,18 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
 
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Header
         onShowLoginModal={handleShowLogin}
         onShowRegisterModal={handleShowRegister}

@@ -28,6 +28,11 @@ appNext
     app.use(express.json({ limit: "10mb" }));
     app.use(cookieParser());
 
+    app.use((req, res, next) => {
+      console.log(`[INCOMING REQUEST] ${req.method} ${req.url}`);
+      next();
+    });
+
     // --- RUTAS API ---
     // (Asegúrate de que estas rutas existan o comenta las que no uses)
     app.use("/api/users", require("./routes/users.js"));
