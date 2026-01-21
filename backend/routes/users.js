@@ -281,7 +281,7 @@ router.post("/forgot-password", async (req, res) => {
     console.log("DB update result:", updateResult);
 
     // Enviar correo electrónico con el enlace de restablecimiento
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
     console.log("Reset link generated:", resetLink);
     console.log("Attempting to send password reset email...");
     await sendPasswordResetEmail(user.email, user.nombre, resetLink);
