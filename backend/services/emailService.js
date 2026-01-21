@@ -194,10 +194,46 @@ const sendReplyToContactMessage = async (to, subject, replyMessage, originalMess
 
 
 // Por ahora, solo exportamos esta función. Puedes añadir las otras después si las necesitas.
+/**
+ * Envía un correo electrónico para restablecer la contraseña.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} resetLink - Enlace de restablecimiento de contraseña.
+ */
+const sendPasswordResetEmail = async (to, userName, resetLink) => {
+  const subject = 'Restablecer Contraseña en FutbolProyect';
+  const htmlContent = `<h1>¡Hola ${userName}!</h1>
+                     <p>Has solicitado restablecer tu contraseña en FutbolProyect.</p>
+                     <p>Por favor, haz clic en el siguiente enlace para continuar con el proceso:</p>
+                     <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+                     <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de restablecimiento de contraseña enviado con éxito a ${to}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error al enviar correo de restablecimiento de contraseña a ${to}:`, error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendContactEmail,
   sendWelcomeEmail,
   sendSubscriptionConfirmationEmail,
   sendNewOfferNotificationEmail,
   sendReplyToContactMessage,
+  sendPasswordResetEmail,
 };

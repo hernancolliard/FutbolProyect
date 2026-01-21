@@ -248,6 +248,81 @@ router.get("/me", verificarToken, async (req, res) => {
   }
 });
 
-// ... (resto de las rutas como forgot-password, etc.)
+// RUTA: Solicitar restablecimiento de contraseña
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userResult = await db.query("SELECT id, email, nombre FROM usuarios WHERE email = @email", { email });
+    const user = userResult.rows[0];
+
+    if (!user) {
+      // Devolver un 200 OK incluso si el usuario no existe para evitar enumeración de usuarios
+      return res.status(200).json({ message: "Si tu correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña." });
+    }
+
+    // Generar un token de restablecimiento
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hora en milisegundos
+
+    // Guardar el token hasheado y su expiración en la base de datos
+    await db.query(
+      "UPDATE usuarios SET reset_password_token = @resetTokenHash, reset_password_expires = @resetTokenExpiry WHERE id = @id",
+      { resetTokenHash, resetTokenExpiry, id: user.id }
+    );
+
+    // Enviar correo electrónico con el enlace de restablecimiento
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    await sendPasswordResetEmail(user.email, user.nombre, resetLink);
+
+    res.status(200).json({ message: "Si tu correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña." });
+  } catch (error) {
+    console.error("Error en forgot-password:", error);
+    res.status(500).json({ message: "Error del servidor al procesar la solicitud." });
+  }
+});
+
+// RUTA: Restablecer contraseña
+router.post("/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  // Validar la nueva contraseña con Zod
+  const passwordSchema = z.string().min(6, "La contraseña debe tener al menos 6 caracteres.");
+  try {
+    passwordSchema.parse(newPassword);
+  } catch (err) {
+    return res.status(400).json({ message: err.errors[0].message });
+  }
+
+  try {
+    const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const userResult = await db.query(
+      "SELECT id, reset_password_expires FROM usuarios WHERE reset_password_token = @resetTokenHash",
+      { resetTokenHash }
+    );
+    const user = userResult.rows[0];
+
+    if (!user || user.reset_password_expires < Date.now()) {
+      return res.status(400).json({ message: "El token de restablecimiento es inválido o ha expirado." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(newPassword, salt);
+
+    await db.query(
+      "UPDATE usuarios SET password_hash = @password_hash, reset_password_token = NULL, reset_password_expires = NULL WHERE id = @id",
+      { password_hash, id: user.id }
+    );
+
+    res.status(200).json({ message: "Tu contraseña ha sido restablecida con éxito." });
+  } catch (error) {
+    console.error("Error en reset-password:", error);
+    res.status(500).json({ message: "Error del servidor al restablecer la contraseña." });
+  }
+});
+
+module.exports = router;
 
 module.exports = router;
