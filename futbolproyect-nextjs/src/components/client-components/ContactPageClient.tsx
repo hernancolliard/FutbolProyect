@@ -57,7 +57,10 @@ export default function ContactPageClient() {
         {t("contact_page_title", "Contáctanos")}
       </Typography>
       <Typography sx={{ mb: 3, color: 'white' }}>{t("contact_page_subtitle", "Estamos aquí para ayudarte.")}</Typography>
-      <Card sx={{ maxWidth: 500, width: "100%", bgcolor: 'primary.main' }}>
+      <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
+        Email: info@futbolproyect.com
+      </Typography>
+      <Card sx={{ maxWidth: 400, width: "100%", bgcolor: 'primary.main' }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
             {t("contact_form_title", "Envíanos un mensaje")}
@@ -96,7 +99,7 @@ export default function ContactPageClient() {
                 required
                 fullWidth
                 multiline
-                rows={6}
+                rows={3}
                 InputProps={{ style: { color: 'white' } }}
                 InputLabelProps={{ style: { color: 'white' } }}
                 sx={{ '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'white' }, '&:hover fieldset': { borderColor: 'white' }, '&.Mui-focused fieldset': { borderColor: 'white' } } }}
