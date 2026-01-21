@@ -121,16 +121,19 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
+    // ⚠️ CORRECCIÓN: sameSite NONE para que funcione con frontend separado
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none",
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
 
     const { password_hash, ...userSafe } = user;
-    res.json(userSafe);
+
+    // ⚠️ CORRECCIÓN: DEVOLVEMOS token también
+    res.json({ user: userSafe, token });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Error del servidor." });
