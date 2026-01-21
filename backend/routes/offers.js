@@ -116,35 +116,33 @@ router.get("/", async (req, res) => {
     sort = "desc",
     page = 1,
     limit = 10,
+    show = 'separated', // 'separated' (default) or 'all'
   } = req.query;
 
   const cacheKey = `offers:${puesto || "all"}:${ubicacion || "all"}:${
     nivel || "all"
   }:${horarios || "all"}:${salarioMin || "none"}-${
     salarioMax || "none"
-  }:${sort}:page${page}:limit${limit}`;
+  }:${sort}:page${page}:limit${limit}:${show}`;
 
   try {
-    // 1. Intentar obtener los datos desde el caché en memoria
     const cachedData = myCache.get(cacheKey);
     if (cachedData) {
-      // console.log("Sirviendo desde caché en memoria:", cacheKey);
       return res.json(cachedData);
     }
 
-    // console.log("Sirviendo desde la base de datos, no hay caché.");
-
-    // 2. Desactivar ofertas destacadas caducadas (se ejecuta siempre)
-    const unfeatureQuery = `
+    await db.query(`
       UPDATE ofertas_laborales
       SET is_featured = FALSE
       WHERE is_featured = TRUE AND featured_until <= NOW();
-    `;
-    await db.query(unfeatureQuery);
+    `);
 
-    // 3. Construir la consulta dinámica para ofertas regulares
-    let whereClauses = ["o.estado = 'abierta'", "o.is_featured = FALSE"];
+    let whereClauses = ["o.estado = 'abierta'"];
     let queryParams = {};
+
+    if (show === 'separated') {
+      whereClauses.push("o.is_featured = FALSE");
+    }
 
     if (puesto) {
       whereClauses.push(`o.puesto LIKE @puesto`);
@@ -171,69 +169,58 @@ router.get("/", async (req, res) => {
       queryParams.salarioMax = salarioMax;
     }
 
-
     const whereString = whereClauses.join(" AND ");
-    console.log("WHERE String:", whereString); // Add this log
 
-    const orderBy =
-      sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
-
-    // 4. Obtener el conteo total de ofertas para la paginación
     const countQuery = `SELECT COUNT(*) as total FROM ofertas_laborales o JOIN usuarios u ON o.id_usuario_ofertante = u.id WHERE ${whereString}`;
     const countResult = await db.query(countQuery, queryParams);
-    console.log("Count Query Result:", countResult.rows[0].total); // Add this log
     const totalOffers = countResult.rows[0].total;
     const totalPages = Math.ceil(totalOffers / limit);
 
-    // 5. Obtener las ofertas regulares paginadas y ordenadas
     const offset = (page - 1) * limit;
-    const regularQuery = `
+    const orderBy = sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
+    
+    // When showing all, we want featured offers to appear first.
+    const finalOrderBy = show === 'all' 
+      ? `o.is_featured DESC, ${orderBy}` 
+      : orderBy;
+
+    const offersQuery = `
       SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
       FROM ofertas_laborales o
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE ${whereString}
-      ORDER BY ${orderBy}
+      ORDER BY ${finalOrderBy}
       OFFSET @offset LIMIT @limit;
     `;
-    console.log("Regular Query:", regularQuery); // Add this log
     queryParams.offset = offset;
     queryParams.limit = parseInt(limit);
+    
+    const offersResult = await db.query(offersQuery, queryParams);
+    const offers = offersResult.rows;
 
-    const regularResult = await db.query(regularQuery, queryParams);
-    console.log("Regular Offers Query Result:", regularResult.rows.length, regularResult.rows); // Add this log
-    const regularOffers = regularResult.rows;
-
-    // 6. Obtener las ofertas destacadas (estas no se filtran, siempre son las mismas)
-    let featuredQuery = `
-      SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
-      FROM ofertas_laborales o
-      JOIN usuarios u ON o.id_usuario_ofertante = u.id
-      WHERE o.estado = 'abierta' AND o.is_featured = TRUE AND o.featured_until > NOW()
-      ORDER BY o.featured_until DESC
-      LIMIT 6;
-    `;
-    const featuredResult = await db.query(featuredQuery);
-    const featuredOffers = featuredResult.rows;
-
-    // DEBUG LOGGING
-    console.log(`[DEBUG] Se encontraron ${featuredOffers.length} ofertas destacadas.`);
-    console.log("[DEBUG] Contenido de ofertas destacadas:", JSON.stringify(featuredOffers, null, 2));
-
-
-    // 7. Preparar los datos para enviar y cachear
+    let featuredOffers = [];
+    if (show === 'separated') {
+      const featuredQuery = `
+        SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
+        FROM ofertas_laborales o
+        JOIN usuarios u ON o.id_usuario_ofertante = u.id
+        WHERE o.estado = 'abierta' AND o.is_featured = TRUE AND o.featured_until > NOW()
+        ORDER BY o.featured_until DESC
+        LIMIT 6;
+      `;
+      const featuredResult = await db.query(featuredQuery);
+      featuredOffers = featuredResult.rows;
+    }
+    
     const responseData = {
       featuredOffers,
-      offers: regularOffers,
+      offers,
       totalPages,
       currentPage: parseInt(page),
     };
 
-    console.log('Response Data:', responseData);
-
-    // 8. Guardar en caché en memoria
     myCache.set(cacheKey, responseData);
 
-    // 9. Devolver la respuesta
     res.json(responseData);
   } catch (error) {
     console.error("Error al obtener ofertas:", error);

@@ -30,6 +30,7 @@ const fetchOffers = async ({
   const params = new URLSearchParams({
     page: page.toString(),
     limit: "10",
+    show: "all",
     ...(filters as Record<string, string>),
   });
 
