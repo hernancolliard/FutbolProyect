@@ -73,7 +73,14 @@ body {
   .hero-container {
     height: 400px;
   }
+  .hero-content {
+    top: 60%; /* Ajusta la posición para bajar el contenido */
+    transform: translate(-50%, -60%); /* Ajusta el transform para compensar el nuevo top */
+  }
   .hero-content h1 {
-    font-size: 2rem;
+    font-size: 1.8rem; /* Un poco más pequeño */
+  }
+  .hero-content p {
+    font-size: 1.2rem; /* También reducir el subtítulo */
   }
 }
