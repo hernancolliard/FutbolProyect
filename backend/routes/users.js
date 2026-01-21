@@ -298,16 +298,23 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   const { token, newPassword } = req.body;
 
+  console.log("Reset password request received.");
+  console.log("Token received:", token ? "[TOKEN RECIBIDO]" : "[TOKEN NO RECIBIDO]"); // No loguear el token directamente por seguridad
+  console.log("New password received:", newPassword ? "[PASSWORD RECIBIDA]" : "[PASSWORD NO RECIBIDA]");
+
   // Validar la nueva contraseña con Zod
   const passwordSchema = z.string().min(6, "La contraseña debe tener al menos 6 caracteres.");
   try {
     passwordSchema.parse(newPassword);
+    console.log("New password passed Zod validation.");
   } catch (err) {
+    console.error("New password failed Zod validation:", err.errors[0].message);
     return res.status(400).json({ message: err.errors[0].message });
   }
 
   try {
     const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    console.log("Generated reset token hash:", resetTokenHash);
 
     const userResult = await db.query(
       "SELECT id, reset_password_expires FROM usuarios WHERE reset_password_token = @resetTokenHash",
@@ -315,17 +322,25 @@ router.post("/reset-password", async (req, res) => {
     );
     const user = userResult.rows[0];
 
+    console.log("User found with token:", user ? "Yes" : "No");
+    console.log("Current time:", Date.now());
+    console.log("Reset token expiry from DB:", user ? user.reset_password_expires : "N/A");
+
     if (!user || user.reset_password_expires < Date.now()) {
+      console.error("Invalid or expired reset token.");
       return res.status(400).json({ message: "El token de restablecimiento es inválido o ha expirado." });
     }
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(newPassword, salt);
+    console.log("Password successfully hashed.");
 
+    console.log("Attempting to update user password in DB...");
     await db.query(
       "UPDATE usuarios SET password_hash = @password_hash, reset_password_token = NULL, reset_password_expires = NULL WHERE id = @id",
       { password_hash, id: user.id }
     );
+    console.log("User password updated successfully in DB.");
 
     res.status(200).json({ message: "Tu contraseña ha sido restablecida con éxito." });
   } catch (error) {
