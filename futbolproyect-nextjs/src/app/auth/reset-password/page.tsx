@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import apiClient from "@/lib/apiClient";
+import publicApi from "@/lib/publicApi";
 import { useTranslation } from "react-i18next";
 import {
   TextField,
@@ -16,7 +16,6 @@ import {
   CardContent,
 } from "@mui/material";
 
-// 1. Creamos un componente interno que maneja la lógica de los parámetros
 function ResetPasswordForm() {
   const { t } = useTranslation("common");
   const [password, setPassword] = useState("");
@@ -24,38 +23,48 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams(); // Esto causaba el error sin Suspense
+
+  const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!token) {
+      setError(t("invalid_token", "Token inválido o expirado."));
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError(t("passwords_do_not_match", "Las contraseñas no coinciden."));
       return;
     }
-    if (!token) {
-      setError(t("invalid_token", "Token inválido."));
-      return;
-    }
+
     setLoading(true);
     setError("");
     setMessage("");
+
     try {
-      const response = await apiClient.post("/users/reset-password", {
+      const response = await publicApi.post("/users/reset-password", {
         token,
         password,
       });
-      setMessage(response.data.message);
+
+      setMessage(
+        response.data?.message ||
+          t("password_updated", "Contraseña actualizada correctamente."),
+      );
+
       setTimeout(() => {
         router.push("/auth/login");
       }, 3000);
     } catch (err: any) {
       setError(
-        err.message ||
+        err.response?.data?.error ||
           t(
             "error_generic",
-            "Ocurrió un error. Por favor, inténtalo de nuevo.",
+            "Ocurrió un error. Por favor, intentá nuevamente.",
           ),
       );
     } finally {
@@ -66,28 +75,28 @@ function ResetPasswordForm() {
   return (
     <Card sx={{ maxWidth: 400, width: "100%", p: 2 }}>
       <CardContent>
-        <Typography variant="h5" component="h2" gutterBottom align="center">
+        <Typography variant="h5" align="center" gutterBottom>
           {t("reset_password_title", "Restablecer Contraseña")}
         </Typography>
+
         {!token ? (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert severity="error">
             {t("invalid_token_or_expired", "Token inválido o expirado.")}
           </Alert>
         ) : (
           <form onSubmit={handleSubmit}>
-            <Stack spacing={2} sx={{ mt: 2 }}>
+            <Stack spacing={2} mt={2}>
               <TextField
                 type="password"
-                id="password"
                 label={t("new_password_label", "Nueva Contraseña")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 fullWidth
               />
+
               <TextField
                 type="password"
-                id="confirmPassword"
                 label={t(
                   "confirm_new_password_label",
                   "Confirmar Nueva Contraseña",
@@ -97,12 +106,13 @@ function ResetPasswordForm() {
                 required
                 fullWidth
               />
+
               {message && <Alert severity="success">{message}</Alert>}
               {error && <Alert severity="error">{error}</Alert>}
+
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
                 disabled={loading}
                 fullWidth
               >
@@ -120,7 +130,6 @@ function ResetPasswordForm() {
   );
 }
 
-// 2. Componente principal exportado que envuelve al formulario en Suspense
 export default function ResetPasswordPage() {
   return (
     <Box
@@ -128,7 +137,6 @@ export default function ResetPasswordPage() {
         mt: 4,
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
       }}
     >
       <Suspense fallback={<CircularProgress />}>
