@@ -267,10 +267,10 @@ router.post("/forgot-password", async (req, res) => {
     // Generar un token de restablecimiento
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
-    const resetTokenExpiry = Date.now() + 3600000; // 1 hora en milisegundos
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hora en milisegundos
 
     console.log("Generated reset token hash:", resetTokenHash);
-    console.log("Reset token expiry:", new Date(resetTokenExpiry));
+    console.log("Reset token expiry:", resetTokenExpiry);
 
     // Guardar el token hasheado y su expiración en la base de datos
     console.log("Attempting to update user with reset token in DB...");
