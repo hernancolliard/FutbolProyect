@@ -57,18 +57,18 @@ export default function FeaturedProfilesClient() {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'white' }}>
+    <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'black' }}>
         {t('featured_profiles_title', 'Perfiles Destacados')}
       </Typography>
-      <Typography variant="body1" paragraph sx={{ color: 'white' }}>
+      <Typography variant="body1" paragraph sx={{ color: 'black' }}>
         {t('featured_profiles_desc', 'Estos son los profesionales que han decidido destacar su perfil en nuestra plataforma.')}
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={5}>
           <FormControl fullWidth>
-            <InputLabel sx={{ color: 'white' }}>{t('filter_by_nationality', 'Filtrar por nacionalidad')}</InputLabel>
+            <InputLabel sx={{ color: 'black' }}>{t('filter_by_nationality', 'Filtrar por nacionalidad')}</InputLabel>
             <Select
               name="nacionalidad"
               value={filters.nacionalidad}
@@ -76,18 +76,18 @@ export default function FeaturedProfilesClient() {
               label={t('filter_by_nationality', 'Filtrar por nacionalidad')}
               disabled={isLoadingNacionalidades}
               sx={{
-                color: 'white',
+                color: 'black',
                 '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '.MuiSvgIcon-root': {
-                  color: 'white',
+                  color: 'black',
                 },
               }}
             >
@@ -104,7 +104,7 @@ export default function FeaturedProfilesClient() {
         </Grid>
         <Grid item xs={12} sm={5}>
           <FormControl fullWidth>
-            <InputLabel sx={{ color: 'white' }}>{t('filter_by_position', 'Filtrar por puesto')}</InputLabel>
+            <InputLabel sx={{ color: 'black' }}>{t('filter_by_position', 'Filtrar por puesto')}</InputLabel>
             <Select
               name="puesto"
               value={filters.puesto}
@@ -112,18 +112,18 @@ export default function FeaturedProfilesClient() {
               label={t('filter_by_position', 'Filtrar por puesto')}
               disabled={isLoadingPuestos}
               sx={{
-                color: 'white',
+                color: 'black',
                 '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'white',
+                  borderColor: 'black',
                 },
                 '.MuiSvgIcon-root': {
-                  color: 'white',
+                  color: 'black',
                 },
               }}
             >
@@ -140,11 +140,11 @@ export default function FeaturedProfilesClient() {
         </Grid>
         <Grid item xs={12} sm={2} sx={{ display: 'flex', alignItems: 'center' }}>
           <Button variant="outlined" onClick={clearFilters} fullWidth sx={{
-            color: 'white',
-            borderColor: 'white',
+            color: 'black',
+            borderColor: 'black',
             '&:hover': {
-              borderColor: 'white',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderColor: 'black',
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
             },
           }}>{t('clear_filters', 'Limpiar')}</Button>
         </Grid>
@@ -170,8 +170,8 @@ export default function FeaturedProfilesClient() {
                     borderRadius: '8px',
                     overflow: 'hidden',
                     textAlign: 'center',
-                    backgroundColor: '#1a1a1a',
-                    color: 'white',
+                    backgroundColor: 'white',
+                    color: 'black',
                   }}
                 >
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -183,13 +183,13 @@ export default function FeaturedProfilesClient() {
                       style={{ width: '100%', height: '180px', objectFit: 'contain' }}
                     />
                     <Box className="profile-info" sx={{ p: 1 }}>
-                      <Typography variant="h6" className="profile-name" sx={{ color: 'white' }}>
+                      <Typography variant="h6" className="profile-name">
                         {`${profile.nombre} ${profile.apellido}`}
                       </Typography>
-                      <Typography variant="body2" className="profile-detail" sx={{ color: '#bdbdbd' }}>
+                      <Typography variant="body2" className="profile-detail">
                         {t('position', 'Posición')}: {profile.posicion_principal || t('not_specified', 'No especificada')}
                       </Typography>
-                      <Typography variant="body2" className="profile-detail" sx={{ color: '#bdbdbd' }}>
+                      <Typography variant="body2" className="profile-detail">
                         {t('nationality', 'Nacionalidad')}: {profile.nacionalidad || t('not_specified', 'No especificada')}
                       </Typography>
                     </Box>
@@ -200,11 +200,11 @@ export default function FeaturedProfilesClient() {
                     variant="outlined"
                     sx={{
                       mb: 1,
-                      color: 'white',
-                      borderColor: 'white',
+                      color: 'black',
+                      borderColor: 'black',
                       '&:hover': {
-                        borderColor: 'white',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'black',
+                        backgroundColor: 'rgba(0, 0, 0, 0.1)',
                       },
                     }}
                   >
@@ -214,7 +214,7 @@ export default function FeaturedProfilesClient() {
               </Grid>
             )})
           ) : (
-            <Typography sx={{ mt: 2, ml: 2, color: 'white' }}>
+            <Typography sx={{ mt: 2, ml: 2, color: 'black' }}>
               {t('no_featured_profiles_filters', 'No hay perfiles destacados que coincidan con los filtros seleccionados.')}
             </Typography>
           )}
