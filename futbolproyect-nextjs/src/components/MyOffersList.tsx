@@ -11,7 +11,8 @@ import Button from "@mui/material/Button";
 import { toast } from "react-toastify"; // Import toast for messages
 
 import { Offer } from "@/lib/types";
-import OfferActions from "@/components/OfferActions"; // Import OfferActions
+import OfferActions from "@/components/shared/OfferActions";
+// Import OfferActions
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 
 // CORRECCIÓN: Interfaz para evitar 'implicitly has an any type'
@@ -27,7 +28,9 @@ function MyOffersList({ offers }: MyOffersListProps) {
     // This is a placeholder function.
     // In a real application, you would implement the logic for editing or deleting an offer.
     console.log(`Action: ${action} on offer ID: ${offerId}`);
-    toast.info(`Acción: ${action} en oferta ID: ${offerId} (Funcionalidad completa de edición/eliminación pendiente)`);
+    toast.info(
+      `Acción: ${action} en oferta ID: ${offerId} (Funcionalidad completa de edición/eliminación pendiente)`,
+    );
     // Example: router.push(`/offers/edit/${offerId}`);
     // Example: call API to delete offer
   };
