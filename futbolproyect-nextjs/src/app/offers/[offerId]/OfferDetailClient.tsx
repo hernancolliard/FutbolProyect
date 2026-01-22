@@ -18,7 +18,8 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal";
-import OfferActions from "@/components/OfferActions";
+import OfferActions from "@/components/shared/OfferActions";
+
 import Image from "next/image";
 import ShareButtons from "@/components/ShareButtons";
 

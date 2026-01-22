@@ -7,28 +7,26 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+import { Offer } from "@/lib/types";
+
 interface OfferActionsProps {
-  offerId: number;
-  ownerId: number; // ID del usuario dueño de la oferta
-  onDelete?: () => void;
+  offer: Offer;
+  onOfferAction?: (action: string, id: string) => void;
+  isFetching?: boolean;
 }
 
 const OfferActions: React.FC<OfferActionsProps> = ({
-  offerId,
-  ownerId,
-  onDelete,
+  offer,
+  onOfferAction,
 }) => {
   const router = useRouter();
   const { user } = useAuth();
 
-  // 🔐 Verificar si el usuario es dueño
-  const isOwner = user?.id === ownerId;
-  const isAdmin = user?.isadmin === true;
+  const isOwner = user?.id === offer.id_usuario_ofertante;
+  const isAdmin = user?.isAdmin === true;
 
-  // Admin o dueño pueden editar
   const canEdit = isOwner || isAdmin;
-
-  if (!canEdit) return null; // ⛔ No mostrar nada
+  if (!canEdit) return null;
 
   return (
     <Box display="flex" gap={1}>
@@ -36,22 +34,20 @@ const OfferActions: React.FC<OfferActionsProps> = ({
         size="small"
         variant="outlined"
         startIcon={<EditIcon />}
-        onClick={() => router.push(`/offers/${offerId}/edit`)}
+        onClick={() => onOfferAction?.("edit", offer.id)}
       >
         Editar
       </Button>
 
-      {onDelete && (
-        <Button
-          size="small"
-          color="error"
-          variant="outlined"
-          startIcon={<DeleteIcon />}
-          onClick={onDelete}
-        >
-          Eliminar
-        </Button>
-      )}
+      <Button
+        size="small"
+        color="error"
+        variant="outlined"
+        startIcon={<DeleteIcon />}
+        onClick={() => onOfferAction?.("delete", offer.id)}
+      >
+        Eliminar
+      </Button>
     </Box>
   );
 };
