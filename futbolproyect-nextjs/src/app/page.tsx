@@ -92,11 +92,13 @@ export default function HomePage() {
           ) : errorOffers ? (
             <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_offers', 'Error al cargar ofertas.')}: {errorOffers.message}</Typography>
           ) : (
-            <OfferList
-              offers={homePageOffers}
-              onOfferAction={handleRefresh}
-              isHomePage={true}
-            />
+            <FadeInOnScroll>
+              <OfferList
+                offers={homePageOffers}
+                onOfferAction={handleRefresh}
+                isHomePage={true}
+              />
+            </FadeInOnScroll>
           )}
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button component={Link} href="/all-offers" variant="contained" className="btn-main">
@@ -109,7 +111,9 @@ export default function HomePage() {
           ) : errorProfiles ? (
             <Typography color="error" sx={{ mt: 2 }}>{t('error_loading_profiles', 'Error al cargar perfiles.')}: {errorProfiles.message}</Typography>
           ) : (
-            <FeaturedProfilesCarousel profiles={featuredProfiles} />
+            <FadeInOnScroll>
+              <FeaturedProfilesCarousel profiles={featuredProfiles} />
+            </FadeInOnScroll>
           )}
           <Box sx={{ textAlign: 'center', padding: '2rem 0' }}>
             <Button component={Link} href="/featured-profiles" variant="contained" className="btn-main">
@@ -119,7 +123,9 @@ export default function HomePage() {
 
           <hr />
           <Box sx={{ mt: 4, mb: 4 }}>
-            <About />
+          <FadeInOnScroll>
+          <About />
+        </FadeInOnScroll>
             <FadeInOnScroll>
               <Mission />
             </FadeInOnScroll>
