@@ -1,137 +1,186 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from "@/context/AuthContext"; // Migrated AuthContext // Migrated AuthContext
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
-import apiClient from '@/lib/apiClient'; // Centralized apiClient
-import { useRouter } from 'next/navigation'; // Import useRouter
+import React from "react";
+import { Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import apiClient from "@/lib/apiClient";
+import { useRouter } from "next/navigation";
 
-const applyToOffer = async (offerId) => {
+/* =========================
+   TIPOS
+========================= */
+interface Offer {
+  id: string;
+  id_usuario_ofertante: string;
+  is_applied?: boolean;
+  is_applied_optimistic?: boolean;
+}
+
+interface OfferActionsProps {
+  offer: Offer;
+  onOfferAction?: (action: "edit" | "delete", id: string) => void;
+  isFetching?: boolean;
+}
+
+/* =========================
+   API
+========================= */
+const applyToOffer = async (offerId: string) => {
   const { data } = await apiClient.post(`/offers/${offerId}/apply`);
   return data;
 };
 
-const fetchUserProfile = async (userId) => {
-    const { data } = await apiClient.get(`/profiles/${userId}`);
-    return data;
-}
+const fetchUserProfile = async (userId: string) => {
+  const { data } = await apiClient.get(`/profiles/${userId}`);
+  return data;
+};
 
-function OfferActions({ offer, onOfferAction, isFetching }) {
-  const { t } = useTranslation('common');
+/* =========================
+   COMPONENTE
+========================= */
+export default function OfferActions({
+  offer,
+  onOfferAction,
+  isFetching,
+}: OfferActionsProps) {
+  const { t } = useTranslation("common");
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
-  const { mutate: performApply, isPending: isApplying } = useMutation({
+  const { mutate: apply, isPending: isApplying } = useMutation({
     mutationFn: () => applyToOffer(offer.id),
+
     onMutate: async () => {
-      // Cancelar queries para evitar sobreescribir la actualización optimista
-      await queryClient.cancelQueries({ queryKey: ['offers'] });
-      await queryClient.cancelQueries({ queryKey: ['offer', offer.id] });
+      await queryClient.cancelQueries({ queryKey: ["offer", offer.id] });
+      await queryClient.cancelQueries({ queryKey: ["offers"] });
 
-      // Guardar el estado previo
-      const previousOfferDetail = queryClient.getQueryData(['offer', offer.id]);
-      const previousOfferLists = queryClient.getQueriesData({ queryKey: ['offers'] });
+      const previousOffer = queryClient.getQueryData<Offer>([
+        "offer",
+        offer.id,
+      ]);
+      const previousOffers = queryClient.getQueryData<Offer[]>(["offers"]);
 
-      // Actualización optimista para la página de detalle
-      if (previousOfferDetail) {
-        queryClient.setQueryData(['offer', offer.id], (old) => {
-          if (old && typeof old === 'object') {
-            return {
-              ...old,
-              is_applied_optimistic: true,
-            };
-          }
-          return old;
+      if (previousOffer) {
+        queryClient.setQueryData(["offer", offer.id], {
+          ...previousOffer,
+          is_applied_optimistic: true,
         });
       }
 
-      // Actualización optimista para todas las listas de ofertas
-      queryClient.setQueriesData({ queryKey: ['offers'] }, (oldData: any) => {
-        if (oldData && Array.isArray(oldData.offers)) {
-          const newOffers = oldData.offers.map(o =>
-              o.id === offer.id ? { ...o, is_applied_optimistic: true } : o
-          );
-          return { ...oldData, offers: newOffers };
-        }
-        return oldData;
-      });
-
-      return { previousOfferDetail, previousOfferLists };
-    },
-    onError: (err, _, context) => {
-      // Revertir en caso de error
-      if (context.previousOfferDetail) {
-        queryClient.setQueryData(['offer', offer.id], context.previousOfferDetail);
+      if (previousOffers) {
+        queryClient.setQueryData(
+          ["offers"],
+          previousOffers.map((o) =>
+            o.id === offer.id ? { ...o, is_applied_optimistic: true } : o,
+          ),
+        );
       }
-      context.previousOfferLists.forEach(([key, data]) => {
-        queryClient.setQueryData(key, data);
-      });
 
-      const errorMessage = err.message || t('apply_error_generic', 'Error genérico al postularse.');
-      toast.error(errorMessage);
+      return { previousOffer, previousOffers };
     },
-    onSettled: () => {
-      // Resincronizar con el servidor
-      queryClient.invalidateQueries({ queryKey: ['offers'] });
-      queryClient.invalidateQueries({ queryKey: ['offer', offer.id] });
-      queryClient.invalidateQueries({ queryKey: ['my-applications'] });
+
+    onError: (err: any, _, context) => {
+      if (context?.previousOffer) {
+        queryClient.setQueryData(["offer", offer.id], context.previousOffer);
+      }
+      if (context?.previousOffers) {
+        queryClient.setQueryData(["offers"], context.previousOffers);
+      }
+
+      toast.error(
+        err?.message || t("apply_error_generic", "Error al postularse"),
+      );
     },
+
     onSuccess: () => {
-      toast.success(t('apply_success', '¡Postulación exitosa!'));
+      toast.success(t("apply_success", "¡Postulación exitosa!"));
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["offers"] });
+      queryClient.invalidateQueries({ queryKey: ["offer", offer.id] });
+      queryClient.invalidateQueries({ queryKey: ["my-applications"] });
     },
   });
 
+  /* =========================
+     HANDLERS
+  ========================= */
   const handleApplyClick = async () => {
     if (!user) {
-      toast.error(t('must_be_logged_in_to_apply', 'Debes iniciar sesión para postularte.'));
+      toast.error(
+        t("must_be_logged_in_to_apply", "Debes iniciar sesión para postularte"),
+      );
       return;
     }
-    try {
-      const userProfile = await fetchUserProfile(user.id);
-      const { foto_perfil_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento } = userProfile;
 
-      const isProfileComplete = foto_perfil_url && altura_cm && peso_kg && pie_dominante && fecha_de_nacimiento;
+    try {
+      const profile = await fetchUserProfile(user.id);
+
+      const isProfileComplete =
+        profile?.foto_perfil_url &&
+        profile?.altura_cm &&
+        profile?.peso_kg &&
+        profile?.pie_dominante &&
+        profile?.fecha_de_nacimiento;
 
       if (!isProfileComplete) {
-        toast.error(t('complete_profile_to_apply', 'Debes completar tu perfil (foto y datos físicos) antes de postularte.'));
-        router.push(`/profile/${user.id}`); // Use router.push
-      } else {
-        performApply();
+        toast.error(
+          t(
+            "complete_profile_to_apply",
+            "Completa tu perfil antes de postularte",
+          ),
+        );
+        router.push(`/profile/${user.id}`);
+        return;
       }
-    } catch (error) {
-      toast.error(t('profile_check_error', 'Error al verificar tu perfil. Inténtalo de nuevo.'));
+
+      apply();
+    } catch {
+      toast.error(t("profile_check_error", "Error al verificar tu perfil"));
     }
   };
 
+  /* =========================
+     PERMISOS
+  ========================= */
+  if (!user) return null;
 
-  if (!user) {
-    return null;
-  }
+  const isOwner = user.id === offer.id_usuario_ofertante;
+  const isAdmin = user.isAdmin === true;
+  const canApply = !isOwner && !isAdmin;
+  const hasApplied = offer.is_applied || offer.is_applied_optimistic;
 
-  const isOwner = user && offer.id_usuario_ofertante === user.id;
-  const isAdmin = user && user.isadmin; // Assuming 'isadmin' is the correct property for admin status
-  const canApply = user && !isOwner && !isAdmin;
-  const hasApplied = offer.is_applied_optimistic || offer.is_applied; // Considera el estado real y el optimista
-
+  /* =========================
+     RENDER
+  ========================= */
   return (
     <>
-      {/* Los botones de editar/eliminar siguen usando la prop para acciones del padre */}
-      {isAdmin && onOfferAction && (
+      {(isOwner || isAdmin) && onOfferAction && (
         <>
-          <Button size="small" onClick={() => onOfferAction('edit', offer.id)} disabled={isFetching}>
-            {t('edit', 'Editar')}
+          <Button
+            size="small"
+            onClick={() => onOfferAction("edit", offer.id)}
+            disabled={isFetching}
+          >
+            {t("edit", "Editar")}
           </Button>
-          <Button size="small" color="error" onClick={() => onOfferAction('delete', offer.id)} disabled={isFetching}>
-            {t('delete', 'Eliminar')}
+
+          <Button
+            size="small"
+            color="error"
+            onClick={() => onOfferAction("delete", offer.id)}
+            disabled={isFetching}
+          >
+            {t("delete", "Eliminar")}
           </Button>
         </>
       )}
 
-      {/* El botón de postularse ahora tiene su propia lógica */}
       {canApply && (
         <Button
           variant="contained"
@@ -141,11 +190,13 @@ function OfferActions({ offer, onOfferAction, isFetching }) {
           }}
           disabled={isApplying || hasApplied}
         >
-          {isApplying ? t('applying', 'Postulando...') : hasApplied ? t('applied', 'Postulado') : t('apply', 'Postularse')}
+          {isApplying
+            ? t("applying", "Postulando...")
+            : hasApplied
+              ? t("applied", "Postulado")
+              : t("apply", "Postularse")}
         </Button>
       )}
     </>
   );
 }
-
-export default OfferActions;

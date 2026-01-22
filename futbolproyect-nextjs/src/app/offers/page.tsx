@@ -15,38 +15,50 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import { useTranslation } from "react-i18next";
 
+/* =========================
+   TIPOS
+========================= */
 interface Offer {
   id: string;
-  titulo: string;
-  descripcion: string;
+  titulo?: string;
+  descripcion?: string;
   ubicacion?: string;
   puesto?: string;
   nivel?: string;
 }
 
-const fetchOffers = async () => {
+/* =========================
+   FETCH
+========================= */
+const fetchOffers = async (): Promise<Offer[]> => {
   const { data } = await apiClient.get("/offers");
   return data;
 };
 
+/* =========================
+   COMPONENTE
+========================= */
 export default function OffersPage() {
   const router = useRouter();
   const { t } = useTranslation("common");
 
   const {
-    data: offers,
+    data: offers = [],
     isLoading,
-    error,
+    isError,
   } = useQuery({
     queryKey: ["offers"],
     queryFn: fetchOffers,
   });
 
+  /* =========================
+     ESTADOS
+  ========================= */
   if (isLoading) {
     return <LoadingSpinner text={t("loading_offers", "Cargando ofertas...")} />;
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Alert severity="error">
         {t("error_loading_offers", "Error al cargar las ofertas")}
@@ -54,7 +66,7 @@ export default function OffersPage() {
     );
   }
 
-  if (!offers || offers.length === 0) {
+  if (offers.length === 0) {
     return (
       <Typography align="center" sx={{ mt: 4 }}>
         {t("no_offers", "No hay ofertas publicadas todavía")}
@@ -62,7 +74,9 @@ export default function OffersPage() {
     );
   }
 
-  console.log("Value of offers:", offers);
+  /* =========================
+     RENDER
+  ========================= */
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -70,17 +84,21 @@ export default function OffersPage() {
       </Typography>
 
       <Stack spacing={2}>
-        {offers.map((offer: Offer) => (
+        {offers.map((offer) => (
           <Card key={offer.id}>
             <CardContent>
-              <Typography variant="h6">{offer.titulo}</Typography>
+              <Typography variant="h6">
+                {offer.titulo || "Sin título"}
+              </Typography>
 
               <Typography variant="body2" sx={{ mt: 1 }}>
-                {offer.descripcion.slice(0, 150)}...
+                {(offer.descripcion || "").slice(0, 150)}
+                {offer.descripcion && offer.descripcion.length > 150 && "..."}
               </Typography>
 
               <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                {offer.ubicacion} {offer.nivel && `• ${offer.nivel}`}
+                {offer.ubicacion}
+                {offer.nivel && ` • ${offer.nivel}`}
               </Typography>
 
               <Button
