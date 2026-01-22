@@ -11,33 +11,23 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import Alert from "@mui/material/Alert";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { useTranslation } from "react-i18next";
 
-/* =========================
-   TIPOS
-========================= */
 interface Offer {
-  id: string;
-  titulo?: string;
-  descripcion?: string;
+  id: number;
+  titulo: string;
+  descripcion: string;
   ubicacion?: string;
-  puesto?: string;
   nivel?: string;
 }
 
-/* =========================
-   FETCH
-========================= */
 const fetchOffers = async (): Promise<Offer[]> => {
   const { data } = await apiClient.get("/offers");
-  return data;
+  return Array.isArray(data) ? data : [];
 };
 
-/* =========================
-   COMPONENTE
-========================= */
 export default function OffersPage() {
   const router = useRouter();
   const { t } = useTranslation("common");
@@ -45,60 +35,42 @@ export default function OffersPage() {
   const {
     data: offers = [],
     isLoading,
-    isError,
+    error,
   } = useQuery({
     queryKey: ["offers"],
     queryFn: fetchOffers,
   });
 
-  /* =========================
-     ESTADOS
-  ========================= */
   if (isLoading) {
-    return <LoadingSpinner text={t("loading_offers", "Cargando ofertas...")} />;
+    return <LoadingSpinner text={t("loading_offers")} />;
   }
 
-  if (isError) {
-    return (
-      <Alert severity="error">
-        {t("error_loading_offers", "Error al cargar las ofertas")}
-      </Alert>
-    );
+  if (error) {
+    return <Alert severity="error">{t("error_loading_offers")}</Alert>;
   }
 
   if (offers.length === 0) {
     return (
       <Typography align="center" sx={{ mt: 4 }}>
-        {t("no_offers", "No hay ofertas publicadas todavía")}
+        {t("no_offers")}
       </Typography>
     );
   }
 
-  /* =========================
-     RENDER
-  ========================= */
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
-        {t("offers_title", "Ofertas de Trabajo")}
+        {t("offers_title")}
       </Typography>
 
       <Stack spacing={2}>
         {offers.map((offer) => (
           <Card key={offer.id}>
             <CardContent>
-              <Typography variant="h6">
-                {offer.titulo || "Sin título"}
-              </Typography>
+              <Typography variant="h6">{offer.titulo}</Typography>
 
               <Typography variant="body2" sx={{ mt: 1 }}>
-                {(offer.descripcion || "").slice(0, 150)}
-                {offer.descripcion && offer.descripcion.length > 150 && "..."}
-              </Typography>
-
-              <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                {offer.ubicacion}
-                {offer.nivel && ` • ${offer.nivel}`}
+                {offer.descripcion.slice(0, 150)}...
               </Typography>
 
               <Button
@@ -106,7 +78,7 @@ export default function OffersPage() {
                 variant="outlined"
                 onClick={() => router.push(`/offers/${offer.id}`)}
               >
-                {t("view_offer", "Ver oferta")}
+                {t("view_offer")}
               </Button>
             </CardContent>
           </Card>
