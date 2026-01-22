@@ -1,87 +1,48 @@
 "use client";
 
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-} from "react";
-import { useRouter } from "next/navigation";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<any>(null);
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
+  const fetchUser = async () => {
+    try {
+      const res = await apiClient.get("/users/me");
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchUser();
   }, []);
 
-  const fetchUser = useCallback(async () => {
-    try {
-      const response = await apiClient.get("/users/me");
-      setUser(response.data);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const login = async (email, password) => {
-    setLoading(true);
-    try {
-      await apiClient.post("/users/login", { email, password });
-      await fetchUser();
-      return true;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  const login = async (email: string, password: string) => {
+    await apiClient.post("/users/login", { email, password });
+    await fetchUser();
   };
 
   const loginWithGoogle = async (token: string) => {
-    setLoading(true);
-    try {
-      // Backend se encargará de validar el token y crear/loguear al usuario
-      await apiClient.post("/users/google-login", { token });
-      // Luego traemos el usuario (ya autenticado por cookie)
-      await fetchUser();
-      return true;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    await apiClient.post("/users/google-login", { token });
+    await fetchUser();
   };
 
   const logout = async () => {
-    try {
-      await apiClient.post("/users/logout");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    } finally {
-      setUser(null);
-      router.push("/");
-    }
-  };
-
-  const authContextValue = {
-    user,
-    login,
-    logout,
-    loginWithGoogle,
-    isAuthenticated: !!user,
-    loading,
+    await apiClient.post("/users/logout");
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider
+      value={{ user, login, loginWithGoogle, logout, loading }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );
