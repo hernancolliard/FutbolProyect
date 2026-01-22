@@ -21,7 +21,8 @@ const fetchAllProfiles = async (filters: {
     filters as Record<string, string>,
   ).toString();
 
-  const res = await fetch(`${apiUrl}/api/profiles?${query}`, {
+  // 🔥 CORRECCIÓN: NO repetir /api
+  const res = await fetch(`${apiUrl}/profiles?${query}`, {
     next: { revalidate: 3600 },
   });
 
@@ -32,7 +33,9 @@ const fetchAllProfiles = async (filters: {
 
 const fetchNacionalidades = async (): Promise<string[]> => {
   const apiUrl = getApiBaseUrl();
-  const res = await fetch(`${apiUrl}/api/profiles/nacionalidades`, {
+
+  // 🔥 CORRECCIÓN: NO repetir /api
+  const res = await fetch(`${apiUrl}/profiles/nacionalidades`, {
     next: { revalidate: 86400 },
   });
 
@@ -42,7 +45,9 @@ const fetchNacionalidades = async (): Promise<string[]> => {
 
 const fetchPuestos = async (): Promise<string[]> => {
   const apiUrl = getApiBaseUrl();
-  const res = await fetch(`${apiUrl}/api/profiles/puestos`, {
+
+  // 🔥 CORRECCIÓN: NO repetir /api
+  const res = await fetch(`${apiUrl}/profiles/puestos`, {
     next: { revalidate: 86400 },
   });
 
