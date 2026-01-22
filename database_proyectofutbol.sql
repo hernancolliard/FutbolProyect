@@ -178,7 +178,7 @@ WHERE email = 'futbolproyect.arg@gmail.com';
 ALTER TABLE user_videos
 ADD COLUMN title_es VARCHAR(255),
 ADD COLUMN title_en VARCHAR(255);
-select*from usuarios u ;
+select*from usuarios u, perfiles_usuario pu ;
 SELECT password_hash
 FROM usuarios
 WHERE email = 'devhernan967@gmail.com';

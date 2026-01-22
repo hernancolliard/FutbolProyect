@@ -20,33 +20,8 @@ const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
 };
 
-// --- RUTA PÚBLICA: OBTENER TODOS LOS PERFILES ---
+// --- RUTA PÚBLICA: OBTENER TODOS LOS PERFILES (CON FILTROS) ---
 router.get("/", async (req, res) => {
-  try {
-    const query = `
-      SELECT
-          u.id, u.nombre, u.apellido,
-          p.foto_perfil_url, p.posicion_principal, p.nacionalidad,
-          p.average_rating, p.total_ratings
-      FROM
-          usuarios u
-      JOIN
-          perfiles_usuario p ON u.id = p.id_usuario
-      WHERE
-          u.tipo_usuario = 'postulante'
-      ORDER BY
-          u.id DESC;
-    `;
-    const result = await db.query(query);
-    res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener todos los perfiles:", error);
-    res.status(500).json({ message: "Error del servidor." });
-  }
-});
-
-// --- RUTA PÚBLICA: OBTENER TODOS LOS PERFILES CON FILTROS ---
-router.get("/all", async (req, res) => {
   const { nacionalidad, puesto } = req.query;
 
   try {
@@ -61,9 +36,6 @@ router.get("/all", async (req, res) => {
       queryParams.puesto = puesto;
       whereClauses.push(`p.posicion_principal = @puesto`);
     }
-
-    console.log("All Profiles Query - whereClauses:", whereClauses);
-    console.log("All Profiles Query - queryParams:", queryParams);
 
     const query = `
       SELECT
@@ -84,13 +56,14 @@ router.get("/all", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
-    console.log("Datos de todos los perfiles obtenidos del backend:", result.rows);
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener todos los perfiles:", error);
     res.status(500).json({ message: "Error del servidor." });
   }
 });
+
+
 
 
 // --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
