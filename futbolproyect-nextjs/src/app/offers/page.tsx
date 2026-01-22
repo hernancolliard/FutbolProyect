@@ -62,6 +62,7 @@ export default function OffersPage() {
     );
   }
 
+  console.log("Value of offers:", offers);
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>

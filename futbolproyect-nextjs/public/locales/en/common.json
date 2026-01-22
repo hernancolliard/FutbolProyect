@@ -346,5 +346,7 @@
   "video_delete_error": "Error deleting video.",
   "all_profiles_seo_title": "All Profiles - FutbolProyect",
   "all_profiles_seo_desc": "Explore all player, coach, and analyst profiles on FutbolProyect.",
-  "no_profiles_filters": "No profiles found with the selected filters."
+  "no_profiles_filters": "No profiles found with the selected filters.",
+  "image_preview": "Image preview",
+  "offer_image_preview": "Offer image"
 }
