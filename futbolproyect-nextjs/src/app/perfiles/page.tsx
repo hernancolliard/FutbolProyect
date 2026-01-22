@@ -5,73 +5,92 @@ import { Profile } from "@/lib/types";
 import { Grid, Typography, Paper } from "@mui/material";
 import FilterControls from "@/components/profile/FilterControls";
 import ProfileCard from "@/components/profile/ProfileCard";
-// Función auxiliar para obtener la URL correcta en el servidor
-const getBaseUrl = () => {
-  // Si existe una URL pública definida, úsala
-  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
-  }
-  // IMPORTANTE: En Render, usar process.env.PORT. Si no existe, usar 5000 (local).
-  const port = process.env.PORT || 5000;
-  return `http://localhost:${port}`;
-};
+import { getApiBaseUrl } from "@/lib/api";
+
+// =========================
+// FETCH FUNCTIONS
+// =========================
+
 const fetchAllProfiles = async (filters: {
   nacionalidad?: string;
   puesto?: string;
 }): Promise<Profile[]> => {
-  const apiUrl = getBaseUrl(); // <--- Usar la función dinámica
+  const apiUrl = getApiBaseUrl();
+
   const query = new URLSearchParams(
     filters as Record<string, string>,
   ).toString();
 
-  try {
-    const res = await fetch(`${apiUrl}/profiles?${query}`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) {
-      console.error("Error fetching profiles:", res.status);
-      return [];
-    }
-    return res.json();
-  } catch (error) {
-    console.error("Network error:", error);
-    return [];
-  }
+  const res = await fetch(`${apiUrl}/api/profiles?${query}`, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!res.ok) return [];
+
+  return res.json();
 };
 
 const fetchNacionalidades = async (): Promise<string[]> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
   const res = await fetch(`${apiUrl}/api/profiles/nacionalidades`, {
     next: { revalidate: 86400 },
-  }); // revalidate once a day
+  });
+
   if (!res.ok) return [];
   return res.json();
 };
 
 const fetchPuestos = async (): Promise<string[]> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
   const res = await fetch(`${apiUrl}/api/profiles/puestos`, {
     next: { revalidate: 86400 },
-  }); // revalidate once a day
+  });
+
   if (!res.ok) return [];
   return res.json();
 };
 
+// =========================
+// SEO METADATA
+// =========================
+
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: {
+    nacionalidad?: string;
+    puesto?: string;
+    lang?: string;
+  };
 }): Promise<Metadata> {
-  const { t } = await getTranslation(searchParams?.lang as string);
+  const { t } = await getTranslation(searchParams?.lang);
+
+  let title = t("all_profiles_seo_title");
+  let description = t("all_profiles_seo_desc");
+
+  if (searchParams?.puesto) {
+    title = `${searchParams.puesto} de Fútbol | FutbolProyect`;
+    description = `Perfiles de ${searchParams.puesto} de fútbol disponibles en FutbolProyect.`;
+  }
+
+  if (searchParams?.puesto && searchParams?.nacionalidad) {
+    title = `${searchParams.puesto} de Fútbol en ${searchParams.nacionalidad} | FutbolProyect`;
+    description = `Perfiles de ${searchParams.puesto} de fútbol en ${searchParams.nacionalidad}.`;
+  }
+
   return {
-    title: t("all_profiles_seo_title"),
-    description: t("all_profiles_seo_desc"),
+    title,
+    description,
+    alternates: {
+      canonical: "/perfiles",
+    },
   };
 }
 
-// A separate component for the main content to wrap it in Suspense
+// =========================
+// PROFILES LIST
+// =========================
+
 async function ProfilesList({
   nacionalidad,
   puesto,
@@ -83,8 +102,6 @@ async function ProfilesList({
 }) {
   const profiles = await fetchAllProfiles({ nacionalidad, puesto });
   const { t } = await getTranslation(lang);
-
-  console.log("Profiles in ProfilesList:", profiles); // DEBUG LOG
 
   if (profiles.length === 0) {
     return <Typography>{t("no_profiles_filters")}</Typography>;
@@ -101,34 +118,54 @@ async function ProfilesList({
   );
 }
 
+// =========================
+// PAGE
+// =========================
+
 export default async function AllProfilesPage({
   searchParams,
 }: {
-  searchParams: { nacionalidad?: string; puesto?: string; lang?: string };
+  searchParams: {
+    nacionalidad?: string;
+    puesto?: string;
+    lang?: string;
+  };
 }) {
   const { t } = await getTranslation(searchParams?.lang);
+
   const [nacionalidades, puestos] = await Promise.all([
     fetchNacionalidades(),
     fetchPuestos(),
   ]);
 
-  const { nacionalidad, puesto, lang } = searchParams;
-
   return (
     <Paper sx={{ p: { xs: 2, md: 4 }, m: { xs: 1, md: 2 } }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        sx={{ textAlign: "center" }}
+      >
         {t("all_profiles_title")}
       </Typography>
+
       <Typography paragraph>{t("all_profiles_desc")}</Typography>
 
       <FilterControls
         nacionalidades={nacionalidades}
         puestos={puestos}
-        initialFilters={{ nacionalidad, puesto }}
+        initialFilters={{
+          nacionalidad: searchParams?.nacionalidad,
+          puesto: searchParams?.puesto,
+        }}
       />
 
       <Suspense fallback={<Typography>{t("loading_profiles")}</Typography>}>
-        <ProfilesList nacionalidad={nacionalidad} puesto={puesto} lang={lang} />
+        <ProfilesList
+          nacionalidad={searchParams?.nacionalidad}
+          puesto={searchParams?.puesto}
+          lang={searchParams?.lang}
+        />
       </Suspense>
     </Paper>
   );
