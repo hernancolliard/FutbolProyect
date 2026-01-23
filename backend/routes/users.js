@@ -123,4 +123,18 @@ router.get("/me", verificarToken, async (req, res) => {
   res.json(result.rows[0]);
 });
 
+/* =========================
+   LOGOUT
+========================= */
+router.post("/logout", (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logout exitoso." });
+});
+
 module.exports = router;
