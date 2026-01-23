@@ -41,7 +41,7 @@ const fetchAllProfiles = async (filters: {
 const fetchNacionalidades = async (): Promise<string[]> => {
   const apiUrl = getApiBaseUrl();
 
-  const res = await fetch(`${apiUrl}/api/profiles/nacionalidades`, {
+  const res = await fetch(`${apiUrl}/profiles/nacionalidades`, {
     next: { revalidate: 86400 },
   });
 
@@ -52,7 +52,7 @@ const fetchNacionalidades = async (): Promise<string[]> => {
 const fetchPuestos = async (): Promise<string[]> => {
   const apiUrl = getApiBaseUrl();
 
-  const res = await fetch(`${apiUrl}/api/profiles/puestos`, {
+  const res = await fetch(`${apiUrl}/profiles/puestos`, {
     next: { revalidate: 86400 },
   });
 
