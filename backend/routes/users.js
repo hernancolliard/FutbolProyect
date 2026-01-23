@@ -81,7 +81,7 @@ router.post("/google-login", async (req, res) => {
     if (!user) {
       const created = await db.query(
         `INSERT INTO usuarios (nombre, email, foto_perfil, tipo_usuario)
-         VALUES (@name, @email, @picture, 'postulante')
+         VALUES (@name, @email, @picture, 'ofertante')
          RETURNING *`,
         { name, email, picture },
       );
