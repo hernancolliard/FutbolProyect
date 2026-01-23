@@ -1,7 +1,5 @@
+"use client";
 export const dynamic = "force-dynamic";
-
-("use client");
-
 import React, { useState } from "react";
 import publicApi from "@/lib/publicApi";
 import { useTranslation } from "react-i18next";

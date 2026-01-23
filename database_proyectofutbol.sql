@@ -179,6 +179,10 @@ ALTER TABLE user_videos
 ADD COLUMN title_es VARCHAR(255),
 ADD COLUMN title_en VARCHAR(255);
 select*from usuarios u, perfiles_usuario pu ;
+SELECT * FROM usuarios u
+JOIN perfiles_usuario p ON u.id = p.id_usuario  
+WHERE u.tipo_usuario = 'postulante'   ;
+select*from perfiles_usuario p ;
 SELECT password_hash
 FROM usuarios
 WHERE email = 'devhernan967@gmail.com';
@@ -187,3 +191,19 @@ select*from ofertas_laborales;
 UPDATE ofertas_laborales
 SET featured_until = '2026-03-30'
 WHERE is_featured = TRUE;
+SELECT DISTINCT tipo_usuario FROM usuarios;
+SELECT
+          u.id, u.nombre,
+          u.apellido,
+          p.foto_perfil_url,
+          p.posicion_principal,
+          p.nacionalidad,
+          p.average_rating,
+          p.total_ratings
+      FROM
+          usuarios u
+      JOIN
+          perfiles_usuario p ON u.id = p.id_usuario
+      WHERE u.tipo_usuario = 'postulante'
+      ORDER BY
+          u.id DESC;
