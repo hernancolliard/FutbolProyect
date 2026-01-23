@@ -17,16 +17,26 @@ const fetchAllProfiles = async (filters: {
 }): Promise<Profile[]> => {
   const apiUrl = getApiBaseUrl();
 
-  const query = new URLSearchParams(
-    filters as Record<string, string>,
-  ).toString();
+  const params = new URLSearchParams();
 
-  const res = await fetch(`${apiUrl}/api/profiles?${query}`, {
+  if (filters.nacionalidad && filters.nacionalidad !== "all") {
+    params.append("nacionalidad", filters.nacionalidad);
+  }
+
+  if (filters.puesto && filters.puesto !== "all") {
+    params.append("puesto", filters.puesto);
+  }
+
+  const query = params.toString();
+  const url = query
+    ? `${apiUrl}/api/profiles?${query}`
+    : `${apiUrl}/api/profiles`;
+
+  const res = await fetch(url, {
     next: { revalidate: 3600 },
   });
 
   if (!res.ok) return [];
-
   return res.json();
 };
 
