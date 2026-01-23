@@ -1,12 +1,8 @@
-// lib/publicApi.ts
 import axios from "axios";
 
 const publicApi = axios.create({
-  baseURL: "/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: false, // 🔑 SIN cookies, SIN sesión
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  withCredentials: true,
 });
 
 export default publicApi;

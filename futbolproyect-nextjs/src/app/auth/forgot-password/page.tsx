@@ -1,4 +1,6 @@
-"use client";
+export const dynamic = "force-dynamic";
+
+("use client");
 
 import React, { useState } from "react";
 import publicApi from "@/lib/publicApi";
@@ -17,6 +19,7 @@ import {
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation("common");
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -55,14 +58,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Box
-      sx={{
-        mt: 4,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
       <Card sx={{ maxWidth: 400, width: "100%", p: 2 }}>
         <CardContent>
           <Typography variant="h5" gutterBottom>
