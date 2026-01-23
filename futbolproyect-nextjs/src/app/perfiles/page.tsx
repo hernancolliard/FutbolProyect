@@ -28,9 +28,7 @@ const fetchAllProfiles = async (filters: {
   }
 
   const query = params.toString();
-  const url = query
-    ? `${apiUrl}/api/profiles?${query}`
-    : `${apiUrl}/api/profiles`;
+  const url = query ? `${apiUrl}/profiles?${query}` : `${apiUrl}/profiles`;
 
   const res = await fetch(url, {
     next: { revalidate: 3600 },
