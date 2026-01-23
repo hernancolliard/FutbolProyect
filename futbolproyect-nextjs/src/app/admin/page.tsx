@@ -1,4 +1,5 @@
-'use client';
+"use client";
+export const dynamic = "force-dynamic";
 
 import AdminDashboard from "@/components/AdminDashboard";
 import AdminRoute from "@/components/AdminRoute";
@@ -12,7 +13,7 @@ export default function AdminPage() {
     <AdminRoute>
       <Box sx={{ p: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom textAlign="center">
-          {t('admin_dashboard_title', 'Panel de Administración')}
+          {t("admin_dashboard_title", "Panel de Administración")}
         </Typography>
         <AdminDashboard />
       </Box>
