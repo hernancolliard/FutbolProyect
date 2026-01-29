@@ -3,7 +3,7 @@ const path = require("path");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // 🔥 CLAVE: export estático
-  output: "export",
+  output: "standalone",
 
   // Next necesita URLs con / al final en export
   trailingSlash: true,
