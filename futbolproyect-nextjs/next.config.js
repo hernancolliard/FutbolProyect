@@ -5,7 +5,6 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_BASE_URL: "https://futbolproyect.com/api",
   },
-  output: "standalone",
   i18n: {
     locales: ["es", "en"],
     defaultLocale: "es",
