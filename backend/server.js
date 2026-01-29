@@ -45,7 +45,7 @@ appNext.prepare().then(() => {
   // Next.js handler
   app.all(/(.*)/, (req, res) => handle(req, res));
 
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 10000;
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Servidor listo en puerto ${PORT}`);
   });
