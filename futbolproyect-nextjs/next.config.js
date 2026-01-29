@@ -2,6 +2,9 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_API_URL: "https://futbolproyect-backend.onrender.com/api",
+  },
   output: "standalone",
   i18n: {
     locales: ["es", "en"],
