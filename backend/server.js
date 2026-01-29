@@ -14,7 +14,6 @@ const handle = appNext.getRequestHandler();
 appNext.prepare().then(() => {
   const app = express();
 
-  // 🔐 CORS CORRECTO (MISMO DOMINIO)
   app.use(
     cors({
       origin: "https://futbolproyect.com",
@@ -30,7 +29,7 @@ appNext.prepare().then(() => {
     next();
   });
 
-  // RUTAS API
+  // API routes
   app.use("/api/users", require("./routes/users"));
   app.use("/api/payments", require("./routes/payments"));
   app.use("/api/offers", require("./routes/offers"));
@@ -43,12 +42,11 @@ appNext.prepare().then(() => {
   app.use("/api/sitemap", require("./routes/sitemap"));
   app.use("/api/subscriptions", require("./routes/subscriptions"));
 
-  // Next.js
+  // Next.js handler
   app.all(/(.*)/, (req, res) => handle(req, res));
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Servidor listo en puerto ${PORT}`);
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Servidor listo en puerto ${PORT}`);
+  });
 });
-
