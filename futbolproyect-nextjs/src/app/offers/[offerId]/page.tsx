@@ -1,24 +1,22 @@
-import { Metadata } from "next";
-import { getOfferById } from "@/lib/offers";
+import type { Metadata } from "next";
 import OfferDetailClient from "./OfferDetailClient";
 
 type Props = {
   params: { offerId: string };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const offer = await getOfferById(params.offerId);
+/* =========================
+   SEO SEGURO PARA STATIC
+========================= */
+export const metadata: Metadata = {
+  title: "Oferta de trabajo en fútbol | FutbolProyect",
+  description:
+    "Detalle de oferta laboral en el sector fútbol. Postulate y conocé más en FutbolProyect.",
+};
 
-  return {
-    title: `${offer.titulo} | FutbolProyect`,
-    description: offer.descripcion?.slice(0, 160),
-    openGraph: {
-      title: offer.titulo,
-      description: offer.descripcion,
-    },
-  };
-}
-
+/* =========================
+   PAGE
+========================= */
 export default function Page({ params }: Props) {
   return <OfferDetailClient offerId={params.offerId} />;
 }

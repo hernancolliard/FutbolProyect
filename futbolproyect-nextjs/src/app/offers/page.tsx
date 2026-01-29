@@ -1,9 +1,7 @@
 "use client";
-export const dynamic = "force-dynamic";
 
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/apiClient";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Box,
   Card,
@@ -11,10 +9,11 @@ import {
   Typography,
   Button,
   Stack,
+  Alert,
 } from "@mui/material";
-import Alert from "@mui/material/Alert";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useTranslation } from "react-i18next";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface Offer {
   id: number;
@@ -24,25 +23,33 @@ interface Offer {
   nivel?: string;
 }
 
-const fetchOffers = async (): Promise<Offer[]> => {
-  const { data } = await apiClient.get("/offers");
-  return Array.isArray(data) ? data : [];
-};
-
 export default function OffersPage() {
-  const router = useRouter();
   const { t } = useTranslation("common");
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const {
-    data: offers = [],
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["offers"],
-    queryFn: fetchOffers,
-  });
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const apiUrl = getApiBaseUrl();
+        const res = await fetch(`${apiUrl}/offers`);
 
-  if (isLoading) {
+        if (!res.ok) throw new Error("Error fetching offers");
+
+        const data = await res.json();
+        setOffers(Array.isArray(data) ? data : []);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOffers();
+  }, []);
+
+  if (loading) {
     return <LoadingSpinner text={t("loading_offers")} />;
   }
 
@@ -71,13 +78,14 @@ export default function OffersPage() {
               <Typography variant="h6">{offer.titulo}</Typography>
 
               <Typography variant="body2" sx={{ mt: 1 }}>
-                {offer.descripcion.slice(0, 150)}...
+                {offer.descripcion.slice(0, 150)}…
               </Typography>
 
               <Button
                 sx={{ mt: 2 }}
                 variant="outlined"
-                onClick={() => router.push(`/offers/${offer.id}`)}
+                component={Link}
+                href={`/offers/${offer.id}`}
               >
                 {t("view_offer")}
               </Button>

@@ -1,17 +1,50 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProfileById } from "@/lib/profiles";
 import { Profile } from "@/lib/types";
 
 /* =========================
-   SEO DINÁMICO
+   API HELPERS (BUILD TIME)
+========================= */
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
+async function getAllProfiles(): Promise<Profile[]> {
+  const res = await fetch(`${API_URL}/profiles`, {
+    cache: "force-cache",
+  });
+
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function getProfileBySlug(slug: string): Promise<Profile | null> {
+  const res = await fetch(`${API_URL}/profiles/${slug}`, {
+    cache: "force-cache",
+  });
+
+  if (!res.ok) return null;
+  return res.json();
+}
+
+/* =========================
+   STATIC PARAMS (OBLIGATORIO)
+========================= */
+export async function generateStaticParams() {
+  const profiles = await getAllProfiles();
+
+  return profiles.map((profile) => ({
+    slug: profile.id.toString(), // o profile.slug si lo tenés
+  }));
+}
+
+/* =========================
+   SEO ESTÁTICO
 ========================= */
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const profile = await getProfileById(params.slug);
+  const profile = await getProfileBySlug(params.slug);
 
   if (!profile) {
     return {
@@ -43,14 +76,14 @@ export default async function ProfilePage({
 }: {
   params: { slug: string };
 }) {
-  const profile: Profile | null = await getProfileById(params.slug);
+  const profile = await getProfileBySlug(params.slug);
 
   if (!profile) notFound();
 
   const nombreCompleto = `${profile.nombre} ${profile.apellido}`;
 
   /* =========================
-     SCHEMA.ORG AVANZADO
+     SCHEMA.ORG
   ========================= */
   const schema = {
     "@context": "https://schema.org",
@@ -69,71 +102,15 @@ export default async function ProfilePage({
       profile.youtube_url,
       profile.transfermarkt_url,
     ].filter(Boolean),
-
-    // HEIGHT / WEIGHT
-    height: profile.altura_cm
-      ? {
-          "@type": "QuantitativeValue",
-          value: profile.altura_cm,
-          unitText: "cm",
-        }
-      : undefined,
-
-    weight: profile.peso_kg
-      ? {
-          "@type": "QuantitativeValue",
-          value: profile.peso_kg,
-          unitText: "kg",
-        }
-      : undefined,
-
-    // RATINGS (rich snippet)
-    aggregateRating:
-      profile.average_rating && profile.total_ratings
-        ? {
-            "@type": "AggregateRating",
-            ratingValue: profile.average_rating,
-            ratingCount: profile.total_ratings,
-          }
-        : undefined,
-  };
-
-  /* =========================
-     BREADCRUMB (opcional pero recomendado)
-  ========================= */
-  const breadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Perfiles",
-        item: "https://futbolproyect.com/perfiles",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: nombreCompleto,
-        item: `https://futbolproyect.com/perfiles/${profile.id}`,
-      },
-    ],
   };
 
   return (
     <>
-      {/* ========= SCHEMA ========= */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
-      />
-
-      {/* ========= CONTENIDO ========= */}
       <main>
         <h1>{nombreCompleto}</h1>
 
@@ -143,22 +120,6 @@ export default async function ProfilePage({
 
         <p>
           <strong>Nacionalidad:</strong> {profile.nacionalidad}
-        </p>
-
-        {profile.altura_cm && (
-          <p>
-            <strong>Altura:</strong> {profile.altura_cm} cm
-          </p>
-        )}
-
-        {profile.peso_kg && (
-          <p>
-            <strong>Peso:</strong> {profile.peso_kg} kg
-          </p>
-        )}
-
-        <p>
-          <strong>Pie dominante:</strong> {profile.pie_dominante}
         </p>
 
         {profile.resumen_profesional && (

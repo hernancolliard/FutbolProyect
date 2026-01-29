@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
 import { Grid, Typography, Paper } from "@mui/material";
@@ -7,146 +7,53 @@ import FilterControls from "@/components/profile/FilterControls";
 import ProfileCard from "@/components/profile/ProfileCard";
 import { getApiBaseUrl } from "@/lib/api";
 
-// =========================
-// FETCH FUNCTIONS
-// =========================
+/* =========================
+   STATIC FETCH (BUILD TIME)
+========================= */
 
-const fetchAllProfiles = async (filters: {
-  nacionalidad?: string;
-  puesto?: string;
-}): Promise<Profile[]> => {
-  const apiUrl = getApiBaseUrl();
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-  const params = new URLSearchParams();
-
-  if (filters.nacionalidad && filters.nacionalidad !== "all") {
-    params.append("nacionalidad", filters.nacionalidad);
-  }
-
-  if (filters.puesto && filters.puesto !== "all") {
-    params.append("puesto", filters.puesto);
-  }
-
-  const query = params.toString();
-  const url = query ? `${apiUrl}/profiles?${query}` : `${apiUrl}/profiles`;
-
-  const res = await fetch(url, {
-    next: { revalidate: 3600 },
-  });
-
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchNacionalidades = async (): Promise<string[]> => {
-  const apiUrl = getApiBaseUrl();
-
-  const res = await fetch(`${apiUrl}/profiles/nacionalidades`, {
-    next: { revalidate: 86400 },
-  });
-
-  if (!res.ok) return [];
-  return res.json();
-};
-
-const fetchPuestos = async (): Promise<string[]> => {
-  const apiUrl = getApiBaseUrl();
-
-  const res = await fetch(`${apiUrl}/profiles/puestos`, {
-    next: { revalidate: 86400 },
-  });
-
-  if (!res.ok) return [];
-  return res.json();
-};
-
-// =========================
-// SEO METADATA
-// =========================
-
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: {
-    nacionalidad?: string;
-    puesto?: string;
-    lang?: string;
-  };
-}): Promise<Metadata> {
-  const { t } = await getTranslation(searchParams?.lang);
-
-  let title = t("all_profiles_seo_title");
-  let description = t("all_profiles_seo_desc");
-
-  if (searchParams?.puesto) {
-    title = `${searchParams.puesto} de Fútbol | FutbolProyect`;
-    description = `Perfiles de ${searchParams.puesto} de fútbol disponibles en FutbolProyect.`;
-  }
-
-  if (searchParams?.puesto && searchParams?.nacionalidad) {
-    title = `${searchParams.puesto} de Fútbol en ${searchParams.nacionalidad} | FutbolProyect`;
-    description = `Perfiles de ${searchParams.puesto} de fútbol en ${searchParams.nacionalidad}.`;
-  }
+async function fetchInitialData(): Promise<{
+  profiles: Profile[];
+  nacionalidades: string[];
+  puestos: string[];
+}> {
+  const [profilesRes, nacRes, puestosRes] = await Promise.all([
+    fetch(`${API_URL}/profiles`, { cache: "force-cache" }),
+    fetch(`${API_URL}/profiles/nacionalidades`, { cache: "force-cache" }),
+    fetch(`${API_URL}/profiles/puestos`, { cache: "force-cache" }),
+  ]);
 
   return {
-    title,
-    description,
+    profiles: profilesRes.ok ? await profilesRes.json() : [],
+    nacionalidades: nacRes.ok ? await nacRes.json() : [],
+    puestos: puestosRes.ok ? await puestosRes.json() : [],
+  };
+}
+
+/* =========================
+   SEO ESTÁTICO
+========================= */
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Perfiles de Fútbol Profesional | FutbolProyect",
+    description:
+      "Explorá perfiles de futbolistas profesionales, jugadores libres y talentos emergentes en FutbolProyect.",
     alternates: {
       canonical: "/perfiles",
     },
   };
 }
 
-// =========================
-// PROFILES LIST
-// =========================
+/* =========================
+   PAGE
+========================= */
 
-async function ProfilesList({
-  nacionalidad,
-  puesto,
-  lang,
-}: {
-  nacionalidad?: string;
-  puesto?: string;
-  lang?: string;
-}) {
-  const profiles = await fetchAllProfiles({ nacionalidad, puesto });
-  const { t } = await getTranslation(lang);
+export default async function AllProfilesPage() {
+  const { t } = await getTranslation("es");
 
-  if (profiles.length === 0) {
-    return <Typography>{t("no_profiles_filters")}</Typography>;
-  }
-
-  return (
-    <Grid container spacing={3} sx={{ mt: 2 }}>
-      {profiles.map((profile) => (
-        <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
-          <ProfileCard profile={profile} />
-        </Grid>
-      ))}
-    </Grid>
-  );
-}
-
-// =========================
-// PAGE
-// =========================
-
-export default async function AllProfilesPage({
-  searchParams,
-}: {
-  searchParams: {
-    nacionalidad?: string;
-    puesto?: string;
-    lang?: string;
-  };
-}) {
-  const { t } = await getTranslation(searchParams?.lang);
-
-  const [nacionalidades, puestos] = await Promise.all([
-    fetchNacionalidades(),
-    fetchPuestos(),
-  ]);
+  const { profiles, nacionalidades, puestos } = await fetchInitialData();
 
   return (
     <Paper sx={{ p: { xs: 2, md: 4 }, m: { xs: 1, md: 2 } }}>
@@ -164,18 +71,17 @@ export default async function AllProfilesPage({
       <FilterControls
         nacionalidades={nacionalidades}
         puestos={puestos}
-        initialFilters={{
-          nacionalidad: searchParams?.nacionalidad,
-          puesto: searchParams?.puesto,
-        }}
+        initialProfiles={profiles}
       />
 
       <Suspense fallback={<Typography>{t("loading_profiles")}</Typography>}>
-        <ProfilesList
-          nacionalidad={searchParams?.nacionalidad}
-          puesto={searchParams?.puesto}
-          lang={searchParams?.lang}
-        />
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          {profiles.map((profile) => (
+            <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
+              <ProfileCard profile={profile} />
+            </Grid>
+          ))}
+        </Grid>
       </Suspense>
     </Paper>
   );
