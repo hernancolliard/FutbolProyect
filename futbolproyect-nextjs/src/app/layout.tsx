@@ -12,6 +12,8 @@ import { GoogleOAuthProvider } from '@react-oauth/google'; // Importar GoogleOAu
 import GoogleTagManager from "@/components/GoogleTagManager";
 import { Suspense } from "react";
 
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
