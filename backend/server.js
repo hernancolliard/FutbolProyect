@@ -21,6 +21,9 @@ app.use("/api/payments", require("./routes/payments"));
 // etc...
 
 const PORT = process.env.PORT || 3001;
+app.get("/", (req, res) => {
+  res.status(200).send("API FutbolProyect OK");
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Backend escuchando en puerto", PORT);
