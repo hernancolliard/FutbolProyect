@@ -1,30 +1,37 @@
+const express = require("express");
+const next = require("next");
+const { parse } = require("url");
 
-const express = require('express');
-const next = require('next');
-const { parse } = require('url');
+const port = process.env.PORT || 10000;
+const hostname = "0.0.0.0";
 
-const port = parseInt(process.env.PORT, 10) || 3000;
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = '0.0.0.0'; // Explicitly bind to 0.0.0.0
+// 🔒 Forzar producción
+const dev = false;
 
-// Create the Next.js app instance
-const app = next({ dev });
+const app = next({
+  dev,
+  hostname,
+  port,
+});
+
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
-  const server = express();
+app
+  .prepare()
+  .then(() => {
+    const server = express();
 
-  // The custom server should pass all requests to the Next.js handler
-  server.all('*', (req, res) => {
-    const parsedUrl = parse(req.url, true);
-    return handle(req, res, parsedUrl);
-  });
+    server.all("*", (req, res) => {
+      const parsedUrl = parse(req.url, true);
+      handle(req, res, parsedUrl);
+    });
 
-  server.listen(port, hostname, (err) => {
-    if (err) throw err;
-    console.log(`> Ready on http://${hostname}:${port}`);
-  });
-}).catch(err => {
-    console.error('Error preparing Next.js app:', err);
+    // 🚨 NO pasar hostname acá
+    server.listen(port, () => {
+      console.log(`✅ Frontend listening on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Error starting server:", err);
     process.exit(1);
-});
+  });
