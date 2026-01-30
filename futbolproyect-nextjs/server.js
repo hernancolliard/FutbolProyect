@@ -3,7 +3,7 @@ const next = require("next");
 const { parse } = require("url");
 
 const port = parseInt(process.env.PORT, 10) || 10000;
-const hostname = "0.0.0.0"; // Usar 0.0.0.0 para compatibilidad con contenedores Docker/Render
+const hostname = "localhost"; // Next.js prefiere localhost internamente
 
 // 🔒 Forzar producción
 const dev = process.env.NODE_ENV !== "production";
