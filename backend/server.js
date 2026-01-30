@@ -6,7 +6,13 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["https://futbolproyect.com", "https://www.futbolproyect.com"],
+    origin: [
+      "https://futbolproyect.com",
+      "https://www.futbolproyect.com",
+      "https://futbolproyect.onrender.com",
+      "http://localhost:3000",
+      "http://localhost:10000",
+    ],
     credentials: true,
   }),
 );
