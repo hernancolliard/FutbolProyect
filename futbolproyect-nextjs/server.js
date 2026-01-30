@@ -27,7 +27,8 @@ app
     });
 
     // 🚨 NO pasar hostname acá
-    server.listen(port, () => {
+    server.listen(port, "0.0.0.0", (err) => {
+      if (err) throw err;
       console.log(`✅ Frontend listening on port ${port}`);
     });
   })
