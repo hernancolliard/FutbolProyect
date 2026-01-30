@@ -20,7 +20,8 @@ app.use("/api/profiles", require("./routes/profiles"));
 app.use("/api/payments", require("./routes/payments"));
 // etc...
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log("🚀 Backend corriendo en puerto", PORT);
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Backend escuchando en puerto", PORT);
 });
