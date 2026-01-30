@@ -2,11 +2,11 @@ const express = require("express");
 const next = require("next");
 const { parse } = require("url");
 
-const port = process.env.PORT || 10000;
-const hostname = "0.0.0.0";
+const port = parseInt(process.env.PORT, 10) || 10000;
+const hostname = "localhost"; // Next.js interno prefiere localhost
 
 // 🔒 Forzar producción
-const dev = false;
+const dev = process.env.NODE_ENV !== "production";
 
 const app = next({
   dev,

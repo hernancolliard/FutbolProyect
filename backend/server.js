@@ -20,7 +20,7 @@ app.use("/api/profiles", require("./routes/profiles"));
 app.use("/api/payments", require("./routes/payments"));
 // etc...
 
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT, 10) || 3001;
 app.get("/", (req, res) => {
   res.status(200).send("API FutbolProyect OK");
 });
