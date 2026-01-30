@@ -8,11 +8,6 @@ const nextConfig = {
   // Next necesita URLs con / al final en export
   trailingSlash: true,
 
-  // Variables públicas
-  env: {
-    NEXT_PUBLIC_API_BASE_URL: "https://futbolproyect.com/api",
-  },
-
   // i18n ⚠️ OJO: Next export NO soporta i18n nativo
   // Vamos a manejar idiomas con rutas (/es, /en) o i18next
   i18n: undefined,
