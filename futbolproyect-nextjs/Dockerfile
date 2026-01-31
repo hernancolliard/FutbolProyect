@@ -13,6 +13,11 @@ RUN npm install
 # 5. Copiar el resto del código
 COPY . .
 
+# ⚠️ IMPORTANTE: Next.js necesita la URL del backend DURANTE el build para generar páginas estáticas.
+# Reemplaza la URL de abajo con la URL real de tu backend en Render si es diferente.
+ARG NEXT_PUBLIC_API_BASE_URL=https://futbolproyect.onrender.com/api
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # Construir la aplicación Next.js
 RUN npm run build
 
