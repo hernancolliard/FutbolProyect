@@ -1,44 +1,20 @@
-# 1. Imagen base ligera de Node.js
-FROM node:18-alpine AS base
+# 1. Usar imagen base ligera de Node.js
+FROM node:18-alpine
 
-# 2. Etapa de dependencias
-FROM base AS deps
+# 2. Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json y package-lock.json
+# 3. Copiar archivos de dependencias
 COPY package.json package-lock.json* ./
 
-# Instalar dependencias (usamos npm ci para instalaciones limpias)
-RUN npm ci
+# 4. Instalar dependencias (solo producción)
+RUN npm ci --omit=dev
 
-# 3. Etapa de construcción (Builder)
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# 5. Copiar el resto del código
 COPY . .
 
-# Desactivar telemetría de Next.js durante el build
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Construir la aplicación
-RUN npm run build
-
-# 4. Etapa de producción (Runner)
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-# Copiar los archivos necesarios desde la etapa de construcción
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/server.js ./server.js
-
-# Exponer el puerto (Render inyectará la variable PORT automáticamente)
+# 6. Exponer el puerto (Render usa 10000 internamente)
 EXPOSE 10000
 
-# Ejecutar tu servidor personalizado
+# 7. Iniciar el servidor
 CMD ["node", "server.js"]
