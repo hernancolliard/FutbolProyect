@@ -2,15 +2,12 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Desactiva trailingSlash a menos que sea estrictamente necesario
+  trailingSlash: false,
 
-  // Next necesita URLs con / al final en export
-  trailingSlash: true,
+  // Elimina i18n: undefined, deja que Next.js use su configuración por defecto
+  // o configúralo formalmente si no vas a usar export estático.
 
-  // i18n ⚠️ OJO: Next export NO soporta i18n nativo
-  // Vamos a manejar idiomas con rutas (/es, /en) o i18next
-  i18n: undefined,
-
-  // Headers (solo se aplican si el hosting los respeta)
   async headers() {
     return [
       {
@@ -25,9 +22,9 @@ const nextConfig = {
     ];
   },
 
-  // Imágenes remotas (S3 OK)
   images: {
-    unoptimized: true, // NECESARIO para export
+    // CAMBIO IMPORTANTE: Quita unoptimized: true para usar sharp en Render
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: "https",
