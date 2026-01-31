@@ -12,7 +12,8 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 
 RUN npm run build
 
-EXPOSE 10000
 
 
-CMD ["npm", "run", "start"]
+
+# Elimina EXPOSE 10000
+CMD ["sh", "-c", "npm run start -- -p $PORT"]
