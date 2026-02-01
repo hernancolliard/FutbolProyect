@@ -13,8 +13,5 @@ RUN npm install --omit=dev
 # 5. Copiar el resto del código
 COPY . .
 
-# 6. Exponer el puerto (Render usa 10000 internamente)
-EXPOSE 10000
-
 # 7. Iniciar el servidor
 CMD ["node", "server.js"]
