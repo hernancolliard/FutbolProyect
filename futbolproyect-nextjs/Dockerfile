@@ -16,4 +16,4 @@ RUN npm run build
 
 
 # Elimina EXPOSE 10000
-CMD ["sh", "-c", "next start -H 0.0.0.0 -p $PORT"]
+CMD ["sh", "-c", "npm run start -- -p $PORT"]
