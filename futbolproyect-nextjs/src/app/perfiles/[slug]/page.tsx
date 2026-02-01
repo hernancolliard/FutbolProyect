@@ -3,42 +3,41 @@ import type { Metadata } from "next";
 import { Profile } from "@/lib/types";
 
 /* =========================
-   API HELPERS (BUILD TIME)
+   CONFIG
 ========================= */
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-async function getAllProfiles(): Promise<Profile[]> {
-  const res = await fetch(`${API_URL}/profiles`, {
-    cache: "force-cache",
-  });
+// Forzamos render dinámico (Vercel friendly)
+export const dynamic = "force-dynamic";
 
-  if (!res.ok) return [];
-  return res.json();
+// API base
+const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_BASE_URL no está definida");
 }
+
+/* =========================
+   API HELPERS (RUNTIME)
+========================= */
 
 async function getProfileBySlug(slug: string): Promise<Profile | null> {
-  const res = await fetch(`${API_URL}/profiles/${slug}`, {
-    cache: "force-cache",
-  });
+  try {
+    const res = await fetch(`${API_URL}/profiles/${slug}`, {
+      cache: "no-store",
+    });
 
-  if (!res.ok) return null;
-  return res.json();
+    if (!res.ok) return null;
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return null;
+  }
 }
 
 /* =========================
-   STATIC PARAMS (OBLIGATORIO)
+   SEO DINÁMICO
 ========================= */
-export async function generateStaticParams() {
-  const profiles = await getAllProfiles();
 
-  return profiles.map((profile) => ({
-    slug: profile.id.toString(), // o profile.slug si lo tenés
-  }));
-}
-
-/* =========================
-   SEO ESTÁTICO
-========================= */
 export async function generateMetadata({
   params,
 }: {
@@ -71,6 +70,7 @@ export async function generateMetadata({
 /* =========================
    PAGE
 ========================= */
+
 export default async function ProfilePage({
   params,
 }: {
