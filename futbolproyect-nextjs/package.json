@@ -5,9 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "postinstall": "npm rebuild sharp"
+    "start": "next start -H 0.0.0.0 -p 10000",
+    "lint": "next lint"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
