@@ -1,5 +1,6 @@
 import React from 'react';
 import AllOffersClient from '@/components/client-components/AllOffersClient';
+export const dynamic = 'force-dynamic';
 
 // SEO Metadata for the page
 export const metadata = {

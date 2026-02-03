@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+export const dynamic = 'force-dynamic';
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+export const dynamic = 'force-dynamic';
 import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
 import { Grid, Typography, Paper } from "@mui/material";
