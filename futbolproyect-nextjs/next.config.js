@@ -2,6 +2,8 @@ const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  staticPageGenerationTimeout: 120,
+
   // Desactiva trailingSlash a menos que sea estrictamente necesario
   trailingSlash: false,
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import FeaturedProfilesClient from '@/components/client-components/FeaturedProfilesClient';
+export const dynamic = 'force-dynamic';
 
 // SEO Metadata for the page
 export const metadata = {

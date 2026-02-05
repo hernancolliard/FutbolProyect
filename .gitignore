@@ -18,4 +18,3 @@ Running
 start
 
 # Lockfiles - Ignore all, always
-**/package-lock.json

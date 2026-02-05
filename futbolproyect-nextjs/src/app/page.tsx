@@ -27,13 +27,23 @@ import FadeInOnScroll from "@/components/FadeInOnScroll";
    FETCHERS (CLIENT SAFE)
 ========================= */
 const fetchHomePageOffers = async () => {
-  const { data } = await apiClient.get("/offers?limit=6");
-  return [...(data.featuredOffers || []), ...(data.offers || [])];
+  try {
+    const { data } = await apiClient.get("/offers?limit=6");
+    return [...(data.featuredOffers || []), ...(data.offers || [])];
+  } catch (error) {
+    console.error("Error fetching home page offers:", error);
+    return [];
+  }
 };
 
 const fetchFeaturedProfiles = async () => {
-  const { data } = await apiClient.get("/profiles/featured");
-  return data || [];
+  try {
+    const { data } = await apiClient.get("/profiles/featured");
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching featured profiles:", error);
+    return [];
+  }
 };
 
 export default function HomePage() {

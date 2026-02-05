@@ -19,17 +19,26 @@ async function fetchInitialData(): Promise<{
   nacionalidades: string[];
   puestos: string[];
 }> {
-  const [profilesRes, nacRes, puestosRes] = await Promise.all([
-    fetch(`${API_URL}/profiles`, { cache: "force-cache" }),
-    fetch(`${API_URL}/profiles/nacionalidades`, { cache: "force-cache" }),
-    fetch(`${API_URL}/profiles/puestos`, { cache: "force-cache" }),
-  ]);
+  try {
+    const [profilesRes, nacRes, puestosRes] = await Promise.all([
+      fetch(`${API_URL}/profiles`, { cache: "no-store" }),
+      fetch(`${API_URL}/profiles/nacionalidades`, { cache: "no-store" }),
+      fetch(`${API_URL}/profiles/puestos`, { cache: "no-store" }),
+    ]);
 
-  return {
-    profiles: profilesRes.ok ? await profilesRes.json() : [],
-    nacionalidades: nacRes.ok ? await nacRes.json() : [],
-    puestos: puestosRes.ok ? await puestosRes.json() : [],
-  };
+    return {
+      profiles: profilesRes.ok ? await profilesRes.json() : [],
+      nacionalidades: nacRes.ok ? await nacRes.json() : [],
+      puestos: puestosRes.ok ? await puestosRes.json() : [],
+    };
+  } catch (error) {
+    console.error("Error fetching initial profile data:", error);
+    return {
+      profiles: [],
+      nacionalidades: [],
+      puestos: [],
+    };
+  }
 }
 
 /* =========================

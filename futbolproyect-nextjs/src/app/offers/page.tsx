@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+export const dynamic = 'force-dynamic';
 import {
   Box,
   Card,
