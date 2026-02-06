@@ -1,8 +1,15 @@
 const { Pool } = require("pg");
 
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL no está definida. Verifica tus variables de entorno.",
+  );
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   allowExitOnIdle: true,
+  connectionTimeoutMillis: 5000, // Timeout de 5s para evitar que el build se cuelgue
 });
 
 module.exports = {

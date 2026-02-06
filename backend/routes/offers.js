@@ -16,26 +16,12 @@ const validate = require("../middleware/validateMiddleware");
 const { translateText } = require("../services/translationService");
 const { uploadToS3 } = require("../services/s3Service");
 const { sendNewOfferNotificationEmail } = require("../services/emailService");
+const { offerSchema } = require("../offerSchema");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
 // El caché se guardará por 3 minutos (180 segundos)
 const myCache = new NodeCache({ stdTTL: 180, checkperiod: 0 });
-
-// --- Esquema de validación para la creación de ofertas ---
-const offerSchema = z.object({
-  titulo: z.string().min(5).max(100),
-  descripcion: z.string().min(20),
-  puesto: z.string().min(3).optional().or(z.literal("")),
-  ubicacion: z.string().min(3).optional().or(z.literal("")),
-  salario: z.preprocess(
-    (val) => (val ? parseFloat(val) : undefined),
-    z.number().positive().optional(),
-  ),
-  horarios: z.string().optional(),
-  nivel: z.string().optional(),
-  detalles_adicionales: z.string().optional(),
-});
 
 // --- Configuración de Multer para la subida de archivos ---
 const storage = multer.memoryStorage();
@@ -641,12 +627,10 @@ router.post(
         profile.fecha_de_nacimiento;
 
       if (!isProfileComplete) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Debes completar tu perfil (foto y datos físicos) antes de postularte.",
-          });
+        return res.status(400).json({
+          message:
+            "Debes completar tu perfil (foto y datos físicos) antes de postularte.",
+        });
       }
 
       // 1. Verificar que la oferta existe y no es del propio usuario
