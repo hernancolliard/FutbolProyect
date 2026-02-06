@@ -20,7 +20,7 @@ const { sendNewOfferNotificationEmail } = require("../services/emailService");
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
 // El caché se guardará por 3 minutos (180 segundos)
-const myCache = new NodeCache({ stdTTL: 180 });
+const myCache = new NodeCache({ stdTTL: 180, checkperiod: 0 });
 
 // --- Esquema de validación para la creación de ofertas ---
 const offerSchema = z.object({
@@ -30,7 +30,7 @@ const offerSchema = z.object({
   ubicacion: z.string().min(3).optional().or(z.literal("")),
   salario: z.preprocess(
     (val) => (val ? parseFloat(val) : undefined),
-    z.number().positive().optional()
+    z.number().positive().optional(),
   ),
   horarios: z.string().optional(),
   nivel: z.string().optional(),
@@ -73,20 +73,16 @@ const processOfferImages = async (req, res, next) => {
 
       // 3. Subir todas las versiones a S3 en paralelo
       const [originalUrl, mediumUrl, thumbUrl] = await Promise.all([
-        uploadToS3(
-          originalWebpBuffer,
-          `offers/${fileBase}.webp`,
-          "image/webp"
-        ),
+        uploadToS3(originalWebpBuffer, `offers/${fileBase}.webp`, "image/webp"),
         uploadToS3(
           mediumWebpBuffer,
           `offers/${fileBase}_medium.webp`,
-          "image/webp"
+          "image/webp",
         ),
         uploadToS3(
           thumbWebpBuffer,
           `offers/${fileBase}_thumb.webp`,
-          "image/webp"
+          "image/webp",
         ),
       ]);
 
@@ -116,7 +112,7 @@ router.get("/", async (req, res) => {
     sort = "desc",
     page = 1,
     limit = 10,
-    show = 'separated', // 'separated' (default) or 'all'
+    show = "separated", // 'separated' (default) or 'all'
   } = req.query;
 
   const cacheKey = `offers:${puesto || "all"}:${ubicacion || "all"}:${
@@ -140,7 +136,7 @@ router.get("/", async (req, res) => {
     let whereClauses = ["o.estado = 'abierta'"];
     let queryParams = {};
 
-    if (show === 'separated') {
+    if (show === "separated") {
       whereClauses.push("o.is_featured = FALSE");
     }
 
@@ -177,12 +173,12 @@ router.get("/", async (req, res) => {
     const totalPages = Math.ceil(totalOffers / limit);
 
     const offset = (page - 1) * limit;
-    const orderBy = sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
-    
+    const orderBy =
+      sort === "asc" ? "o.fecha_publicacion ASC" : "o.fecha_publicacion DESC";
+
     // When showing all, we want featured offers to appear first.
-    const finalOrderBy = show === 'all' 
-      ? `o.is_featured DESC, ${orderBy}` 
-      : orderBy;
+    const finalOrderBy =
+      show === "all" ? `o.is_featured DESC, ${orderBy}` : orderBy;
 
     const offersQuery = `
       SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
@@ -194,12 +190,12 @@ router.get("/", async (req, res) => {
     `;
     queryParams.offset = offset;
     queryParams.limit = parseInt(limit);
-    
+
     const offersResult = await db.query(offersQuery, queryParams);
     const offers = offersResult.rows;
 
     let featuredOffers = [];
-    if (show === 'separated') {
+    if (show === "separated") {
       const featuredQuery = `
         SELECT o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion, o.imagen_url as imagen_url, u.nombre as nombre_ofertante, o.puesto, o.is_featured, o.nivel, o.horarios, o.salario
         FROM ofertas_laborales o
@@ -211,7 +207,7 @@ router.get("/", async (req, res) => {
       const featuredResult = await db.query(featuredQuery);
       featuredOffers = featuredResult.rows;
     }
-    
+
     const responseData = {
       featuredOffers,
       offers,
@@ -244,7 +240,7 @@ router.get("/:id", async (req, res) => {
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE o.id = @id
     `,
-      { id }
+      { id },
     );
 
     if (result.rows.length === 0) {
@@ -357,7 +353,9 @@ router.post(
       (async () => {
         try {
           console.log("Iniciando proceso de notificación de nueva oferta...");
-          const userResult = await db.query("SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'");
+          const userResult = await db.query(
+            "SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'",
+          );
           const applicants = userResult.rows;
 
           if (applicants.length === 0) {
@@ -366,25 +364,37 @@ router.post(
           }
 
           const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
-          console.log(`Se encontraron ${applicants.length} postulantes. Enviando notificaciones (con retardo para evitar límite de velocidad)...`);
-          
-          const delay = ms => new Promise(res => setTimeout(res, ms));
+          console.log(
+            `Se encontraron ${applicants.length} postulantes. Enviando notificaciones (con retardo para evitar límite de velocidad)...`,
+          );
+
+          const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
           for (const applicant of applicants) {
             console.log(`Enviando correo a: ${applicant.email}`);
-            // Se envía el correo pero no se espera (await) para no bloquear el loop, 
+            // Se envía el correo pero no se espera (await) para no bloquear el loop,
             // solo se maneja el error si ocurre. El retardo se maneja por separado.
-            sendNewOfferNotificationEmail(applicant.email, titulo, offerLink)
-              .catch(err => console.error(`Error al enviar correo a ${applicant.email}:`, err.message));
-            
+            sendNewOfferNotificationEmail(
+              applicant.email,
+              titulo,
+              offerLink,
+            ).catch((err) =>
+              console.error(
+                `Error al enviar correo a ${applicant.email}:`,
+                err.message,
+              ),
+            );
+
             // Esperar 600ms para cumplir con el límite de 2 req/segundo de Resend
             await delay(600);
           }
         } catch (emailError) {
-          console.error("Error al obtener la lista de postulantes para enviar correos:", emailError);
+          console.error(
+            "Error al obtener la lista de postulantes para enviar correos:",
+            emailError,
+          );
         }
       })();
-
 
       res.status(201).json({
         message: "Oferta creada con éxito",
@@ -396,7 +406,7 @@ router.post(
         .status(500)
         .json({ message: "Error del servidor al crear la oferta." });
     }
-  }
+  },
 );
 
 // --- RUTA PROTEGIDA: ACTUALIZAR UNA OFERTA ---
@@ -421,7 +431,7 @@ router.put(
       processedImages,
     } = req.body;
     const id_usuario_actual = req.user.id;
-            const esAdmin = req.user.isadmin; // Corregido para ser consistente con el payload del JWT
+    const esAdmin = req.user.isadmin; // Corregido para ser consistente con el payload del JWT
 
     try {
       // 1. Verificar que la oferta existe y obtener el dueño
@@ -542,35 +552,38 @@ router.put(
         .status(500)
         .json({ message: "Error del servidor al actualizar la oferta." });
     }
-  }
+  },
 );
 
 // --- RUTA PROTEGIDA: OBTENER POSTULANTES DE UNA OFERTA ---
-router.get("/:offerId/applications", [verificarToken, popularRolUsuario], async (req, res) => {
-  const { offerId } = req.params;
-  const userId = req.user.id;
+router.get(
+  "/:offerId/applications",
+  [verificarToken, popularRolUsuario],
+  async (req, res) => {
+    const { offerId } = req.params;
+    const userId = req.user.id;
 
-  try {
-    // Primero, verificar que la oferta existe
-    const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
-    const offerResult = await db.query(offerQuery, { offerId });
+    try {
+      // Primero, verificar que la oferta existe
+      const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`;
+      const offerResult = await db.query(offerQuery, { offerId });
 
-    if (offerResult.rows.length === 0) {
-      return res.status(404).json({ message: "Oferta no encontrada." });
-    }
+      if (offerResult.rows.length === 0) {
+        return res.status(404).json({ message: "Oferta no encontrada." });
+      }
 
-    const isOwner = offerResult.rows[0].id_usuario_ofertante === userId;
-    const isAdmin = req.user.isadmin;
+      const isOwner = offerResult.rows[0].id_usuario_ofertante === userId;
+      const isAdmin = req.user.isadmin;
 
-    // Permitir si el usuario es el dueño O si es administrador
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        message: "No tienes permiso para ver los postulantes de esta oferta.",
-      });
-    }
+      // Permitir si el usuario es el dueño O si es administrador
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          message: "No tienes permiso para ver los postulantes de esta oferta.",
+        });
+      }
 
-    // Si tiene permiso, obtener los postulantes
-    const applicantsQuery = `
+      // Si tiene permiso, obtener los postulantes
+      const applicantsQuery = `
         SELECT
           p.id,
           p.id_usuario_postulante AS id_usuario,
@@ -584,16 +597,17 @@ router.get("/:offerId/applications", [verificarToken, popularRolUsuario], async 
         WHERE p.id_oferta = @offerId
         ORDER BY p.fecha_postulacion DESC;
       `;
-    const applicantsResult = await db.query(applicantsQuery, { offerId });
+      const applicantsResult = await db.query(applicantsQuery, { offerId });
 
-    res.json(applicantsResult.rows);
-  } catch (error) {
-    console.error("Error al obtener los postulantes:", error);
-    res
-      .status(500)
-      .json({ message: "Error del servidor al obtener los postulantes." });
-  }
-});
+      res.json(applicantsResult.rows);
+    } catch (error) {
+      console.error("Error al obtener los postulantes:", error);
+      res
+        .status(500)
+        .json({ message: "Error del servidor al obtener los postulantes." });
+    }
+  },
+);
 
 // --- RUTA PROTEGIDA: POSTULARSE A UNA OFERTA ---
 router.post(
@@ -613,14 +627,26 @@ router.post(
       const profileResult = await db.query(profileQuery, { userId });
 
       if (profileResult.rows.length === 0) {
-        return res.status(400).json({ message: "Debes crear un perfil antes de postularte." });
+        return res
+          .status(400)
+          .json({ message: "Debes crear un perfil antes de postularte." });
       }
 
       const profile = profileResult.rows[0];
-      const isProfileComplete = profile.foto_perfil_url && profile.altura_cm && profile.peso_kg && profile.pie_dominante && profile.fecha_de_nacimiento;
+      const isProfileComplete =
+        profile.foto_perfil_url &&
+        profile.altura_cm &&
+        profile.peso_kg &&
+        profile.pie_dominante &&
+        profile.fecha_de_nacimiento;
 
       if (!isProfileComplete) {
-        return res.status(400).json({ message: "Debes completar tu perfil (foto y datos físicos) antes de postularte." });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Debes completar tu perfil (foto y datos físicos) antes de postularte.",
+          });
       }
 
       // 1. Verificar que la oferta existe y no es del propio usuario
@@ -663,7 +689,7 @@ router.post(
         .status(500)
         .json({ message: "Error del servidor al procesar la postulación." });
     }
-  }
+  },
 );
 
 module.exports = router;
