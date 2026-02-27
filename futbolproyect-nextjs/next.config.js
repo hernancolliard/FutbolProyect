@@ -1,14 +1,8 @@
-const path = require("path");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   staticPageGenerationTimeout: 120,
-
-  // Desactiva trailingSlash a menos que sea estrictamente necesario
   trailingSlash: false,
-
-  // Elimina i18n: undefined, deja que Next.js use su configuración por defecto
-  // o configúralo formalmente si no vas a usar export estático.
 
   async headers() {
     return [
@@ -25,7 +19,8 @@ const nextConfig = {
   },
 
   images: {
-    // CAMBIO IMPORTANTE: Quita unoptimized: true para usar sharp en Render
+    // La optimización de imágenes está activada (unoptimized: false),
+    // lo cual es correcto para que Vercel pueda optimizar las imágenes automáticamente.
     unoptimized: false,
     remotePatterns: [
       {

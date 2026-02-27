@@ -1,33 +1,42 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import Backend from 'i18next-http-backend'; // Import the backend to load translations
+import HttpBackend from 'i18next-http-backend';
+import FsBackend from 'i18next-fs-backend';
+import ChainedBackend from 'i18next-chained-backend';
 
-if (typeof window !== 'undefined') {
-  console.log('i18n.ts: Initializing i18next with backend');
-  i18n
-    .use(Backend) // Use the backend to load translations
-    .use(initReactI18next)
-    .init({
-      fallbackLng: 'es', // default language
-      debug: true, // Cambiar a true para ver logs de i18next
-      interpolation: {
-        escapeValue: false, // not needed for react as it escapes by default
-      },
-      ns: ['common'],
-      defaultNS: 'common',
-      backend: {
-        loadPath: '/locales/{{lng}}/common.json', // Path relative to public folder
-      },
-    }, (err, t) => {
-      if (err) {
-        console.error('Error al inicializar i18next:', err);
-      } else {
-        console.log('i18next inicializado. Idioma actual:', i18n.language);
-        console.log('Recursos cargados para "es":', i18n.hasResourceBundle('es', 'common'));
-        console.log('Recursos cargados para "en":', i18n.hasResourceBundle('en', 'common'));
-      }
-    });
-}
+const isServer = typeof window === 'undefined';
+
+i18n
+  .use(ChainedBackend)
+  .use(initReactI18next)
+  .init({
+    backend: {
+      backends: [
+        FsBackend, // En el servidor, carga desde el sistema de archivos
+        HttpBackend, // En el cliente, carga a través de http
+      ],
+      backendOptions: [
+        {
+          // Opciones para FsBackend (servidor)
+          loadPath: './public/locales/{{lng}}/{{ns}}.json',
+        },
+        {
+          // Opciones para HttpBackend (cliente)
+          loadPath: '/locales/{{lng}}/{{ns}}.json',
+        },
+      ],
+    },
+    fallbackLng: 'es',
+    debug: false, // Desactivado para producción
+    interpolation: {
+      escapeValue: false, // React ya escapa los valores
+    },
+    ns: ['common'],
+    defaultNS: 'common',
+    react: {
+      useSuspense: false, // Importante para evitar que el cliente espere
+    },
+  });
 
 export default i18n;
 
