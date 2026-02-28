@@ -12,6 +12,7 @@ app.use(
       "https://futbolproyect.onrender.com",
       "http://localhost:3000",
       "http://localhost:10000",
+      /\.vercel\.app$/,
     ],
     credentials: true,
   }),
