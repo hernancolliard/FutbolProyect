@@ -8,6 +8,7 @@ import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import ParallaxClientProvider from "@/components/providers/ParallaxProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleTagManager from "@/components/GoogleTagManager";
+import { AuthProvider } from "@/context/AuthContext";
 import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -36,8 +37,10 @@ export default function RootLayout({
             <ThemeRegistry>
               <I18nProvider>
                 <GoogleOAuthProvider clientId={googleClientId}>
-                  {/* 👇 SIN AUTH GLOBAL */}
-                  <RootClientLayout>{children}</RootClientLayout>
+                  {/* auth provider added so useAuth never returns null */}
+                  <AuthProvider>
+                    <RootClientLayout>{children}</RootClientLayout>
+                  </AuthProvider>
                 </GoogleOAuthProvider>
               </I18nProvider>
             </ThemeRegistry>
