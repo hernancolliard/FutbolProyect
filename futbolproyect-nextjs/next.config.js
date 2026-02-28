@@ -4,19 +4,7 @@ const nextConfig = {
   staticPageGenerationTimeout: 120,
   trailingSlash: false,
 
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Cross-Origin-Opener-Policy",
-            value: "same-origin-allow-popups",
-          },
-        ],
-      },
-    ];
-  },
+
 
   images: {
     // La optimización de imágenes está activada (unoptimized: false),
