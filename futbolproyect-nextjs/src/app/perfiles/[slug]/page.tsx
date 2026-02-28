@@ -10,10 +10,19 @@ import { Profile } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 // API base
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+// If the environment variable is missing (e.g. during a build without
+// configuration), fall back to localhost and log a warning. This prevents
+// the build from failing while still making the issue visible via console.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.API_URL ||
+  "http://localhost:5000";
 
-if (!API_URL) {
-  throw new Error("NEXT_PUBLIC_API_BASE_URL no está definida");
+if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+  // This will appear in build logs or server output.
+  console.warn(
+    "WARNING: NEXT_PUBLIC_API_BASE_URL is not defined; using fallback",
+  );
 }
 
 /* =========================
