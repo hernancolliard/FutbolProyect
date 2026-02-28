@@ -1,30 +1,17 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
-import FsBackend from 'i18next-fs-backend';
-import ChainedBackend from 'i18next-chained-backend';
 
-const isServer = typeof window === 'undefined';
+// We no longer use filesystem or chained backends; the client and server
+// both load translations via HTTP from the public folder. This avoids
+// pulling in `node:fs` during the webpack build.
 
 i18n
-  .use(ChainedBackend)
+  .use(HttpBackend)
   .use(initReactI18next)
   .init({
     backend: {
-      backends: [
-        FsBackend, // En el servidor, carga desde el sistema de archivos
-        HttpBackend, // En el cliente, carga a través de http
-      ],
-      backendOptions: [
-        {
-          // Opciones para FsBackend (servidor)
-          loadPath: './public/locales/{{lng}}/{{ns}}.json',
-        },
-        {
-          // Opciones para HttpBackend (cliente)
-          loadPath: '/locales/{{lng}}/{{ns}}.json',
-        },
-      ],
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     fallbackLng: 'es',
     debug: false, // Desactivado para producción
