@@ -25,12 +25,19 @@ export const AuthProvider = ({ children }: any) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    await apiClient.post("/users/login", { email, password });
+    const res = await apiClient.post("/users/login", { email, password });
+    // store token if returned
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
+    }
     await fetchUser();
   };
 
   const loginWithGoogle = async (token: string) => {
-    await apiClient.post("/users/google-login", { token });
+    const res = await apiClient.post("/users/google-login", { token });
+    if (res.data?.token) {
+      localStorage.setItem("token", res.data.token);
+    }
     await fetchUser();
   };
 

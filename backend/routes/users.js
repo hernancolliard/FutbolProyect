@@ -52,7 +52,8 @@ router.post("/login", async (req, res) => {
     });
 
     const { password_hash, ...userSafe } = user;
-    res.json(userSafe);
+    // return token as well so client can store it as fallback
+    res.json({ user: userSafe, token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error del servidor." });
@@ -106,7 +107,7 @@ router.post("/google-login", async (req, res) => {
     });
 
     const { password_hash, ...userSafe } = user;
-    res.json(userSafe);
+    res.json({ user: userSafe, token: jwtToken });
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "Error Google Login" });
