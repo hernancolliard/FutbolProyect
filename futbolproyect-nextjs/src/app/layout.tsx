@@ -16,6 +16,18 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "FutbolProyect",
   description: "Conectando el mundo del fútbol",
+  icons: {
+    icon: [
+      {
+        url: "/images/logos/logofpazul.webp",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/images/logos/logofpblanco.webp",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

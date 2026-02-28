@@ -127,6 +127,94 @@ router.get("/me", verificarToken, async (req, res) => {
 });
 
 /* =========================
+   REGISTRO DE NUEVO USUARIO
+========================= */
+router.post("/register", async (req, res) => {
+  const { nombre, email, password, tipo_usuario } = req.body;
+
+  try {
+    // Validación básica
+    if (!email || !password || !nombre) {
+      return res
+        .status(400)
+        .json({ message: "Email, nombre y contraseña son obligatorios." });
+    }
+
+    // Validación de tipo de usuario
+    const tiposValidos = ["postulante", "ofertante"];
+    if (!tiposValidos.includes(tipo_usuario)) {
+      return res
+        .status(400)
+        .json({ message: "Tipo de usuario inválido." });
+    }
+
+    // Verificar si el email ya existe
+    const existingUser = await db.query(
+      "SELECT id FROM usuarios WHERE email = @email",
+      { email }
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res
+        .status(409)
+        .json({ message: "Este email ya está registrado." });
+    }
+
+    // Hash de la contraseña
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(password, salt);
+
+    // Insertar el nuevo usuario
+    const result = await db.query(
+      `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
+       VALUES (@nombre, @email, @password_hash, @tipo_usuario)
+       RETURNING id, nombre, email, tipo_usuario`,
+      {
+        nombre,
+        email,
+        password_hash,
+        tipo_usuario,
+      }
+    );
+
+    const newUser = result.rows[0];
+
+    // Enviar email de bienvenida
+    try {
+      await sendWelcomeEmail(newUser.email, newUser.nombre, newUser.tipo_usuario);
+    } catch (emailErr) {
+      console.error("Error al enviar email de bienvenida:", emailErr);
+      // No bloquear el registro si el email falla
+    }
+
+    // Crear JWT automáticamente (auto-login)
+    const token = jwt.sign(
+      { id: newUser.id, tipo_usuario: newUser.tipo_usuario },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
+      path: "/",
+      maxAge: 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      message: "Registro exitoso.",
+      user: newUser,
+      token,
+    });
+  } catch (err) {
+    console.error("Error al registrar usuario:", err);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+/* =========================
    LOGOUT
 ========================= */
 router.post("/logout", (req, res) => {
