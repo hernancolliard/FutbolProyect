@@ -45,7 +45,8 @@ router.post("/login", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none", // required for cross-site cookies (frontend on different domain)
+      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
@@ -98,7 +99,8 @@ router.post("/google-login", async (req, res) => {
     res.cookie("token", jwtToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
+      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
