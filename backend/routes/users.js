@@ -215,6 +215,82 @@ router.post("/register", async (req, res) => {
 });
 
 /* =========================
+   SOLICITUD DE RESTABLECIMIENTO DE CONTRASEÑA
+========================= */
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "El email es obligatorio." });
+  }
+
+  try {
+    const result = await db.query("SELECT id, nombre FROM usuarios WHERE email = @email", { email });
+    if (result.rows.length === 0) {
+      // Responder igual para no revelar existencia
+      return res.json({ message: "Si el correo existe, te enviamos un enlace para restablecer la contraseña." });
+    }
+
+    const user = result.rows[0];
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 3600 * 1000); // 1h
+
+    await db.query(
+      `UPDATE usuarios SET reset_password_token = @token, reset_password_expires = @expires WHERE id = @id`,
+      { token, expires, id: user.id }
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL || "https://futbolproyect.com";
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
+
+    try {
+      await sendPasswordResetEmail(email, user.nombre, resetLink);
+    } catch (emailErr) {
+      console.error("Error enviando email de restablecimiento:", emailErr);
+    }
+
+    res.json({ message: "Si el correo existe, te enviamos un enlace para restablecer la contraseña." });
+  } catch (err) {
+    console.error("Error en forgot-password:", err);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+/* =========================
+   CAMBIO DE CONTRASEÑA MEDIANTE TOKEN
+========================= */
+router.post("/reset-password", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: "Token y nueva contraseña son obligatorios." });
+  }
+
+  try {
+    const query = `SELECT id FROM usuarios WHERE reset_password_token = @token AND reset_password_expires > NOW()`;
+    const result = await db.query(query, { token });
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: "Token inválido o expirado." });
+    }
+
+    const userId = result.rows[0].id;
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(newPassword, salt);
+
+    await db.query(
+      `UPDATE usuarios SET password_hash = @password_hash, reset_password_token = NULL, reset_password_expires = NULL WHERE id = @id`,
+      { password_hash, id: userId }
+    );
+
+    res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (err) {
+    console.error("Error en reset-password:", err);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+/* =========================
    LOGOUT
 ========================= */
 router.post("/logout", (req, res) => {
