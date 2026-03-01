@@ -31,7 +31,9 @@ export default function ForgotPasswordPage() {
     setMessage("");
 
     try {
-      const response = await publicApi.post("/users/forgot-password", {
+      // prefijamos "/api" para evitar que el baseURL malconfigurado provoque
+      // llamadas a la raíz del dominio.
+      const response = await publicApi.post("/api/users/forgot-password", {
         email,
       });
 
