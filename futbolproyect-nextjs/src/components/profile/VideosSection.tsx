@@ -14,6 +14,7 @@ import { Video } from "@/lib/types";
 import VideoCard from "./VideoCard";
 import VideoPlayerModal from "./VideoPlayerModal";
 import VideoFormModal from "./VideoFormModal";
+import { getApiBaseUrl } from "@/lib/api";
 
 // CORRECCIÓN: userId acepta string | number
 interface VideosSectionProps {
@@ -23,8 +24,8 @@ interface VideosSectionProps {
 
 // CORRECCIÓN: fetch acepta string | number
 const fetchUserVideos = async (userId: string | number): Promise<Video[]> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  // use normalized base URL
+  const apiUrl = getApiBaseUrl();
   try {
     const res = await fetch(`${apiUrl}/profiles/${userId}/videos`);
     if (!res.ok) {
@@ -109,10 +110,9 @@ export default function VideosSection({
         ),
       )
     ) {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+      const apiUrl = getApiBaseUrl();
       try {
-        const res = await fetch(`${apiUrl}/api/profiles/videos/${videoId}`, {
+        const res = await fetch(`${apiUrl}/profiles/videos/${videoId}`, {
           method: "DELETE",
         });
         if (!res.ok) {

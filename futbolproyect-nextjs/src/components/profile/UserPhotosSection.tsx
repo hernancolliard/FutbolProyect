@@ -21,6 +21,7 @@ import FileUpload from "@/components/ui/FileUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import Image from "next/image";
+import { getApiBaseUrl } from "@/lib/api";
 
 // CORRECCIÓN: userId ahora acepta string | number
 interface UserPhotosSectionProps {
@@ -32,8 +33,7 @@ interface UserPhotosSectionProps {
 const fetchUserPhotos = async (
   userId: string | number,
 ): Promise<UserPhoto[]> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
   const res = await fetch(`${apiUrl}/profiles/${userId}/photos`);
   if (!res.ok) {
     throw new Error("Failed to fetch photos");
@@ -54,8 +54,7 @@ const uploadPhoto = async ({
   formData.append("photo", file);
   formData.append("title", title);
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
   const res = await fetch(`${apiUrl}/profiles/${userId}/photos`, {
     method: "POST",
     body: formData,

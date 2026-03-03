@@ -12,6 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Application } from "@/lib/types";
 import Link from "next/link";
+import { getApiBaseUrl } from "@/lib/api";
 
 // CORRECCIÓN: userId acepta string | number
 interface MyApplicationsSectionProps {
@@ -22,8 +23,7 @@ interface MyApplicationsSectionProps {
 const fetchUserApplications = async (
   userId: string | number,
 ): Promise<Application[]> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
       const res = await fetch(`${apiUrl}/applications/user/${userId}`);  if (!res.ok) {
     throw new Error("Failed to fetch applications");
   }
