@@ -13,7 +13,7 @@ const getBaseUrl = () => {
 };
 export async function getAllProfiles() {
   const apiUrl = getBaseUrl();
-  const res = await fetch(`${apiUrl}/profiles`, { cache: "no-store" });
+  const res = await fetch(`${apiUrl}/api/profiles`, { cache: "no-store" });
   return res.json();
 }
 

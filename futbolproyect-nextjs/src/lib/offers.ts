@@ -14,6 +14,6 @@ const getBaseUrl = () => {
 };
 export async function getAllOffers() {
   const apiUrl = getBaseUrl();
-  const res = await fetch(`${apiUrl}/offers`, { cache: "no-store" });
+  const res = await fetch(`${apiUrl}/api/offers`, { cache: "no-store" });
   return res.json();
 }
