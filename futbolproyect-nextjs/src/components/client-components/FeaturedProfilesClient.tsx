@@ -177,14 +177,14 @@ export default function FeaturedProfilesClient() {
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Image
                       src={profile.foto_perfil_url || 'images/logos/logofp.png'}
-                      alt={`Perfil de ${profile.nombre} ${profile.apellido}`}
+                      alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                       width={180}
                       height={180}
                       style={{ width: '100%', height: '180px', objectFit: 'contain' }}
                     />
                     <Box className="profile-info" sx={{ p: 1 }}>
                       <Typography variant="h6" className="profile-name">
-                        {`${profile.nombre} ${profile.apellido}`}
+                        {`${profile.nombre} ${profile.apellido ? profile.apellido : ''}`.trim()}
                       </Typography>
                       <Typography variant="body2" className="profile-detail">
                         {t('position', 'Posición')}: {profile.posicion_principal || t('not_specified', 'No especificada')}

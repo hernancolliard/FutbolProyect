@@ -193,7 +193,7 @@ export default function ProfilePageClient({
                       </Box>
                     )}
                     <Typography variant="h4">
-                      {profile.nombre} {profile.apellido || ""}
+                      {profile.nombre} {profile.apellido ? profile.apellido : ""}
                     </Typography>
 
                     {/* Botón de Editar solo si es mi perfil */}
@@ -204,7 +204,7 @@ export default function ProfilePageClient({
                     )}
 
                     <ShareButtons
-                      title={`${profile.nombre} ${profile.apellido || ""}`}
+                      title={`${profile.nombre} ${profile.apellido ? profile.apellido : ""}`.trim()}
                       url={pathname}
                     />
                   </Stack>

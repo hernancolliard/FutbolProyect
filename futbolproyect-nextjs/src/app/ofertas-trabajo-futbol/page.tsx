@@ -3,11 +3,12 @@ import SeoPage from "@/components/shared/SeoPage";
 import OfferList from "@/components/shared/OfferList";
 import { getTranslation } from "@/lib/i18n-server";
 import { Offer } from "@/lib/types";
+import { getApiBaseUrl } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 async function getOffers(): Promise<Offer[]> {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const apiBaseUrl = getApiBaseUrl();
   if (!apiBaseUrl) return [];
 
   try {

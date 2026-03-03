@@ -2,13 +2,13 @@ import { type Metadata } from "next";
 import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
 import ProfilePageClient from "@/components/profile/ProfilePageClient";
+import { getApiBaseUrl } from "@/lib/api";
 
 // IMPORTANTE: Forzamos renderizado dinámico para evitar errores de fetch en el build
 export const dynamic = "force-dynamic";
 
 const fetchProfile = async (userId: string): Promise<Profile | null> => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  const apiUrl = getApiBaseUrl();
   
   console.log(`[fetchProfile] Fetching profile for userId: ${userId}`);
   console.log(`[fetchProfile] API URL: ${apiUrl}/profiles/${userId}`);

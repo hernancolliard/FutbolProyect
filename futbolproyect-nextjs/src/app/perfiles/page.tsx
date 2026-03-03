@@ -12,7 +12,7 @@ import { getApiBaseUrl } from "@/lib/api";
    STATIC FETCH (BUILD TIME)
 ========================= */
 
-const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const API_URL = getApiBaseUrl();
 
 async function fetchInitialData(): Promise<{
   profiles: Profile[];

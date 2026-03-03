@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Profile } from "@/lib/types";
+import { getApiBaseUrl } from "@/lib/api";
 
 /* =========================
    CONFIG
@@ -9,21 +10,8 @@ import { Profile } from "@/lib/types";
 // Forzamos render dinámico (Vercel friendly)
 export const dynamic = "force-dynamic";
 
-// API base
-// If the environment variable is missing (e.g. during a build without
-// configuration), fall back to localhost and log a warning. This prevents
-// the build from failing while still making the issue visible via console.
-const API_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.API_URL ||
-  "http://localhost:5000";
-
-if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
-  // This will appear in build logs or server output.
-  console.warn(
-    "WARNING: NEXT_PUBLIC_API_BASE_URL is not defined; using fallback",
-  );
-}
+// API base (normalizado con /api)
+const API_URL = getApiBaseUrl();
 
 /* =========================
    API HELPERS (RUNTIME)
