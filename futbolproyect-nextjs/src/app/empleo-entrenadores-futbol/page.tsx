@@ -48,7 +48,7 @@ export default async function EmpleoEntrenadoresFutbolPage() {
       ctaText={t("empleo_entrenadores_futbol_cta")}
       ctaLink="/register"
     >
-      <OfferList offers={offers} isHomePage={false} />
+      <OfferList offers={offers} isHomePage={false} showApplyButton={false} />
     </SeoPage>
   );
 }

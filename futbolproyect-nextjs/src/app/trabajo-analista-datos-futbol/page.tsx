@@ -44,7 +44,7 @@ export default async function TrabajoAnalistaDatosFutbolPage() {
       ctaText={t("trabajo_analista_datos_futbol_cta")}
       ctaLink="/register"
     >
-      <OfferList offers={offers} isHomePage={false} />
+      <OfferList offers={offers} isHomePage={false} showApplyButton={false} />
     </SeoPage>
   );
 }

@@ -18,9 +18,13 @@ interface OfferActionsProps {
 const OfferActions: React.FC<OfferActionsProps> = ({
   offer,
   onOfferAction,
+  isFetching,
 }) => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // No mostrar nada si está cargando o no hay usuario logueado
+  if (loading || !user) return null;
 
   const isOwner = user?.id === offer.id_usuario_ofertante;
   const isAdmin = user?.isAdmin === true;

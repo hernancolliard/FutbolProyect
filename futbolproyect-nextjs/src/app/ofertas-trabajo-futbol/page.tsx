@@ -42,7 +42,7 @@ export default async function OfertasTrabajoFutbolPage() {
       ctaText={t("ofertas_trabajo_futbol_cta")}
       ctaLink="/register"
     >
-      <OfferList offers={offers} isHomePage={false} />
+      <OfferList offers={offers} isHomePage={false} showApplyButton={false} />
     </SeoPage>
   );
 }
