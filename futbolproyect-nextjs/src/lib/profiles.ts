@@ -2,10 +2,16 @@ import { Profile } from "@/lib/types";
 
 /**
  * Obtiene la URL base correcta según entorno
+ * Normaliza la URL para evitar /api duplicado y barras finales
  */
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (raw) {
+    // quitar barra final
+    let url = raw.replace(/\/+$/, '');
+    // si alguien puso /api al final, quitarlo para evitar duplicados
+    url = url.replace(/\/api$/, '');
+    return url;
   }
 
   const port = process.env.PORT || 5000;

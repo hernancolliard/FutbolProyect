@@ -5,8 +5,13 @@ export async function getOfferById(offerId: string) {
   return res.data;
 }
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
-    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (raw) {
+    // quitar barra final
+    let url = raw.replace(/\/+$/, '');
+    // si alguien puso /api al final, quitarlo para evitar duplicados
+    url = url.replace(/\/api$/, '');
+    return url;
   }
 
   const port = process.env.PORT || 5000;
