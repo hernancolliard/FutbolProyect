@@ -195,6 +195,7 @@
   "save_changes_button": "Guardar Cambios",
   "subscription_plans_title": "Planes de Suscripción",
   "subscription_plans_subtitle": "Para poder publicar ofertas o postularte, necesitas una suscripción activa.",
+  "must_be_logged_in_to_see_offer": "Debes iniciar sesión para ver esta oferta.",
   "offerer_plan_title": "Plan Ofertante",
   "offerer_plan_description": "Publica ofertas de trabajo ilimitadas.",
   "applicant_plan_title": "Plan Postulante",

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import apiClient from "@/lib/apiClient";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal";
 import OfferActions from "@/components/shared/OfferActions";
@@ -149,6 +151,8 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
     }
   };
 
+  const [applied, setApplied] = useState(false);
+
   const handleDownload = () => {
     if (!offerCardRef.current) return;
 
@@ -161,20 +165,48 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   };
 
   /* =========================
+     APPLY MUTATION
+  ========================= */
+  const {
+    mutate: applyToOffer,
+    isLoading: isApplying,
+  } = useMutation({
+    mutationFn: () => apiClient.post(`/applications`, { id_oferta: offerId }),
+    onSuccess: () => {
+      setApplied(true);
+      toast.success(
+        t("apply_success", "¡Postulación exitosa!"),
+      );
+    },
+    onError: (err: any) => {
+      // if backend sends message in response.data
+      const msg =
+        err?.response?.data?.message ||
+        t("apply_error_generic", "Ocurrió un error al postular.");
+      toast.error(msg);
+    },
+  });
+
+  const handleApply = () => {
+    applyToOffer();
+  };
+
+  /* =========================
      RENDER
   ========================= */
-  if (!user) {
-    return (
-      <Alert severity="warning">{t("must_be_logged_in_to_see_offer")}</Alert>
-    );
-  }
-
   if (isLoading) return <CircularProgress />;
   if (isError) return <Alert severity="error">{error?.message}</Alert>;
   if (!offer) return <Alert severity="info">Oferta no encontrada</Alert>;
 
   return (
     <Stack alignItems="center" sx={{ mt: 4 }}>
+      {/* show info to visitors that login is required to apply */}
+      {!user && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {t("must_be_logged_in_to_see_offer")}
+        </Alert>
+      )}
+
       <Card ref={offerCardRef} sx={{ maxWidth: 800, width: "100%" }}>
         {offer.imagen_url && (
           <Image src={offer.imagen_url} alt={titulo} width={800} height={400} />
@@ -196,6 +228,43 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
               onOfferAction={handleOfferAction}
               isFetching={isLoading}
             />
+
+            {/* apply button / subscription warning for eligible users */}
+            {user?.tipo_usuario === 'postulante' && !isOwner && !isAdmin && (
+              <Box sx={{ mt: 2 }}>
+                {user.subscription_status === "activa" && !applied ? (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleApply}
+                    disabled={isApplying}
+                  >
+                    {isApplying
+                      ? t("applying", "Postulando...")
+                      : t("apply", "Postularme")}
+                  </Button>
+                ) : user.subscription_status === "activa" && applied ? (
+                  <Typography color="success.main">
+                    {t("apply_success", "¡Postulación exitosa!")}
+                  </Typography>
+                ) : (
+                  <Alert severity="warning">
+                    {t(
+                      "subscription_plans_subtitle",
+                      "Para poder publicar ofertas o postularte, necesitas una suscripción activa.",
+                    )}{" "}
+                    <Button
+                      component={Link}
+                      href="/suscripcion"
+                      size="small"
+                      sx={{ ml: 1 }}
+                    >
+                      {t("subscription_plans_title", "Planes de Suscripción")}
+                    </Button>
+                  </Alert>
+                )}
+              </Box>
+            )}
           </Stack>
         </CardContent>
       </Card>

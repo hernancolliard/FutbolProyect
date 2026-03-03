@@ -118,8 +118,17 @@ router.post("/google-login", async (req, res) => {
    USUARIO AUTENTICADO
 ========================= */
 router.get("/me", verificarToken, async (req, res) => {
+  // include subscription info
   const result = await db.query(
-    "SELECT id, nombre, email, tipo_usuario, isadmin FROM usuarios WHERE id = @id",
+    `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.isadmin,
+            s.plan as subscription_plan,
+            s.estado as subscription_status,
+            s.fecha_fin as subscription_end_date
+     FROM usuarios u
+     LEFT JOIN suscripciones s ON u.id = s.id_usuario
+       AND s.estado = 'activa'
+       AND s.fecha_fin > GETDATE()
+     WHERE u.id = @id`,
     { id: req.user.id },
   );
 
