@@ -25,14 +25,14 @@ router.post(
     try {
       const query = `
             INSERT INTO postulaciones (id_oferta, id_usuario_postulante, mensaje_presentacion)
-            VALUES ($1, $2, $3)
+            VALUES (@id_oferta, @id_usuario_postulante, @mensaje_presentacion)
             RETURNING id_oferta;
         `;
-      const result = await db.query(query, [
+      const result = await db.query(query, {
         id_oferta,
         id_usuario_postulante,
-        mensaje_presentacion || null,
-      ]);
+        mensaje_presentacion: mensaje_presentacion || null,
+      });
 
       // Notificar al ofertante
       try {
@@ -43,11 +43,11 @@ router.post(
           SELECT o.titulo, u.email AS email_ofertante
           FROM ofertas_laborales o
           JOIN usuarios u ON o.id_usuario_ofertante = u.id
-          WHERE o.id = $1
+          WHERE o.id = @inserted_id_oferta
         `;
-        const offerDetailsResult = await db.query(offerDetailsQuery, [
+        const offerDetailsResult = await db.query(offerDetailsQuery, {
           inserted_id_oferta,
-        ]);
+        });
 
         if (offerDetailsResult.rows.length > 0) {
           const { titulo, email_ofertante } = offerDetailsResult.rows[0];
@@ -102,10 +102,10 @@ router.get("/user/:userId", verificarToken, async (req, res) => {
     SELECT p.id, p.id_oferta AS oferta_id, p.fecha_postulacion, p.estado, o.titulo as oferta_titulo
     FROM postulaciones p
     JOIN ofertas_laborales o ON p.id_oferta = o.id
-    WHERE p.id_usuario_postulante = $1
+    WHERE p.id_usuario_postulante = @userId
     ORDER BY p.fecha_postulacion DESC;
 `;
-    const result = await db.query(query, [userId]);
+    const result = await db.query(query, { userId });
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener las postulaciones del usuario:", error);
