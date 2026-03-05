@@ -128,7 +128,7 @@ router.get("/me", verificarToken, async (req, res) => {
        FROM usuarios u
        LEFT JOIN suscripciones s ON u.id = s.id_usuario
          AND s.estado = 'activa'
-         AND s.fecha_fin > GETDATE()
+         AND s.fecha_fin > NOW()
        WHERE u.id = @id`,
       { id: req.user.id },
     );
