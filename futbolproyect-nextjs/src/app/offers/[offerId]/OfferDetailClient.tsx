@@ -169,7 +169,7 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   ========================= */
   const {
     mutate: applyToOffer,
-    isLoading: isApplying,
+    isPending: isApplying,
   } = useMutation({
     mutationFn: () => apiClient.post(`/applications`, { id_oferta: offerId }),
     onSuccess: () => {
