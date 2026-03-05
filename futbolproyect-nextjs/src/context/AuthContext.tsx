@@ -13,7 +13,8 @@ export const AuthProvider = ({ children }: any) => {
     try {
       const res = await apiClient.get("/users/me");
       setUser(res.data);
-    } catch {
+    } catch (error: any) {
+      console.error("Error fetching user:", error.response?.status, error.message);
       setUser(null);
     } finally {
       setLoading(false);
@@ -25,20 +26,30 @@ export const AuthProvider = ({ children }: any) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await apiClient.post("/users/login", { email, password });
-    // store token if returned
-    if (res.data?.token) {
-      localStorage.setItem("token", res.data.token);
+    try {
+      const res = await apiClient.post("/users/login", { email, password });
+      // store token if returned
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+      await fetchUser();
+    } catch (error: any) {
+      console.error("Login error:", error);
+      throw error;
     }
-    await fetchUser();
   };
 
   const loginWithGoogle = async (token: string) => {
-    const res = await apiClient.post("/users/google-login", { token });
-    if (res.data?.token) {
-      localStorage.setItem("token", res.data.token);
+    try {
+      const res = await apiClient.post("/users/google-login", { token });
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+      await fetchUser();
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      throw error;
     }
-    await fetchUser();
   };
 
   const logout = async () => {

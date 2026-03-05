@@ -118,21 +118,31 @@ router.post("/google-login", async (req, res) => {
    USUARIO AUTENTICADO
 ========================= */
 router.get("/me", verificarToken, async (req, res) => {
-  // include subscription info
-  const result = await db.query(
-    `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.isadmin,
-            s.plan as subscription_plan,
-            s.estado as subscription_status,
-            s.fecha_fin as subscription_end_date
-     FROM usuarios u
-     LEFT JOIN suscripciones s ON u.id = s.id_usuario
-       AND s.estado = 'activa'
-       AND s.fecha_fin > GETDATE()
-     WHERE u.id = @id`,
-    { id: req.user.id },
-  );
+  try {
+    // include subscription info
+    const result = await db.query(
+      `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.isadmin,
+              s.plan as subscription_plan,
+              s.estado as subscription_status,
+              s.fecha_fin as subscription_end_date
+       FROM usuarios u
+       LEFT JOIN suscripciones s ON u.id = s.id_usuario
+         AND s.estado = 'activa'
+         AND s.fecha_fin > GETDATE()
+       WHERE u.id = @id`,
+      { id: req.user.id },
+    );
 
-  res.json(result.rows[0]);
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Error en /me:", err);
+    res.status(500).json({ message: "Error al obtener datos del usuario." });
+  }
 });
 
 /* =========================
