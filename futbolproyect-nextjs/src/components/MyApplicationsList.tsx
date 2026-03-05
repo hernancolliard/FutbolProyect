@@ -36,7 +36,7 @@ function MyApplicationsList({
       try {
         // userId se convierte a string automáticamente en el template literal, así que es seguro
         const response = await apiClient.get(
-          `/profiles/${userId}/applications`,
+          `/applications/user/${userId}`,
         );
         setApplications(response.data);
       } catch (err: any) {

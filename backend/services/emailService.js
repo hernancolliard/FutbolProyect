@@ -229,6 +229,40 @@ const sendPasswordResetEmail = async (to, userName, resetLink) => {
   }
 };
 
+/**
+ * Envía un correo notificando sobre una nueva postulación.
+ * @param {string} to - Email del ofertante.
+ * @param {string} applicantName - Nombre del postulante.
+ * @param {string} offerTitle - Título de la oferta.
+ */
+const sendNewApplicationNotification = async (to, applicantName, offerTitle) => {
+  const subject = `¡Nueva postulación para tu oferta: ${offerTitle}!`;
+  const htmlContent = `<h1>¡Hola!</h1>
+                     <p>Has recibido una nueva postulación para tu oferta <strong>${offerTitle}</strong>.</p>
+                     <p>El usuario <strong>${applicantName}</strong> se ha postulado.</p>
+                     <p>Puedes revisar los detalles de la postulación en tu panel de control.</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Notificación de nueva postulación enviada a ${to}.`);
+    return data;
+  } catch (error) {
+    console.error(`Error enviando notificación de postulación a ${to}:`, error);
+    // No relanzamos para no afectar el flujo principal
+  }
+};
+
 module.exports = {
   sendContactEmail,
   sendWelcomeEmail,
@@ -236,4 +270,5 @@ module.exports = {
   sendNewOfferNotificationEmail,
   sendReplyToContactMessage,
   sendPasswordResetEmail,
+  sendNewApplicationNotification,
 };
