@@ -59,32 +59,28 @@ export default function ProfilePageClient({
       currentUser &&
       String(profile.id) !== String(currentUser.id)
     ) {
+      import apiClient from "@/lib/apiClient";
+...
       const recordView = async () => {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
-          // Usamos sendBeacon si es posible para no bloquear, o fetch simple
-          await fetch(`${apiUrl}/profiles/${profile.id}/view`, {
-            method: "POST",
-          });
+          // Usamos apiClient para asegurar que el token se envíe si es necesario
+          await apiClient.post(`/profiles/${profile.id}/view`);
         } catch (error) {
           console.error("Failed to record profile view:", error);
         }
       };
       recordView();
+...
     }
   }, [profile, currentUser]);
 
   const handleRatingChange = async (event: any, newValue: number | null) => {
     if (!newValue || !profile) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
-      const res = await fetch(`${apiUrl}/profiles/${profile.id}/rate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating: newValue }),
+      const res = await apiClient.post(`/profiles/${profile.id}/rate`, {
+        rating: newValue,
       });
-      if (!res.ok) throw new Error("Failed to submit rating");
-      const updatedProfile = await res.json();
+      const updatedProfile = res.data;
       setProfile((prev) =>
         prev
           ? {
