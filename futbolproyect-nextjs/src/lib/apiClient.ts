@@ -23,8 +23,10 @@ apiClient.interceptors.request.use((config) => {
   // Check if running on the client side before accessing localStorage
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem("token");
+    console.log("API Interceptor: Token from localStorage:", token); // DEBUG LOG
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("API Interceptor: Authorization header set."); // DEBUG LOG
     }
   }
   return config;
