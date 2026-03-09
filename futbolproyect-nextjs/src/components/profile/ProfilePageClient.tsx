@@ -24,6 +24,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import PublicIcon from "@mui/icons-material/Public";
+import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
 import MyApplicationsSection from "./MyApplicationsSection";
 import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
@@ -59,8 +60,6 @@ export default function ProfilePageClient({
       currentUser &&
       String(profile.id) !== String(currentUser.id)
     ) {
-      import apiClient from "@/lib/apiClient";
-...
       const recordView = async () => {
         try {
           // Usamos apiClient para asegurar que el token se envíe si es necesario
@@ -70,7 +69,6 @@ export default function ProfilePageClient({
         }
       };
       recordView();
-...
     }
   }, [profile, currentUser]);
 
