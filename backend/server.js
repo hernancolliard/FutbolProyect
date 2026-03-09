@@ -21,6 +21,7 @@ app.use(
       /\.vercel\.app$/,
     ],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
