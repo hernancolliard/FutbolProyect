@@ -39,7 +39,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: user.id, tipo_usuario: user.tipo_usuario },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "24h" },
     );
 
     res.cookie("token", token, {
@@ -94,7 +94,7 @@ router.post("/google-login", async (req, res) => {
     const jwtToken = jwt.sign(
       { id: user.id, tipo_usuario: user.tipo_usuario },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "24h" },
     );
 
     res.cookie("token", jwtToken, {
@@ -210,7 +210,7 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign(
       { id: newUser.id, tipo_usuario: newUser.tipo_usuario },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.cookie("token", token, {
