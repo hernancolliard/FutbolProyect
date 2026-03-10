@@ -7,6 +7,9 @@ const db = require("../db");
 const verificarToken = (req, res, next) => {
   let token = req.cookies?.token;
 
+  // DEBUG: Log all headers to see what's coming in
+  console.log("DEBUG: Headers recibidos:", JSON.stringify(req.headers, null, 2));
+
   // Fallback: Authorization Bearer
   if (!token) {
     const authHeader = req.headers.authorization;
@@ -21,6 +24,18 @@ const verificarToken = (req, res, next) => {
     });
   }
 
+  // DEBUG: Verificar que la variable de entorno se carga correctamente
+  if (process.env.JWT_SECRET) {
+    console.log(
+      `DEBUG: JWT_SECRET cargada. Inicio: ${process.env.JWT_SECRET.substring(
+        0,
+        5,
+      )}, Fin: ${process.env.JWT_SECRET.slice(-5)}`,
+    );
+  } else {
+    console.error("DEBUG: ¡La variable de entorno JWT_SECRET no está definida!");
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -33,8 +48,12 @@ const verificarToken = (req, res, next) => {
 
     next();
   } catch (error) {
+    // DEBUG: Loguear el error específico de JWT
+    console.error("DEBUG: Error al verificar el token JWT:", error);
+
     return res.status(401).json({
       message: "Token inválido o expirado.",
+      error: error.message, // Opcional: enviar el mensaje de error al cliente en desarrollo
     });
   }
 };
