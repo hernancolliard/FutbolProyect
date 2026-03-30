@@ -31,6 +31,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
     instagram_url: profileData.instagram_url || "",
     youtube_url: profileData.youtube_url || "",
     transfermarkt_url: profileData.transfermarkt_url || "",
+    whatsapp_url: profileData.whatsapp_url || "",
     altura_cm: profileData.altura_cm || "",
     peso_kg: profileData.peso_kg || "",
     pie_dominante: profileData.pie_dominante || "",
@@ -39,6 +40,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showWhatsAppInput, setShowWhatsAppInput] = useState(Boolean(profileData.whatsapp_url));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -128,6 +130,20 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
             <TextField name="instagram_url" label={t("instagram_placeholder")} value={formData.instagram_url} onChange={handleChange} fullWidth />
             <TextField name="youtube_url" label={t("youtube_placeholder")} value={formData.youtube_url} onChange={handleChange} fullWidth />
             <TextField name="transfermarkt_url" label={t("transfermarkt_placeholder")} value={formData.transfermarkt_url} onChange={handleChange} fullWidth />
+            {showWhatsAppInput ? (
+              <TextField
+                name="whatsapp_url"
+                label={t("whatsapp_placeholder", "WhatsApp")}
+                value={formData.whatsapp_url}
+                onChange={handleChange}
+                fullWidth
+                helperText={t("whatsapp_help", "Introduce tu enlace de WhatsApp (ej. https://wa.me/123456789)")}
+              />
+            ) : (
+              <Button variant="outlined" onClick={() => setShowWhatsAppInput(true)}>
+                {t("add_whatsapp_button", "Agregar WhatsApp")}
+              </Button>
+            )}
 
             <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
                 <Button type="button" onClick={onCancel} variant="outlined" disabled={loading}>{t("cancel_button", "Cancelar")}</Button>

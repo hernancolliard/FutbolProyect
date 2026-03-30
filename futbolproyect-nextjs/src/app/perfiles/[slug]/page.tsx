@@ -98,6 +98,7 @@ export default async function ProfilePage({
       profile.instagram_url,
       profile.youtube_url,
       profile.transfermarkt_url,
+      profile.whatsapp_url,
     ].filter(Boolean),
   };
 

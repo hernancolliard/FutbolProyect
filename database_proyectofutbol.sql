@@ -67,6 +67,7 @@ CREATE TABLE perfiles_usuario (
 	instagram_url VARCHAR(255),
 	youtube_url VARCHAR(255),
 	transfermarkt_url VARCHAR(255),
+	whatsapp_url VARCHAR(255),
 	altura_cm INTEGER,
 	peso_kg INTEGER,
 	pie_dominante VARCHAR(50),
@@ -207,3 +208,8 @@ SELECT
       WHERE u.tipo_usuario = 'postulante'
       ORDER BY
           u.id DESC;
+
+
+ALTER TABLE perfiles_usuario
+  ADD COLUMN IF NOT EXISTS whatsapp_url VARCHAR(255);
+select * from perfiles_usuario pu ;

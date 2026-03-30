@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useTransition } from "react";
 import { Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
+import { FaWhatsapp } from "react-icons/fa";
 import {
   Typography,
   Alert,
@@ -40,6 +41,17 @@ export default function ProfilePageClient({
 
   // CORRECCIÓN: Usamos el usuario real del contexto, no el mock
   const { user: currentUser } = useAuth();
+
+  const normalizeWhatsAppUrl = (value?: string) => {
+    if (!value) return "";
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    const digits = trimmed.replace(/[^0-9+]/g, "");
+    if (!digits) return "";
+    const cleaned = digits.startsWith("+") ? digits.slice(1) : digits;
+    return `https://wa.me/${cleaned}`;
+  };
 
   const pathname = usePathname();
   const router = useRouter();
@@ -282,6 +294,28 @@ export default function ProfilePageClient({
                       >
                         <PublicIcon />
                       </IconButton>
+                    )}
+                    {profile.whatsapp_url && (
+                      <Button
+                        component="a"
+                        href={normalizeWhatsAppUrl(profile.whatsapp_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        startIcon={<FaWhatsapp />}
+                        sx={{ color: "#25D366", textTransform: "none", ml: 1 }}
+                      >
+                        {t("contact_whatsapp", "Contactar por WhatsApp")}
+                      </Button>
+                    )}
+                    {isMyProfile && !profile.whatsapp_url && (
+                      <Button
+                        variant="outlined"
+                        onClick={handleOpenEditModal}
+                        startIcon={<FaWhatsapp />}
+                        sx={{ textTransform: "none", mt: 1 }}
+                      >
+                        {t("add_whatsapp_visually", "Agregar WhatsApp")}
+                      </Button>
                     )}
                   </Stack>
                 </Box>

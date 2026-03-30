@@ -20,6 +20,7 @@ export interface Profile {
   instagram_url: string;
   youtube_url: string;
   transfermarkt_url: string;
+  whatsapp_url?: string;
   tipo_usuario: 'jugador' | 'ofertante' | 'agencia';
   subscription_status: 'activa' | 'inactiva' | 'cancelada';
   subscription_plan: string;

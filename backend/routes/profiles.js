@@ -155,7 +155,7 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
+      SELECT u.*, p.foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
              p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
@@ -276,6 +276,7 @@ router.put(
       instagram_url,
       youtube_url,
       transfermarkt_url,
+      whatsapp_url,
       altura_cm,
       peso_kg,
       pie_dominante,
@@ -302,8 +303,8 @@ router.put(
       }
 
       const upsertQuery = `
-        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
-        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
+        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, whatsapp_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
+        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @whatsapp_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
         ON CONFLICT (id_usuario)
         DO UPDATE SET
           foto_perfil_url = COALESCE(@fotoPerfilUrl, perfiles_usuario.foto_perfil_url),
@@ -316,6 +317,7 @@ router.put(
           instagram_url = @instagram_url,
           youtube_url = @youtube_url,
           transfermarkt_url = @transfermarkt_url,
+          whatsapp_url = @whatsapp_url,
           altura_cm = @altura_cm,
           peso_kg = @peso_kg,
           pie_dominante = @pie_dominante,
@@ -335,6 +337,7 @@ router.put(
         instagram_url,
         youtube_url,
         transfermarkt_url,
+        whatsapp_url,
         altura_cm: altura_cm || null,
         peso_kg: peso_kg || null,
         pie_dominante,
