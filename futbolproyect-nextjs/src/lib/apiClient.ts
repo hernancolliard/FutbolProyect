@@ -27,7 +27,9 @@ apiClient.interceptors.request.use((config) => {
 
     if (token && token !== "null") {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("API Interceptor: Authorization header set."); // DEBUG LOG
+      console.log("API Interceptor: Authorization header set.", config.headers.Authorization); // DEBUG LOG
+    } else {
+      console.log("API Interceptor: No token found, request will be sent without Authorization header.");
     }
   }
   return config;
