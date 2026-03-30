@@ -8,12 +8,12 @@ import "../../styles/TrustedBy.css"; // Path to the copied CSS
 import { useTranslation } from 'react-i18next';
 import Image from "next/image"; // Import next/image
 
-// Mock useIsMobile for now
+// Hook para detectar si es móvil con breakpoint correcto
 const useIsMobile = () => {
     const [isMobile, setIsMobile] = React.useState(false);
     React.useEffect(() => {
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 600); // Example breakpoint
+            setIsMobile(window.innerWidth < 768); // Mobile: < 768px, Tablet/Desktop: >= 768px
         };
         window.addEventListener('resize', handleResize);
         handleResize();
