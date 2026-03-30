@@ -123,6 +123,10 @@ export default function ProfilePageClient({
     startTransition(() => router.refresh());
   };
 
+  if (!isHydrated) {
+    return null;
+  }
+
   if (!profile) {
     return (
       <Alert severity="warning">
