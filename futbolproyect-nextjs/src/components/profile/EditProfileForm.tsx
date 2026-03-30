@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, TextField, Button, Alert, Divider, Typography, Card, CardContent, CircularProgress, Box } from "@mui/material";
 import { Profile } from "@/lib/types";
+import apiClient from "@/lib/apiClient";
 
 interface EditProfileFormProps {
     profileData: Profile;
@@ -66,21 +67,17 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
     }
 
     try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiUrl}/api/profiles/me`, {
-            method: 'PUT',
-            body: data,
-            // We need a way to send the auth token, assuming it's handled by a wrapper or context
+        const response = await apiClient.put("/profiles/me", data, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.message || t("error_saving_profile"));
+        if (response.status !== 200 && response.status !== 201) {
+          throw new Error(t("error_saving_profile", "Error al guardar el perfil"));
         }
-      
-      onSave();
+
+        onSave();
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || t("error_saving_profile", "Error al guardar el perfil"));
     } finally {
       setLoading(false);
     }
