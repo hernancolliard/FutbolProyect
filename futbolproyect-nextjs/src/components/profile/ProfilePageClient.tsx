@@ -57,6 +57,11 @@ export default function ProfilePageClient({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const [profile, setProfile] = useState(initialProfile);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
