@@ -10,6 +10,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleTagManager from "@/components/GoogleTagManager";
 import { AuthProvider } from "@/context/AuthContext";
 import { Suspense } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -58,6 +59,7 @@ export default function RootLayout({
             </ThemeRegistry>
           </ReactQueryProvider>
         </ParallaxClientProvider>
+        <Analytics />
       </body>
     </html>
   );
