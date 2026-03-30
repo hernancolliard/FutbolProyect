@@ -10,6 +10,16 @@ export const AuthProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
+    if (typeof window === "undefined") return;
+
+    const storedToken = localStorage.getItem("token");
+
+    if (!storedToken || storedToken === "null") {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await apiClient.get("/users/me");
       setUser(res.data);
@@ -31,6 +41,7 @@ export const AuthProvider = ({ children }: any) => {
       // store token if returned
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
+        apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
       await fetchUser();
     } catch (error: any) {
@@ -44,6 +55,7 @@ export const AuthProvider = ({ children }: any) => {
       const res = await apiClient.post("/users/google-login", { token });
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
+        apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
       await fetchUser();
     } catch (error: any) {
