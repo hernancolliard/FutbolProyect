@@ -241,6 +241,40 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// --- RUTA DE DEBUG: VERIFICAR ESTADO DEL USUARIO ---
+router.get("/debug/user-status", verificarToken, async (req, res) => {
+  try {
+    const userResult = await db.query(
+      `SELECT id, nombre, email, tipo_usuario 
+       FROM usuarios WHERE id = @id`,
+      { id: req.user.id }
+    );
+
+    const user = userResult.rows[0];
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const subResult = await db.query(
+      `SELECT id, plan, estado, fecha_fin 
+       FROM suscripciones 
+       WHERE id_usuario = @id 
+       ORDER BY fecha_fin DESC 
+       LIMIT 1`,
+      { id: req.user.id }
+    );
+
+    res.json({
+      user,
+      subscription: subResult.rows[0] || null,
+      jwtPayload: req.user,
+    });
+  } catch (error) {
+    console.error("Debug error:", error);
+    res.status(500).json({ message: "Error en debug" });
+  }
+});
+
 // --- RUTA PROTEGIDA: CREAR UNA NUEVA OFERTA ---
 router.post(
   "/",

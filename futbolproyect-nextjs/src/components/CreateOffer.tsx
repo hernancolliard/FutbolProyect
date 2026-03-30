@@ -157,6 +157,9 @@ function CreateOffer({ onOfferCreated, onClose }: CreateOfferProps) {
         router.push(isEditMode ? `/offers/${offerId}` : "/offers");
       }, 1500);
     } catch (err: any) {
+      console.error("Error completo:", err);
+      console.error("Status:", err.response?.status);
+      console.error("Data:", err.response?.data);
       setError(
         err.response?.data?.message ||
           err.message ||

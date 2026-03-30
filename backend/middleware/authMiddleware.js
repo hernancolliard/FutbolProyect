@@ -113,19 +113,29 @@ const verificarSuscripcionActiva =
         return next();
       }
 
-      // 2️⃣ Verificar tipo de usuario
+      // 2️⃣ Verificar tipo de usuario (normalizar a minúsculas)
+      const tiposPermitidosNormalizados = tiposPermitidos.map(t => t.toLowerCase());
+      const tipoUsuarioNormalizado = req.user.tipo_usuario?.toLowerCase();
+      
+      console.log(`[SUSCRIPCIÓN] Verificando tipo de usuario:`, {
+        esperados: tiposPermitidosNormalizados,
+        actual: tipoUsuarioNormalizado,
+      });
+      
       if (
-        tiposPermitidos.length > 0 &&
-        !tiposPermitidos.includes(req.user.tipo_usuario)
+        tiposPermitidosNormalizados.length > 0 &&
+        !tiposPermitidosNormalizados.includes(tipoUsuarioNormalizado)
       ) {
+        console.log(`[SUSCRIPCIÓN] ❌ Tipo de usuario no permitido: ${req.user.tipo_usuario}`);
         return res.status(403).json({
-          message: `Acción no permitida para tu tipo de usuario (${req.user.tipo_usuario}).`,
+          message: `Acción no permitida para tu tipo de usuario (${req.user.tipo_usuario}). Se requiere uno de: ${tiposPermitidos.join(", ")}.`,
         });
       }
 
       // 3️⃣ Verificar suscripción activa
       const subResult = await db.query(
-        `SELECT id FROM suscripciones
+        `SELECT id, plan, estado, fecha_fin 
+         FROM suscripciones
          WHERE id_usuario = @id
            AND estado = 'activa'
            AND fecha_fin > NOW()`,
@@ -133,12 +143,14 @@ const verificarSuscripcionActiva =
       );
 
       if (subResult.rows.length === 0) {
+        console.log(`[SUSCRIPCIÓN] ❌ Sin suscripción activa para usuario ${req.user.id}`);
         return res.status(403).json({
           message:
             "Acceso denegado. Se requiere una suscripción activa para realizar esta acción.",
         });
       }
 
+      console.log(`[SUSCRIPCIÓN] ✅ Usuario ${req.user.id} tiene suscripción válida:`, subResult.rows[0]);
       next();
     } catch (error) {
       console.error("Error al verificar suscripción:", error);

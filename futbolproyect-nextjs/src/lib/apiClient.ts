@@ -31,6 +31,11 @@ apiClient.interceptors.request.use((config) => {
     } else {
       console.log("API Interceptor: No token found, request will be sent without Authorization header.");
     }
+    
+    // Para FormData, no establecer Content-Type para que axios lo haga automáticamente
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
   }
   return config;
 });
