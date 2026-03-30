@@ -22,7 +22,12 @@ const DropzoneContainer = styled(Box, {
 function FileUpload({ onFilesChange, uploadProgress, multiple, initialFiles = [] }) {
   const { t } = useTranslation('common');
   const [files, setFiles] = useState(initialFiles);
-  const [errors, setErrors] = useState([]);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Sincroniza las cargas iniciales del servidor con el cliente cuando cambia la oferta en edición.
+    setFiles(initialFiles);
+  }, [initialFiles]);
 
   const onDrop = useCallback((acceptedFiles, fileRejections) => {
     const newFiles = acceptedFiles.map(file => Object.assign(file, {

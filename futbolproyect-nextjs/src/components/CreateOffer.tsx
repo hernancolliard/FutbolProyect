@@ -29,11 +29,17 @@ const fetchOffer = async (offerId: string) => {
 
 // 2. Aplicamos la interfaz al componente
 function CreateOffer({ onOfferCreated, onClose }: CreateOfferProps) {
-  const { t } = useTranslation("common");
+  const { t, ready } = useTranslation("common");
   const params = useParams();
-  const offerId = params.offerId as string;
+  const offerId = params?.offerId as string | undefined;
   const router = useRouter();
   const isEditMode = Boolean(offerId);
+
+  // Evita errores de hidratación al renderizar textos traducidos que se cargan
+  // asíncronamente en el cliente (React 425/418/423 causados por mismatch). 
+  if (!ready) {
+    return <LoadingSpinner text={t("loading_offer", "Cargando oferta...")} />;
+  }
 
   const [formData, setFormData] = useState({
     titulo: "",
