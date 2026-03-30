@@ -10,7 +10,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleTagManager from "@/components/GoogleTagManager";
 import { AuthProvider } from "@/context/AuthContext";
 import { Suspense } from "react";
-import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
