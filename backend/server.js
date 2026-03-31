@@ -27,7 +27,18 @@ const corsOptions = {
 
 // Manejar CORS con preflight
 app.use(cors(corsOptions));
-app.options("/**", cors(corsOptions));
+
+// Middleware para manejar OPTIONS requests para todas las rutas
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    return res.status(200).json({});
+  }
+  next();
+});
 
 // Middleware para parsear JSON con límite aumentado
 app.use(express.json({ limit: '50mb' }));
