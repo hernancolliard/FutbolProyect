@@ -25,10 +25,9 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// Manejar CORS con preflight
 app.use(cors(corsOptions));
-
-// Manejar manualmente las peticiones OPTIONS (preflight)
-app.options("*", cors(corsOptions));
+app.options("/**", cors(corsOptions));
 
 // Middleware para parsear JSON con límite aumentado
 app.use(express.json({ limit: '50mb' }));
