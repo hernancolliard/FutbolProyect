@@ -19,13 +19,13 @@ export default function CreateOfferPage() {
         return;
       }
 
-      if (user.rol !== "OFERTANTE") {
+      if (user.tipo_usuario !== "ofertante") {
         router.replace("/");
       }
     }
   }, [user, loading, router]);
 
-  if (loading || !user || user.rol !== "OFERTANTE") {
+  if (loading || !user || user.tipo_usuario !== "ofertante") {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
         <CircularProgress />

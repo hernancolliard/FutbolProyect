@@ -122,6 +122,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Handle submit called");
     setError("");
     setSuccess("");
     setUploadProgress(0);
@@ -166,6 +167,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
       console.error("Error completo:", err);
       console.error("Status:", err.response?.status);
       console.error("Data:", err.response?.data);
+      console.log("Setting error:", err.response?.data?.message || err.message || t("error_processing_offer", "Error al procesar la oferta."));
       setError(
         err.response?.data?.message ||
           err.message ||
