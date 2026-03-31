@@ -114,6 +114,10 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
         >
           {user && user.id ? (
             <>
+              {console.log("Header Debug - User:", user)}
+              {console.log("Header Debug - isadmin:", user.isadmin)}
+              {console.log("Header Debug - tipo_usuario:", user.tipo_usuario)}
+              {console.log("Header Debug - Show button:", user.tipo_usuario === "ofertante" || user.isadmin)}
               {(user.tipo_usuario === "ofertante" || user.isadmin) && (
                 <Button
                   variant="contained"
@@ -234,6 +238,10 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             <Box sx={{ my: 1 }} />
             {user && user.id ? (
               <>
+                {console.log("Mobile Header Debug - User:", user)}
+                {console.log("Mobile Header Debug - isadmin:", user.isadmin)}
+                {console.log("Mobile Header Debug - tipo_usuario:", user.tipo_usuario)}
+                {console.log("Mobile Header Debug - Show button:", user.tipo_usuario === "ofertante" || user.isadmin)}
                 {(user.tipo_usuario === "ofertante" || user.isadmin) && (
                   <MenuItem onClick={handleCreateOfferClick}>
                     {t("publish_offer")}
