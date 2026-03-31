@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
+import GoogleLoginButton from "./GoogleLoginButton";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -147,7 +147,7 @@ function Login({ onClose }: LoginProps) {
             {t("or_login_with", "O inicia sesión con:")}
           </Typography>
           <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
-            <GoogleLogin
+            <GoogleLoginButton
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
             />

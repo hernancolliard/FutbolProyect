@@ -10,20 +10,25 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(
-  cors({
-    origin: [
-      "https://futbolproyect.com",
-      "https://www.futbolproyect.com",
-      "https://futbolproyect.onrender.com",
-      "http://localhost:3000",
-      "http://localhost:10000",
-      /\.vercel\.app$/,
-    ],
-    credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+const corsOptions = {
+  origin: [
+    "https://futbolproyect.com",
+    "https://www.futbolproyect.com",
+    "https://futbolproyect.onrender.com",
+    "http://localhost:3000",
+    "http://localhost:10000",
+    /\.vercel\.app$/,
+  ],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
+// Manejar manualmente las peticiones OPTIONS (preflight)
+app.options("*", cors(corsOptions));
 
 // Middleware para parsear JSON con límite aumentado
 app.use(express.json({ limit: '50mb' }));
