@@ -401,10 +401,7 @@ export default function ProfilePageClient({
 
           {isMyProfile && <MyApplicationsSection userId={profile.id} />}
           {isMyProfile && currentUser?.tipo_usuario === 'ofertante' && (
-            <>
-              {console.log('Mostrando MyOffersSection:', { isMyProfile, tipo_usuario: currentUser?.tipo_usuario })}
-              <MyOffersSection userId={profile.id} />
-            </>
+            <MyOffersSection userId={profile.id} />
           )}
         </CardContent>
       </Card>

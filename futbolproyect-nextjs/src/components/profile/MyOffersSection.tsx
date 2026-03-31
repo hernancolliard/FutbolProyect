@@ -36,9 +36,7 @@ interface MyOffersSectionProps {
 const fetchUserOffers = async (
   userId: string | number,
 ): Promise<Offer[]> => {
-  console.log('fetchUserOffers llamado con userId:', userId);
   const response = await apiClient.get("/offers/my-offers");
-  console.log('Respuesta de /offers/my-offers:', response.data);
   return response.data;
 };
 
@@ -49,8 +47,6 @@ export default function MyOffersSection({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  console.log('MyOffersSection renderizado con userId:', userId);
 
   useEffect(() => {
     const loadOffers = async () => {
