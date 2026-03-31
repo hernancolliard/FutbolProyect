@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { useAuth } from "@/context/AuthContext";
 import CreateOffer from "@/components/CreateOffer";
-import DebugOfferStatus from "@/components/DebugOfferStatus";
 
 export default function CreateOfferPage() {
   const { user, loading } = useAuth();
@@ -39,7 +38,6 @@ export default function CreateOfferPage() {
         Crear oferta
       </Typography>
 
-      <DebugOfferStatus />
       <CreateOffer />
     </Box>
   );
