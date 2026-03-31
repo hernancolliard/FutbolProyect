@@ -37,7 +37,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, tipo_usuario: user.tipo_usuario },
+      { id: user.id, tipo_usuario: user.tipo_usuario, isadmin: user.isadmin },
       process.env.JWT_SECRET,
       { expiresIn: "24h" },
     );
@@ -92,7 +92,7 @@ router.post("/google-login", async (req, res) => {
     }
 
     const jwtToken = jwt.sign(
-      { id: user.id, tipo_usuario: user.tipo_usuario },
+      { id: user.id, tipo_usuario: user.tipo_usuario, isadmin: user.isadmin },
       process.env.JWT_SECRET,
       { expiresIn: "24h" },
     );

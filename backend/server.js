@@ -6,7 +6,7 @@ const app = express();
 
 // COOP header para permitir Google OAuth popups
 app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
 
