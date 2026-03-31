@@ -131,7 +131,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
               <Button
                 color="inherit"
                 component={Link}
-                href={`/profile/${user.id}`}
+                href="/profile"
               >
                 {t("my_profile")}
               </Button>
@@ -249,7 +249,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                 )}
                 <MenuItem
                   component={Link}
-                  href={`/profile/${user.id}`}
+                  href="/profile"
                   onClick={handleMobileMenuClose}
                 >
                   {t("my_profile")}

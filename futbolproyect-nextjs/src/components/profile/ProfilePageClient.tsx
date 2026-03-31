@@ -28,6 +28,7 @@ import PublicIcon from "@mui/icons-material/Public";
 import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
 import MyApplicationsSection from "./MyApplicationsSection";
+import MyOffersSection from "./MyOffersSection";
 import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
 
 interface ProfilePageClientProps {
@@ -399,6 +400,12 @@ export default function ProfilePageClient({
           <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
 
           {isMyProfile && <MyApplicationsSection userId={profile.id} />}
+          {isMyProfile && currentUser?.tipo_usuario === 'ofertante' && (
+            <>
+              {console.log('Mostrando MyOffersSection:', { isMyProfile, tipo_usuario: currentUser?.tipo_usuario })}
+              <MyOffersSection userId={profile.id} />
+            </>
+          )}
         </CardContent>
       </Card>
 

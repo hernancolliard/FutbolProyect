@@ -275,6 +275,34 @@ router.get("/debug/user-status", verificarToken, async (req, res) => {
   }
 });
 
+// --- RUTA PROTEGIDA: OBTENER MIS OFERTAS ---
+router.get("/my-offers", verificarToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const query = `
+      SELECT 
+        o.id, o.titulo, o.descripcion, o.puesto, o.ubicacion, o.salario, 
+        o.horarios, o.nivel, o.detalles_adicionales, o.imagen_url, 
+        o.fecha_creacion, o.estado, o.is_featured, o.featured_until,
+        COUNT(p.id) as total_applications
+      FROM ofertas_laborales o
+      LEFT JOIN postulaciones p ON o.id = p.id_oferta
+      WHERE o.id_usuario_ofertante = @userId
+      GROUP BY o.id, o.titulo, o.descripcion, o.puesto, o.ubicacion, o.salario, 
+               o.horarios, o.nivel, o.detalles_adicionales, o.imagen_url, 
+               o.fecha_creacion, o.estado, o.is_featured, o.featured_until
+      ORDER BY o.fecha_creacion DESC
+    `;
+
+    const result = await db.query(query, { userId });
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener mis ofertas:", error);
+    res.status(500).json({ message: "Error del servidor al obtener las ofertas." });
+  }
+});
+
 // --- RUTA PROTEGIDA: CREAR UNA NUEVA OFERTA ---
 router.post(
   "/",
