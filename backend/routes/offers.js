@@ -221,15 +221,15 @@ router.get("/my-offers", verificarToken, async (req, res) => {
       SELECT
         o.id, o.titulo, o.descripcion, o.puesto, o.ubicacion, o.salario,
         o.horarios, o.nivel, o.detalles_adicionales, o.imagen_url,
-        o.fecha_creacion, o.estado, o.is_featured, o.featured_until,
+        o.fecha_publicacion, o.estado, o.is_featured, o.featured_until,
         COUNT(p.id) as total_applications
       FROM ofertas_laborales o
       LEFT JOIN postulaciones p ON o.id = p.id_oferta
       WHERE o.id_usuario_ofertante = @userId
       GROUP BY o.id, o.titulo, o.descripcion, o.puesto, o.ubicacion, o.salario,
                o.horarios, o.nivel, o.detalles_adicionales, o.imagen_url,
-               o.fecha_creacion, o.estado, o.is_featured, o.featured_until
-      ORDER BY o.fecha_creacion DESC
+               o.fecha_publicacion, o.estado, o.is_featured, o.featured_until
+      ORDER BY o.fecha_publicacion DESC
     `;
 
     const result = await db.query(query, { userId });
