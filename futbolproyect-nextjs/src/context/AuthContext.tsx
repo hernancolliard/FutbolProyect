@@ -64,6 +64,20 @@ export const AuthProvider = ({ children }: any) => {
     }
   };
 
+  const register = async (name: string, email: string, password: string, tipo_usuario: string) => {
+    try {
+      const res = await apiClient.post("/users/register", { nombre: name, email, password, tipo_usuario });
+      if (res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
+      }
+      await fetchUser();
+    } catch (error: any) {
+      console.error("Register error:", error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     await apiClient.post("/users/logout");
     localStorage.removeItem("token");
@@ -72,7 +86,7 @@ export const AuthProvider = ({ children }: any) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, loginWithGoogle, logout, loading }}
+      value={{ user, login, loginWithGoogle, register, logout, loading }}
     >
       {children}
     </AuthContext.Provider>

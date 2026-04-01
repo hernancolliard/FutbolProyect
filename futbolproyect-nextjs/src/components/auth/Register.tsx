@@ -25,10 +25,10 @@ interface RegisterProps {
 export default function Register({
   onClose,
   onSwitchToLogin,
-  initialRole = "user",
+  initialRole = "postulante",
 }: RegisterProps) {
   const { t } = useTranslation("common");
-  const { login } = useAuth(); // Usamos login para auto-loguear tras registro, o register si existe
+  const { register } = useAuth();
 
   // 2. CORRECCIÓN: Usamos initialRole como valor inicial
   const [role, setRole] = useState(initialRole);
@@ -61,30 +61,8 @@ export default function Register({
 
     setLoading(true);
     try {
-      // Aquí deberías llamar a tu función de registro.
-      // Si usas apiClient directo: await apiClient.post('/users/register', { ...formData, role });
-      // Si usas el contexto: await register({ ...formData, role });
-
-      // Ejemplo usando fetch directo para asegurar funcionalidad si no tienes register en context:
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
-      const res = await fetch(`${apiUrl}/users/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: formData.name,
-          email: formData.email,
-          password: formData.password,
-          tipo_usuario: role,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Error en el registro");
-      }
-
-      // Si todo sale bien, intentamos loguear automáticamente o cerramos
-      await login(formData.email, formData.password);
+      // Usar la función register del contexto
+      await register(formData.name, formData.email, formData.password, role);
       onClose();
     } catch (err: any) {
       setError(err.message || t("register_error", "Error al registrarse."));
