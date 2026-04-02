@@ -52,6 +52,10 @@ app.use("/api/profiles", require("./routes/profiles"));
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/contact", require("./routes/contact"));
+app.use("/api/privacy", require("./routes/privacy"));
+app.use("/api/terms", require("./routes/terms"));
+app.use("/api/sitemap", require("./routes/sitemap"));
 // etc...
 
 const PORT = parseInt(process.env.PORT, 10) || 10000;
