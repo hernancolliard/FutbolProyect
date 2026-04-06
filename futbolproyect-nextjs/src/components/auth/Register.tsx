@@ -25,13 +25,13 @@ interface RegisterProps {
 export default function Register({
   onClose,
   onSwitchToLogin,
-  initialRole = "postulante",
+  initialRole = "jugador",
 }: RegisterProps) {
   const { t } = useTranslation("common");
   const { register } = useAuth();
 
   // 2. CORRECCIÓN: Usamos initialRole como valor inicial
-  const [role, setRole] = useState(initialRole);
+  const [rol, setRol] = useState(initialRole);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,8 +43,11 @@ export default function Register({
 
   // 3. CORRECCIÓN: Actualizamos el rol si cambia la prop (por si el modal se reabre)
   useEffect(() => {
-    setRole(initialRole);
+    setRol(initialRole);
   }, [initialRole]);
+
+  // Derivar tipo_usuario del rol
+  const tipo_usuario = ["jugador", "entrenador", "ayudante", "analista"].includes(rol) ? "postulante" : "ofertante";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -62,7 +65,7 @@ export default function Register({
     setLoading(true);
     try {
       // Usar la función register del contexto
-      await register(formData.name, formData.email, formData.password, role);
+      await register(formData.name, formData.email, formData.password, tipo_usuario, rol);
       onClose();
     } catch (err: any) {
       setError(err.message || t("register_error", "Error al registrarse."));
@@ -95,12 +98,17 @@ export default function Register({
           <TextField
             select
             label={t("i_am_a", "Soy un...")}
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
+            value={rol}
+            onChange={(e) => setRol(e.target.value)}
             fullWidth
           >
-            <MenuItem value="postulante">{t("player", "Jugador")}</MenuItem>
-            <MenuItem value="ofertante">{t("club", "Club/Agencia")}</MenuItem>
+            <MenuItem value="jugador">{t("player", "Jugador")}</MenuItem>
+            <MenuItem value="entrenador">{t("coach", "Entrenador")}</MenuItem>
+            <MenuItem value="ayudante">{t("assistant", "Ayudante")}</MenuItem>
+            <MenuItem value="analista">{t("analyst", "Analista")}</MenuItem>
+            <MenuItem value="club">{t("club", "Club")}</MenuItem>
+            <MenuItem value="agente">{t("agent", "Agente")}</MenuItem>
+            <MenuItem value="scout">{t("scout", "Scout")}</MenuItem>
           </TextField>
 
           <TextField

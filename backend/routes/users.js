@@ -121,7 +121,7 @@ router.get("/me", verificarToken, async (req, res) => {
   try {
     // include subscription info
     const result = await db.query(
-      `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.isadmin,
+      `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.rol, u.isadmin,
               s.plan as subscription_plan,
               s.estado as subscription_status,
               s.fecha_fin as subscription_end_date
@@ -149,7 +149,7 @@ router.get("/me", verificarToken, async (req, res) => {
    REGISTRO DE NUEVO USUARIO
 ========================= */
 router.post("/register", async (req, res) => {
-  const { nombre, email, password, tipo_usuario } = req.body;
+  const { nombre, email, password, tipo_usuario, rol } = req.body;
 
   try {
     // Validación básica
@@ -165,6 +165,17 @@ router.post("/register", async (req, res) => {
       return res
         .status(400)
         .json({ message: "Tipo de usuario inválido." });
+    }
+
+    // Validación de rol
+    const rolesValidos = {
+      postulante: ["jugador", "entrenador", "ayudante", "analista"],
+      ofertante: ["club", "agente", "scout"]
+    };
+    if (!rol || !rolesValidos[tipo_usuario].includes(rol)) {
+      return res
+        .status(400)
+        .json({ message: "Rol inválido para el tipo de usuario." });
     }
 
     // Verificar si el email ya existe
@@ -185,14 +196,15 @@ router.post("/register", async (req, res) => {
 
     // Insertar el nuevo usuario
     const result = await db.query(
-      `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
-       VALUES (@nombre, @email, @password_hash, @tipo_usuario)
-       RETURNING id, nombre, email, tipo_usuario`,
+      `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario, rol)
+       VALUES (@nombre, @email, @password_hash, @tipo_usuario, @rol)
+       RETURNING id, nombre, email, tipo_usuario, rol`,
       {
         nombre,
         email,
         password_hash,
         tipo_usuario,
+        rol,
       }
     );
 
