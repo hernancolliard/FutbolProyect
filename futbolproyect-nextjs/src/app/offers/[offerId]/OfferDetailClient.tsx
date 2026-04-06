@@ -95,6 +95,7 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
     offer?.[`detalles_adicionales_${lang}`] ||
     offer?.detalles_adicionales ||
     "";
+  const salario = offer?.salario;
 
   const isOwner = user && offer && user.id === offer.id_usuario_ofertante;
   const isAdmin = user?.isAdmin;
@@ -215,6 +216,42 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
         <CardContent>
           <Typography variant="h4">{titulo}</Typography>
           <Typography>{descripcion}</Typography>
+
+          {ubicacion && (
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              <strong>{t("location", "Ubicación")}:</strong> {ubicacion}
+            </Typography>
+          )}
+
+          {puesto && (
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              <strong>{t("position", "Puesto")}:</strong> {puesto}
+            </Typography>
+          )}
+
+          {nivel && (
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              <strong>{t("level", "Nivel")}:</strong> {nivel}
+            </Typography>
+          )}
+
+          {salario && (
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              <strong>{t("salary", "Salario")}:</strong> ${salario}
+            </Typography>
+          )}
+
+          {horarios && (
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              <strong>{t("schedule", "Horarios")}:</strong> {horarios}
+            </Typography>
+          )}
+
+          {detalles_adicionales && (
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              <strong>{t("additional_details_title", "Detalles adicionales")}:</strong> {detalles_adicionales}
+            </Typography>
+          )}
 
           <Stack spacing={2} sx={{ mt: 3 }}>
             {(isOwner || isAdmin) && (
