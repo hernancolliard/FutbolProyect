@@ -92,19 +92,17 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
             sx={{ mb: 2 }}
           >
             <Typography>{t("profile_image", "Imagen de Perfil")}</Typography>
-            {profileData.foto_perfil_url && (
-              <Image
-                src={selectedFile ? URL.createObjectURL(selectedFile) : profileData.foto_perfil_url} // Show preview of new file
-                alt={t('profile_picture_alt', { name: profileData.nombre })}
-                width={150}
-                height={150}
-                style={{
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid #ccc",
-                }}
-              />
-            )}
+            <Image
+              src={selectedFile ? URL.createObjectURL(selectedFile) : (profileData.foto_perfil_url || '/images/logos/logofp.png')} // Show preview of new file or default
+              alt={t('profile_picture_alt', { name: profileData.nombre })}
+              width={150}
+              height={150}
+              style={{
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "2px solid #ccc",
+              }}
+            />
             <Button variant="outlined" component="label">
               {t("select_file", "Seleccionar Archivo")}
               <input

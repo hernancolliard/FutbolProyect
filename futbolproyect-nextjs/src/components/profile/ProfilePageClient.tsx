@@ -170,44 +170,24 @@ export default function ProfilePageClient({
                     alignItems="center"
                     sx={{ mb: 2 }}
                   >
-                    {profile.foto_perfil_url ? (
-                      <Box
-                        sx={{ flexShrink: 0, cursor: "pointer" }}
-                        onClick={handleOpenImageModal}
-                      >
-                        <img
-                          src={profile.foto_perfil_url}
-                          alt={t("profile_picture_alt", {
-                            name: profile.nombre,
-                          })}
-                          width="150"
-                          height="150"
-                          style={{
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid #ccc",
-                          }}
-                        />
-                      </Box>
-                    ) : (
-                      <Box
-                        sx={{
-                          width: 150,
-                          height: 150,
+                    <Box
+                      sx={{ flexShrink: 0, cursor: "pointer" }}
+                      onClick={handleOpenImageModal}
+                    >
+                      <img
+                        src={profile.foto_perfil_url || '/images/logos/logofp.png'}
+                        alt={t("profile_picture_alt", {
+                          name: profile.nombre,
+                        })}
+                        width="150"
+                        height="150"
+                        style={{
                           borderRadius: "50%",
-                          bgcolor: "#e0e0e0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
+                          objectFit: "cover",
                           border: "2px solid #ccc",
                         }}
-                      >
-                        <Typography variant="caption">
-                          {t("no_image")}
-                        </Typography>
-                      </Box>
-                    )}
+                      />
+                    </Box>
                     <Typography variant="h4">
                       {profile.nombre} {profile.apellido ? profile.apellido : ""}
                     </Typography>
@@ -430,7 +410,7 @@ export default function ProfilePageClient({
           }}
         >
           <img
-            src={profile.foto_perfil_url}
+            src={profile.foto_perfil_url || '/images/logos/logofp.png'}
             alt={t("profile_picture_alt", { name: profile.nombre })}
             style={{
               maxWidth: "100%",
