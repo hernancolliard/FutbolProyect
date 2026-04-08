@@ -54,10 +54,6 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  if (!ready) {
-    return <LoadingSpinner text={t("loading_offer", "Cargando oferta...")} />;
-  }
-
   const { data: existingOffer, isLoading: isLoadingOffer } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: () => fetchOffer(offerId),
@@ -111,6 +107,10 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
       }
     };
   }, [files, isEditMode, existingOffer]);
+
+  if (!ready) {
+    return <LoadingSpinner text={t("loading_offer", "Cargando oferta...")} />;
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
