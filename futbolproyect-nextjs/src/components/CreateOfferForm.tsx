@@ -35,12 +35,6 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
   const router = useRouter();
   const isEditMode = Boolean(offerId);
 
-  // Evita errores de hidratación al renderizar textos traducidos que se cargan
-  // asíncronamente en el cliente (React 425/418/423 causados por mismatch). 
-  if (!ready) {
-    return <LoadingSpinner text={t("loading_offer", "Cargando oferta...")} />;
-  }
-
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
@@ -59,6 +53,10 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  if (!ready) {
+    return <LoadingSpinner text={t("loading_offer", "Cargando oferta...")} />;
+  }
 
   const { data: existingOffer, isLoading: isLoadingOffer } = useQuery({
     queryKey: ["offer", offerId],
