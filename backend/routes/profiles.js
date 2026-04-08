@@ -48,7 +48,7 @@ router.get("/", async (req, res) => {
           p.total_ratings
       FROM
           usuarios u
-      JOIN
+      LEFT JOIN
           perfiles_usuario p ON u.id = p.id_usuario
       WHERE ${whereClauses.join(" AND ")}
       ORDER BY
