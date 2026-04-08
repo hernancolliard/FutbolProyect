@@ -72,6 +72,8 @@ CREATE TABLE perfiles_usuario (
 	peso_kg INTEGER,
 	pie_dominante VARCHAR(50),
 	fecha_de_nacimiento DATE,
+	average_rating NUMERIC(3,2) DEFAULT 0,
+	total_ratings INTEGER DEFAULT 0,
 	resumen_profesional_es TEXT,
 	resumen_profesional_en TEXT,
 	posicion_principal_es VARCHAR(100),
@@ -80,6 +82,16 @@ CREATE TABLE perfiles_usuario (
 	nacionalidad_en VARCHAR(100),
 	pie_dominante_es VARCHAR(50),
 	pie_dominante_en VARCHAR(50)
+);
+
+-- Tabla de calificaciones de perfiles
+CREATE TABLE profile_ratings (
+	profile_id INTEGER NOT NULL REFERENCES perfiles_usuario (id_usuario) ON DELETE CASCADE,
+	user_id INTEGER NOT NULL REFERENCES usuarios (id) ON DELETE CASCADE,
+	rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	PRIMARY KEY (profile_id, user_id)
 );
 
 -- Tabla de postulaciones

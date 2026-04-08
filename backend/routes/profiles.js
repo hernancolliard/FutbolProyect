@@ -239,11 +239,29 @@ router.post("/:profileId/rate", verificarToken, async (req, res) => {
       `;
       await db.query(upsertRatingQuery, { profileIdNum, userId, rating });
   
-      // Obtener la calificación promedio y el total de calificaciones actualizados del perfil
+      // Actualizar las estadísticas de calificaciones en el perfil
+      const updateProfileStatsQuery = `
+        UPDATE perfiles_usuario
+        SET average_rating = stats.avg_rating,
+            total_ratings = stats.total_ratings
+        FROM (
+          SELECT profile_id, AVG(rating)::float AS avg_rating, COUNT(*) AS total_ratings
+          FROM profile_ratings
+          WHERE profile_id = @profileIdNum
+          GROUP BY profile_id
+        ) AS stats
+        WHERE id_usuario = stats.profile_id;
+      `;
+      await db.query(updateProfileStatsQuery, { profileIdNum });
+  
       const updatedProfileRatings = await db.query(
         `SELECT average_rating, total_ratings FROM perfiles_usuario WHERE id_usuario = @profileIdNum`,
         { profileIdNum }
       );
+
+      if (updatedProfileRatings.rows.length === 0) {
+        return res.status(404).json({ message: "Perfil no encontrado." });
+      }
   
       res.status(200).json({
         message: "Perfil calificado exitosamente.",
