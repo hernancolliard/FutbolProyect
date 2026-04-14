@@ -10,7 +10,7 @@ import Image from "next/image"; // Import next/image
 
 // Hook para detectar si es móvil con breakpoint correcto
 const useIsMobile = () => {
-    const [isMobile, setIsMobile] = React.useState(false);
+    const [isMobile, setIsMobile] = React.useState<boolean | null>(null);
     React.useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768); // Mobile: < 768px, Tablet/Desktop: >= 768px
@@ -19,7 +19,8 @@ const useIsMobile = () => {
         handleResize();
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    return isMobile;
+    // Return false during hydration, then the actual value
+    return isMobile === null ? false : isMobile;
 };
 
 function TrustedBy() {

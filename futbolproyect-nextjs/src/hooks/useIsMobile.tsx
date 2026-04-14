@@ -3,25 +3,25 @@
 import { useState, useEffect } from 'react';
 
 const useIsMobile = (breakpoint = 768) => {
-  // Initialize with a default value or calculate on mount
-  const [isMobile, setIsMobile] = useState(false); 
+  // Initialize as null to prevent hydration mismatch
+  const [isMobile, setIsMobile] = useState<boolean | null>(null); 
 
   useEffect(() => {
-    // Only run this effect on the client side after hydration
+    // Set initial value after hydration
+    setIsMobile(window.innerWidth < breakpoint);
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < breakpoint);
     };
-
-    // Set initial value
-    setIsMobile(window.innerWidth < breakpoint);
 
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [breakpoint]); // Depend on breakpoint
+  }, [breakpoint]);
 
-  return isMobile;
+  // Return false during hydration, then the actual value
+  return isMobile === null ? false : isMobile;
 };
 
 export default useIsMobile;
