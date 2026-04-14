@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
@@ -39,6 +40,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Middleware para parsear cookies
+app.use(cookieParser());
 
 // Middleware para parsear JSON con límite aumentado
 app.use(express.json({ limit: '50mb' }));
