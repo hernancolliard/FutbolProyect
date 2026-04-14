@@ -67,9 +67,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
     }
 
     try {
-        const response = await apiClient.put("/profiles/me", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await apiClient.put("/profiles/me", data);
 
         if (response.status !== 200 && response.status !== 201) {
           throw new Error(t("error_saving_profile", "Error al guardar el perfil"));

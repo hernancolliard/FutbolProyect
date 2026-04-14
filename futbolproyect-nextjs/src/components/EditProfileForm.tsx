@@ -64,9 +64,7 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
     }
 
     try {
-      await apiClient.put("/profiles/me", data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      await apiClient.put("/profiles/me", data);
       onSave();
     } catch (err) {
       setError(err.message || t("error_saving_profile", "Error al guardar el perfil."));

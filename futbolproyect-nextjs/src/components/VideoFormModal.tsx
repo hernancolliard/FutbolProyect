@@ -19,14 +19,10 @@ const saveVideo = async ({ videoData, isEdit, videoId }) => {
   }
 
   if (isEdit) {
-    const { data } = await apiClient.put(`/profiles/videos/${videoId}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await apiClient.put(`/profiles/videos/${videoId}`, formData);
     return data;
   } else {
-    const { data } = await apiClient.post('/profiles/videos', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await apiClient.post('/profiles/videos', formData);
     return data;
   }
 };

@@ -34,9 +34,7 @@ const uploadPhoto = async ({ userId, file, title }) => {
   const formData = new FormData();
   formData.append('photo', file);
   formData.append('title', title);
-  const { data } = await apiClient.post(`/profiles/${userId}/photos`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await apiClient.post(`/profiles/${userId}/photos`, formData);
   return data;
 };
 
