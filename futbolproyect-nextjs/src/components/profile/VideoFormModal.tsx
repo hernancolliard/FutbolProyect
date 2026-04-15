@@ -5,7 +5,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, S
 import { useTranslation } from 'react-i18next';
 import { Video } from '@/lib/types';
 import FileUpload from '@/components/ui/FileUpload';
-import { useRouter } from 'next/navigation';
+import apiClient from '@/lib/apiClient';
 
 interface VideoFormModalProps {
     open: boolean;
@@ -23,22 +23,13 @@ const saveVideo = async ({ videoData, isEdit, videoId }: { videoData: any, isEdi
         }
     });
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    const endpoint = isEdit ? `/api/profiles/videos/${videoId}` : '/api/profiles/videos';
-    const method = isEdit ? 'PUT' : 'POST';
-
-    const res = await fetch(apiUrl + endpoint, {
-        method: method,
-        body: formData,
-        // Don't set Content-Type, browser will set it with boundary
-    });
-
-    if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: 'An unknown error occurred' }));
-        throw new Error(errorData.message || 'Failed to save video');
+    if (isEdit) {
+        const { data } = await apiClient.put(`/profiles/videos/${videoId}`, formData);
+        return data;
     }
 
-    return res.json();
+    const { data } = await apiClient.post('/profiles/videos', formData);
+    return data;
 };
 
 const VideoFormModal = ({ open, onClose, video, onSave }: VideoFormModalProps) => {

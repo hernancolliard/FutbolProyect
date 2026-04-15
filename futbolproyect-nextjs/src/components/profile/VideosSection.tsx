@@ -14,7 +14,6 @@ import { Video } from "@/lib/types";
 import VideoCard from "./VideoCard";
 import VideoPlayerModal from "./VideoPlayerModal";
 import VideoFormModal from "./VideoFormModal";
-import { getApiBaseUrl } from "@/lib/api";
 import apiClient from "@/lib/apiClient";
 
 // CORRECCIÓN: userId acepta string | number
@@ -103,14 +102,8 @@ export default function VideosSection({
         ),
       )
     ) {
-      const apiUrl = getApiBaseUrl();
       try {
-        const res = await fetch(`${apiUrl}/profiles/videos/${videoId}`, {
-          method: "DELETE",
-        });
-        if (!res.ok) {
-          throw new Error("Failed to delete video");
-        }
+        await apiClient.delete(`/profiles/videos/${videoId}`);
         loadVideos();
       } catch (error) {
         console.error("Error deleting video", error);
