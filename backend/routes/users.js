@@ -46,7 +46,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "none", // required for cross-site cookies (frontend on different domain)
-      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
+      domain: process.env.COOKIE_DOMAIN,
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
