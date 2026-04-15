@@ -430,12 +430,6 @@ const videoSchema = z.object({
 router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
 
-  if (isNaN(parseInt(userId, 10))) {
-    return res
-      .status(400)
-      .json({ message: "El ID de usuario debe ser un número." });
-  }
-
   try {
     const query = `
       SELECT id, user_id, title, youtube_url, cover_image_url, position
