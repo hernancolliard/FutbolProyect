@@ -78,7 +78,7 @@ const VideoCard = ({
           component="img"
           image={video.cover_image_url}
           alt={video.title}
-          sx={{ objectFit: "cover", height: 120 }}
+          sx={{ objectFit: "contain", height: 120 }}
         />
         <Box
           sx={{
