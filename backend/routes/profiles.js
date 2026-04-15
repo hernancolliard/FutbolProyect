@@ -426,6 +426,7 @@ const videoSchema = z.object({
 });
 
 // --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
+// Public route
 router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
 
