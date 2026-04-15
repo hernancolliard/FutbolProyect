@@ -425,8 +425,8 @@ const videoSchema = z.object({
   ),
 });
 
-// --- RUTA PROTEGIDA: OBTENER VIDEOS DE UN USUARIO ---
-router.get("/:userId/videos", verificarToken, async (req, res) => {
+// --- RUTA PÚBLICA: OBTENER VIDEOS DE UN USUARIO ---
+router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
 
   if (isNaN(parseInt(userId, 10))) {
