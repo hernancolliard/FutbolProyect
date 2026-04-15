@@ -260,11 +260,11 @@ export default function UserPhotosSection({
       <Dialog
         open={!!selectedPhotoToView}
         onClose={handleClosePhotoView}
-        maxWidth="lg"
+        maxWidth="md"
         fullWidth
-        sx={{ '& .MuiDialog-paper': { maxWidth: '80vw', maxHeight: '80vh' } }}
+        sx={{ '& .MuiDialog-paper': { maxWidth: '70vw', maxHeight: '70vh' } }}
       >
-        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <DialogContent sx={{ p: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
           {selectedPhotoToView && (
             <img
               src={selectedPhotoToView.url}
@@ -272,7 +272,7 @@ export default function UserPhotosSection({
                 selectedPhotoToView[`title_${lang}`] ||
                 selectedPhotoToView.title
               }
-              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "scale-down" }}
             />
           )}
         </DialogContent>
