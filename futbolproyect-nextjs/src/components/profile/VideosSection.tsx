@@ -15,6 +15,7 @@ import VideoCard from "./VideoCard";
 import VideoPlayerModal from "./VideoPlayerModal";
 import VideoFormModal from "./VideoFormModal";
 import { getApiBaseUrl } from "@/lib/api";
+import apiClient from "@/lib/apiClient";
 
 // CORRECCIÓN: userId acepta string | number
 interface VideosSectionProps {
@@ -24,19 +25,11 @@ interface VideosSectionProps {
 
 // CORRECCIÓN: fetch acepta string | number
 const fetchUserVideos = async (userId: string | number): Promise<Video[]> => {
-  // use normalized base URL
-  const apiUrl = getApiBaseUrl();
   try {
-    const res = await fetch(`${apiUrl}/profiles/${userId}/videos`);
-    if (!res.ok) {
-      console.error(
-        `Failed to fetch videos for user ${userId}: ${res.statusText}`,
-      );
-      return [];
-    }
-    return res.json();
+    const res = await apiClient.get(`/profiles/${userId}/videos`);
+    return res.data;
   } catch (error) {
-    console.error(`Network error fetching videos for user ${userId}:`, error);
+    console.error(`Error fetching videos for user ${userId}:`, error);
     return [];
   }
 };

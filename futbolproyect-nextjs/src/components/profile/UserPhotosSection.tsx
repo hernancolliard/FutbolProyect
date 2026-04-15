@@ -176,7 +176,7 @@ export default function UserPhotosSection({
                     src={photo.url}
                     alt={title}
                     layout="fill"
-                    objectFit="cover"
+                    objectFit="contain"
                   />
                   {isMyProfile && (
                     <IconButton
@@ -260,8 +260,7 @@ export default function UserPhotosSection({
       <Dialog
         open={!!selectedPhotoToView}
         onClose={handleClosePhotoView}
-        maxWidth="lg"
-        fullWidth
+        fullScreen
       >
         <DialogContent>
           {selectedPhotoToView && (
@@ -271,7 +270,7 @@ export default function UserPhotosSection({
                 selectedPhotoToView[`title_${lang}`] ||
                 selectedPhotoToView.title
               }
-              style={{ width: "100%", maxHeight: "80vh", objectFit: "contain" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           )}
         </DialogContent>
