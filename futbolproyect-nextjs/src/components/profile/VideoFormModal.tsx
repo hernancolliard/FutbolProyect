@@ -34,7 +34,6 @@ const saveVideo = async ({ videoData, isEdit, videoId }: { videoData: any, isEdi
 
 const VideoFormModal = ({ open, onClose, video, onSave }: VideoFormModalProps) => {
     const { t } = useTranslation();
-    const router = useRouter();
     const [formData, setFormData] = useState<{
         title: string;
         youtube_url: string;
