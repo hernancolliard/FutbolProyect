@@ -21,7 +21,7 @@ import FileUpload from "@/components/ui/FileUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import Image from "next/image";
-import { getApiBaseUrl } from "@/lib/api";
+import apiClient from "@/lib/apiClient";
 
 // CORRECCIÓN: userId ahora acepta string | number
 interface UserPhotosSectionProps {
@@ -33,12 +33,8 @@ interface UserPhotosSectionProps {
 const fetchUserPhotos = async (
   userId: string | number,
 ): Promise<UserPhoto[]> => {
-  const apiUrl = getApiBaseUrl();
-  const res = await fetch(`${apiUrl}/profiles/${userId}/photos`);
-  if (!res.ok) {
-    throw new Error("Failed to fetch photos");
-  }
-  return res.json();
+  const { data } = await apiClient.get(`/profiles/${userId}/photos`);
+  return data;
 };
 
 const uploadPhoto = async ({
@@ -54,17 +50,8 @@ const uploadPhoto = async ({
   formData.append("photo", file);
   formData.append("title", title);
 
-  const apiUrl = getApiBaseUrl();
-  const res = await fetch(`${apiUrl}/profiles/${userId}/photos`, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to upload photo");
-  }
-  return res.json();
+  const { data } = await apiClient.post(`/profiles/${userId}/photos`, formData);
+  return data;
 };
 
 const deletePhoto = async ({
@@ -74,19 +61,10 @@ const deletePhoto = async ({
   userId: string | number;
   photoId: number;
 }) => {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-      const res = await fetch(
-        `${apiUrl}/profiles/${userId}/photos/${photoId}`,    {
-      method: "DELETE",
-    },
+  const { data } = await apiClient.delete(
+    `/profiles/${userId}/photos/${photoId}`,
   );
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || "Failed to delete photo");
-  }
-  return res.json();
+  return data;
 };
 
 export default function UserPhotosSection({
