@@ -68,6 +68,7 @@ export default function ProfilePageClient({
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
+  const [myRating, setMyRating] = useState<number | null>(null);
 
   useEffect(() => {
     setProfile(initialProfile);
@@ -90,6 +91,24 @@ export default function ProfilePageClient({
 
     loadStats();
   }, [isMyProfile, profile]);
+
+  useEffect(() => {
+    if (!currentUser || !profile || isMyProfile) {
+      setMyRating(null);
+      return;
+    }
+
+    const loadMyRating = async () => {
+      try {
+        const { data } = await apiClient.get(`/profiles/${profile.id}/my-rating`);
+        setMyRating(data.rating);
+      } catch (error) {
+        setMyRating(null);
+      }
+    };
+
+    loadMyRating();
+  }, [currentUser, profile, isMyProfile]);
 
   useEffect(() => {
     // Validación segura de IDs
@@ -117,6 +136,7 @@ export default function ProfilePageClient({
         rating: newValue,
       });
       const updatedProfile = res.data;
+      setMyRating(updatedProfile.user_rating ?? newValue);
       setProfile((prev) =>
         prev
           ? {
@@ -395,20 +415,47 @@ export default function ProfilePageClient({
                 </Box>
                 {!isMyProfile && (
                   <Box sx={{ ml: { sm: 4 }, mt: { xs: 2, sm: 0 } }}>
+                    <Typography component="legend" sx={{ fontWeight: 700 }}>
+                      {t("profile_average_rating", "Promedio del perfil")}
+                    </Typography>
+                    <Rating
+                      name="profile-average-rating"
+                      value={Number(profile.average_rating || 0)}
+                      precision={0.5}
+                      readOnly
+                    />
+                    {profile.total_ratings > 0 ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        {Number(profile.average_rating || 0).toFixed(1)} / 5 ·{" "}
+                        {profile.total_ratings} {t("ratings", "calificaciones")}
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        {t("no_ratings_yet", "Sin calificaciones todavía")}
+                      </Typography>
+                    )}
+
                     <Typography component="legend">
                       {t("rate_profile", "Calificar Perfil")}
                     </Typography>
                     <Rating
                       name="profile-rating"
-                      value={profile.average_rating || 0}
-                      precision={0.5}
+                      value={myRating || 0}
+                      precision={1}
                       onChange={handleRatingChange}
-                      disabled={isPending}
+                      disabled={isPending || !currentUser}
                     />
-                    {profile.total_ratings > 0 && (
+                    {myRating ? (
                       <Typography variant="body2" color="text.secondary">
-                        ({profile.total_ratings}{" "}
-                        {t("ratings", "calificaciones")})
+                        {t("your_rating", "Tu calificación")}: {myRating} / 5
+                      </Typography>
+                    ) : !currentUser ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {t("login_to_rate", "Iniciá sesión para calificar")}
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        {t("not_rated_by_you", "Todavía no calificaste este perfil")}
                       </Typography>
                     )}
                   </Box>

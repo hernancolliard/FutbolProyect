@@ -232,6 +232,34 @@ router.get("/:userId/stats", verificarToken, async (req, res) => {
   }
 });
 
+// --- RUTA PROTEGIDA: OBTENER MI CALIFICACIÓN PARA UN PERFIL ---
+router.get("/:profileId/my-rating", verificarToken, async (req, res) => {
+  const { profileId } = req.params;
+  const userId = req.user.id;
+
+  if (isNaN(parseInt(profileId, 10))) {
+    return res.status(400).json({ message: "El ID de perfil no es válido." });
+  }
+
+  try {
+    const result = await db.query(
+      `
+        SELECT rating
+        FROM profile_ratings
+        WHERE profile_id = @profileId AND user_id = @userId;
+      `,
+      { profileId: parseInt(profileId, 10), userId },
+    );
+
+    res.json({
+      rating: result.rows.length > 0 ? result.rows[0].rating : null,
+    });
+  } catch (error) {
+    console.error("Error al obtener la calificación del usuario:", error);
+    res.status(500).json({ message: "Error del servidor al obtener la calificación." });
+  }
+});
+
 router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
@@ -356,6 +384,7 @@ router.post("/:profileId/rate", verificarToken, async (req, res) => {
         message: "Perfil calificado exitosamente.",
         average_rating: updatedProfileRatings.rows[0].average_rating,
         total_ratings: updatedProfileRatings.rows[0].total_ratings,
+        user_rating: rating,
       });
     } catch (error) {
       console.error("Error al calificar el perfil:", error);
