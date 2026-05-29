@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import VideosSection from "./VideosSection";
 import UserPhotosSection from "./UserPhotosSection";
+import ScoutingReportsSection from "./ScoutingReportsSection";
 import ShareButtons from "@/components/ui/ShareButtons";
 import EditProfileModal from "./EditProfileModal";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -507,8 +508,9 @@ export default function ProfilePageClient({
             </Grid>
           </Grid>
 
-          <UserPhotosSection userId={profile.id} isMyProfile={isMyProfile} />
-          <VideosSection userId={profile.id} isMyProfile={isMyProfile} />
+          <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
+          <UserPhotosSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
+          <VideosSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
 
           {isMyProfile && <MyApplicationsSection userId={profile.id} />}
           {isMyProfile && currentUser?.tipo_usuario === 'ofertante' && (

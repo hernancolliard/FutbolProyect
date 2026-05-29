@@ -46,6 +46,23 @@ export interface UserPhoto {
     title_en: string;
 }
 
+export interface ScoutingReportImage {
+  id: number;
+  report_id: number;
+  url: string;
+  position: number;
+}
+
+export interface ScoutingReport {
+  id: number;
+  user_id: number;
+  title: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  images: ScoutingReportImage[];
+}
+
 export interface Application {
     id: number;
     oferta_id: number;

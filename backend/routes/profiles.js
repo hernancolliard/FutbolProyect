@@ -15,6 +15,9 @@ const fs = require("fs");
 
 const { uploadToS3 } = require("../services/s3Service");
 
+const MAX_SCOUTING_REPORTS = 3;
+const MAX_SCOUTING_REPORT_IMAGES = 15;
+
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
@@ -70,6 +73,8 @@ router.get("/", async (req, res) => {
 router.get("/featured", async (req, res) => {
       const { nacionalidad, puesto } = req.query;
   
+    let createdReportId = null;
+
     try {
       let queryParams = {}; // Usar un objeto para los parámetros nombrados
       let whereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
@@ -648,6 +653,199 @@ router.get("/:userId/photos", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error del servidor al obtener las fotos." });
+  }
+});
+
+// --- RUTA PÚBLICA: OBTENER INFORMES DE SCOUTING DE UN USUARIO ---
+router.get("/:userId/scouting-reports", async (req, res) => {
+  const { userId } = req.params;
+
+  if (isNaN(parseInt(userId, 10))) {
+    return res
+      .status(400)
+      .json({ message: "El ID de usuario debe ser un número." });
+  }
+
+  try {
+    const reportsResult = await db.query(
+      `
+        SELECT id, user_id, title, description, created_at, updated_at
+        FROM scouting_reports
+        WHERE user_id = @userId
+        ORDER BY created_at DESC;
+      `,
+      { userId: parseInt(userId, 10) }
+    );
+
+    const reports = reportsResult.rows;
+
+    if (reports.length === 0) {
+      return res.json([]);
+    }
+
+    const imagesResult = await db.query(
+      `
+        SELECT id, report_id, url, position
+        FROM scouting_report_images
+        WHERE report_id = ANY(@reportIds::int[])
+        ORDER BY report_id ASC, position ASC;
+      `,
+      { reportIds: reports.map((report) => report.id) }
+    );
+
+    const imagesByReport = imagesResult.rows.reduce((acc, image) => {
+      acc[image.report_id] = acc[image.report_id] || [];
+      acc[image.report_id].push(image);
+      return acc;
+    }, {});
+
+    res.json(
+      reports.map((report) => ({
+        ...report,
+        images: imagesByReport[report.id] || [],
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener informes de scouting:", error);
+    res.status(500).json({ message: "Error del servidor al obtener informes." });
+  }
+});
+
+// --- RUTA PROTEGIDA: CREAR INFORME DE SCOUTING ---
+router.post(
+  "/:userId/scouting-reports",
+  verificarToken,
+  upload.array("images", MAX_SCOUTING_REPORT_IMAGES),
+  async (req, res) => {
+    const { userId } = req.params;
+    const requester = req.user;
+    const { title, description } = req.body;
+
+    if (parseInt(userId, 10) !== requester.id) {
+      return res
+        .status(403)
+        .json({ message: "No tienes permiso para crear informes en este perfil." });
+    }
+
+    if (!title || title.trim().length < 3 || title.length > 150) {
+      return res
+        .status(400)
+        .json({ message: "El título debe tener entre 3 y 150 caracteres." });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Debes subir al menos una imagen del informe." });
+    }
+
+    if (req.files.length > MAX_SCOUTING_REPORT_IMAGES) {
+      return res
+        .status(400)
+        .json({ message: "Cada informe puede tener hasta 15 imágenes." });
+    }
+
+    try {
+      const countResult = await db.query(
+        "SELECT COUNT(*)::int AS total FROM scouting_reports WHERE user_id = @userId",
+        { userId: requester.id }
+      );
+
+      if (countResult.rows[0].total >= MAX_SCOUTING_REPORTS) {
+        return res
+          .status(400)
+          .json({ message: "Solo puedes cargar hasta 3 informes de scouting." });
+      }
+
+      const reportResult = await db.query(
+        `
+          INSERT INTO scouting_reports (user_id, title, description)
+          VALUES (@userId, @title, @description)
+          RETURNING id, user_id, title, description, created_at, updated_at;
+        `,
+        {
+          userId: requester.id,
+          title: title.trim(),
+          description: description?.trim() || null,
+        }
+      );
+
+      const report = reportResult.rows[0];
+      createdReportId = report.id;
+      const uploadedImages = [];
+
+      for (const [index, file] of req.files.entries()) {
+        const processedImageBuffer = await sharp(file.buffer)
+          .rotate()
+          .resize(1600, null, { withoutEnlargement: true })
+          .webp({ quality: 85 })
+          .toBuffer();
+
+        const key = `scouting-reports/report-${report.id}-${index + 1}-${Date.now()}.webp`;
+        const imageUrl = await uploadToS3(processedImageBuffer, key, "image/webp");
+
+        const imageResult = await db.query(
+          `
+            INSERT INTO scouting_report_images (report_id, url, position)
+            VALUES (@reportId, @url, @position)
+            RETURNING id, report_id, url, position;
+          `,
+          {
+            reportId: report.id,
+            url: imageUrl,
+            position: index + 1,
+          }
+        );
+
+        uploadedImages.push(imageResult.rows[0]);
+      }
+
+      res.status(201).json({ ...report, images: uploadedImages });
+    } catch (error) {
+      console.error("Error al crear informe de scouting:", error);
+      if (createdReportId) {
+        try {
+          await db.query("DELETE FROM scouting_reports WHERE id = @reportId", {
+            reportId: createdReportId,
+          });
+        } catch (cleanupError) {
+          console.error("Error al limpiar informe de scouting incompleto:", cleanupError);
+        }
+      }
+      res.status(500).json({ message: "Error del servidor al crear informe." });
+    }
+  }
+);
+
+// --- RUTA PROTEGIDA: ELIMINAR INFORME DE SCOUTING ---
+router.delete("/:userId/scouting-reports/:reportId", verificarToken, async (req, res) => {
+  const { userId, reportId } = req.params;
+  const requester = req.user;
+
+  if (parseInt(userId, 10) !== requester.id) {
+    return res
+      .status(403)
+      .json({ message: "No tienes permiso para eliminar informes de este perfil." });
+  }
+
+  try {
+    const result = await db.query(
+      `
+        DELETE FROM scouting_reports
+        WHERE id = @reportId AND user_id = @userId
+        RETURNING id;
+      `,
+      { reportId, userId: requester.id }
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Informe no encontrado." });
+    }
+
+    res.json({ message: "Informe eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar informe de scouting:", error);
+    res.status(500).json({ message: "Error del servidor al eliminar informe." });
   }
 });
 

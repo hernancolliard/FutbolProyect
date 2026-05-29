@@ -152,6 +152,26 @@ CREATE TABLE user_videos (
 	UNIQUE (user_id, position)
 );
 
+-- Tabla de informes de scouting
+CREATE TABLE scouting_reports (
+	id SERIAL PRIMARY KEY,
+	user_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+	title VARCHAR(150) NOT NULL,
+	description TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Imágenes de cada informe de scouting
+CREATE TABLE scouting_report_images (
+	id SERIAL PRIMARY KEY,
+	report_id INTEGER NOT NULL REFERENCES scouting_reports(id) ON DELETE CASCADE,
+	url VARCHAR(500) NOT NULL,
+	position INTEGER NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	UNIQUE(report_id, position)
+);
+
 ALTER TABLE ofertas_laborales
 ALTER COLUMN salario TYPE DECIMAL(10, 2)
 USING salario::DECIMAL(10, 2);
