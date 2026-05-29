@@ -2,9 +2,13 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Stack, TextField, Button, Alert, Divider, Typography, Card, CardContent, CircularProgress, Box } from "@mui/material";
+import { Stack, TextField, Button, Alert, Divider, Typography, Card, CardContent, CircularProgress, MenuItem } from "@mui/material";
 import { Profile } from "@/lib/types";
 import apiClient from "@/lib/apiClient";
+import {
+  getPlayerPositionCategory,
+  PLAYER_POSITION_OPTIONS,
+} from "@/lib/profilePositions";
 
 interface EditProfileFormProps {
     profileData: Profile;
@@ -25,7 +29,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
     apellido: profileData.apellido || "",
     telefono: profileData.telefono || "",
     nacionalidad: profileData.nacionalidad || "",
-    posicion_principal: profileData.posicion_principal || "",
+    posicion_principal: getPlayerPositionCategory(profileData.posicion_principal),
     resumen_profesional: profileData.resumen_profesional || "",
     cv_url: profileData.cv_url || "",
     linkedin_url: profileData.linkedin_url || "",
@@ -109,7 +113,27 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
             
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1">{t("sport_data_title", "Datos Deportivos")}</Typography>
-            <TextField name="posicion_principal" label={t("main_position_placeholder")} value={formData.posicion_principal} onChange={handleChange} fullWidth />
+            <TextField
+              name="posicion_principal"
+              label={t("main_position_placeholder")}
+              value={formData.posicion_principal}
+              onChange={handleChange}
+              select
+              fullWidth
+              helperText={t(
+                "main_position_select_help",
+                "Elegí una de estas categorías para que los filtros funcionen mejor.",
+              )}
+            >
+              <MenuItem value="">
+                {t("select_position_placeholder", "Selecciona una posición")}
+              </MenuItem>
+              {PLAYER_POSITION_OPTIONS.map((position) => (
+                <MenuItem key={position.value} value={position.value}>
+                  {t(position.labelKey, position.fallback)}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField type="number" name="altura_cm" label={t("height_placeholder")} value={formData.altura_cm} onChange={handleChange} fullWidth />
             <TextField type="number" name="peso_kg" label={t("weight_placeholder")} value={formData.peso_kg} onChange={handleChange} fullWidth />
             <TextField name="pie_dominante" label={t("dominant_foot_placeholder")} value={formData.pie_dominante} onChange={handleChange} fullWidth />

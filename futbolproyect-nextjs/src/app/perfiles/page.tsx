@@ -1,11 +1,9 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 export const dynamic = 'force-dynamic';
 import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
-import { Grid, Typography, Paper } from "@mui/material";
+import { Typography, Paper } from "@mui/material";
 import FilterControls from "@/components/profile/FilterControls";
-import ProfileCard from "@/components/profile/ProfileCard";
 import { getApiBaseUrl } from "@/lib/api";
 
 /* =========================
@@ -17,26 +15,22 @@ const API_URL = getApiBaseUrl();
 async function fetchInitialData(): Promise<{
   profiles: Profile[];
   nacionalidades: string[];
-  puestos: string[];
 }> {
   try {
-    const [profilesRes, nacRes, puestosRes] = await Promise.all([
+    const [profilesRes, nacRes] = await Promise.all([
       fetch(`${API_URL}/profiles`, { cache: "no-store" }),
       fetch(`${API_URL}/profiles/nacionalidades`, { cache: "no-store" }),
-      fetch(`${API_URL}/profiles/puestos`, { cache: "no-store" }),
     ]);
 
     return {
       profiles: profilesRes.ok ? await profilesRes.json() : [],
       nacionalidades: nacRes.ok ? await nacRes.json() : [],
-      puestos: puestosRes.ok ? await puestosRes.json() : [],
     };
   } catch (error) {
     console.error("Error fetching initial profile data:", error);
     return {
       profiles: [],
       nacionalidades: [],
-      puestos: [],
     };
   }
 }
@@ -63,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AllProfilesPage() {
   const { t } = await getTranslation("es");
 
-  const { profiles, nacionalidades, puestos } = await fetchInitialData();
+  const { profiles, nacionalidades } = await fetchInitialData();
 
   return (
     <Paper sx={{ p: { xs: 2, md: 4 }, m: { xs: 1, md: 2 } }}>
@@ -80,19 +74,8 @@ export default async function AllProfilesPage() {
 
       <FilterControls
         nacionalidades={nacionalidades}
-        puestos={puestos}
         initialProfiles={profiles}
       />
-
-      <Suspense fallback={<Typography>{t("loading_profiles")}</Typography>}>
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          {profiles.map((profile) => (
-            <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
-              <ProfileCard profile={profile} />
-            </Grid>
-          ))}
-        </Grid>
-      </Suspense>
     </Paper>
   );
 }

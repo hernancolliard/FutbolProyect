@@ -14,16 +14,18 @@ import {
 import { SelectChangeEvent } from "@mui/material/Select";
 import { Profile } from "@/lib/types";
 import ProfileCard from "@/components/profile/ProfileCard";
+import {
+  getPlayerPositionCategory,
+  PLAYER_POSITION_OPTIONS,
+} from "@/lib/profilePositions";
 
 interface FilterControlsProps {
   nacionalidades: string[];
-  puestos: string[];
   initialProfiles: Profile[];
 }
 
 export default function FilterControls({
   nacionalidades,
-  puestos,
   initialProfiles,
 }: FilterControlsProps) {
   const { t } = useTranslation();
@@ -51,7 +53,8 @@ export default function FilterControls({
         !filters.nacionalidad || profile.nacionalidad === filters.nacionalidad;
 
       const matchPuesto =
-        !filters.puesto || profile.posicion_principal === filters.puesto;
+        !filters.puesto ||
+        getPlayerPositionCategory(profile.posicion_principal) === filters.puesto;
 
       return matchNac && matchPuesto;
     });
@@ -98,9 +101,9 @@ export default function FilterControls({
               <MenuItem value="">
                 <em>{t("all_positions", "Todos")}</em>
               </MenuItem>
-              {puestos.map((pos) => (
-                <MenuItem key={pos} value={pos}>
-                  {pos}
+              {PLAYER_POSITION_OPTIONS.map((position) => (
+                <MenuItem key={position.value} value={position.value}>
+                  {t(position.labelKey, position.fallback)}
                 </MenuItem>
               ))}
             </Select>

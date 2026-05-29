@@ -11,7 +11,12 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import MenuItem from "@mui/material/MenuItem";
 import Image from "next/image"; // Import next/image
+import {
+  getPlayerPositionCategory,
+  PLAYER_POSITION_OPTIONS,
+} from "@/lib/profilePositions";
 
 function EditProfileForm({ profileData, onSave, onCancel }) {
   const { t } = useTranslation('common');
@@ -26,7 +31,7 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
     apellido: profileData.apellido || "",
     telefono: profileData.telefono || "",
     nacionalidad: profileData.nacionalidad || "",
-    posicion_principal: profileData.posicion_principal || "",
+    posicion_principal: getPlayerPositionCategory(profileData.posicion_principal),
     resumen_profesional: profileData.resumen_profesional || "",
     cv_url: profileData.cv_url || "",
     linkedin_url: profileData.linkedin_url || "",
@@ -171,13 +176,26 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
                 {t("sport_data_title", "Datos Deportivos")}
               </Typography>
               <TextField
-                type="text"
                 name="posicion_principal"
                 label={t("main_position_placeholder", "Posición Principal")}
                 value={formData.posicion_principal}
                 onChange={handleChange}
+                select
                 fullWidth
-              />
+                helperText={t(
+                  "main_position_select_help",
+                  "Elegí una de estas categorías para que los filtros funcionen mejor.",
+                )}
+              >
+                <MenuItem value="">
+                  {t("select_position_placeholder", "Selecciona una posición")}
+                </MenuItem>
+                {PLAYER_POSITION_OPTIONS.map((position) => (
+                  <MenuItem key={position.value} value={position.value}>
+                    {t(position.labelKey, position.fallback)}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField
                 type="number"
                 name="altura_cm"

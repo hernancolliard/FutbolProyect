@@ -17,6 +17,37 @@ const { uploadToS3 } = require("../services/s3Service");
 
 const MAX_SCOUTING_REPORTS = 3;
 const MAX_SCOUTING_REPORT_IMAGES = 15;
+const PROFILE_POSITION_OPTIONS = ["Arquero", "Defensa", "Centrocampista", "Delantero"];
+const PROFILE_POSITION_FILTERS = {
+  Arquero: ["arquero", "portero", "goalkeeper"],
+  Defensa: ["defensa", "defensor", "lateral", "central"],
+  Centrocampista: [
+    "centrocampista",
+    "mediocampista",
+    "medio",
+    "volante",
+    "pivote",
+    "enganche",
+  ],
+  Delantero: ["delantero", "atacante", "extremo", "punta", "wing"],
+};
+
+const buildProfilePositionFilterClause = (column, position) => {
+  const terms = Object.prototype.hasOwnProperty.call(
+    PROFILE_POSITION_FILTERS,
+    position
+  )
+    ? PROFILE_POSITION_FILTERS[position]
+    : null;
+
+  if (!terms) {
+    return null;
+  }
+
+  return `(${terms
+    .map((term) => `${column} ILIKE '%${term}%'`)
+    .join(" OR ")})`;
+};
 
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
@@ -36,8 +67,14 @@ router.get("/", async (req, res) => {
       whereClauses.push(`p.nacionalidad = @nacionalidad`);
     }
     if (puesto) {
-      queryParams.puesto = puesto;
-      whereClauses.push(`p.posicion_principal = @puesto`);
+      const positionFilterClause = buildProfilePositionFilterClause(
+        "p.posicion_principal",
+        puesto
+      );
+
+      if (positionFilterClause) {
+        whereClauses.push(positionFilterClause);
+      }
     }
 
     const query = `
@@ -73,8 +110,6 @@ router.get("/", async (req, res) => {
 router.get("/featured", async (req, res) => {
       const { nacionalidad, puesto } = req.query;
   
-    let createdReportId = null;
-
     try {
       let queryParams = {}; // Usar un objeto para los parámetros nombrados
       let whereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
@@ -84,8 +119,14 @@ router.get("/featured", async (req, res) => {
         whereClauses.push(`p.nacionalidad = @nacionalidad`);
       }
       if (puesto) {
-        queryParams.puesto = puesto;
-        whereClauses.push(`p.posicion_principal = @puesto`);
+        const positionFilterClause = buildProfilePositionFilterClause(
+          "p.posicion_principal",
+          puesto
+        );
+
+        if (positionFilterClause) {
+          whereClauses.push(positionFilterClause);
+        }
       }
   
       const query = `
@@ -132,14 +173,7 @@ router.get('/nacionalidades', async (req, res) => {
 
 // RUTA PÚBLICA: OBTENER TODOS LOS PUESTOS ÚNICOS
 router.get('/puestos', async (req, res) => {
-  try {
-    const query = "SELECT DISTINCT posicion_principal FROM perfiles_usuario WHERE posicion_principal IS NOT NULL ORDER BY posicion_principal ASC";
-    const result = await db.query(query);
-    res.json(result.rows.map(row => row.posicion_principal));
-  } catch (error) {
-    console.error('Error al obtener los puestos:', error);
-    res.status(500).json({ message: 'Error del servidor' });
-  }
+  res.json(PROFILE_POSITION_OPTIONS);
 });
 
 
@@ -427,6 +461,18 @@ router.put(
     let fotoPerfilUrl = null;
 
     try {
+      const normalizedPosition = posicion_principal?.trim() || null;
+
+      if (
+        normalizedPosition &&
+        !PROFILE_POSITION_OPTIONS.includes(normalizedPosition)
+      ) {
+        return res.status(400).json({
+          message:
+            "La posición principal debe ser Arquero, Defensa, Centrocampista o Delantero.",
+        });
+      }
+
       if (req.file) {
         const processedImageBuffer = await sharp(req.file.buffer)
           .rotate()
@@ -473,7 +519,7 @@ router.put(
         nacionalidad,
         resumen_profesional,
         cv_url,
-        posicion_principal,
+        posicion_principal: normalizedPosition,
         linkedin_url,
         instagram_url,
         youtube_url,
@@ -744,6 +790,8 @@ router.post(
         .status(400)
         .json({ message: "Cada informe puede tener hasta 15 imágenes." });
     }
+
+    let createdReportId = null;
 
     try {
       const countResult = await db.query(

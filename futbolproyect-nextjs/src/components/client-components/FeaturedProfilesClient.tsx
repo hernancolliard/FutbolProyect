@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Typography, Box, SelectChangeEvent } from '@mui/material';
 import LoadingSpinner from '@/components/LoadingSpinner'; // Corrected path
 import apiClient from '@/lib/apiClient'; // Corrected path
+import { PLAYER_POSITION_OPTIONS } from '@/lib/profilePositions';
 
 const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: string; }) => {
 
@@ -19,11 +20,6 @@ const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: st
 
 const fetchNacionalidades = async () => {
   const { data } = await apiClient.get('/profiles/nacionalidades');
-  return data;
-};
-
-const fetchPuestos = async () => {
-  const { data } = await apiClient.get('/profiles/puestos');
   return data;
 };
 
@@ -39,11 +35,6 @@ export default function FeaturedProfilesClient() {
   const { data: nacionalidades, isLoading: isLoadingNacionalidades } = useQuery<string[]>({
     queryKey: ['nacionalidades'],
     queryFn: fetchNacionalidades,
-  });
-
-  const { data: puestos, isLoading: isLoadingPuestos } = useQuery<string[]>({
-    queryKey: ['puestos'],
-    queryFn: fetchPuestos,
   });
 
   const handleFilterChange = (e: SelectChangeEvent<string>) => {
@@ -108,7 +99,6 @@ export default function FeaturedProfilesClient() {
               value={filters.puesto}
               onChange={handleFilterChange}
               label={t('filter_by_position', 'Filtrar por puesto')}
-              disabled={isLoadingPuestos}
               sx={{
                 color: 'black',
                 '.MuiOutlinedInput-notchedOutline': {
@@ -128,9 +118,9 @@ export default function FeaturedProfilesClient() {
               <MenuItem value="">
                 <em>{t('all_positions', 'Todos')}</em>
               </MenuItem>
-              {puestos?.map((pos) => (
-                <MenuItem key={pos} value={pos}>
-                  {pos}
+              {PLAYER_POSITION_OPTIONS.map((position) => (
+                <MenuItem key={position.value} value={position.value}>
+                  {t(position.labelKey, position.fallback)}
                 </MenuItem>
               ))}
             </Select>
