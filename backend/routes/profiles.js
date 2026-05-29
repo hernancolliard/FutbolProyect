@@ -146,7 +146,8 @@ router.get("/featured", async (req, res) => {
           suscripciones s ON u.id = s.id_usuario
       WHERE ${whereClauses.join(" AND ")}
       ORDER BY
-          p.average_rating DESC NULLS LAST, -- Ordenar por calificación promedio (los nulos al final)
+          COALESCE(p.average_rating, 0) DESC,
+          COALESCE(p.total_ratings, 0) DESC,
           s.fecha_fin DESC; -- Luego por fecha de fin de suscripción
     `;
 
