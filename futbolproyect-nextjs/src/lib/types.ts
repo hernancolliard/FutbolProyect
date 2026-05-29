@@ -70,6 +70,11 @@ export interface Offer {
   puesto_es?: string;
   puesto_en?: string;
   puesto: string;
+  nivel?: string;
+  nivel_es?: string;
+  nivel_en?: string;
+  salario?: string | number;
+  fecha_publicacion?: string;
   nombre_ofertante: string;
   id_usuario_ofertante: string;
   applicants?: { user_id: string }[];

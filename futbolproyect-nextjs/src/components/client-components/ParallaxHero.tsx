@@ -7,9 +7,16 @@ import { ParallaxBanner } from 'react-scroll-parallax';
 interface ParallaxHeroProps {
   heroTitle: string;
   heroSubtitle: string;
+  primaryCta?: React.ReactNode;
+  secondaryCta?: React.ReactNode;
 }
 
-const ParallaxHero: React.FC<ParallaxHeroProps> = ({ heroTitle, heroSubtitle }) => {
+const ParallaxHero: React.FC<ParallaxHeroProps> = ({
+  heroTitle,
+  heroSubtitle,
+  primaryCta,
+  secondaryCta,
+}) => {
   // Original logic for high-res/low-res image loading, if still needed.
   // For simplicity, directly using high-res for now, assuming Next.js handles it.
   const heroBackgroundImage = "/images/fondo_1.webp";
@@ -38,8 +45,15 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({ heroTitle, heroSubtitle }) 
     shouldAlwaysCompleteAnimation: true,
     children: (
       <div className="hero-content">
+        <span className="hero-kicker">Bolsa especializada en futbol</span>
         <h1>{heroTitle}</h1>
         <p>{heroSubtitle}</p>
+        {(primaryCta || secondaryCta) && (
+          <div className="hero-actions">
+            {primaryCta}
+            {secondaryCta}
+          </div>
+        )}
       </div>
     ),
   };

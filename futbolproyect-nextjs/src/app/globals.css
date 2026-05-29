@@ -40,32 +40,71 @@ body {
   height: 600px; /* Altura necesaria para el Hero */
   overflow: hidden;
   width: 100%;
+  background: #111827;
 }
 
 .hero-banner {
   height: 100% !important; /* Forzar altura al banner */
 }
 
+.hero-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(13, 25, 39, 0.9), rgba(13, 25, 39, 0.55) 48%, rgba(13, 25, 39, 0.2));
+  z-index: 2;
+}
+
 .hero-content {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  left: min(7vw, 96px);
+  transform: translateY(-50%);
+  text-align: left;
   color: white;
   z-index: 10;
-  width: 90%;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  width: min(720px, 86vw);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .hero-content h1 {
-  font-size: 3rem;
+  font-size: clamp(2.4rem, 5vw, 4.8rem);
   font-weight: bold;
+  line-height: 1.02;
   margin-bottom: 1rem;
+  max-width: 760px;
 }
 
 .hero-content p {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 660px;
+  margin-bottom: 1.5rem;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero-secondary-cta {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Opcional: Ajuste para móviles */
@@ -74,13 +113,15 @@ body {
     height: 400px;
   }
   .hero-content {
-    top: 60%; /* Ajusta la posición para bajar el contenido */
-    transform: translate(-50%, -60%); /* Ajusta el transform para compensar el nuevo top */
+    top: 54%;
+    left: 24px;
+    transform: translateY(-50%);
+    width: calc(100% - 48px);
   }
   .hero-content h1 {
-    font-size: 1.8rem; /* Un poco más pequeño */
+    font-size: 2rem;
   }
   .hero-content p {
-    font-size: 1.2rem; /* También reducir el subtítulo */
+    font-size: 1rem;
   }
 }

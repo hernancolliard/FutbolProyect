@@ -13,10 +13,9 @@ export default function DebugOfferStatus() {
     setLoading(true);
     setError("");
     try {
-      const response = await apiClient.get("/offers/debug/user-status");
-      setStatus(response.data);
-      console.log("User status:", response.data);
-    } catch (err: any) {
+        const response = await apiClient.get("/offers/debug/user-status");
+        setStatus(response.data);
+      } catch (err: any) {
       setError(err.response?.data?.message || err.message);
       console.error("Error:", err);
     } finally {

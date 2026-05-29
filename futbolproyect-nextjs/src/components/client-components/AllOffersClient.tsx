@@ -20,6 +20,9 @@ import {
   Grid,
   Collapse,
   SelectChangeEvent,
+  Paper,
+  Stack,
+  Chip,
 } from "@mui/material";
 
 // --- Fetching Logic for React Query ---
@@ -42,9 +45,16 @@ const fetchOffers = async ({
   }
 
   const { data } = await apiClient.get(`/offers?${params.toString()}`);
-  console.log("All Offers API response:", data);
   return data;
 };
+
+const roleFilters = [
+  { label: "Jugador", value: "jugador" },
+  { label: "Entrenador", value: "entrenador" },
+  { label: "Analista", value: "analista" },
+  { label: "Scout", value: "scout" },
+  { label: "Preparador fisico", value: "preparador" },
+];
 
 // --- Main Component for All Offers Page ---
 export default function AllOffersClient() {
@@ -100,16 +110,39 @@ export default function AllOffersClient() {
   });
 
   return (
-    <Box sx={{ p: 3, maxWidth: "1200px", mx: "auto" }}>
-      {/* CAMBIO 1: Color del título a text.primary y negrita */}
+    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: "1200px", mx: "auto" }}>
       <Typography
         variant="h4"
         component="h1"
         gutterBottom
-        sx={{ color: "text.primary", fontWeight: "bold", mb: 4 }}
+        sx={{ color: "text.primary", fontWeight: "bold", mb: 2 }}
       >
         {t("all_offers_title", "Todas las Ofertas de Empleo")}
       </Typography>
+
+      <Typography color="text.secondary" sx={{ maxWidth: 780, mb: 3 }}>
+        {t(
+          "all_offers_intro",
+          "Encuentra oportunidades reales en clubes, academias y proyectos deportivos. Usa los filtros para reducir por rol, ubicacion, nivel y rango salarial.",
+        )}
+      </Typography>
+
+      <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: "wrap", gap: 1 }}>
+        {roleFilters.map((role) => (
+          <Chip
+            key={role.value}
+            clickable
+            color={filters.puesto === role.value ? "primary" : "default"}
+            label={t(`role_filter_${role.value}`, role.label)}
+            onClick={() =>
+              setFilters((prev) => ({
+                ...prev,
+                puesto: prev.puesto === role.value ? "" : role.value,
+              }))
+            }
+          />
+        ))}
+      </Stack>
 
       {isMobile && (
         <Button
@@ -124,8 +157,16 @@ export default function AllOffersClient() {
       )}
 
       <Collapse in={!isMobile || showMobileFilters}>
-        {/* CAMBIO 2: Eliminados los estilos 'white' de todos los inputs */}
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 4,
+            border: "1px solid rgba(25, 38, 52, 0.12)",
+            borderRadius: 2,
+          }}
+        >
+        <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
@@ -210,6 +251,7 @@ export default function AllOffersClient() {
             </FormControl>
           </Grid>
         </Grid>
+        </Paper>
       </Collapse>
 
       {isLoading ? (

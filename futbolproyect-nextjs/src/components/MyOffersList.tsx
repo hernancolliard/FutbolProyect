@@ -27,7 +27,6 @@ function MyOffersList({ offers }: MyOffersListProps) {
   const handleOfferAction = (action: string, offerId: string) => {
     // This is a placeholder function.
     // In a real application, you would implement the logic for editing or deleting an offer.
-    console.log(`Action: ${action} on offer ID: ${offerId}`);
     toast.info(
       `Acción: ${action} en oferta ID: ${offerId} (Funcionalidad completa de edición/eliminación pendiente)`,
     );

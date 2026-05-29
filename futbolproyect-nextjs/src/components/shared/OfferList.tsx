@@ -10,6 +10,8 @@ import {
   Button,
   Typography,
   Box,
+  Chip,
+  Stack,
 } from "@mui/material";
 import Slider from "react-slick";
 import FadeInOnScroll from "./FadeInOnScroll";
@@ -60,6 +62,15 @@ const OfferCard = ({
     (offer as any)[`descripcion_${lang}`] || offer.descripcion;
   const ubicacion = (offer as any)[`ubicacion_${lang}`] || offer.ubicacion;
   const puesto = (offer as any)[`puesto_${lang}`] || offer.puesto;
+  const nivel = (offer as any)[`nivel_${lang}`] || (offer as any).nivel;
+  const salario = (offer as any).salario;
+  const fechaPublicacion = (offer as any).fecha_publicacion;
+  const formattedDate = fechaPublicacion
+    ? new Intl.DateTimeFormat(lang === "es" ? "es-ES" : "en-US", {
+        day: "2-digit",
+        month: "short",
+      }).format(new Date(fechaPublicacion))
+    : null;
 
   // Los estilos unificados ahora siempre reflejan el diseño que se usaba para isHomePage
   const imageWidth = 267; // Siempre usar el ancho de imagen de la homepage
@@ -76,6 +87,16 @@ const OfferCard = ({
         flexDirection: "column", // Siempre en columna para diseño unificado
         height: "100%",
         minHeight: "420px", // Altura mínima unificada
+        cursor: "pointer",
+        border: offer.is_featured
+          ? "1px solid rgba(245, 166, 35, 0.65)"
+          : "1px solid rgba(25, 38, 52, 0.08)",
+        transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+          boxShadow: "0 14px 32px rgba(17, 24, 39, 0.12)",
+          borderColor: "rgba(25, 38, 52, 0.2)",
+        },
       }}
       elevation={2}
       onClick={() => handleViewOffer(offer.id)} // Siempre clickeable
@@ -105,6 +126,14 @@ const OfferCard = ({
         ) : (
           <Typography color="text.secondary">{t("no_image")}</Typography>
         )}
+        {offer.is_featured && (
+          <Chip
+            label={t("featured", "Destacada")}
+            color="secondary"
+            size="small"
+            sx={{ position: "absolute", top: 12, left: 12, fontWeight: 700 }}
+          />
+        )}
       </Box>
 
       <CardContent
@@ -117,11 +146,29 @@ const OfferCard = ({
         }}
       >
         <Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ mb: 1, flexWrap: "wrap", gap: 1 }}
+          >
+            {formattedDate && (
+              <Chip size="small" label={formattedDate} variant="outlined" />
+            )}
+            {nivel && <Chip size="small" label={nivel} variant="outlined" />}
+            {salario && (
+              <Chip
+                size="small"
+                label={`${t("salary", "Salario:")} ${salario}`}
+                variant="outlined"
+              />
+            )}
+          </Stack>
           <Typography
             variant="h6"
             sx={{
               color: "inherit", // Color de texto normal
-              fontWeight: 400,
+              fontWeight: 700,
+              lineHeight: 1.25,
             }}
           >
             {titulo}
@@ -153,7 +200,7 @@ const OfferCard = ({
           </Typography>
         </Box>
 
-        <CardActions sx={{ p: 0, mt: 2 }}>
+        <CardActions sx={{ p: 0, mt: 2, justifyContent: "space-between", gap: 1 }}>
           <Button
             variant="contained"
             color="primary" // Usar color primario para todos los botones de ver oferta
@@ -201,7 +248,6 @@ const OfferList = ({
   };
 
   const featuredOffers = offersToDisplay.filter((o) => o.is_featured);
-  console.log("Featured Offers Length:", featuredOffers.length);
   const normalOffers = offersToDisplay.filter((o) => !o.is_featured);
 
   const slides = Math.min(isMobile ? 2 : 4, offersToDisplay.length);

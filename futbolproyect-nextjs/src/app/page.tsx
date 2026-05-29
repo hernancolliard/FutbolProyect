@@ -100,11 +100,11 @@ export default function HomePage() {
   return (
     <Box>
       <Box component="main">
+        <Hero />
+
         <FadeInOnScroll>
           <TrustedBy />
         </FadeInOnScroll>
-
-        <Hero />
 
         <Box sx={{ p: 3 }}>
           {/* OFERTAS */}

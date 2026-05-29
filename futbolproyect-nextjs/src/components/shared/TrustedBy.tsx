@@ -1,81 +1,95 @@
-'use client';
+"use client";
 
 import React from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import "../../styles/TrustedBy.css"; // Path to the copied CSS
-import { useTranslation } from 'react-i18next';
-import Image from "next/image"; // Import next/image
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import {
+  Box,
+  Button,
+  Chip,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import GroupsIcon from "@mui/icons-material/Groups";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import "../../styles/TrustedBy.css";
 
-// Hook para detectar si es móvil con breakpoint correcto
-const useIsMobile = () => {
-    const [isMobile, setIsMobile] = React.useState<boolean | null>(null);
-    React.useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768); // Mobile: < 768px, Tablet/Desktop: >= 768px
-        };
-        window.addEventListener('resize', handleResize);
-        handleResize();
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-    // Return false during hydration, then the actual value
-    return isMobile === null ? false : isMobile;
-};
+const audiences = [
+  {
+    icon: <SearchIcon />,
+    titleKey: "audience_talent_title",
+    title: "Busco una oportunidad",
+    textKey: "audience_talent_text",
+    text: "Encuentra ofertas por puesto, pais, nivel y salario.",
+    href: "/all-offers",
+    ctaKey: "view_all_offers",
+    cta: "Ver ofertas",
+  },
+  {
+    icon: <GroupsIcon />,
+    titleKey: "audience_club_title",
+    title: "Busco talento",
+    textKey: "audience_club_text",
+    text: "Explora perfiles con CV, videos, datos deportivos y contacto directo.",
+    href: "/perfiles",
+    ctaKey: "view_all_profiles",
+    cta: "Ver perfiles",
+  },
+  {
+    icon: <WorkOutlineIcon />,
+    titleKey: "audience_publish_title",
+    title: "Publicar una oferta",
+    textKey: "audience_publish_text",
+    text: "Llega a jugadores, entrenadores, analistas, scouts y staff tecnico.",
+    href: "/create-offer",
+    ctaKey: "publish_offer",
+    cta: "Publicar oferta",
+  },
+];
 
 function TrustedBy() {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
-  const logos = [
-    {
-      name: "Club A",
-      url: "/images/logos/logofpazul.webp",
-    },
-    {
-      name: "Agencia B",
-      url: "/images/logos/logofpazul.webp",
-    },
-    {
-      name: "Club C",
-      url: "/images/logos/logofpazul.webp",
-    },
-    {
-      name: "Club D",
-      url: "/images/logos/logofpazul.webp",
-    },
-    {
-      name: "Agencia E",
-      url: "/images/logos/logofpazul.webp",
-    },
-  ];
-
-  const settings = {
-    dots: false,
-    infinite: true,
-    slidesToShow: isMobile ? 3 : 5,
-    slidesToScroll: 1,
-    autoplay: true,
-    speed: 2000,
-    autoplaySpeed: 2000,
-    cssEase: "linear",
-  };
 
   return (
-    <div className="trusted-by-container">
-      <h4>{t('trusted_by')}</h4>
-      <Slider {...settings}>
-        {logos.map((logo, index) => (
-          <div key={index} className="logo-item">
-            <Image
-              src={logo.url}
-              alt={logo.name}
-              width={120} // Fixed width from previous analysis
-              height={120} // Fixed height from previous analysis
-            />
-          </div>
+    <Box className="trust-section">
+      <Stack spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
+        <Chip
+          icon={<VerifiedOutlinedIcon />}
+          label={t("trust_badge", "Perfiles, ofertas y contacto en un solo lugar")}
+          color="primary"
+          variant="outlined"
+        />
+        <Typography variant="h4" component="h2" sx={{ fontWeight: 800, textAlign: "center" }}>
+          {t("trust_title", "Una plataforma pensada para el mercado laboral del futbol")}
+        </Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 760, textAlign: "center" }}>
+          {t(
+            "trust_subtitle",
+            "Separa candidatos, clubes y agencias desde el primer clic para que cada usuario llegue rapido al flujo correcto.",
+          )}
+        </Typography>
+      </Stack>
+
+      <Box className="audience-grid">
+        {audiences.map((item) => (
+          <Paper key={item.titleKey} className="audience-card" elevation={0}>
+            <Box className="audience-icon">{item.icon}</Box>
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              {t(item.titleKey, item.title)}
+            </Typography>
+            <Typography color="text.secondary">
+              {t(item.textKey, item.text)}
+            </Typography>
+            <Button component={Link} href={item.href} variant="outlined">
+              {t(item.ctaKey, item.cta)}
+            </Button>
+          </Paper>
         ))}
-      </Slider>
-    </div>
+      </Box>
+    </Box>
   );
 }
 

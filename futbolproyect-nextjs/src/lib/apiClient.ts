@@ -23,13 +23,9 @@ apiClient.interceptors.request.use((config) => {
   // Check if running on the client side before accessing localStorage
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem("token");
-    console.log("API Interceptor: Token from localStorage:", token); // DEBUG LOG
 
     if (token && token !== "null") {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("API Interceptor: Authorization header set.", config.headers.Authorization); // DEBUG LOG
-    } else {
-      console.log("API Interceptor: No token found, request will be sent without Authorization header.");
     }
     
     // Para FormData, no establecer Content-Type para que axios lo haga automáticamente

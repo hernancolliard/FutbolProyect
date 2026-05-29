@@ -1,19 +1,47 @@
-.trusted-by-container {
-  padding: 2rem 0;
+.trust-section {
+  padding: 3rem 1.5rem;
+  background: #ffffff;
 }
 
-.trusted-by-container h4 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.slick-slide > div {
-    margin: 0 10px;
-}
-
-.logo-item img {
-  width: 100%;
-  height: auto;
-  max-width: 120px;
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 1180px;
   margin: 0 auto;
+}
+
+.audience-card {
+  min-height: 250px;
+  padding: 1.25rem;
+  border: 1px solid rgba(25, 38, 52, 0.12);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.audience-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(245, 166, 35, 0.55);
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.08);
+}
+
+.audience-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #192634;
+  background: rgba(245, 166, 35, 0.15);
+}
+
+@media (max-width: 900px) {
+  .audience-grid {
+    grid-template-columns: 1fr;
+  }
 }

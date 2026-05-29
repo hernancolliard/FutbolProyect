@@ -14,6 +14,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Alert from "@mui/material/Alert";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 // --- Fetching Logic ---
 const fetchSubscriptionPlans = async () => {
@@ -53,6 +54,18 @@ export default function SubscriptionPage() {
 
   const monthlyPrice = getPrice("monthly");
   const annualPrice = getPrice("annual");
+
+  const offererBenefits = [
+    t("offerer_benefit_1", "Publicar ofertas y gestionarlas desde tu perfil"),
+    t("offerer_benefit_2", "Recibir postulantes con CV, videos y datos deportivos"),
+    t("offerer_benefit_3", "Destacar oportunidades para ganar mas visibilidad"),
+  ];
+
+  const applicantBenefits = [
+    t("applicant_benefit_1", "Postularte a ofertas abiertas"),
+    t("applicant_benefit_2", "Mostrar CV, fotos, videos y enlaces deportivos"),
+    t("applicant_benefit_3", "Compartir tu perfil profesional con clubes y agentes"),
+  ];
 
   // Dynamic SEO update for client components
   useEffect(() => {
@@ -113,7 +126,6 @@ export default function SubscriptionPage() {
         spacing={4}
         sx={{ mt: 5, alignItems: "center", px: 2 }}
       >
-        {/* CORRECCIÓN 1: Color del título adaptativo (text.primary) */}
         <Typography
           variant="h4"
           sx={{
@@ -125,7 +137,6 @@ export default function SubscriptionPage() {
           {t("subscription_plans_title", "Planes de Suscripción")}
         </Typography>
 
-        {/* CORRECCIÓN 2: Color del subtítulo (text.secondary) */}
         <Typography sx={{ color: "text.secondary", textAlign: "center" }}>
           {t(
             "subscription_plans_subtitle",
@@ -140,7 +151,6 @@ export default function SubscriptionPage() {
           onChange={handleBillingCycleChange}
           aria-label="Billing Cycle"
         >
-          {/* CORRECCIÓN 3: Eliminado color='white' para que se vean los botones */}
           <ToggleButton value="monthly">{t("monthly", "Mensual")}</ToggleButton>
           <ToggleButton value="annual">{t("annual", "Anual")}</ToggleButton>
         </ToggleButtonGroup>
@@ -182,6 +192,14 @@ export default function SubscriptionPage() {
                   "Para clubes y agencias que buscan talento.",
                 )}
               </Typography>
+              <Stack spacing={1.2} sx={{ width: "100%", mb: 2, textAlign: "left" }}>
+                {offererBenefits.map((benefit) => (
+                  <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
+                    <CheckCircleOutlineIcon color="primary" fontSize="small" />
+                    <Typography variant="body2">{benefit}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
               <Typography
                 variant="h4"
                 color="primary"
@@ -229,6 +247,14 @@ export default function SubscriptionPage() {
                   "Para futbolistas que buscan oportunidades.",
                 )}
               </Typography>
+              <Stack spacing={1.2} sx={{ width: "100%", mb: 2, textAlign: "left" }}>
+                {applicantBenefits.map((benefit) => (
+                  <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
+                    <CheckCircleOutlineIcon color="primary" fontSize="small" />
+                    <Typography variant="body2">{benefit}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
               <Typography
                 variant="h4"
                 color="primary"

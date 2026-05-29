@@ -9,16 +9,11 @@ export const dynamic = "force-dynamic";
 
 const fetchProfile = async (userId: string): Promise<Profile | null> => {
   const apiUrl = getApiBaseUrl();
-  
-  console.log(`[fetchProfile] Fetching profile for userId: ${userId}`);
-  console.log(`[fetchProfile] API URL: ${apiUrl}/profiles/${userId}`);
 
   try {
     const res = await fetch(`${apiUrl}/profiles/${userId}`, {
       cache: "no-store",
     });
-
-    console.log(`[fetchProfile] Response status for ${userId}: ${res.status}`);
 
     if (!res.ok) {
       console.error(
@@ -27,7 +22,6 @@ const fetchProfile = async (userId: string): Promise<Profile | null> => {
       return null;
     }
     const data = await res.json();
-    console.log(`[fetchProfile] Data for user ${userId}:`, data);
     return data;
   } catch (error) {
     console.error(`[fetchProfile] Network error fetching profile for user ${userId}:`, error);

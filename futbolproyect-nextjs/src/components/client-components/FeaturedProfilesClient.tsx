@@ -13,8 +13,6 @@ const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: st
 
   const { data } = await apiClient.get('/profiles/featured', { params: filters });
 
-  console.log("Featured Profiles API response:", data); // Add this line
-
   return data;
 
 };
@@ -160,7 +158,6 @@ export default function FeaturedProfilesClient() {
         <Grid container spacing={2}>
           {profiles && profiles.length > 0 ? (
             profiles.map((profile: any) => {
-              console.log('Profile Image URL:', profile.foto_perfil_url);
               return (
               <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
                 <Box
@@ -176,7 +173,7 @@ export default function FeaturedProfilesClient() {
                 >
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Image
-                      src={profile.foto_perfil_url || 'images/logos/logofp.png'}
+                      src={profile.foto_perfil_url || '/images/logos/logofp.png'}
                       alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                       width={180}
                       height={180}
