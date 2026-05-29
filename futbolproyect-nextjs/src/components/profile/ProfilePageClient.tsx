@@ -16,6 +16,7 @@ import {
   Rating,
   Modal,
   IconButton,
+  LinearProgress,
 } from "@mui/material";
 import VideosSection from "./VideosSection";
 import UserPhotosSection from "./UserPhotosSection";
@@ -66,10 +67,29 @@ export default function ProfilePageClient({
   const [profile, setProfile] = useState(initialProfile);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [profileStats, setProfileStats] = useState<any>(null);
 
   useEffect(() => {
     setProfile(initialProfile);
   }, [initialProfile]);
+
+  const isMyProfile =
+    currentUser && profile && String(currentUser.id) === String(profile.id);
+
+  useEffect(() => {
+    if (!isMyProfile || !profile) return;
+
+    const loadStats = async () => {
+      try {
+        const { data } = await apiClient.get(`/profiles/${profile.id}/stats`);
+        setProfileStats(data);
+      } catch (error) {
+        console.error("Failed to load profile stats:", error);
+      }
+    };
+
+    loadStats();
+  }, [isMyProfile, profile]);
 
   useEffect(() => {
     // Validación segura de IDs
@@ -136,10 +156,6 @@ export default function ProfilePageClient({
     );
   }
 
-  // Comparación segura de IDs
-  const isMyProfile =
-    currentUser && String(currentUser.id) === String(profile.id);
-
   const lang = i18n.language;
 
   // Acceso seguro a propiedades dinámicas
@@ -159,6 +175,74 @@ export default function ProfilePageClient({
       >
         <CardContent>
           <Grid container spacing={4}>
+            {isMyProfile && profileStats && (
+              <Grid item xs={12}>
+                <Card variant="outlined" sx={{ p: 2, bgcolor: "#f8fafc" }}>
+                  <Stack spacing={2}>
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      justifyContent="space-between"
+                      gap={2}
+                    >
+                      <Box>
+                        <Typography variant="h6">
+                          {t("profile_metrics_title", "Métricas de tu perfil")}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {t(
+                            "profile_metrics_subtitle",
+                            "Controla visibilidad, postulaciones y nivel de completitud.",
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ minWidth: { xs: "100%", md: 260 } }}>
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          {t("profile_completion", "Perfil completo")}:{" "}
+                          {profileStats.completion_percent}%
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={profileStats.completion_percent}
+                          sx={{ height: 8, borderRadius: 2 }}
+                        />
+                      </Box>
+                    </Stack>
+
+                    <Grid container spacing={2}>
+                      {[
+                        {
+                          label: t("profile_views_header", "Vistas de Perfil"),
+                          value: profileStats.profile_views,
+                        },
+                        {
+                          label: t("applications_sent_metric", "Postulaciones enviadas"),
+                          value: profileStats.applications_sent,
+                        },
+                        {
+                          label: t("offers_published_metric", "Ofertas publicadas"),
+                          value: profileStats.offers_published,
+                        },
+                        {
+                          label: t("applications_received_metric", "Postulaciones recibidas"),
+                          value: profileStats.applications_received,
+                        },
+                      ].map((metric) => (
+                        <Grid item xs={6} md={3} key={metric.label}>
+                          <Card variant="outlined" sx={{ p: 2 }}>
+                            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                              {metric.value}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {metric.label}
+                            </Typography>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Stack>
+                </Card>
+              </Grid>
+            )}
             {/* ==== LEFT COLUMN ==== */}
             <Grid item xs={12} md={8}>
               <Grid container spacing={3}>

@@ -83,9 +83,6 @@ router.get("/featured", async (req, res) => {
         whereClauses.push(`p.posicion_principal = @puesto`);
       }
   
-      console.log("Featured Profiles Query - whereClauses:", whereClauses);
-      console.log("Featured Profiles Query - queryParams:", queryParams);
-  
       const query = `
         SELECT
             u.id,          u.nombre,
@@ -108,7 +105,6 @@ router.get("/featured", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
-    console.log("Datos de perfiles destacados obtenidos del backend:", result.rows); // Añadir este log
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los perfiles destacados:", error);
@@ -143,6 +139,99 @@ router.get('/puestos', async (req, res) => {
 
 
 // --- RUTA PÚBLICA: OBTENER PERFIL DE USUARIO ---
+// --- RUTA PROTEGIDA: MÉTRICAS DEL PERFIL ---
+router.get("/:userId/stats", verificarToken, async (req, res) => {
+  const { userId } = req.params;
+  const requesterId = req.user.id;
+  const isAdmin = req.user.isadmin;
+
+  if (requesterId !== parseInt(userId, 10) && !isAdmin) {
+    return res
+      .status(403)
+      .json({ message: "No tienes permiso para ver estas métricas." });
+  }
+
+  try {
+    const statsQuery = `
+      SELECT
+        u.id,
+        u.tipo_usuario,
+        COALESCE(u.profile_views, 0) AS profile_views,
+        p.foto_perfil_url,
+        p.telefono,
+        p.nacionalidad,
+        p.resumen_profesional,
+        p.cv_url,
+        p.posicion_principal,
+        p.youtube_url,
+        p.transfermarkt_url,
+        p.whatsapp_url,
+        p.altura_cm,
+        p.peso_kg,
+        p.pie_dominante,
+        p.fecha_de_nacimiento,
+        COALESCE(p.average_rating, 0) AS average_rating,
+        COALESCE(p.total_ratings, 0) AS total_ratings,
+        (
+          SELECT COUNT(*)
+          FROM postulaciones po
+          WHERE po.id_usuario_postulante = u.id
+        ) AS applications_sent,
+        (
+          SELECT COUNT(*)
+          FROM ofertas_laborales o
+          WHERE o.id_usuario_ofertante = u.id
+        ) AS offers_published,
+        (
+          SELECT COUNT(*)
+          FROM ofertas_laborales o
+          JOIN postulaciones po ON po.id_oferta = o.id
+          WHERE o.id_usuario_ofertante = u.id
+        ) AS applications_received
+      FROM usuarios u
+      LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
+      WHERE u.id = @userId;
+    `;
+
+    const result = await db.query(statsQuery, { userId: parseInt(userId, 10) });
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const stats = result.rows[0];
+    const completionFields = [
+      "foto_perfil_url",
+      "telefono",
+      "nacionalidad",
+      "resumen_profesional",
+      "cv_url",
+      "posicion_principal",
+      "altura_cm",
+      "peso_kg",
+      "pie_dominante",
+      "fecha_de_nacimiento",
+    ];
+    const completedFields = completionFields.filter((field) => Boolean(stats[field]));
+
+    res.json({
+      profile_views: Number(stats.profile_views || 0),
+      applications_sent: Number(stats.applications_sent || 0),
+      offers_published: Number(stats.offers_published || 0),
+      applications_received: Number(stats.applications_received || 0),
+      average_rating: Number(stats.average_rating || 0),
+      total_ratings: Number(stats.total_ratings || 0),
+      completion_percent: Math.round(
+        (completedFields.length / completionFields.length) * 100,
+      ),
+      missing_fields: completionFields.filter((field) => !stats[field]),
+    });
+  } catch (error) {
+    console.error("Error al obtener métricas del perfil:", error);
+    res.status(500).json({ message: "Error del servidor al obtener métricas." });
+  }
+});
+
 router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 

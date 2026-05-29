@@ -48,6 +48,11 @@ const fetchOffers = async ({
   return data;
 };
 
+const fetchOfferFilterOptions = async () => {
+  const { data } = await apiClient.get("/offers/filter-options");
+  return data;
+};
+
 const roleFilters = [
   { label: "Jugador", value: "jugador" },
   { label: "Entrenador", value: "entrenador" },
@@ -66,6 +71,7 @@ export default function AllOffersClient() {
     puesto: "",
     ubicacion: "",
     nivel: "",
+    horarios: "",
     salarioMin: "",
     salarioMax: "",
     sort: "desc",
@@ -108,6 +114,16 @@ export default function AllOffersClient() {
     queryFn: fetchOffers,
     placeholderData: (previousData) => previousData,
   });
+
+  const { data: filterOptions } = useQuery({
+    queryKey: ["offerFilterOptions"],
+    queryFn: fetchOfferFilterOptions,
+  });
+
+  const puestos = filterOptions?.puestos || [];
+  const ubicaciones = filterOptions?.ubicaciones || [];
+  const niveles = filterOptions?.niveles || [];
+  const horarios = filterOptions?.horarios || [];
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: "1200px", mx: "auto" }}>
@@ -168,22 +184,40 @@ export default function AllOffersClient() {
         >
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              name="puesto"
-              label={t("filter_by_position", "Filtrar por puesto")}
-              value={filters.puesto}
-              onChange={handleTextFieldChange}
-            />
+            <FormControl fullWidth>
+              <InputLabel>{t("filter_by_position", "Filtrar por puesto")}</InputLabel>
+              <Select
+                name="puesto"
+                value={filters.puesto}
+                onChange={handleSelectChange}
+                label={t("filter_by_position", "Filtrar por puesto")}
+              >
+                <MenuItem value="">{t("all_positions", "Todos")}</MenuItem>
+                {puestos.map((puesto: string) => (
+                  <MenuItem key={puesto} value={puesto}>
+                    {puesto}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              name="ubicacion"
-              label={t("filter_by_location", "Filtrar por ubicación")}
-              value={filters.ubicacion}
-              onChange={handleTextFieldChange}
-            />
+            <FormControl fullWidth>
+              <InputLabel>{t("filter_by_location", "Filtrar por ubicación")}</InputLabel>
+              <Select
+                name="ubicacion"
+                value={filters.ubicacion}
+                onChange={handleSelectChange}
+                label={t("filter_by_location", "Filtrar por ubicación")}
+              >
+                <MenuItem value="">{t("all_locations", "Todas")}</MenuItem>
+                {ubicaciones.map((ubicacion: string) => (
+                  <MenuItem key={ubicacion} value={ubicacion}>
+                    {ubicacion}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth>
@@ -197,16 +231,29 @@ export default function AllOffersClient() {
                 <MenuItem value="">
                   {t("select_level", "Seleccionar Nivel")}
                 </MenuItem>
-                <MenuItem value="Profesional">
-                  {t("level_professional", "Profesional")}
-                </MenuItem>
-                <MenuItem value="Semi-Profesional">
-                  {t("level_semi_professional", "Semi-Profesional")}
-                </MenuItem>
-                <MenuItem value="Amateur">
-                  {t("level_amateur", "Amateur")}
-                </MenuItem>
-                <MenuItem value="Otro">{t("level_other", "Otro")}</MenuItem>
+                {niveles.map((nivel: string) => (
+                  <MenuItem key={nivel} value={nivel}>
+                    {nivel}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl fullWidth>
+              <InputLabel>{t("filter_by_schedule", "Jornada")}</InputLabel>
+              <Select
+                name="horarios"
+                value={filters.horarios}
+                onChange={handleSelectChange}
+                label={t("filter_by_schedule", "Jornada")}
+              >
+                <MenuItem value="">{t("all_schedules", "Todas")}</MenuItem>
+                {horarios.map((horario: string) => (
+                  <MenuItem key={horario} value={horario}>
+                    {horario}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>

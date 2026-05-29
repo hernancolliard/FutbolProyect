@@ -14,7 +14,8 @@ CREATE TABLE usuarios (
 	ciudad VARCHAR(100),
 	pais VARCHAR(100),
 	reset_password_token VARCHAR(255),
-	reset_password_expires TIMESTAMPTZ
+	reset_password_expires TIMESTAMPTZ,
+	profile_views INTEGER NOT NULL DEFAULT 0
 );
 ALTER TABLE usuarios RENAME COLUMN "isAdmin" TO isadmin;
 select * from usuarios u; 

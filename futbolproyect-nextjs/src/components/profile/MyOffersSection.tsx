@@ -9,6 +9,7 @@ import {
   Card,
   Button,
   Chip,
+  Grid,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -23,7 +24,8 @@ interface Offer {
   salario: string;
   horarios: string;
   nivel: string;
-  fecha_creacion: string;
+  fecha_publicacion: string;
+  featured_until?: string;
   estado: string;
   is_featured: boolean;
   total_applications: number;
@@ -47,6 +49,11 @@ export default function MyOffersSection({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const totalApplications = offers.reduce(
+    (total, offer) => total + Number(offer.total_applications || 0),
+    0,
+  );
+  const activeOffers = offers.filter((offer) => offer.estado === "abierta").length;
 
   useEffect(() => {
     const loadOffers = async () => {
@@ -75,6 +82,32 @@ export default function MyOffersSection({
         <Alert severity="error">{error}</Alert>
       ) : offers.length > 0 ? (
         <Stack spacing={2}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}>
+              <Card variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="h5">{offers.length}</Typography>
+                <Typography color="text.secondary">
+                  {t("offers_published_metric", "Ofertas publicadas")}
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Card variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="h5">{totalApplications}</Typography>
+                <Typography color="text.secondary">
+                  {t("applications_received_metric", "Postulaciones recibidas")}
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Card variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="h5">{activeOffers}</Typography>
+                <Typography color="text.secondary">
+                  {t("active_offers_metric", "Ofertas abiertas")}
+                </Typography>
+              </Card>
+            </Grid>
+          </Grid>
           {offers.map((offer) => (
             <Card key={offer.id} variant="outlined" sx={{ p: 2 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -93,7 +126,7 @@ export default function MyOffersSection({
                     <strong>{t("applications", "Postulaciones")}:</strong> {offer.total_applications}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {t("created", "Creada")}: {new Date(offer.fecha_creacion).toLocaleDateString()}
+                    {t("created", "Creada")}: {offer.fecha_publicacion ? new Date(offer.fecha_publicacion).toLocaleDateString() : "-"}
                   </Typography>
                 </div>
                 <Stack direction="row" spacing={1} alignItems="center">
@@ -104,7 +137,11 @@ export default function MyOffersSection({
                   />
                   {offer.is_featured && (
                     <Chip
-                      label={t('featured', 'Destacada')}
+                      label={
+                        offer.featured_until
+                          ? `${t('featured', 'Destacada')} hasta ${new Date(offer.featured_until).toLocaleDateString()}`
+                          : t('featured', 'Destacada')
+                      }
                       color="primary"
                       size="small"
                     />
@@ -127,6 +164,14 @@ export default function MyOffersSection({
                   variant="contained"
                 >
                   {t("edit_offer", "Editar Oferta")}
+                </Button>
+                <Button
+                  component={Link}
+                  href={`/offers/${offer.id}/applicants`}
+                  size="small"
+                  variant="outlined"
+                >
+                  {t("view_applicants", "Ver Postulantes")}
                 </Button>
               </Stack>
             </Card>

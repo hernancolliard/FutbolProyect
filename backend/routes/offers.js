@@ -28,6 +28,9 @@ const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
+const salaryNumericExpression =
+  "NULLIF(regexp_replace(o.salario::text, '[^0-9.]', '', 'g'), '')::numeric";
+
 // --- Middleware para procesar y subir imágenes de ofertas a S3 ---
 const processOfferImages = async (req, res, next) => {
   if (!req.files || Object.keys(req.files).length === 0) {
@@ -127,11 +130,11 @@ router.get("/", async (req, res) => {
     }
 
     if (puesto) {
-      whereClauses.push(`o.puesto LIKE @puesto`);
+      whereClauses.push(`o.puesto ILIKE @puesto`);
       queryParams.puesto = `%${puesto}%`;
     }
     if (ubicacion) {
-      whereClauses.push(`o.ubicacion LIKE @ubicacion`);
+      whereClauses.push(`o.ubicacion ILIKE @ubicacion`);
       queryParams.ubicacion = `%${ubicacion}%`;
     }
     if (nivel) {
@@ -143,12 +146,12 @@ router.get("/", async (req, res) => {
       queryParams.horarios = horarios;
     }
     if (salarioMin) {
-      whereClauses.push(`o.salario >= @salarioMin`);
-      queryParams.salarioMin = salarioMin;
+      whereClauses.push(`${salaryNumericExpression} >= @salarioMin`);
+      queryParams.salarioMin = Number(salarioMin);
     }
     if (salarioMax) {
-      whereClauses.push(`o.salario <= @salarioMax`);
-      queryParams.salarioMax = salarioMax;
+      whereClauses.push(`${salaryNumericExpression} <= @salarioMax`);
+      queryParams.salarioMax = Number(salarioMax);
     }
 
     const whereString = whereClauses.join(" AND ");
@@ -209,6 +212,58 @@ router.get("/", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error del servidor al obtener las ofertas." });
+  }
+});
+
+// --- RUTA PÚBLICA: OPCIONES ESTRUCTURADAS PARA FILTROS ---
+router.get("/filter-options", async (req, res) => {
+  try {
+    const [puestos, ubicaciones, niveles, horarios, salaryRange] =
+      await Promise.all([
+        db.query(`
+          SELECT DISTINCT puesto
+          FROM ofertas_laborales
+          WHERE estado = 'abierta' AND puesto IS NOT NULL AND puesto <> ''
+          ORDER BY puesto ASC;
+        `),
+        db.query(`
+          SELECT DISTINCT ubicacion
+          FROM ofertas_laborales
+          WHERE estado = 'abierta' AND ubicacion IS NOT NULL AND ubicacion <> ''
+          ORDER BY ubicacion ASC;
+        `),
+        db.query(`
+          SELECT DISTINCT nivel
+          FROM ofertas_laborales
+          WHERE estado = 'abierta' AND nivel IS NOT NULL AND nivel <> ''
+          ORDER BY nivel ASC;
+        `),
+        db.query(`
+          SELECT DISTINCT horarios
+          FROM ofertas_laborales
+          WHERE estado = 'abierta' AND horarios IS NOT NULL AND horarios <> ''
+          ORDER BY horarios ASC;
+        `),
+        db.query(`
+          SELECT
+            MIN(${salaryNumericExpression}) AS min_salary,
+            MAX(${salaryNumericExpression}) AS max_salary
+          FROM ofertas_laborales o
+          WHERE estado = 'abierta'
+            AND NULLIF(regexp_replace(o.salario::text, '[^0-9.]', '', 'g'), '') IS NOT NULL;
+        `),
+      ]);
+
+    res.json({
+      puestos: puestos.rows.map((row) => row.puesto),
+      ubicaciones: ubicaciones.rows.map((row) => row.ubicacion),
+      niveles: niveles.rows.map((row) => row.nivel),
+      horarios: horarios.rows.map((row) => row.horarios),
+      salaryRange: salaryRange.rows[0] || { min_salary: null, max_salary: null },
+    });
+  } catch (error) {
+    console.error("Error al obtener opciones de filtros:", error);
+    res.status(500).json({ message: "Error del servidor al obtener filtros." });
   }
 });
 
@@ -400,26 +455,20 @@ router.post(
       // Enviar notificación por correo electrónico a todos los postulantes
       (async () => {
         try {
-          console.log("Iniciando proceso de notificación de nueva oferta...");
           const userResult = await db.query(
             "SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'",
           );
           const applicants = userResult.rows;
 
           if (applicants.length === 0) {
-            console.log("No se encontraron postulantes para notificar.");
             return;
           }
 
           const offerLink = `${process.env.FRONTEND_URL}/offers/${newOfferId}`;
-          console.log(
-            `Se encontraron ${applicants.length} postulantes. Enviando notificaciones (con retardo para evitar límite de velocidad)...`,
-          );
 
           const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
           for (const applicant of applicants) {
-            console.log(`Enviando correo a: ${applicant.email}`);
             // Se envía el correo pero no se espera (await) para no bloquear el loop,
             // solo se maneja el error si ocurre. El retardo se maneja por separado.
             sendNewOfferNotificationEmail(
@@ -638,10 +687,20 @@ router.get(
           p.id_oferta,
           p.fecha_postulacion,
           p.estado,
+          p.mensaje_presentacion,
           u.nombre,
-          u.email
+          u.apellido,
+          u.email,
+          pu.posicion_principal,
+          pu.nacionalidad,
+          pu.telefono,
+          pu.foto_perfil_url,
+          pu.cv_url,
+          pu.average_rating,
+          pu.total_ratings
         FROM postulaciones p
         JOIN usuarios u ON p.id_usuario_postulante = u.id
+        LEFT JOIN perfiles_usuario pu ON u.id = pu.id_usuario
         WHERE p.id_oferta = @offerId
         ORDER BY p.fecha_postulacion DESC;
       `;
@@ -653,6 +712,61 @@ router.get(
       res
         .status(500)
         .json({ message: "Error del servidor al obtener los postulantes." });
+    }
+  },
+);
+
+// --- RUTA PROTEGIDA: ACTUALIZAR ESTADO DE UNA POSTULACIÓN ---
+router.patch(
+  "/:offerId/applications/:applicationId/status",
+  [verificarToken, popularRolUsuario],
+  async (req, res) => {
+    const { offerId, applicationId } = req.params;
+    const { estado } = req.body;
+    const userId = req.user.id;
+    const allowedStatuses = ["enviada", "en_revision", "preseleccionado", "rechazada", "contratado"];
+
+    if (!allowedStatuses.includes(estado)) {
+      return res.status(400).json({ message: "Estado de postulación inválido." });
+    }
+
+    try {
+      const offerResult = await db.query(
+        `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @offerId`,
+        { offerId },
+      );
+
+      if (offerResult.rows.length === 0) {
+        return res.status(404).json({ message: "Oferta no encontrada." });
+      }
+
+      const isOwner = offerResult.rows[0].id_usuario_ofertante === userId;
+      const isAdmin = req.user.isadmin;
+
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          message: "No tienes permiso para actualizar esta postulación.",
+        });
+      }
+
+      const updateResult = await db.query(
+        `
+          UPDATE postulaciones
+          SET estado = @estado
+          WHERE id = @applicationId AND id_oferta = @offerId
+          RETURNING id, estado;
+        `,
+        { estado, applicationId, offerId },
+      );
+
+      if (updateResult.rows.length === 0) {
+        return res.status(404).json({ message: "Postulación no encontrada." });
+      }
+
+      res.json(updateResult.rows[0]);
+    } catch (error) {
+      console.error("Error al actualizar estado de postulación:", error);
+      res.status(500).json({ message: "Error del servidor al actualizar la postulación." });
     }
   },
 );
