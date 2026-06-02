@@ -151,7 +151,7 @@ export default function FeaturedProfilesClient() {
               return (
               <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
                 <Box
-                  className="profile-card profile-card-watermark"
+                  className="profile-card"
                   sx={{
                     border: '1px solid #e0e0e0',
                     borderRadius: '8px',

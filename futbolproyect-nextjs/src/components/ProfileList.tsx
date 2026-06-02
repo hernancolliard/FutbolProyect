@@ -17,7 +17,7 @@ const ProfileList = ({ profiles }) => {
     <Grid container spacing={2}>
       {profiles.map((profile) => (
         <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
-          <Box className="profile-card profile-card-watermark" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
+          <Box className="profile-card" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
             <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <Image
                 src={profile.foto_perfil_url || '/images/logos/logofp.png'}
