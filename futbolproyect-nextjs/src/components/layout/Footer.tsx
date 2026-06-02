@@ -171,7 +171,7 @@ function Footer() {
         {/* SECCIÓN 4: Developer */}
         <Typography variant="caption" color="inherit" sx={{ opacity: 0.7 }}>
           <MuiLink
-            href="https://paranadev.onrender.com/"
+            href="https://parana-dev.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             color="inherit"

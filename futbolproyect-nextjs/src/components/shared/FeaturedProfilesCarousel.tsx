@@ -70,7 +70,7 @@ function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
       <Slider {...settings} className="profiles-carousel">
         {profiles.map((profile) => (
           <div key={profile.id} className="carousel-profile-card-wrapper" style={{ padding: 2 }}>
-            <div className="carousel-profile-card">
+            <div className="carousel-profile-card profile-card-watermark">
               <Link href={`/profile/${profile.id}`} className="carousel-profile-card-link">
                 <Image
                   src={profile.foto_perfil_url || '/images/logos/logofp.png'}

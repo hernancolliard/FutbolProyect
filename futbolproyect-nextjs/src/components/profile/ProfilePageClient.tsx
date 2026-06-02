@@ -191,6 +191,7 @@ export default function ProfilePageClient({
   return (
     <Stack alignItems="center" sx={{ mt: 4, mb: 4 }}>
       <Card
+        className="profile-card-watermark"
         sx={{ maxWidth: 1350, width: "100%", p: { xs: 1, sm: 2, md: 3 } }}
         elevation={3}
       >

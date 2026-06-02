@@ -18,6 +18,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
 
     return (
         <Paper
+            className="profile-card-watermark"
             elevation={2}
             sx={{
                 overflow: 'hidden',

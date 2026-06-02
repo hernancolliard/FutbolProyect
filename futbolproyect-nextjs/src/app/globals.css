@@ -53,6 +53,7 @@ body {
   inset: 0;
   background: linear-gradient(90deg, rgba(13, 25, 39, 0.9), rgba(13, 25, 39, 0.55) 48%, rgba(13, 25, 39, 0.2));
   z-index: 2;
+  pointer-events: none;
 }
 
 .hero-content {
@@ -99,12 +100,39 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
 }
 
 .hero-secondary-cta {
   color: white !important;
   border-color: rgba(255, 255, 255, 0.75) !important;
   background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.profile-card-watermark {
+  position: relative;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.profile-card-watermark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/logos/logofpazul.webp");
+  background-repeat: no-repeat;
+  background-position: center 58%;
+  background-size: min(68%, 220px);
+  opacity: 0.055;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.profile-card-watermark > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Opcional: Ajuste para móviles */
