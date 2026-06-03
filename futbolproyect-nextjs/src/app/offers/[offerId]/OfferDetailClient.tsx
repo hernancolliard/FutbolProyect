@@ -61,7 +61,16 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
     queryKey: ["offer", offerId],
     queryFn: () => fetchOffer(offerId),
     enabled: !!offerId,
+    retry: (failureCount, queryError: any) => {
+      const status = queryError?.response?.status;
+      if (status === 401 || status === 403) return false;
+      return failureCount < 3;
+    },
   });
+
+  const offerAccessStatus = (error as any)?.response?.status;
+  const shouldShowSubscriptionGate =
+    isError && (offerAccessStatus === 401 || offerAccessStatus === 403);
 
   const { mutate: deleteOffer } = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/offers/${id}`),
@@ -196,7 +205,44 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
      RENDER
   ========================= */
   if (isLoading) return <CircularProgress />;
-  if (isError) return <Alert severity="error">{error?.message}</Alert>;
+  if (shouldShowSubscriptionGate) {
+    return (
+      <Stack alignItems="center" sx={{ mt: 4, px: 2 }}>
+        <Alert
+          severity="warning"
+          sx={{
+            maxWidth: 720,
+            width: "100%",
+            alignItems: "center",
+          }}
+          action={
+            <Button
+              component={Link}
+              href="/suscripcion"
+              color="inherit"
+              size="small"
+            >
+              {t("subscription_plans_title", "Planes de Suscripcion")}
+            </Button>
+          }
+        >
+          {t(
+            "offer_detail_requires_active_subscription",
+            "Necesitas tener una suscripcion activa para ver los detalles de la oferta.",
+          )}
+        </Alert>
+      </Stack>
+    );
+  }
+  if (isError) {
+    return (
+      <Alert severity="error">
+        {(error as any)?.response?.data?.message ||
+          (error as Error)?.message ||
+          t("offer_detail_fetch_error", "Error al cargar la oferta.")}
+      </Alert>
+    );
+  }
   if (!offer) return <Alert severity="info">Oferta no encontrada</Alert>;
 
   return (

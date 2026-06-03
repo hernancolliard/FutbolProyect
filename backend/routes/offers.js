@@ -295,8 +295,9 @@ router.get("/my-offers", verificarToken, async (req, res) => {
   }
 });
 
-// --- RUTA PÚBLICA: OBTENER UNA OFERTA POR ID ---
-router.get("/:id", async (req, res) => {
+// --- RUTA PROTEGIDA: OBTENER UNA OFERTA POR ID ---
+// La lista de ofertas sigue siendo publica; el detalle completo requiere una suscripcion activa.
+router.get("/:id", [verificarToken, verificarSuscripcionActiva()], async (req, res) => {
   const { id } = req.params;
   try {
     const result = await db.query(
