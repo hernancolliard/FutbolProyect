@@ -45,12 +45,16 @@ const fetchOffer = async (offerId: string) => {
 ========================= */
 export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   const { t, i18n } = useTranslation("common");
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const offerCardRef = useRef<HTMLDivElement | null>(null);
+
+  const isAdmin = Boolean(user?.isAdmin || user?.isadmin);
+  const hasActiveSubscription = user?.subscription_status === "activa";
+  const canViewOfferDetail = isAdmin || hasActiveSubscription;
 
   const {
     data: offer,
@@ -60,7 +64,7 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   } = useQuery({
     queryKey: ["offer", offerId],
     queryFn: () => fetchOffer(offerId),
-    enabled: !!offerId,
+    enabled: !!offerId && !authLoading && canViewOfferDetail,
     retry: (failureCount, queryError: any) => {
       const status = queryError?.response?.status;
       if (status === 401 || status === 403) return false;
@@ -107,7 +111,6 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   const salario = offer?.salario;
 
   const isOwner = user && offer && user.id === offer.id_usuario_ofertante;
-  const isAdmin = user?.isAdmin;
 
   /* =========================
      SEO JSON-LD
@@ -204,35 +207,37 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
   /* =========================
      RENDER
   ========================= */
-  if (isLoading) return <CircularProgress />;
-  if (shouldShowSubscriptionGate) {
-    return (
-      <Stack alignItems="center" sx={{ mt: 4, px: 2 }}>
-        <Alert
-          severity="warning"
-          sx={{
-            maxWidth: 720,
-            width: "100%",
-            alignItems: "center",
-          }}
-          action={
-            <Button
-              component={Link}
-              href="/suscripcion"
-              color="inherit"
-              size="small"
-            >
-              {t("subscription_plans_title", "Planes de Suscripcion")}
-            </Button>
-          }
-        >
-          {t(
-            "offer_detail_requires_active_subscription",
-            "Necesitas tener una suscripcion activa para ver los detalles de la oferta.",
-          )}
-        </Alert>
-      </Stack>
-    );
+  const subscriptionGate = (
+    <Stack alignItems="center" sx={{ mt: 4, px: 2 }}>
+      <Alert
+        severity="warning"
+        sx={{
+          maxWidth: 720,
+          width: "100%",
+          alignItems: "center",
+        }}
+        action={
+          <Button
+            component={Link}
+            href="/suscripcion"
+            color="inherit"
+            size="small"
+          >
+            {t("subscription_plans_title", "Planes de Suscripcion")}
+          </Button>
+        }
+      >
+        {t(
+          "offer_detail_requires_active_subscription",
+          "Necesitas tener una suscripcion activa para ver los detalles de la oferta.",
+        )}
+      </Alert>
+    </Stack>
+  );
+
+  if (authLoading || isLoading) return <CircularProgress />;
+  if (!canViewOfferDetail || shouldShowSubscriptionGate) {
+    return subscriptionGate;
   }
   if (isError) {
     return (
@@ -247,13 +252,6 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
 
   return (
     <Stack alignItems="center" sx={{ mt: 4 }}>
-      {/* show info to visitors that login is required to apply */}
-      {!user && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {t("must_be_logged_in_to_see_offer")}
-        </Alert>
-      )}
-
       <Card ref={offerCardRef} sx={{ maxWidth: 800, width: "100%" }}>
         {offer.imagen_url && (
           <Image src={offer.imagen_url} alt={titulo} width={800} height={400} />
