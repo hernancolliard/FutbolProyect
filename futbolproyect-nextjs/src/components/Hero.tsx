@@ -13,7 +13,7 @@ const Hero = () => {
       heroTitle={t('hero_title')}
       heroSubtitle={t('hero_subtitle')}
       primaryCta={
-        <Button component={Link} href="/all-offers" variant="contained" className="hero-primary-cta">
+        <Button component={Link} href="/all-offers" variant="contained" color="secondary">
           {t("hero_primary_cta", "Ver oportunidades")}
         </Button>
       }

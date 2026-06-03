@@ -73,7 +73,7 @@ function Footer() {
         {/* SECCIÓN 2: Legales y Copyright */}
         <Stack spacing={1} alignItems="center">
           <Typography variant="body2" color="inherit">
-            &copy; 2025 FutbolProyect.{" "}
+            &copy; 2026 FutbolProyect.{" "}
             {t("all_rights_reserved", "Todos los derechos reservados.")}
           </Typography>
           <Stack

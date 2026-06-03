@@ -28,6 +28,28 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
   const isMobileMenuOpen = Boolean(anchorEl);
   const isLanguageMenuOpen = Boolean(languageAnchorEl);
+  const headerButtonSx = {
+    borderRadius: 1,
+    px: 1.5,
+    transition: "background-color 180ms ease, color 180ms ease",
+    "&:hover": {
+      bgcolor: "rgba(255, 255, 255, 0.16)",
+      color: "#ffffff",
+    },
+  };
+  const headerOutlinedButtonSx = {
+    transition: "background-color 180ms ease, border-color 180ms ease",
+    "&:hover": {
+      bgcolor: "rgba(244, 67, 54, 0.12)",
+      borderColor: "error.light",
+    },
+  };
+  const headerContainedButtonSx = {
+    transition: "background-color 180ms ease, filter 180ms ease",
+    "&:hover": {
+      filter: "brightness(1.08)",
+    },
+  };
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -87,19 +109,19 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             />
           </Link>
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            <Button color="inherit" component={Link} href="/">
+            <Button color="inherit" component={Link} href="/" sx={headerButtonSx}>
               {t("home")}
             </Button>
-                            <Button color="inherit" component={Link} href="/all-offers">
+                            <Button color="inherit" component={Link} href="/all-offers" sx={headerButtonSx}>
                               {t("offers")}
-                            </Button>            <Button color="inherit" component={Link} href="/perfiles">
+                            </Button>            <Button color="inherit" component={Link} href="/perfiles" sx={headerButtonSx}>
               {t("all_profiles", "Todos los Perfiles")}
             </Button>
-                                        <Button color="inherit" component={Link} href="/suscripcion">
+                                        <Button color="inherit" component={Link} href="/suscripcion" sx={headerButtonSx}>
                                           {t("subscriptions")}
                                         </Button>
                                         {user && user.isadmin && (
-                                          <Button color="inherit" component={Link} href="/admin">
+                                          <Button color="inherit" component={Link} href="/admin" sx={headerButtonSx}>
                                             Admin
                                           </Button>
                                         )}
@@ -119,7 +141,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                   variant="contained"
                   color="secondary"
                   onClick={handleCreateOfferClick}
-                  sx={{ mr: 1 }}
+                  sx={{ mr: 1, ...headerContainedButtonSx }}
                 >
                   {t("publish_offer")}
                 </Button>
@@ -128,13 +150,14 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                 color="inherit"
                 component={Link}
                 href="/profile"
+                sx={headerButtonSx}
               >
                 {t("my_profile")}
               </Button>
               <Typography variant="body2" sx={{ mx: 1 }}>
                 | {t("welcome_user", { name: user.nombre })}
               </Typography>
-              <Button color="error" variant="outlined" onClick={handleLogout}>
+              <Button color="error" variant="outlined" onClick={handleLogout} sx={headerOutlinedButtonSx}>
                 {t("logout")}
               </Button>
             </>
@@ -143,25 +166,26 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
               <Typography variant="body2" sx={{ mx: 1 }}>
                 {t("welcome_user", { name: user.nombre })}
               </Typography>
-              <Button color="error" variant="outlined" onClick={handleLogout}>
+              <Button color="error" variant="outlined" onClick={handleLogout} sx={headerOutlinedButtonSx}>
                 {t("logout")}
               </Button>
             </>
           ) : (
             <>
-              <Button color="inherit" onClick={() => changeLanguage("es")}>
+              <Button color="inherit" onClick={() => changeLanguage("es")} sx={headerButtonSx}>
                 ES
               </Button>
-              <Button color="inherit" onClick={() => changeLanguage("en")}>
+              <Button color="inherit" onClick={() => changeLanguage("en")} sx={headerButtonSx}>
                 EN
               </Button>
-              <Button color="inherit" onClick={onShowLoginModal}>
+              <Button color="inherit" onClick={onShowLoginModal} sx={headerButtonSx}>
                 {t("login")}
               </Button>
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={() => onShowRegisterModal('player')}
+                sx={headerContainedButtonSx}
               >
                 {t("register")}
               </Button>
@@ -172,7 +196,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
           <IconButton
             color="inherit"
             onClick={handleLanguageMenuOpen}
-            sx={{ mr: 1 }}
+            sx={{ mr: 1, ...headerButtonSx }}
           >
             <LanguageIcon />
           </IconButton>
@@ -187,7 +211,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             <MenuItem onClick={() => changeLanguage("en")}>EN</MenuItem>
           </Menu>
 
-          <IconButton color="inherit" onClick={handleMobileMenuOpen}>
+          <IconButton color="inherit" onClick={handleMobileMenuOpen} sx={headerButtonSx}>
             <MenuIcon />
           </IconButton>
           <Menu
