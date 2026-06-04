@@ -108,6 +108,52 @@ export default function HomePage() {
         </FadeInOnScroll>
 
         <Box sx={{ p: 3 }}>
+          <FadeInOnScroll>
+            <Box
+              component="section"
+              sx={{
+                maxWidth: 1180,
+                mx: "auto",
+                mb: 3,
+                p: { xs: 2.5, md: 3 },
+                borderRadius: 2,
+                bgcolor: "#f2f6fa",
+                border: "1px solid rgba(25, 38, 52, 0.12)",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  alignItems: { xs: "stretch", md: "center" },
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
+              >
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.75 }}>
+                    {t("advertising_home_title", "Publicita en FutbolProyect")}
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+                    {t(
+                      "advertising_home_description",
+                      "Llega a jugadores, clubes, agentes, scouts y academias con espacios directos de sponsor dentro de la plataforma.",
+                    )}
+                  </Typography>
+                </Box>
+                <Button
+                  component={Link}
+                  href="/publicidad"
+                  variant="contained"
+                  color="secondary"
+                  sx={{ alignSelf: { xs: "stretch", md: "center" }, whiteSpace: "nowrap" }}
+                >
+                  {t("advertising_home_cta", "Anuncia con nosotros")}
+                </Button>
+              </Box>
+            </Box>
+          </FadeInOnScroll>
+
           <AdBanner placement="home_middle" />
 
           {/* OFERTAS */}

@@ -117,6 +117,9 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                             </Button>            <Button color="inherit" component={Link} href="/perfiles" sx={headerButtonSx}>
               {t("all_profiles", "Todos los Perfiles")}
             </Button>
+                                        <Button color="inherit" component={Link} href="/publicidad" sx={headerButtonSx}>
+                                          {t("advertise_with_us", "Anuncia con nosotros")}
+                                        </Button>
                                         <Button color="inherit" component={Link} href="/suscripcion" sx={headerButtonSx}>
                                           {t("subscriptions")}
                                         </Button>
@@ -238,6 +241,13 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
               onClick={handleMobileMenuClose}
             >
               {t("all_profiles", "Todos los Perfiles")}
+            </MenuItem>
+            <MenuItem
+              component={Link}
+              href="/publicidad"
+              onClick={handleMobileMenuClose}
+            >
+              {t("advertise_with_us", "Anuncia con nosotros")}
             </MenuItem>
             <MenuItem
               component={Link}
