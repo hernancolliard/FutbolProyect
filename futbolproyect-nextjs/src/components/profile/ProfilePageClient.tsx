@@ -37,15 +37,17 @@ import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
 
 interface ProfilePageClientProps {
   profile: Profile | null;
+  requestedProfileId?: string;
 }
 
 export default function ProfilePageClient({
   profile: initialProfile,
+  requestedProfileId,
 }: ProfilePageClientProps) {
   const { t, i18n } = useTranslation();
 
   // CORRECCIÓN: Usamos el usuario real del contexto, no el mock
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: authLoading } = useAuth();
 
   const normalizeWhatsAppUrl = (value?: string) => {
     if (!value) return "";
@@ -68,6 +70,8 @@ export default function ProfilePageClient({
   }, []);
 
   const [profile, setProfile] = useState(initialProfile);
+  const [attemptedPrivateProfileLoad, setAttemptedPrivateProfileLoad] =
+    useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
@@ -76,6 +80,38 @@ export default function ProfilePageClient({
   useEffect(() => {
     setProfile(initialProfile);
   }, [initialProfile]);
+
+  useEffect(() => {
+    if (
+      profile ||
+      authLoading ||
+      attemptedPrivateProfileLoad ||
+      !currentUser ||
+      !requestedProfileId ||
+      String(currentUser.id) !== String(requestedProfileId)
+    ) {
+      return;
+    }
+
+    const loadOwnPrivateProfile = async () => {
+      try {
+        const { data } = await apiClient.get(`/profiles/${requestedProfileId}`);
+        setProfile(data);
+      } catch (error) {
+        console.error("Failed to load private profile:", error);
+      } finally {
+        setAttemptedPrivateProfileLoad(true);
+      }
+    };
+
+    loadOwnPrivateProfile();
+  }, [
+    profile,
+    authLoading,
+    attemptedPrivateProfileLoad,
+    currentUser,
+    requestedProfileId,
+  ]);
 
   const isManagedProfile = Boolean(profile?.is_managed_profile);
   const isOwnAccountProfile =
@@ -212,6 +248,10 @@ export default function ProfilePageClient({
   };
 
   if (!isHydrated) {
+    return null;
+  }
+
+  if (!profile && authLoading) {
     return null;
   }
 

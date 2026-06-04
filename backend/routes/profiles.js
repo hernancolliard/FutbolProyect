@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+const jwt = require("jsonwebtoken");
 const {
   verificarToken,
   popularRolUsuario,
@@ -65,6 +66,25 @@ const canManagePlayerProfiles = async (userId) => {
     (user.tipo_usuario === "ofertante" &&
       MANAGED_PROFILE_ROLES.includes(user.rol))
   );
+};
+
+const getRequesterFromRequest = (req) => {
+  let token = req.cookies?.token;
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+  }
+
+  if (!token) return null;
+
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (_error) {
+    return null;
+  }
 };
 
 const getManagedProfileIdFromSlug = (value) => {
@@ -885,6 +905,15 @@ router.get("/:userId", async (req, res) => {
     }
 
     const userProfile = result.rows[0];
+
+    const requester = getRequesterFromRequest(req);
+    const isPublicProfile = userProfile.tipo_usuario === "postulante";
+    const isOwnProfile = requester && Number(requester.id) === userIdNum;
+    const isRequesterAdmin = Boolean(requester?.isadmin);
+
+    if (!isPublicProfile && !isOwnProfile && !isRequesterAdmin) {
+      return res.status(404).json({ message: "Perfil no encontrado." });
+    }
 
     res.json(userProfile);
   } catch (error) {

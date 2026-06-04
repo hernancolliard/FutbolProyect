@@ -3,6 +3,7 @@ import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
 import ProfilePageClient from "@/components/profile/ProfilePageClient";
 import { getApiBaseUrl } from "@/lib/api";
+import { cookies } from "next/headers";
 
 // IMPORTANTE: Forzamos renderizado dinámico para evitar errores de fetch en el build
 export const dynamic = "force-dynamic";
@@ -11,8 +12,10 @@ const fetchProfile = async (userId: string): Promise<Profile | null> => {
   const apiUrl = getApiBaseUrl();
 
   try {
+    const token = cookies().get("token")?.value;
     const res = await fetch(`${apiUrl}/profiles/${userId}`, {
       cache: "no-store",
+      headers: token ? { Cookie: `token=${token}` } : undefined,
     });
 
     if (!res.ok) {
@@ -86,5 +89,5 @@ export default async function ProfilePage({
   params: { id: string };
 }) {
   const profile = await fetchProfile(params.id);
-  return <ProfilePageClient profile={profile} />;
+  return <ProfilePageClient profile={profile} requestedProfileId={params.id} />;
 }
