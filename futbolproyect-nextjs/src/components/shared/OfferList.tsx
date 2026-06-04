@@ -18,6 +18,7 @@ import FadeInOnScroll from "./FadeInOnScroll";
 import OfferActions from "./OfferActions";
 import useIsMobile from "@/hooks/useIsMobile";
 import Image from "next/image";
+import AdBanner from "@/components/ads/AdBanner";
 
 import { Offer } from "@/lib/types";
 
@@ -313,18 +314,24 @@ const OfferList = ({
                     )}
         {!isHomePage && (
           <div className="offers-list">
-            {offersToDisplay.map((offer) => ( // Aquí mapeamos todas las ofertas si no es HomePage
-              <OfferCard
-                key={offer.id}
-                offer={offer}
-                isHomePage={false}
-                isMobile={isMobile}
-                showApplyButton={showApplyButton}
-                onOfferAction={onOfferAction}
-                t={t}
-                i18n={i18n}
-                handleViewOffer={handleViewOffer}
-              />
+            {offersToDisplay.map((offer, index) => (
+              <React.Fragment key={offer.id}>
+                <OfferCard
+                  offer={offer}
+                  isHomePage={false}
+                  isMobile={isMobile}
+                  showApplyButton={showApplyButton}
+                  onOfferAction={onOfferAction}
+                  t={t}
+                  i18n={i18n}
+                  handleViewOffer={handleViewOffer}
+                />
+                {(index + 1) % 5 === 0 && (
+                  <div style={{ gridColumn: "1 / -1", width: "100%" }}>
+                    <AdBanner placement="offers_inline" compact />
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         )}

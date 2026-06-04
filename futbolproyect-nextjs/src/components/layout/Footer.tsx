@@ -10,6 +10,7 @@ import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Image from "next/image";
 import Divider from "@mui/material/Divider"; // Importamos Divider
+import AdBanner from "@/components/ads/AdBanner";
 
 function Footer() {
   const { t } = useTranslation("common");
@@ -34,6 +35,8 @@ function Footer() {
       >
         {/* SECCIÓN 1: Enlaces SEO (Lo nuevo) */}
         <Box sx={{ width: "100%", textAlign: "center" }}>
+          <AdBanner placement="footer" compact />
+
           <Typography
             variant="subtitle2"
             sx={{
@@ -100,6 +103,17 @@ function Footer() {
               underline="hover"
             >
               {t("terms_of_service", "Términos de Servicio")}
+            </MuiLink>
+            <Typography variant="body2" color="inherit">
+              |
+            </Typography>
+            <MuiLink
+              component={Link}
+              href="/publicidad"
+              color="inherit"
+              underline="hover"
+            >
+              {t("advertising_footer_link", "Publicidad")}
             </MuiLink>
           </Stack>
         </Stack>

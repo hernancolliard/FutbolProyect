@@ -5,6 +5,8 @@ import UserManagement from "./UserManagement";
 import OfferManagement from "./OfferManagement";
 import SubscriptionManagement from "./SubscriptionManagement";
 import ContactMessages from "./ContactMessages";
+import AdvertisementManagement from "./AdvertisementManagement";
+import AdvertisingLeadManagement from "./AdvertisingLeadManagement";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
@@ -32,12 +34,16 @@ function AdminDashboard() {
         <Tab label={t('user_management_tab', 'Gestión de Usuarios')} value="users" />
         <Tab label={t('offer_management_tab', 'Gestión de Ofertas')} value="offers" />
         <Tab label={t('subscription_management_tab', 'Gestión de Suscripciones')} value="subscriptions" />
+        <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
+        <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
         <Tab label={t('contact_messages_tab', 'Mensajes de Contacto')} value="contact" />
       </Tabs>
       <Box className="admin-content" sx={{ mt: 3 }}>
         {activeTab === "users" && <UserManagement />}
         {activeTab === "offers" && <OfferManagement />}
         {activeTab === "subscriptions" && <SubscriptionManagement />}
+        {activeTab === "advertising" && <AdvertisementManagement />}
+        {activeTab === "advertising-leads" && <AdvertisingLeadManagement />}
         {activeTab === "contact" && <ContactMessages />}
       </Box>
     </Box>

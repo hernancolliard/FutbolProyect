@@ -102,3 +102,43 @@ export interface Offer {
   id_usuario_ofertante: string;
   applicants?: { user_id: string }[];
 }
+
+export interface Advertisement {
+  id: number;
+  title: string;
+  advertiser_name: string;
+  advertiser_type: string;
+  image_url: string;
+  target_url?: string;
+  placement: string;
+  language: string;
+  country?: string;
+  description?: string;
+  button_text?: string;
+  package_type?: string;
+  notes?: string;
+  priority: number;
+  is_active?: boolean;
+  start_date?: string;
+  end_date?: string;
+  impressions_count?: number;
+  clicks_count?: number;
+  ctr?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AdvertisingLead {
+  id: number;
+  name: string;
+  company?: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  advertiser_type?: string;
+  budget?: string;
+  message: string;
+  status: string;
+  created_at: string;
+  updated_at?: string;
+}

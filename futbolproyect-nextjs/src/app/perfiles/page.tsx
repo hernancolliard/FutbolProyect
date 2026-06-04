@@ -5,6 +5,7 @@ import { Profile } from "@/lib/types";
 import { Typography, Paper } from "@mui/material";
 import FilterControls from "@/components/profile/FilterControls";
 import { getApiBaseUrl } from "@/lib/api";
+import AdBanner from "@/components/ads/AdBanner";
 
 /* =========================
    STATIC FETCH (BUILD TIME)
@@ -71,6 +72,8 @@ export default async function AllProfilesPage() {
       </Typography>
 
       <Typography paragraph>{t("all_profiles_desc")}</Typography>
+
+      <AdBanner placement="profiles_top" />
 
       <FilterControls
         nacionalidades={nacionalidades}

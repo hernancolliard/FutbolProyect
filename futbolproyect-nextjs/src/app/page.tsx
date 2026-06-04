@@ -22,6 +22,7 @@ import Modal from "@/components/ui/Modal";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
+import AdBanner from "@/components/ads/AdBanner";
 
 /* =========================
    FETCHERS (CLIENT SAFE)
@@ -107,6 +108,8 @@ export default function HomePage() {
         </FadeInOnScroll>
 
         <Box sx={{ p: 3 }}>
+          <AdBanner placement="home_middle" />
+
           {/* OFERTAS */}
           {isLoadingOffers ? (
             <LoadingSpinner text={t("loading_offers", "Cargando ofertas...")} />
@@ -149,6 +152,8 @@ export default function HomePage() {
               <FeaturedProfilesCarousel profiles={featuredProfiles} />
             </FadeInOnScroll>
           )}
+
+          <AdBanner placement="home_profiles" />
 
           <Box sx={{ textAlign: "center", py: 4 }}>
             <Button

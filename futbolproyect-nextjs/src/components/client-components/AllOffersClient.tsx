@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination";
 import { useTranslation } from "react-i18next";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import useIsMobile from "@/hooks/useIsMobile";
+import AdBanner from "@/components/ads/AdBanner";
 import {
   Box,
   Typography,
@@ -142,6 +143,8 @@ export default function AllOffersClient() {
           "Encuentra oportunidades reales en clubes, academias y proyectos deportivos. Usa los filtros para reducir por rol, ubicacion, nivel y rango salarial.",
         )}
       </Typography>
+
+      <AdBanner placement="offers_top" />
 
       <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: "wrap", gap: 1 }}>
         {roleFilters.map((role) => (

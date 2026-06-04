@@ -34,6 +34,7 @@ import MyApplicationsSection from "./MyApplicationsSection";
 import MyOffersSection from "./MyOffersSection";
 import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
+import AdBanner from "@/components/ads/AdBanner";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -601,6 +602,7 @@ export default function ProfilePageClient({
                   </Button>
                 )}
               </Card>
+              <AdBanner placement="player_profile_sidebar" compact />
             </Grid>
           </Grid>
 

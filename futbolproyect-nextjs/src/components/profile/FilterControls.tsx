@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Select,
@@ -14,6 +14,7 @@ import {
 import { SelectChangeEvent } from "@mui/material/Select";
 import { Profile } from "@/lib/types";
 import ProfileCard from "@/components/profile/ProfileCard";
+import AdBanner from "@/components/ads/AdBanner";
 import {
   getPlayerPositionCategory,
   PLAYER_POSITION_OPTIONS,
@@ -127,10 +128,17 @@ export default function FilterControls({
         <Typography>{t("no_profiles_filters")}</Typography>
       ) : (
         <Grid container spacing={3}>
-          {filteredProfiles.map((profile) => (
-            <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
-              <ProfileCard profile={profile} />
-            </Grid>
+          {filteredProfiles.map((profile, index) => (
+            <React.Fragment key={profile.id}>
+              <Grid item xs={12} sm={6} md={4} lg={3}>
+                <ProfileCard profile={profile} />
+              </Grid>
+              {(index + 1) % 8 === 0 && (
+                <Grid item xs={12}>
+                  <AdBanner placement="profiles_inline" compact />
+                </Grid>
+              )}
+            </React.Fragment>
           ))}
         </Grid>
       )}
