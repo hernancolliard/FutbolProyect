@@ -46,7 +46,7 @@ const advertisingPlans = [
     name: "Plan Básico",
     subtitle: "Visibilidad Inicial",
     priceArs: "$30.000 ARS / mes",
-    priceUsd: "USD 20 a USD 40 / mes",
+    priceUsd: "USD 20 / mes",
     description:
       "Ideal para cursos, academias, servicios chicos o marcas que quieren comenzar a tener presencia en FutbolProyect.",
     includes: [
@@ -62,7 +62,7 @@ const advertisingPlans = [
     name: "Plan Destacado",
     subtitle: "Mayor Alcance",
     priceArs: "$75.000 ARS / mes",
-    priceUsd: "USD 50 a USD 90 / mes",
+    priceUsd: "USD 50 / mes",
     recommended: true,
     description:
       "Ideal para agencias, cursos, empresas deportivas o academias que quieren mayor visibilidad dentro de FutbolProyect.",
@@ -81,7 +81,7 @@ const advertisingPlans = [
     name: "Sponsor Principal",
     subtitle: "Presencia Premium",
     priceArs: "$180.000 ARS / mes",
-    priceUsd: "USD 120 a USD 200 / mes",
+    priceUsd: "USD 120 / mes",
     description:
       "Ideal para agencias importantes, empresas, academias grandes, cursos reconocidos o servicios que quieren posicionarse fuerte dentro de FutbolProyect.",
     includes: [
