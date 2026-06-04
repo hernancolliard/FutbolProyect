@@ -27,6 +27,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import PublicIcon from "@mui/icons-material/Public";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
 import MyApplicationsSection from "./MyApplicationsSection";
@@ -177,6 +178,37 @@ export default function ProfilePageClient({
   const handleProfileSave = () => {
     handleCloseEditModal();
     startTransition(() => router.refresh());
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      t(
+        "confirm_delete_account",
+        "¿Seguro que querés eliminar tu cuenta? Se borrarán tus datos, perfiles, ofertas y postulaciones. Esta acción no se puede deshacer.",
+      ),
+    );
+
+    if (!confirmed) return;
+
+    const typedConfirmation = window.prompt(
+      t(
+        "confirm_delete_account_prompt",
+        "Escribí ELIMINAR para confirmar la baja de tu cuenta.",
+      ),
+    );
+
+    if (typedConfirmation !== "ELIMINAR") return;
+
+    try {
+      await apiClient.delete("/users/me");
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    } catch (error: any) {
+      alert(
+        error.response?.data?.message ||
+          t("delete_account_error", "No se pudo eliminar la cuenta."),
+      );
+    }
   };
 
   if (!isHydrated) {
@@ -558,6 +590,38 @@ export default function ProfilePageClient({
           {isOwnAccountProfile && <MyApplicationsSection userId={profile.id} />}
           {isOwnAccountProfile && currentUser?.tipo_usuario === 'ofertante' && (
             <MyOffersSection userId={profile.id} />
+          )}
+          {isOwnAccountProfile && (
+            <Card variant="outlined" sx={{ mt: 4, borderColor: "error.light" }}>
+              <CardContent>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  justifyContent="space-between"
+                  alignItems={{ xs: "stretch", sm: "center" }}
+                >
+                  <Box>
+                    <Typography variant="h6" color="error">
+                      {t("delete_account_title", "Eliminar cuenta")}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {t(
+                        "delete_account_description",
+                        "Da de baja tu cuenta y elimina tus datos asociados de FutbolProyect.",
+                      )}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteForeverIcon />}
+                    onClick={handleDeleteAccount}
+                  >
+                    {t("delete_account_button", "Eliminar cuenta")}
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
           )}
         </CardContent>
       </Card>

@@ -646,6 +646,47 @@ router.put(
 
 // --- RUTA PÚBLICA: OBTENER PERFIL DE USUARIO ---
 // --- RUTA PROTEGIDA: MÉTRICAS DEL PERFIL ---
+router.delete("/managed/:profileId", verificarToken, async (req, res) => {
+  const profileId = parseInt(req.params.profileId, 10);
+
+  if (Number.isNaN(profileId)) {
+    return res.status(400).json({ message: "El ID de perfil no es vÃ¡lido." });
+  }
+
+  try {
+    const allowed = await canManagePlayerProfiles(req.user.id);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Solo clubes, agentes o scouts pueden gestionar perfiles de jugadores.",
+      });
+    }
+
+    const result = await db.query(
+      `
+        DELETE FROM managed_player_profiles
+        WHERE id = @profileId
+          AND (owner_user_id = @userId OR @isAdmin = TRUE)
+        RETURNING id;
+      `,
+      {
+        profileId,
+        userId: req.user.id,
+        isAdmin: Boolean(req.user.isadmin),
+      }
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Perfil no encontrado." });
+    }
+
+    res.json({ message: "Perfil eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar perfil gestionado:", error);
+    res.status(500).json({ message: "Error del servidor al eliminar el perfil." });
+  }
+});
+
 router.get("/:userId/stats", verificarToken, async (req, res) => {
   const { userId } = req.params;
   const requesterId = req.user.id;

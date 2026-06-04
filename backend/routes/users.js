@@ -324,6 +324,48 @@ router.post("/reset-password", async (req, res) => {
 /* =========================
    LOGOUT
 ========================= */
+router.delete("/me", verificarToken, async (req, res) => {
+  const userId = req.user.id;
+  const client = await db.getClient();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      "DELETE FROM postulaciones WHERE id_usuario_postulante = @userId",
+      { userId }
+    );
+
+    const result = await client.query(
+      "DELETE FROM usuarios WHERE id = @userId RETURNING id",
+      { userId }
+    );
+
+    if (result.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    await client.query("COMMIT");
+
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      expires: new Date(0),
+    });
+
+    res.json({ message: "Cuenta eliminada correctamente." });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error al eliminar cuenta:", error);
+    res.status(500).json({ message: "Error del servidor al eliminar la cuenta." });
+  } finally {
+    client.release();
+  }
+});
+
 router.post("/logout", (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,

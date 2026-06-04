@@ -16,6 +16,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import { Profile } from "@/lib/types";
@@ -107,6 +108,30 @@ export default function ManagedPlayerProfilesSection() {
     await loadProfiles();
   };
 
+  const handleDelete = async (profile: Profile) => {
+    const profileName = `${profile.nombre} ${profile.apellido || ""}`.trim();
+    const confirmed = window.confirm(
+      t(
+        "confirm_delete_managed_profile",
+        `¿Seguro que querés eliminar el perfil de ${profileName}? Esta acción no se puede deshacer.`,
+      ),
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError("");
+      const managedId = String(profile.id).replace("managed-", "");
+      await apiClient.delete(`/profiles/managed/${managedId}`);
+      setProfiles((current) => current.filter((item) => item.id !== profile.id));
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+          t("managed_profile_delete_error", "No se pudo eliminar el perfil."),
+      );
+    }
+  };
+
   return (
     <Box sx={{ mt: 4 }}>
       <Card variant="outlined">
@@ -184,6 +209,14 @@ export default function ManagedPlayerProfilesSection() {
                           startIcon={<OpenInNewIcon />}
                         >
                           {t("view_profile", "Ver Perfil")}
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDelete(profile)}
+                        >
+                          {t("delete", "Eliminar")}
                         </Button>
                       </Stack>
                     </CardContent>
