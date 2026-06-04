@@ -40,6 +40,50 @@ const fetchOffer = async (offerId: string) => {
   return data;
 };
 
+const renderLinkedText = (text: string) => {
+  const urlPattern = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(urlPattern)) {
+    const rawUrl = match[0];
+    const index = match.index ?? 0;
+
+    if (index > lastIndex) {
+      nodes.push(text.slice(lastIndex, index));
+    }
+
+    const trailingPunctuation = rawUrl.match(/[.,;:!?)]*$/)?.[0] || "";
+    const cleanUrl = rawUrl.slice(0, rawUrl.length - trailingPunctuation.length);
+    const href = cleanUrl.startsWith("www.") ? `https://${cleanUrl}` : cleanUrl;
+
+    nodes.push(
+      <Box
+        key={`${cleanUrl}-${index}`}
+        component="a"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{ color: "primary.main", textDecoration: "underline" }}
+      >
+        {cleanUrl}
+      </Box>,
+    );
+
+    if (trailingPunctuation) {
+      nodes.push(trailingPunctuation);
+    }
+
+    lastIndex = index + rawUrl.length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+};
+
 /* =========================
    COMPONENTE
 ========================= */
@@ -259,7 +303,9 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
 
         <CardContent>
           <Typography variant="h4">{titulo}</Typography>
-          <Typography sx={{ whiteSpace: "pre-line" }}>{descripcion}</Typography>
+          <Typography sx={{ whiteSpace: "pre-line" }}>
+            {renderLinkedText(descripcion)}
+          </Typography>
 
           {ubicacion && (
             <Typography variant="body1" sx={{ mt: 2 }}>
@@ -294,7 +340,7 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
           {detalles_adicionales && (
             <Typography variant="body1" sx={{ mt: 1, whiteSpace: "pre-line" }}>
               <strong>{t("additional_details_title", "Detalles adicionales")}:</strong>{" "}
-              {detalles_adicionales}
+              {renderLinkedText(detalles_adicionales)}
             </Typography>
           )}
 
