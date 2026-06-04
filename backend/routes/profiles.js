@@ -213,7 +213,20 @@ router.get("/", async (req, res) => {
           p.posicion_principal,
           p.nacionalidad,
           p.average_rating,
-          p.total_ratings
+          p.total_ratings,
+          (
+            CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+          ) AS completion_score,
+          u.fecha_creacion AS sort_created_at
         FROM usuarios u
         LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
         WHERE ${userWhereClauses.join(" AND ")}
@@ -233,12 +246,25 @@ router.get("/", async (req, res) => {
           mp.posicion_principal,
           mp.nacionalidad,
           mp.average_rating,
-          mp.total_ratings
+          mp.total_ratings,
+          (
+            CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+          ) AS completion_score,
+          mp.created_at AS sort_created_at
         FROM managed_player_profiles mp
         JOIN usuarios owner ON owner.id = mp.owner_user_id
         WHERE ${managedWhereClauses.join(" AND ")}
       ) profiles
-      ORDER BY id DESC;
+      ORDER BY completion_score DESC, sort_created_at DESC, id DESC;
     `;
 
     const result = await db.query(query, queryParams);
