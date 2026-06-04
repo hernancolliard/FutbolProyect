@@ -259,7 +259,7 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
 
         <CardContent>
           <Typography variant="h4">{titulo}</Typography>
-          <Typography>{descripcion}</Typography>
+          <Typography sx={{ whiteSpace: "pre-line" }}>{descripcion}</Typography>
 
           {ubicacion && (
             <Typography variant="body1" sx={{ mt: 2 }}>
