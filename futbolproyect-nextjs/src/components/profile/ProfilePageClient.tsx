@@ -31,6 +31,7 @@ import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
 import MyApplicationsSection from "./MyApplicationsSection";
 import MyOffersSection from "./MyOffersSection";
+import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import { useAuth } from "@/context/AuthContext"; // <--- CONEXIÓN REAL
 
 interface ProfilePageClientProps {
@@ -75,11 +76,24 @@ export default function ProfilePageClient({
     setProfile(initialProfile);
   }, [initialProfile]);
 
-  const isMyProfile =
-    currentUser && profile && String(currentUser.id) === String(profile.id);
+  const isManagedProfile = Boolean(profile?.is_managed_profile);
+  const isOwnAccountProfile =
+    currentUser &&
+    profile &&
+    !isManagedProfile &&
+    String(currentUser.id) === String(profile.id);
+  const isManagedProfileOwner =
+    currentUser &&
+    profile &&
+    isManagedProfile &&
+    String(currentUser.id) === String(profile.owner_user_id);
+  const canEditProfile = Boolean(isOwnAccountProfile || isManagedProfileOwner);
+  const canManagePlayerProfiles =
+    currentUser?.tipo_usuario === "ofertante" &&
+    ["club", "agente", "scout"].includes(currentUser?.rol);
 
   useEffect(() => {
-    if (!isMyProfile || !profile) return;
+    if (!isOwnAccountProfile || !profile) return;
 
     const loadStats = async () => {
       try {
@@ -91,10 +105,10 @@ export default function ProfilePageClient({
     };
 
     loadStats();
-  }, [isMyProfile, profile]);
+  }, [isOwnAccountProfile, profile]);
 
   useEffect(() => {
-    if (!currentUser || !profile || isMyProfile) {
+    if (!currentUser || !profile || canEditProfile || isManagedProfile) {
       setMyRating(null);
       return;
     }
@@ -109,14 +123,14 @@ export default function ProfilePageClient({
     };
 
     loadMyRating();
-  }, [currentUser, profile, isMyProfile]);
+  }, [currentUser, profile, canEditProfile, isManagedProfile]);
 
   useEffect(() => {
     // Validación segura de IDs
     if (
       profile &&
       currentUser &&
-      String(profile.id) !== String(currentUser.id)
+      !canEditProfile
     ) {
       const recordView = async () => {
         try {
@@ -128,7 +142,7 @@ export default function ProfilePageClient({
       };
       recordView();
     }
-  }, [profile, currentUser]);
+  }, [profile, currentUser, canEditProfile]);
 
   const handleRatingChange = async (event: any, newValue: number | null) => {
     if (!newValue || !profile) return;
@@ -197,7 +211,7 @@ export default function ProfilePageClient({
       >
         <CardContent>
           <Grid container spacing={4}>
-            {isMyProfile && profileStats && (
+            {isOwnAccountProfile && profileStats && (
               <Grid item xs={12}>
                 <Card variant="outlined" sx={{ p: 2, bgcolor: "#f8fafc" }}>
                   <Stack spacing={2}>
@@ -299,7 +313,7 @@ export default function ProfilePageClient({
                     </Typography>
 
                     {/* Botón de Editar solo si es mi perfil */}
-                    {isMyProfile && (
+                    {canEditProfile && (
                       <Button variant="contained" onClick={handleOpenEditModal}>
                         {t("edit_profile_button", "Editar Perfil")}
                       </Button>
@@ -319,7 +333,8 @@ export default function ProfilePageClient({
                     </Typography>
                     <Stack spacing={1}>
                       <Typography>
-                        <strong>{t("email_label")}</strong> {profile.email}
+                        <strong>{t("email_label")}</strong>{" "}
+                        {profile.email || t("not_specified")}
                       </Typography>
                       <Typography>
                         <strong>{t("phone_placeholder")}</strong>{" "}
@@ -403,7 +418,7 @@ export default function ProfilePageClient({
                         {t("contact_whatsapp", "Contactar por WhatsApp")}
                       </Button>
                     )}
-                    {isMyProfile && !profile.whatsapp_url && (
+                    {canEditProfile && !profile.whatsapp_url && (
                       <Button
                         variant="outlined"
                         onClick={handleOpenEditModal}
@@ -415,7 +430,7 @@ export default function ProfilePageClient({
                     )}
                   </Stack>
                 </Box>
-                {!isMyProfile && (
+                {!canEditProfile && !isManagedProfile && (
                   <Box sx={{ ml: { sm: 4 }, mt: { xs: 2, sm: 0 } }}>
                     <Typography component="legend" sx={{ fontWeight: 700 }}>
                       {t("profile_average_rating", "Promedio del perfil")}
@@ -509,23 +524,34 @@ export default function ProfilePageClient({
             </Grid>
           </Grid>
 
-          <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
-          <UserPhotosSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
-          <VideosSection userId={profile.id} isMyProfile={Boolean(isMyProfile)} />
+          {!isManagedProfile && (
+            <>
+              <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
+              <UserPhotosSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
+              <VideosSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
+            </>
+          )}
 
-          {isMyProfile && <MyApplicationsSection userId={profile.id} />}
-          {isMyProfile && currentUser?.tipo_usuario === 'ofertante' && (
+          {isOwnAccountProfile && canManagePlayerProfiles && <ManagedPlayerProfilesSection />}
+          {isOwnAccountProfile && <MyApplicationsSection userId={profile.id} />}
+          {isOwnAccountProfile && currentUser?.tipo_usuario === 'ofertante' && (
             <MyOffersSection userId={profile.id} />
           )}
         </CardContent>
       </Card>
 
-      {isMyProfile && (
+      {canEditProfile && (
         <EditProfileModal
           open={isEditModalOpen}
           onClose={handleCloseEditModal}
           profileData={profile}
           onSave={handleProfileSave}
+          saveEndpoint={
+            isManagedProfile
+              ? `/profiles/managed/${String(profile.id).replace("managed-", "")}`
+              : "/profiles/me"
+          }
+          showEmailField={isManagedProfile}
         />
       )}
 

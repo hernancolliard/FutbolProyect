@@ -14,9 +14,23 @@ interface EditProfileFormProps {
     profileData: Profile;
     onSave: () => void;
     onCancel: () => void;
+    saveEndpoint?: string;
+    saveMethod?: "post" | "put";
+    title?: string;
+    submitLabel?: string;
+    showEmailField?: boolean;
 }
 
-const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps) => {
+const EditProfileForm = ({
+  profileData,
+  onSave,
+  onCancel,
+  saveEndpoint = "/profiles/me",
+  saveMethod = "put",
+  title,
+  submitLabel,
+  showEmailField = false,
+}: EditProfileFormProps) => {
   const { t } = useTranslation();
   
   const formatDateForInput = (date: string | null) => {
@@ -27,6 +41,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
   const [formData, setFormData] = useState({
     nombre: profileData.nombre || "",
     apellido: profileData.apellido || "",
+    email: profileData.email || "",
     telefono: profileData.telefono || "",
     nacionalidad: profileData.nacionalidad || "",
     posicion_principal: getPlayerPositionCategory(profileData.posicion_principal),
@@ -71,7 +86,10 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
     }
 
     try {
-        const response = await apiClient.put("/profiles/me", data);
+        const response =
+          saveMethod === "post"
+            ? await apiClient.post(saveEndpoint, data)
+            : await apiClient.put(saveEndpoint, data);
 
         if (response.status !== 200 && response.status !== 201) {
           throw new Error(t("error_saving_profile", "Error al guardar el perfil"));
@@ -88,7 +106,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
   return (
     <Card sx={{ maxWidth: 900, width: "100%" }}>
       <CardContent>
-        <Typography variant="h5" sx={{ mb: 2 }}>{t("edit_profile_title", "Editar Perfil")}</Typography>
+        <Typography variant="h5" sx={{ mb: 2 }}>{title || t("edit_profile_title", "Editar Perfil")}</Typography>
         <form onSubmit={handleSubmit}>
             <Stack spacing={2}>
             {error && <Alert severity="error">{error}</Alert>}
@@ -107,6 +125,9 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
             <Typography variant="subtitle1">{t("personal_data_title", "Datos Personales")}</Typography>
             <TextField name="nombre" label={t("name_placeholder")} value={formData.nombre} onChange={handleChange} fullWidth />
             <TextField name="apellido" label={t("lastname_placeholder")} value={formData.apellido} onChange={handleChange} fullWidth />
+            {showEmailField && (
+              <TextField name="email" label={t("email_label", "Email")} value={formData.email} onChange={handleChange} fullWidth />
+            )}
             <TextField type="date" name="fecha_de_nacimiento" label={t("birth_date_placeholder")} value={formData.fecha_de_nacimiento} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
             <TextField name="nacionalidad" label={t("nationality_placeholder")} value={formData.nacionalidad} onChange={handleChange} fullWidth />
             <TextField name="telefono" label={t("contact_phone_placeholder")} value={formData.telefono} onChange={handleChange} fullWidth />
@@ -167,7 +188,7 @@ const EditProfileForm = ({ profileData, onSave, onCancel }: EditProfileFormProps
             <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
                 <Button type="button" onClick={onCancel} variant="outlined" disabled={loading}>{t("cancel_button", "Cancelar")}</Button>
                 <Button type="submit" disabled={loading} variant="contained">
-                    {loading ? <CircularProgress size={24} /> : t("save_changes_button", "Guardar Cambios")}
+                    {loading ? <CircularProgress size={24} /> : submitLabel || t("save_changes_button", "Guardar Cambios")}
                 </Button>
             </Stack>
             </Stack>

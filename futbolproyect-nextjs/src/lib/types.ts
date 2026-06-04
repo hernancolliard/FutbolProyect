@@ -21,7 +21,11 @@ export interface Profile {
   youtube_url: string;
   transfermarkt_url: string;
   whatsapp_url?: string;
-  tipo_usuario: 'jugador' | 'ofertante' | 'agencia';
+  tipo_usuario: 'postulante' | 'jugador' | 'ofertante' | 'agencia';
+  rol?: string;
+  managed_profile_id?: number;
+  owner_user_id?: number;
+  is_managed_profile?: boolean;
   subscription_status: 'activa' | 'inactiva' | 'cancelada';
   subscription_plan: string;
   subscription_end_date: string;

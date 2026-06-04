@@ -48,16 +48,39 @@ interface FeaturedProfilesCarouselProps {
 function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+
+  const mobileSlidesToScroll = 2;
+  const maxMobileDots = 5;
+
+  const getVisibleDots = (dots: React.ReactNode[]) => {
+    if (!isMobile || dots.length <= maxMobileDots) {
+      return dots;
+    }
+
+    const activeDotIndex = Math.floor(currentSlide / mobileSlidesToScroll);
+    const startIndex = Math.min(
+      Math.max(activeDotIndex - Math.floor(maxMobileDots / 2), 0),
+      dots.length - maxMobileDots
+    );
+
+    return dots.slice(startIndex, startIndex + maxMobileDots);
+  };
 
   const settings = {
     dots: true,
     infinite: profiles && profiles.length > (isMobile ? 2 : 4),
     speed: 500,
     slidesToShow: isMobile ? 2 : 4,
-    slidesToScroll: isMobile ? 2 : 4,
+    slidesToScroll: isMobile ? mobileSlidesToScroll : 4,
     initialSlide: 0,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
+    beforeChange: (_current: number, next: number) => setCurrentSlide(next),
+    appendDots: (dots: React.ReactNode) => {
+      const dotItems = React.Children.toArray(dots);
+      return <ul>{getVisibleDots(dotItems)}</ul>;
+    },
   };
 
   if (!profiles || profiles.length === 0) {

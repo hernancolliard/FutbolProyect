@@ -49,6 +49,98 @@ const buildProfilePositionFilterClause = (column, position) => {
     .join(" OR ")})`;
 };
 
+const MANAGED_PROFILE_ROLES = ["club", "agente", "scout"];
+
+const canManagePlayerProfiles = async (userId) => {
+  const result = await db.query(
+    "SELECT tipo_usuario, rol, isadmin FROM usuarios WHERE id = @userId",
+    { userId }
+  );
+
+  const user = result.rows[0];
+  if (!user) return false;
+
+  return (
+    user.isadmin ||
+    (user.tipo_usuario === "ofertante" &&
+      MANAGED_PROFILE_ROLES.includes(user.rol))
+  );
+};
+
+const getManagedProfileIdFromSlug = (value) => {
+  if (typeof value !== "string" || !value.startsWith("managed-")) {
+    return null;
+  }
+
+  const id = parseInt(value.replace("managed-", ""), 10);
+  return Number.isNaN(id) ? null : id;
+};
+
+const buildManagedProfilePayload = (body) => ({
+  nombre: body.nombre?.trim(),
+  apellido: body.apellido?.trim() || null,
+  email: body.email?.trim() || null,
+  telefono: body.telefono?.trim() || null,
+  nacionalidad: body.nacionalidad?.trim() || null,
+  posicion_principal: body.posicion_principal?.trim() || null,
+  resumen_profesional: body.resumen_profesional?.trim() || null,
+  cv_url: body.cv_url?.trim() || null,
+  linkedin_url: body.linkedin_url?.trim() || null,
+  instagram_url: body.instagram_url?.trim() || null,
+  youtube_url: body.youtube_url?.trim() || null,
+  transfermarkt_url: body.transfermarkt_url?.trim() || null,
+  whatsapp_url: body.whatsapp_url?.trim() || null,
+  altura_cm: body.altura_cm || null,
+  peso_kg: body.peso_kg || null,
+  pie_dominante: body.pie_dominante?.trim() || null,
+  fecha_de_nacimiento: body.fecha_de_nacimiento || null,
+});
+
+const buildManagedProfileResponseSelect = () => `
+  SELECT
+    'managed-' || mp.id AS id,
+    mp.id AS managed_profile_id,
+    mp.owner_user_id,
+    TRUE AS is_managed_profile,
+    mp.nombre,
+    mp.apellido,
+    mp.email,
+    'postulante' AS tipo_usuario,
+    'jugador' AS rol,
+    COALESCE(mp.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+    mp.telefono,
+    mp.nacionalidad,
+    mp.resumen_profesional,
+    mp.cv_url,
+    mp.posicion_principal,
+    mp.linkedin_url,
+    mp.instagram_url,
+    mp.youtube_url,
+    mp.transfermarkt_url,
+    mp.whatsapp_url,
+    mp.altura_cm,
+    mp.peso_kg,
+    mp.pie_dominante,
+    mp.fecha_de_nacimiento,
+    mp.average_rating,
+    mp.total_ratings,
+    mp.profile_views,
+    mp.resumen_profesional_es,
+    mp.resumen_profesional_en,
+    mp.posicion_principal_es,
+    mp.posicion_principal_en,
+    mp.nacionalidad_es,
+    mp.nacionalidad_en,
+    mp.pie_dominante_es,
+    mp.pie_dominante_en,
+    s.plan as subscription_plan,
+    s.fecha_fin as subscription_end_date,
+    s.estado as subscription_status
+  FROM managed_player_profiles mp
+  JOIN usuarios owner ON owner.id = mp.owner_user_id
+  LEFT JOIN suscripciones s ON owner.id = s.id_usuario
+`;
+
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
   return `${req.protocol}://${req.get("host")}/${filePath}`;
@@ -60,39 +152,76 @@ router.get("/", async (req, res) => {
 
   try {
     let queryParams = {};
-    let whereClauses = ["u.tipo_usuario = 'postulante'"];
+    let userWhereClauses = ["u.tipo_usuario = 'postulante'"];
+    let managedWhereClauses = [
+      "owner.tipo_usuario = 'ofertante'",
+      "owner.rol = ANY(@managedRoles::text[])",
+    ];
+    queryParams.managedRoles = MANAGED_PROFILE_ROLES;
 
     if (nacionalidad) {
       queryParams.nacionalidad = nacionalidad;
-      whereClauses.push(`p.nacionalidad = @nacionalidad`);
+      userWhereClauses.push(`p.nacionalidad = @nacionalidad`);
+      managedWhereClauses.push(`mp.nacionalidad = @nacionalidad`);
     }
     if (puesto) {
-      const positionFilterClause = buildProfilePositionFilterClause(
+      const userPositionFilterClause = buildProfilePositionFilterClause(
         "p.posicion_principal",
         puesto
       );
+      const managedPositionFilterClause = buildProfilePositionFilterClause(
+        "mp.posicion_principal",
+        puesto
+      );
 
-      if (positionFilterClause) {
-        whereClauses.push(positionFilterClause);
+      if (userPositionFilterClause && managedPositionFilterClause) {
+        userWhereClauses.push(userPositionFilterClause);
+        managedWhereClauses.push(managedPositionFilterClause);
       }
     }
 
     const query = `
-      SELECT
-          u.id, u.nombre,
+      SELECT *
+      FROM (
+        SELECT
+          u.id::text AS id,
+          NULL::int AS managed_profile_id,
+          NULL::int AS owner_user_id,
+          FALSE AS is_managed_profile,
+          u.nombre,
           u.apellido,
+          u.email,
+          u.tipo_usuario,
           COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
           p.posicion_principal,
           p.nacionalidad,
           p.average_rating,
           p.total_ratings
-      FROM
-          usuarios u
-      LEFT JOIN
-          perfiles_usuario p ON u.id = p.id_usuario
-      WHERE ${whereClauses.join(" AND ")}
-      ORDER BY
-          u.id DESC;
+        FROM usuarios u
+        LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
+        WHERE ${userWhereClauses.join(" AND ")}
+
+        UNION ALL
+
+        SELECT
+          'managed-' || mp.id AS id,
+          mp.id AS managed_profile_id,
+          mp.owner_user_id,
+          TRUE AS is_managed_profile,
+          mp.nombre,
+          mp.apellido,
+          mp.email,
+          'postulante' AS tipo_usuario,
+          COALESCE(mp.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+          mp.posicion_principal,
+          mp.nacionalidad,
+          mp.average_rating,
+          mp.total_ratings
+        FROM managed_player_profiles mp
+        JOIN usuarios owner ON owner.id = mp.owner_user_id
+        WHERE ${managedWhereClauses.join(" AND ")}
+      ) profiles
+      ORDER BY id DESC;
     `;
 
     const result = await db.query(query, queryParams);
@@ -108,6 +237,99 @@ router.get("/", async (req, res) => {
 
 // --- RUTA PÚBLICA: OBTENER PERFILES DESTACADOS ---
 router.get("/featured", async (req, res) => {
+  const { nacionalidad, puesto } = req.query;
+
+  try {
+    let queryParams = { managedRoles: MANAGED_PROFILE_ROLES };
+    let userWhereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
+    let managedWhereClauses = [
+      "owner.tipo_usuario = 'ofertante'",
+      "owner.rol = ANY(@managedRoles::text[])",
+      "s.estado = 'activa'",
+    ];
+
+    if (nacionalidad) {
+      queryParams.nacionalidad = nacionalidad;
+      userWhereClauses.push("p.nacionalidad = @nacionalidad");
+      managedWhereClauses.push("mp.nacionalidad = @nacionalidad");
+    }
+
+    if (puesto) {
+      const userPositionFilterClause = buildProfilePositionFilterClause(
+        "p.posicion_principal",
+        puesto
+      );
+      const managedPositionFilterClause = buildProfilePositionFilterClause(
+        "mp.posicion_principal",
+        puesto
+      );
+
+      if (userPositionFilterClause && managedPositionFilterClause) {
+        userWhereClauses.push(userPositionFilterClause);
+        managedWhereClauses.push(managedPositionFilterClause);
+      }
+    }
+
+    const query = `
+      SELECT *
+      FROM (
+        SELECT
+          u.id::text AS id,
+          NULL::int AS managed_profile_id,
+          NULL::int AS owner_user_id,
+          FALSE AS is_managed_profile,
+          u.nombre,
+          u.apellido,
+          u.email,
+          u.tipo_usuario,
+          COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+          p.posicion_principal,
+          p.nacionalidad,
+          p.average_rating,
+          p.total_ratings,
+          s.fecha_fin
+        FROM usuarios u
+        JOIN perfiles_usuario p ON u.id = p.id_usuario
+        LEFT JOIN suscripciones s ON u.id = s.id_usuario
+        WHERE ${userWhereClauses.join(" AND ")}
+
+        UNION ALL
+
+        SELECT
+          'managed-' || mp.id AS id,
+          mp.id AS managed_profile_id,
+          mp.owner_user_id,
+          TRUE AS is_managed_profile,
+          mp.nombre,
+          mp.apellido,
+          mp.email,
+          'postulante' AS tipo_usuario,
+          COALESCE(mp.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+          mp.posicion_principal,
+          mp.nacionalidad,
+          mp.average_rating,
+          mp.total_ratings,
+          s.fecha_fin
+        FROM managed_player_profiles mp
+        JOIN usuarios owner ON owner.id = mp.owner_user_id
+        LEFT JOIN suscripciones s ON owner.id = s.id_usuario
+        WHERE ${managedWhereClauses.join(" AND ")}
+      ) profiles
+      ORDER BY
+        COALESCE(average_rating, 0) DESC,
+        COALESCE(total_ratings, 0) DESC,
+        fecha_fin DESC;
+    `;
+
+    const result = await db.query(query, queryParams);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener los perfiles destacados:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+router.get("/featured-legacy-disabled", async (req, res) => {
       const { nacionalidad, puesto } = req.query;
   
     try {
@@ -163,7 +385,15 @@ router.get("/featured", async (req, res) => {
 // RUTA PÚBLICA: OBTENER TODAS LAS NACIONALIDADES ÚNICAS
 router.get('/nacionalidades', async (req, res) => {
   try {
-    const query = "SELECT DISTINCT nacionalidad FROM perfiles_usuario WHERE nacionalidad IS NOT NULL ORDER BY nacionalidad ASC";
+    const query = `
+      SELECT DISTINCT nacionalidad
+      FROM (
+        SELECT nacionalidad FROM perfiles_usuario WHERE nacionalidad IS NOT NULL
+        UNION
+        SELECT nacionalidad FROM managed_player_profiles WHERE nacionalidad IS NOT NULL
+      ) nacionalidades
+      ORDER BY nacionalidad ASC
+    `;
     const result = await db.query(query);
     res.json(result.rows.map(row => row.nacionalidad));
   } catch (error) {
@@ -176,6 +406,221 @@ router.get('/nacionalidades', async (req, res) => {
 router.get('/puestos', async (req, res) => {
   res.json(PROFILE_POSITION_OPTIONS);
 });
+
+router.get("/managed/me", verificarToken, async (req, res) => {
+  try {
+    const allowed = await canManagePlayerProfiles(req.user.id);
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Solo clubes, agentes o scouts pueden gestionar perfiles de jugadores.",
+      });
+    }
+
+    const result = await db.query(
+      `
+        ${buildManagedProfileResponseSelect()}
+        WHERE mp.owner_user_id = @userId
+        ORDER BY mp.created_at DESC;
+      `,
+      { userId: req.user.id }
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener perfiles gestionados:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+router.post(
+  "/managed",
+  verificarToken,
+  upload.single("foto_perfil"),
+  async (req, res) => {
+    try {
+      const allowed = await canManagePlayerProfiles(req.user.id);
+
+      if (!allowed) {
+        return res.status(403).json({
+          message: "Solo clubes, agentes o scouts pueden gestionar perfiles de jugadores.",
+        });
+      }
+
+      const payload = buildManagedProfilePayload(req.body);
+
+      if (!payload.nombre) {
+        return res.status(400).json({ message: "El nombre del jugador es obligatorio." });
+      }
+
+      if (
+        payload.posicion_principal &&
+        !PROFILE_POSITION_OPTIONS.includes(payload.posicion_principal)
+      ) {
+        return res.status(400).json({
+          message:
+            "La posiciÃ³n principal debe ser Arquero, Defensa, Centrocampista o Delantero.",
+        });
+      }
+
+      let fotoPerfilUrl = null;
+      if (req.file) {
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .rotate()
+          .resize(300, 300, { fit: "cover" })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        const key = `managed-player-profiles/profile-${req.user.id}-${Date.now()}.webp`;
+        fotoPerfilUrl = await uploadToS3(processedImageBuffer, key, "image/webp");
+      }
+
+      const result = await db.query(
+        `
+          INSERT INTO managed_player_profiles (
+            owner_user_id, nombre, apellido, email, foto_perfil_url, telefono,
+            nacionalidad, resumen_profesional, cv_url, posicion_principal,
+            linkedin_url, instagram_url, youtube_url, transfermarkt_url,
+            whatsapp_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento
+          )
+          VALUES (
+            @ownerUserId, @nombre, @apellido, @email, @fotoPerfilUrl, @telefono,
+            @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal,
+            @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url,
+            @whatsapp_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento
+          )
+          RETURNING id;
+        `,
+        {
+          ownerUserId: req.user.id,
+          fotoPerfilUrl,
+          ...payload,
+        }
+      );
+
+      const profileResult = await db.query(
+        `
+          ${buildManagedProfileResponseSelect()}
+          WHERE mp.id = @profileId;
+        `,
+        { profileId: result.rows[0].id }
+      );
+
+      res.status(201).json(profileResult.rows[0]);
+    } catch (error) {
+      console.error("Error al crear perfil gestionado:", error);
+      res.status(500).json({ message: "Error del servidor al crear el perfil." });
+    }
+  }
+);
+
+router.put(
+  "/managed/:profileId",
+  verificarToken,
+  upload.single("foto_perfil"),
+  async (req, res) => {
+    const profileId = parseInt(req.params.profileId, 10);
+
+    if (Number.isNaN(profileId)) {
+      return res.status(400).json({ message: "El ID de perfil no es vÃ¡lido." });
+    }
+
+    try {
+      const allowed = await canManagePlayerProfiles(req.user.id);
+
+      if (!allowed) {
+        return res.status(403).json({
+          message: "Solo clubes, agentes o scouts pueden gestionar perfiles de jugadores.",
+        });
+      }
+
+      const existing = await db.query(
+        "SELECT id FROM managed_player_profiles WHERE id = @profileId AND owner_user_id = @userId",
+        { profileId, userId: req.user.id }
+      );
+
+      if (existing.rows.length === 0 && !req.user.isadmin) {
+        return res.status(404).json({ message: "Perfil no encontrado." });
+      }
+
+      const payload = buildManagedProfilePayload(req.body);
+
+      if (!payload.nombre) {
+        return res.status(400).json({ message: "El nombre del jugador es obligatorio." });
+      }
+
+      if (
+        payload.posicion_principal &&
+        !PROFILE_POSITION_OPTIONS.includes(payload.posicion_principal)
+      ) {
+        return res.status(400).json({
+          message:
+            "La posiciÃ³n principal debe ser Arquero, Defensa, Centrocampista o Delantero.",
+        });
+      }
+
+      let fotoPerfilUrl = null;
+      if (req.file) {
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .rotate()
+          .resize(300, 300, { fit: "cover" })
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        const key = `managed-player-profiles/profile-${profileId}-${Date.now()}.webp`;
+        fotoPerfilUrl = await uploadToS3(processedImageBuffer, key, "image/webp");
+      }
+
+      await db.query(
+        `
+          UPDATE managed_player_profiles
+          SET
+            nombre = @nombre,
+            apellido = @apellido,
+            email = @email,
+            foto_perfil_url = COALESCE(@fotoPerfilUrl, foto_perfil_url),
+            telefono = @telefono,
+            nacionalidad = @nacionalidad,
+            resumen_profesional = @resumen_profesional,
+            cv_url = @cv_url,
+            posicion_principal = @posicion_principal,
+            linkedin_url = @linkedin_url,
+            instagram_url = @instagram_url,
+            youtube_url = @youtube_url,
+            transfermarkt_url = @transfermarkt_url,
+            whatsapp_url = @whatsapp_url,
+            altura_cm = @altura_cm,
+            peso_kg = @peso_kg,
+            pie_dominante = @pie_dominante,
+            fecha_de_nacimiento = @fecha_de_nacimiento,
+            updated_at = NOW()
+          WHERE id = @profileId
+            AND (owner_user_id = @userId OR @isAdmin = TRUE);
+        `,
+        {
+          profileId,
+          userId: req.user.id,
+          isAdmin: Boolean(req.user.isadmin),
+          fotoPerfilUrl,
+          ...payload,
+        }
+      );
+
+      const profileResult = await db.query(
+        `
+          ${buildManagedProfileResponseSelect()}
+          WHERE mp.id = @profileId;
+        `,
+        { profileId }
+      );
+
+      res.json(profileResult.rows[0]);
+    } catch (error) {
+      console.error("Error al actualizar perfil gestionado:", error);
+      res.status(500).json({ message: "Error del servidor al actualizar el perfil." });
+    }
+  }
+);
 
 
 // --- RUTA PÚBLICA: OBTENER PERFIL DE USUARIO ---
@@ -304,6 +749,29 @@ router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
   // Validar que userId sea un número
+  const managedProfileId = getManagedProfileIdFromSlug(userId);
+
+  if (managedProfileId) {
+    try {
+      const result = await db.query(
+        `
+          ${buildManagedProfileResponseSelect()}
+          WHERE mp.id = @profileId;
+        `,
+        { profileId: managedProfileId }
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Perfil no encontrado." });
+      }
+
+      return res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error al obtener el perfil gestionado:", error);
+      return res.status(500).json({ message: "Error del servidor." });
+    }
+  }
+
   if (isNaN(parseInt(userId, 10))) {
     return res.status(400).json({ message: "El ID de usuario debe ser un número válido." });
   }
@@ -341,6 +809,20 @@ router.get("/:userId", async (req, res) => {
 router.post('/:userId/view', async (req, res) => {
   const { userId } = req.params;
   try {
+    const managedProfileId = getManagedProfileIdFromSlug(userId);
+
+    if (managedProfileId) {
+      await db.query(
+        `
+          UPDATE managed_player_profiles
+          SET profile_views = COALESCE(profile_views, 0) + 1
+          WHERE id = @profileId;
+        `,
+        { profileId: managedProfileId }
+      );
+      return res.status(204).send();
+    }
+
     const query = `
       UPDATE usuarios
       SET profile_views = COALESCE(profile_views, 0) + 1

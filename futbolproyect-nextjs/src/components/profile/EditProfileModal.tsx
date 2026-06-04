@@ -10,6 +10,11 @@ interface EditProfileModalProps {
     onClose: () => void;
     profileData: Profile;
     onSave: () => void;
+    saveEndpoint?: string;
+    saveMethod?: "post" | "put";
+    title?: string;
+    submitLabel?: string;
+    showEmailField?: boolean;
 }
 
 const style = {
@@ -26,7 +31,17 @@ const style = {
     borderRadius: 2,
 };
 
-const EditProfileModal = ({ open, onClose, profileData, onSave }: EditProfileModalProps) => {
+const EditProfileModal = ({
+  open,
+  onClose,
+  profileData,
+  onSave,
+  saveEndpoint,
+  saveMethod,
+  title,
+  submitLabel,
+  showEmailField,
+}: EditProfileModalProps) => {
     return (
         <Modal
             open={open}
@@ -38,6 +53,11 @@ const EditProfileModal = ({ open, onClose, profileData, onSave }: EditProfileMod
                     profileData={profileData}
                     onSave={onSave}
                     onCancel={onClose}
+                    saveEndpoint={saveEndpoint}
+                    saveMethod={saveMethod}
+                    title={title}
+                    submitLabel={submitLabel}
+                    showEmailField={showEmailField}
                 />
             </Box>
         </Modal>
