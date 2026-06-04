@@ -348,6 +348,14 @@ export default function ProfilePageClient({
                         <strong>{t("position")}</strong>{" "}
                         {posicion_principal || t("not_specified")}
                       </Typography>
+                      <Typography>
+                        <strong>{t("agent_name_label", "Agente")}</strong>{" "}
+                        {profile.agente_nombre || t("not_specified")}
+                      </Typography>
+                      <Typography>
+                        <strong>{t("agent_contact_label", "Contacto Agente")}</strong>{" "}
+                        {profile.agente_contacto || t("not_specified")}
+                      </Typography>
                     </Stack>
                   </Card>
                 </Grid>
@@ -525,12 +533,26 @@ export default function ProfilePageClient({
           </Grid>
 
           {!isManagedProfile && (
-            <>
-              <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
-              <UserPhotosSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
-              <VideosSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
-            </>
+            <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
           )}
+          <UserPhotosSection userId={profile.id} isMyProfile={canEditProfile} />
+          <VideosSection
+            userId={profile.id}
+            isMyProfile={canEditProfile}
+            createEndpoint={
+              isManagedProfile ? `/profiles/${profile.id}/videos` : "/profiles/videos"
+            }
+            updateEndpointBuilder={(videoId) =>
+              isManagedProfile
+                ? `/profiles/managed-videos/${videoId}`
+                : `/profiles/videos/${videoId}`
+            }
+            deleteEndpointBuilder={(videoId) =>
+              isManagedProfile
+                ? `/profiles/managed-videos/${videoId}`
+                : `/profiles/videos/${videoId}`
+            }
+          />
 
           {isOwnAccountProfile && canManagePlayerProfiles && <ManagedPlayerProfilesSection />}
           {isOwnAccountProfile && <MyApplicationsSection userId={profile.id} />}

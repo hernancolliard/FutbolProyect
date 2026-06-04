@@ -21,6 +21,8 @@ export interface Profile {
   youtube_url: string;
   transfermarkt_url: string;
   whatsapp_url?: string;
+  agente_nombre?: string;
+  agente_contacto?: string;
   tipo_usuario: 'postulante' | 'jugador' | 'ofertante' | 'agencia';
   rol?: string;
   managed_profile_id?: number;

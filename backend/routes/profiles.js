@@ -90,6 +90,8 @@ const buildManagedProfilePayload = (body) => ({
   youtube_url: body.youtube_url?.trim() || null,
   transfermarkt_url: body.transfermarkt_url?.trim() || null,
   whatsapp_url: body.whatsapp_url?.trim() || null,
+  agente_nombre: body.agente_nombre?.trim() || null,
+  agente_contacto: body.agente_contacto?.trim() || null,
   altura_cm: body.altura_cm || null,
   peso_kg: body.peso_kg || null,
   pie_dominante: body.pie_dominante?.trim() || null,
@@ -118,6 +120,8 @@ const buildManagedProfileResponseSelect = () => `
     mp.youtube_url,
     mp.transfermarkt_url,
     mp.whatsapp_url,
+    mp.agente_nombre,
+    mp.agente_contacto,
     mp.altura_cm,
     mp.peso_kg,
     mp.pie_dominante,
@@ -140,6 +144,19 @@ const buildManagedProfileResponseSelect = () => `
   JOIN usuarios owner ON owner.id = mp.owner_user_id
   LEFT JOIN suscripciones s ON owner.id = s.id_usuario
 `;
+
+const getOwnedManagedProfile = async (profileId, userId) => {
+  const result = await db.query(
+    `
+      SELECT id, owner_user_id
+      FROM managed_player_profiles
+      WHERE id = @profileId AND owner_user_id = @userId;
+    `,
+    { profileId, userId }
+  );
+
+  return result.rows[0] || null;
+};
 
 // Helper para construir la URL completa
 const getFullUrl = (req, filePath) => {
@@ -481,13 +498,15 @@ router.post(
             owner_user_id, nombre, apellido, email, foto_perfil_url, telefono,
             nacionalidad, resumen_profesional, cv_url, posicion_principal,
             linkedin_url, instagram_url, youtube_url, transfermarkt_url,
-            whatsapp_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento
+            whatsapp_url, agente_nombre, agente_contacto, altura_cm, peso_kg,
+            pie_dominante, fecha_de_nacimiento
           )
           VALUES (
             @ownerUserId, @nombre, @apellido, @email, @fotoPerfilUrl, @telefono,
             @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal,
             @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url,
-            @whatsapp_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento
+            @whatsapp_url, @agente_nombre, @agente_contacto, @altura_cm, @peso_kg,
+            @pie_dominante, @fecha_de_nacimiento
           )
           RETURNING id;
         `,
@@ -589,6 +608,8 @@ router.put(
             youtube_url = @youtube_url,
             transfermarkt_url = @transfermarkt_url,
             whatsapp_url = @whatsapp_url,
+            agente_nombre = @agente_nombre,
+            agente_contacto = @agente_contacto,
             altura_cm = @altura_cm,
             peso_kg = @peso_kg,
             pie_dominante = @pie_dominante,
@@ -780,7 +801,7 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT u.*, COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
+      SELECT u.*, COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
              p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
@@ -935,6 +956,8 @@ router.put(
       youtube_url,
       transfermarkt_url,
       whatsapp_url,
+      agente_nombre,
+      agente_contacto,
       altura_cm,
       peso_kg,
       pie_dominante,
@@ -973,8 +996,8 @@ router.put(
       }
 
       const upsertQuery = `
-        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, whatsapp_url, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
-        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @whatsapp_url, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
+        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, whatsapp_url, agente_nombre, agente_contacto, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
+        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @whatsapp_url, @agente_nombre, @agente_contacto, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
         ON CONFLICT (id_usuario)
         DO UPDATE SET
           foto_perfil_url = COALESCE(@fotoPerfilUrl, perfiles_usuario.foto_perfil_url),
@@ -988,6 +1011,8 @@ router.put(
           youtube_url = @youtube_url,
           transfermarkt_url = @transfermarkt_url,
           whatsapp_url = @whatsapp_url,
+          agente_nombre = @agente_nombre,
+          agente_contacto = @agente_contacto,
           altura_cm = @altura_cm,
           peso_kg = @peso_kg,
           pie_dominante = @pie_dominante,
@@ -1008,6 +1033,8 @@ router.put(
         youtube_url,
         transfermarkt_url,
         whatsapp_url,
+        agente_nombre,
+        agente_contacto,
         altura_cm: altura_cm || null,
         peso_kg: peso_kg || null,
         pie_dominante,
@@ -1081,8 +1108,23 @@ const videoSchema = z.object({
 // Public route
 router.get("/:userId/videos", async (req, res) => {
   const { userId } = req.params;
+  const managedProfileId = getManagedProfileIdFromSlug(userId);
 
   try {
+    if (managedProfileId) {
+      const result = await db.query(
+        `
+          SELECT id, managed_profile_id, title, youtube_url, cover_image_url, position
+          FROM managed_profile_videos
+          WHERE managed_profile_id = @profileId
+          ORDER BY position ASC;
+        `,
+        { profileId: managedProfileId }
+      );
+
+      return res.json(result.rows);
+    }
+
     const query = `
       SELECT id, user_id, title, youtube_url, cover_image_url, position
       FROM user_videos
@@ -1160,13 +1202,106 @@ router.post(
   }
 );
 
+router.post(
+  "/:userId/videos",
+  verificarToken,
+  upload.single("cover_image"),
+  validate(videoSchema),
+  async (req, res) => {
+    const { userId } = req.params;
+    const managedProfileId = getManagedProfileIdFromSlug(userId);
+    const { title, youtube_url, position } = req.body;
+
+    if (!managedProfileId) {
+      return res.status(400).json({ message: "El ID de perfil no es vÃ¡lido." });
+    }
+
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ message: "La imagen de portada es obligatoria." });
+    }
+
+    try {
+      const ownedProfile = await getOwnedManagedProfile(managedProfileId, req.user.id);
+
+      if (!ownedProfile) {
+        return res.status(403).json({
+          message: "No tienes permiso para cargar videos en este perfil.",
+        });
+      }
+
+      const processedImageBuffer = await sharp(req.file.buffer)
+        .resize(800, 450)
+        .webp({ quality: 85 })
+        .toBuffer();
+
+      const key = `managed-profile-videos/cover-${managedProfileId}-${Date.now()}.webp`;
+      const coverImageUrl = await uploadToS3(
+        processedImageBuffer,
+        key,
+        "image/webp"
+      );
+
+      const translatedTitles = await translateText(title, ["es", "en"]);
+
+      const result = await db.query(
+        `
+          INSERT INTO managed_profile_videos (managed_profile_id, title, title_es, title_en, youtube_url, cover_image_url, position)
+          VALUES (@profileId, @title, @title_es, @title_en, @youtube_url, @cover_image_url, @position)
+          ON CONFLICT (managed_profile_id, position)
+          DO UPDATE SET
+            title = EXCLUDED.title,
+            title_es = EXCLUDED.title_es,
+            title_en = EXCLUDED.title_en,
+            youtube_url = EXCLUDED.youtube_url,
+            cover_image_url = EXCLUDED.cover_image_url
+          RETURNING *;
+        `,
+        {
+          profileId: managedProfileId,
+          title,
+          title_es: translatedTitles.es,
+          title_en: translatedTitles.en,
+          youtube_url,
+          cover_image_url: coverImageUrl,
+          position,
+        }
+      );
+
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error("Error al aÃ±adir el video gestionado:", error);
+      res
+        .status(500)
+        .json({ message: "Error del servidor al aÃ±adir el video." });
+    }
+  }
+);
+
 // ... (Otras rutas sin cambios)
 
 // --- RUTA PÚBLICA: OBTENER FOTOS DE UN USUARIO ---
 // --- RUTA PÚBLICA: OBTENER FOTOS DE UN USUARIO ---
 router.get("/:userId/photos", async (req, res) => {
   const { userId } = req.params;
+  const managedProfileId = getManagedProfileIdFromSlug(userId);
+
   try {
+    if (managedProfileId) {
+      const result = await db.query(
+        `
+          SELECT id, url, title, title_es, title_en
+          FROM managed_profile_photos
+          WHERE managed_profile_id = @profileId
+          ORDER BY created_at DESC;
+        `,
+        { profileId: managedProfileId }
+      );
+
+      return res.json(result.rows);
+    }
+
     const query = `
       SELECT id, url, title, title_es, title_en
       FROM user_photos
@@ -1389,6 +1524,64 @@ router.post(
     const { userId } = req.params;
     const { title } = req.body;
     const requester = req.user;
+    const managedProfileId = getManagedProfileIdFromSlug(userId);
+
+    if (managedProfileId) {
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ message: "No se ha subido ningÃºn archivo." });
+      }
+
+      try {
+        const ownedProfile = await getOwnedManagedProfile(
+          managedProfileId,
+          requester.id
+        );
+
+        if (!ownedProfile) {
+          return res
+            .status(403)
+            .json({ message: "No tienes permiso para subir fotos a este perfil." });
+        }
+
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .rotate()
+          .resize(1024)
+          .webp({ quality: 80 })
+          .toBuffer();
+
+        const key = `managed-profile-photos/photo-${managedProfileId}-${Date.now()}.webp`;
+        const photoUrl = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
+
+        const translatedTitles = await translateText(title);
+        const result = await db.query(
+          `
+            INSERT INTO managed_profile_photos (managed_profile_id, url, title, title_es, title_en)
+            VALUES (@profileId, @url, @title, @title_es, @title_en)
+            RETURNING *;
+          `,
+          {
+            profileId: managedProfileId,
+            url: photoUrl,
+            title,
+            title_es: translatedTitles.es,
+            title_en: translatedTitles.en,
+          }
+        );
+
+        return res.status(201).json(result.rows[0]);
+      } catch (error) {
+        console.error("Error al subir la foto gestionada:", error);
+        return res
+          .status(500)
+          .json({ message: "Error del servidor al subir la foto." });
+      }
+    }
 
     if (isNaN(parseInt(userId, 10))) {
       return res
@@ -1454,6 +1647,38 @@ router.post(
 router.delete("/:userId/photos/:photoId", verificarToken, async (req, res) => {
   const { userId, photoId } = req.params;
   const requester = req.user;
+  const managedProfileId = getManagedProfileIdFromSlug(userId);
+
+  if (managedProfileId) {
+    try {
+      const photoResult = await db.query(
+        `
+          SELECT p.id
+          FROM managed_profile_photos p
+          JOIN managed_player_profiles mp ON mp.id = p.managed_profile_id
+          WHERE p.id = @photoId
+            AND p.managed_profile_id = @profileId
+            AND mp.owner_user_id = @userId;
+        `,
+        { photoId, profileId: managedProfileId, userId: requester.id }
+      );
+
+      if (photoResult.rows.length === 0) {
+        return res.status(404).json({ message: "Foto no encontrada." });
+      }
+
+      await db.query("DELETE FROM managed_profile_photos WHERE id = @photoId", {
+        photoId,
+      });
+
+      return res.json({ message: "Foto eliminada correctamente." });
+    } catch (error) {
+      console.error("Error al eliminar la foto gestionada:", error);
+      return res
+        .status(500)
+        .json({ message: "Error del servidor al eliminar la foto." });
+    }
+  }
 
   if (parseInt(userId, 10) !== requester.id) {
     return res.status(403).json({
@@ -1492,6 +1717,86 @@ router.delete("/:userId/photos/:photoId", verificarToken, async (req, res) => {
 });
 
 // --- RUTA PROTEGIDA: ACTUALIZAR UN VIDEO ---
+router.put(
+  "/managed-videos/:videoId",
+  verificarToken,
+  upload.single("cover_image"),
+  validate(videoSchema.partial()),
+  async (req, res) => {
+    const { videoId } = req.params;
+    const { title, youtube_url, position } = req.body;
+
+    try {
+      const videoResult = await db.query(
+        `
+          SELECT v.*
+          FROM managed_profile_videos v
+          JOIN managed_player_profiles mp ON mp.id = v.managed_profile_id
+          WHERE v.id = @videoId AND mp.owner_user_id = @userId;
+        `,
+        { videoId, userId: req.user.id }
+      );
+
+      if (videoResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Video no encontrado o no tienes permiso para editarlo.",
+        });
+      }
+
+      let coverImageFilename = videoResult.rows[0].cover_image_url;
+
+      if (req.file) {
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .resize(800, 450)
+          .webp({ quality: 85 })
+          .toBuffer();
+
+        const key = `managed-profile-videos/cover-${videoResult.rows[0].managed_profile_id}-${Date.now()}.webp`;
+        coverImageFilename = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
+      }
+
+      const translatedTitles = title
+        ? await translateText(title, ["es", "en"])
+        : { es: videoResult.rows[0].title_es, en: videoResult.rows[0].title_en };
+
+      const result = await db.query(
+        `
+          UPDATE managed_profile_videos
+          SET
+            title = COALESCE(@title, title),
+            title_es = COALESCE(@title_es, title_es),
+            title_en = COALESCE(@title_en, title_en),
+            youtube_url = COALESCE(@youtube_url, youtube_url),
+            position = COALESCE(@position, position),
+            cover_image_url = @coverImageFilename
+          WHERE id = @videoId
+          RETURNING *;
+        `,
+        {
+          videoId,
+          title,
+          title_es: translatedTitles.es,
+          title_en: translatedTitles.en,
+          youtube_url,
+          position: position || null,
+          coverImageFilename,
+        }
+      );
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error al actualizar el video gestionado:", error);
+      res
+        .status(500)
+        .json({ message: "Error del servidor al actualizar el video." });
+    }
+  }
+);
+
 router.put(
   "/videos/:videoId",
   verificarToken,
@@ -1576,6 +1881,39 @@ router.put(
 );
 
 // --- RUTA PROTEGIDA: ELIMINAR UN VIDEO ---
+router.delete("/managed-videos/:videoId", verificarToken, async (req, res) => {
+  const { videoId } = req.params;
+
+  try {
+    const videoResult = await db.query(
+      `
+        SELECT v.id
+        FROM managed_profile_videos v
+        JOIN managed_player_profiles mp ON mp.id = v.managed_profile_id
+        WHERE v.id = @videoId AND mp.owner_user_id = @userId;
+      `,
+      { videoId, userId: req.user.id }
+    );
+
+    if (videoResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Video no encontrado o no tienes permiso para eliminarlo.",
+      });
+    }
+
+    await db.query("DELETE FROM managed_profile_videos WHERE id = @videoId", {
+      videoId,
+    });
+
+    res.json({ message: "Video eliminado correctamente." });
+  } catch (error) {
+    console.error("Error al eliminar el video gestionado:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al eliminar el video." });
+  }
+});
+
 router.delete("/videos/:videoId", verificarToken, async (req, res) => {
   const { videoId } = req.params;
   const userId = req.user.id;

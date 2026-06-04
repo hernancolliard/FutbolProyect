@@ -12,9 +12,23 @@ interface VideoFormModalProps {
     onClose: () => void;
     video: Video | null;
     onSave: () => void; // Callback to refresh data on parent
+    createEndpoint?: string;
+    updateEndpointBuilder?: (videoId: number) => string;
 }
 
-const saveVideo = async ({ videoData, isEdit, videoId }: { videoData: any, isEdit: boolean, videoId: number | null }): Promise<any> => {
+const saveVideo = async ({
+    videoData,
+    isEdit,
+    videoId,
+    createEndpoint,
+    updateEndpointBuilder,
+}: {
+    videoData: any,
+    isEdit: boolean,
+    videoId: number | null,
+    createEndpoint: string,
+    updateEndpointBuilder: (videoId: number) => string,
+}): Promise<any> => {
     const formData = new FormData();
     // Append all form data
     Object.keys(videoData).forEach(key => {
@@ -24,15 +38,22 @@ const saveVideo = async ({ videoData, isEdit, videoId }: { videoData: any, isEdi
     });
 
     if (isEdit) {
-        const { data } = await apiClient.put(`/profiles/videos/${videoId}`, formData);
+        const { data } = await apiClient.put(updateEndpointBuilder(videoId as number), formData);
         return data;
     }
 
-    const { data } = await apiClient.post('/profiles/videos', formData);
+    const { data } = await apiClient.post(createEndpoint, formData);
     return data;
 };
 
-const VideoFormModal = ({ open, onClose, video, onSave }: VideoFormModalProps) => {
+const VideoFormModal = ({
+    open,
+    onClose,
+    video,
+    onSave,
+    createEndpoint = "/profiles/videos",
+    updateEndpointBuilder = (videoId: number) => `/profiles/videos/${videoId}`,
+}: VideoFormModalProps) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState<{
         title: string;
@@ -79,6 +100,8 @@ const VideoFormModal = ({ open, onClose, video, onSave }: VideoFormModalProps) =
                 videoData: formData,
                 isEdit: !!video?.id,
                 videoId: video?.id || null,
+                createEndpoint,
+                updateEndpointBuilder,
             });
             // alert(t('video_saved_success'));
             onSave(); // This will trigger a data refresh in the parent

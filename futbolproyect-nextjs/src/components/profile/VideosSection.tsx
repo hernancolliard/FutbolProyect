@@ -20,6 +20,9 @@ import apiClient from "@/lib/apiClient";
 interface VideosSectionProps {
   userId: string | number;
   isMyProfile: boolean;
+  createEndpoint?: string;
+  updateEndpointBuilder?: (videoId: number) => string;
+  deleteEndpointBuilder?: (videoId: number) => string;
 }
 
 // CORRECCIÓN: fetch acepta string | number
@@ -36,6 +39,9 @@ const fetchUserVideos = async (userId: string | number): Promise<Video[]> => {
 export default function VideosSection({
   userId,
   isMyProfile,
+  createEndpoint = "/profiles/videos",
+  updateEndpointBuilder = (videoId: number) => `/profiles/videos/${videoId}`,
+  deleteEndpointBuilder = (videoId: number) => `/profiles/videos/${videoId}`,
 }: VideosSectionProps) {
   const { t } = useTranslation();
   const [videos, setVideos] = useState<Video[]>([]);
@@ -103,7 +109,7 @@ export default function VideosSection({
       )
     ) {
       try {
-        await apiClient.delete(`/profiles/videos/${videoId}`);
+        await apiClient.delete(deleteEndpointBuilder(videoId));
         loadVideos();
       } catch (error) {
         console.error("Error deleting video", error);
@@ -111,12 +117,14 @@ export default function VideosSection({
     }
   };
 
-  const videosToDisplay = Array(5).fill(null);
-  videos.forEach((video) => {
-    if (video.position >= 1 && video.position <= 5) {
-      videosToDisplay[video.position - 1] = video;
-    }
-  });
+  const videosToDisplay = isMyProfile ? Array(5).fill(null) : [...videos];
+  if (isMyProfile) {
+    videos.forEach((video) => {
+      if (video.position >= 1 && video.position <= 5) {
+        videosToDisplay[video.position - 1] = video;
+      }
+    });
+  }
 
   return (
     <Box sx={{ mt: 4 }}>
@@ -170,6 +178,8 @@ export default function VideosSection({
           onClose={handleCloseVideoForm}
           video={videoToEdit}
           onSave={handleVideoSaved}
+          createEndpoint={createEndpoint}
+          updateEndpointBuilder={updateEndpointBuilder}
         />
       )}
     </Box>

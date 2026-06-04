@@ -52,6 +52,8 @@ const EditProfileForm = ({
     youtube_url: profileData.youtube_url || "",
     transfermarkt_url: profileData.transfermarkt_url || "",
     whatsapp_url: profileData.whatsapp_url || "",
+    agente_nombre: profileData.agente_nombre || "",
+    agente_contacto: profileData.agente_contacto || "",
     altura_cm: profileData.altura_cm || "",
     peso_kg: profileData.peso_kg || "",
     pie_dominante: profileData.pie_dominante || "",
@@ -163,6 +165,11 @@ const EditProfileForm = ({
             <Typography variant="subtitle1">{t("summary_cv_title", "Resumen y CV")}</Typography>
             <TextField name="resumen_profesional" label={t("professional_summary_placeholder")} value={formData.resumen_profesional} onChange={handleChange} fullWidth multiline rows={4}/>
             <TextField name="cv_url" label={t("cv_url_placeholder")} value={formData.cv_url} onChange={handleChange} fullWidth />
+
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1">{t("agent_data_title", "Datos del Agente")}</Typography>
+            <TextField name="agente_nombre" label={t("agent_name_label", "Agente")} value={formData.agente_nombre} onChange={handleChange} fullWidth />
+            <TextField name="agente_contacto" label={t("agent_contact_label", "Contacto Agente")} value={formData.agente_contacto} onChange={handleChange} fullWidth />
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1">{t("social_networks_links_title", "Redes Sociales")}</Typography>
