@@ -232,6 +232,7 @@ router.get("/", async (req, res) => {
           COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
           p.posicion_principal,
           p.nacionalidad,
+          p.fecha_de_nacimiento,
           p.average_rating,
           p.total_ratings,
           (
@@ -265,6 +266,7 @@ router.get("/", async (req, res) => {
           COALESCE(mp.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
           mp.posicion_principal,
           mp.nacionalidad,
+          mp.fecha_de_nacimiento,
           mp.average_rating,
           mp.total_ratings,
           (

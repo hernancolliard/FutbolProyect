@@ -61,18 +61,24 @@ export default function FilterControls({
 }: FilterControlsProps) {
   const { t } = useTranslation();
 
+  const agesInProfiles = useMemo(
+    () =>
+      initialProfiles
+        .map((profile) => getProfileAge(profile.fecha_de_nacimiento))
+        .filter((age): age is number => age !== null),
+    [initialProfiles],
+  );
+
+  const hasAgeData = agesInProfiles.length > 0;
+
   const ageBounds = useMemo<[number, number]>(() => {
-    const ages = initialProfiles
-      .map((profile) => getProfileAge(profile.fecha_de_nacimiento))
-      .filter((age): age is number => age !== null);
+    if (agesInProfiles.length === 0) return [12, 45];
 
-    if (ages.length === 0) return [12, 45];
-
-    const minAge = Math.max(0, Math.min(...ages));
-    const maxAge = Math.max(minAge + 1, Math.max(...ages));
+    const minAge = Math.max(0, Math.min(...agesInProfiles));
+    const maxAge = Math.max(minAge + 1, Math.max(...agesInProfiles));
 
     return [minAge, maxAge];
-  }, [initialProfiles]);
+  }, [agesInProfiles]);
 
   const [filters, setFilters] = useState({
     nombre: "",
@@ -105,6 +111,7 @@ export default function FilterControls({
   };
 
   const handleAgeRangeChange = (_event: Event, value: number | number[]) => {
+    if (!hasAgeData) return;
     if (!Array.isArray(value)) return;
     setAgeRange([value[0], value[1]]);
     setIsAgeFilterActive(true);
@@ -233,12 +240,21 @@ export default function FilterControls({
               valueLabelDisplay="auto"
               min={ageBounds[0]}
               max={ageBounds[1]}
+              disabled={!hasAgeData}
               disableSwap
               marks={[
                 { value: ageBounds[0], label: String(ageBounds[0]) },
                 { value: ageBounds[1], label: String(ageBounds[1]) },
               ]}
             />
+            {!hasAgeData && (
+              <Typography variant="body2" color="text.secondary">
+                {t(
+                  "no_age_data_available",
+                  "Todavía no hay perfiles con fecha de nacimiento cargada.",
+                )}
+              </Typography>
+            )}
           </Box>
         </Grid>
       </Grid>
