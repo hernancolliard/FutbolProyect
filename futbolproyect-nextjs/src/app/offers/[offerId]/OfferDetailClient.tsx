@@ -292,8 +292,9 @@ export default function OfferDetailClient({ offerId }: OfferDetailClientProps) {
           )}
 
           {detalles_adicionales && (
-            <Typography variant="body1" sx={{ mt: 1 }}>
-              <strong>{t("additional_details_title", "Detalles adicionales")}:</strong> {detalles_adicionales}
+            <Typography variant="body1" sx={{ mt: 1, whiteSpace: "pre-line" }}>
+              <strong>{t("additional_details_title", "Detalles adicionales")}:</strong>{" "}
+              {detalles_adicionales}
             </Typography>
           )}
 
