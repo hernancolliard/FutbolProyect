@@ -56,7 +56,7 @@ const emptyForm = {
   advertiser_type: "sponsor",
   image_url: "",
   target_url: "",
-  placement: "home_middle",
+  placement: ["home_middle"],
   language: "all",
   country: "",
   description: "",
@@ -78,6 +78,7 @@ export default function AdvertisementManagement() {
   const [saving, setSaving] = useState(false);
   const [editingAd, setEditingAd] = useState<Advertisement | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const fetchAds = async () => {
     setLoading(true);
@@ -98,6 +99,7 @@ export default function AdvertisementManagement() {
   const openCreateDialog = () => {
     setEditingAd(null);
     setForm({ ...emptyForm });
+    setImageFile(null);
     setDialogOpen(true);
   };
 
@@ -109,7 +111,7 @@ export default function AdvertisementManagement() {
       advertiser_type: ad.advertiser_type || "sponsor",
       image_url: ad.image_url || "",
       target_url: ad.target_url || "",
-      placement: ad.placement || "home_middle",
+      placement: [ad.placement || "home_middle"],
       language: ad.language || "all",
       country: ad.country || "",
       description: ad.description || "",
@@ -121,6 +123,7 @@ export default function AdvertisementManagement() {
       start_date: formatInputDate(ad.start_date),
       end_date: formatInputDate(ad.end_date),
     });
+    setImageFile(null);
     setDialogOpen(true);
   };
 
@@ -128,19 +131,55 @@ export default function AdvertisementManagement() {
     const { name, value, type, checked } = event.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : name === "priority" ? Number(value) : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : name === "priority"
+            ? Number(value)
+            : name === "placement"
+              ? typeof value === "string"
+                ? value.split(",")
+                : value
+              : value,
     }));
+  };
+
+  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setImageFile(file);
+  };
+
+  const uploadSelectedImage = async () => {
+    if (!imageFile) return form.image_url;
+
+    const data = new FormData();
+    data.append("image", imageFile);
+
+    const response = await apiClient.post("/ads/admin/upload-image", data);
+    return response.data.image_url;
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const imageUrl = await uploadSelectedImage();
+      const payload = {
+        ...form,
+        image_url: imageUrl,
+        placement: editingAd ? form.placement[0] : form.placement,
+        placements: editingAd ? undefined : form.placement,
+      };
+
       if (editingAd) {
-        await apiClient.put(`/ads/admin/advertisements/${editingAd.id}`, form);
+        await apiClient.put(`/ads/admin/advertisements/${editingAd.id}`, payload);
         toast.success("Anuncio actualizado.");
       } else {
-        await apiClient.post("/ads/admin/advertisements", form);
-        toast.success("Anuncio creado.");
+        await apiClient.post("/ads/admin/advertisements", payload);
+        toast.success(
+          form.placement.length > 1
+            ? "Anuncios creados en las ubicaciones seleccionadas."
+            : "Anuncio creado.",
+        );
       }
       setDialogOpen(false);
       fetchAds();
@@ -299,7 +338,28 @@ export default function AdvertisementManagement() {
               </TextField>
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField select name="placement" label="Ubicacion" value={form.placement} onChange={handleChange} fullWidth>
+              <TextField
+                select
+                name="placement"
+                label={editingAd ? "Ubicacion" : "Ubicaciones"}
+                value={editingAd ? form.placement[0] : form.placement}
+                onChange={handleChange}
+                fullWidth
+                SelectProps={{
+                  multiple: !editingAd,
+                  renderValue: (selected) =>
+                    Array.isArray(selected)
+                      ? selected
+                          .map((value) => placements.find((item) => item.value === value)?.label || value)
+                          .join(", ")
+                      : placements.find((item) => item.value === selected)?.label || String(selected),
+                }}
+                helperText={
+                  editingAd
+                    ? "Edita esta ubicacion especifica."
+                    : "Puedes elegir mas de una ubicacion para el mismo plan."
+                }
+              >
                 {placements.map((placement) => (
                   <MenuItem key={placement.value} value={placement.value}>
                     {placement.label}
@@ -315,7 +375,41 @@ export default function AdvertisementManagement() {
               </TextField>
             </Grid>
             <Grid item xs={12}>
-              <TextField name="image_url" label="URL de imagen/banner" value={form.image_url} onChange={handleChange} fullWidth required />
+              <Stack spacing={1}>
+                <TextField
+                  name="image_url"
+                  label="URL de imagen/banner"
+                  value={form.image_url}
+                  onChange={handleChange}
+                  fullWidth
+                  helperText="Puedes pegar una URL o subir una imagen desde tu computadora."
+                />
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
+                  alignItems={{ xs: "stretch", sm: "center" }}
+                >
+                  <Button variant="outlined" component="label">
+                    Subir imagen
+                    <input
+                      hidden
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                    />
+                  </Button>
+                  <Typography variant="body2" color="text.secondary">
+                    {imageFile ? imageFile.name : "Ningun archivo seleccionado"}
+                  </Typography>
+                </Stack>
+                {(form.image_url || imageFile) && (
+                  <Alert severity="info">
+                    {imageFile
+                      ? "Al guardar se subira esta imagen y se usara como banner."
+                      : "Se usara la URL cargada como banner."}
+                  </Alert>
+                )}
+              </Stack>
             </Grid>
             <Grid item xs={12}>
               <TextField name="target_url" label="URL destino" value={form.target_url} onChange={handleChange} fullWidth required />

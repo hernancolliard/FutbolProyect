@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const sharp = require("sharp");
 const db = require("../db");
+const { uploadToS3 } = require("../services/s3Service");
 const {
   verificarToken,
   verificarAdmin,
 } = require("../middleware/authMiddleware");
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const VALID_PLACEMENTS = [
   "home_top",
@@ -44,6 +49,18 @@ const normalizeLanguage = (value) => {
   if (!value || typeof value !== "string") return "all";
   const lang = value.toLowerCase().slice(0, 2);
   return VALID_LANGUAGES.includes(lang) ? lang : "all";
+};
+
+const normalizePlacements = (body) => {
+  const rawPlacements = Array.isArray(body.placements)
+    ? body.placements
+    : Array.isArray(body.placement)
+      ? body.placement
+      : [body.placement];
+
+  return rawPlacements
+    .map((placement) => String(placement || "").trim())
+    .filter((placement, index, list) => placement && list.indexOf(placement) === index);
 };
 
 const slugifyCampaign = (value) =>
@@ -125,6 +142,21 @@ const validateAdvertisement = (ad) => {
   }
   return null;
 };
+
+const insertAdvertisement = (ad, clientOrDb = db) =>
+  clientOrDb.query(
+    `INSERT INTO advertisements (
+      title, advertiser_name, advertiser_type, image_url, target_url,
+      placement, language, country, description, button_text, package_type,
+      notes, priority, is_active, start_date, end_date
+    ) VALUES (
+      @title, @advertiser_name, @advertiser_type, @image_url, @target_url,
+      @placement, @language, @country, @description, @button_text,
+      @package_type, @notes, @priority, @is_active, @start_date, @end_date
+    )
+    RETURNING *`,
+    ad,
+  );
 
 // GET /api/ads?placement=home_middle&language=es
 router.get("/", async (req, res) => {
@@ -290,35 +322,75 @@ router.get(
   },
 );
 
+// POST /api/ads/admin/upload-image
+router.post(
+  "/admin/upload-image",
+  [verificarToken, verificarAdmin, upload.single("image")],
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "La imagen es obligatoria." });
+    }
+
+    try {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const fileBase = `ad-banner-${uniqueSuffix}`;
+      const webpBuffer = await sharp(req.file.buffer)
+        .resize({ width: 1400, withoutEnlargement: true })
+        .webp({ quality: 86 })
+        .toBuffer();
+
+      const imageUrl = await uploadToS3(
+        webpBuffer,
+        `ads/${fileBase}.webp`,
+        "image/webp",
+      );
+
+      res.status(201).json({ image_url: imageUrl });
+    } catch (error) {
+      console.error("Error uploading advertisement image:", error);
+      res.status(500).json({ message: "Error al subir la imagen." });
+    }
+  },
+);
+
 // POST /api/ads/admin/advertisements
 router.post(
   "/admin/advertisements",
   [verificarToken, verificarAdmin],
   async (req, res) => {
-    const ad = mapAdvertisementPayload(req.body);
-    const validationError = validateAdvertisement(ad);
+    const placements = normalizePlacements(req.body);
+
+    if (placements.length === 0) {
+      return res.status(400).json({ message: "Selecciona al menos una ubicacion." });
+    }
+
+    const ads = placements.map((placement) =>
+      mapAdvertisementPayload({ ...req.body, placement }),
+    );
+    const validationError = ads.map(validateAdvertisement).find(Boolean);
     if (validationError) {
       return res.status(400).json({ message: validationError });
     }
 
+    const client = await db.getClient();
+
     try {
-      const result = await db.query(
-        `INSERT INTO advertisements (
-          title, advertiser_name, advertiser_type, image_url, target_url,
-          placement, language, country, description, button_text, package_type,
-          notes, priority, is_active, start_date, end_date
-        ) VALUES (
-          @title, @advertiser_name, @advertiser_type, @image_url, @target_url,
-          @placement, @language, @country, @description, @button_text,
-          @package_type, @notes, @priority, @is_active, @start_date, @end_date
-        )
-        RETURNING *`,
-        ad,
-      );
-      res.status(201).json(result.rows[0]);
+      await client.query("BEGIN");
+      const createdAds = [];
+
+      for (const ad of ads) {
+        const result = await insertAdvertisement(ad, client);
+        createdAds.push(result.rows[0]);
+      }
+
+      await client.query("COMMIT");
+      res.status(201).json(createdAds.length === 1 ? createdAds[0] : createdAds);
     } catch (error) {
+      await client.query("ROLLBACK");
       console.error("Error creating advertisement:", error);
       res.status(500).json({ message: "Error del servidor." });
+    } finally {
+      client.release();
     }
   },
 );

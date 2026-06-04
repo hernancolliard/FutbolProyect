@@ -291,7 +291,10 @@ const OfferList = ({
                     {/* Nueva sección para ofertas normales en la página de inicio */}
                     {isHomePage && normalOffers.length > 0 && (
                       <Box sx={{ mt: 4 }}>
-                        <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
+                        <Typography
+                          variant="h5"
+                          sx={{ mb: 2, textAlign: "center", fontWeight: 900 }}
+                        >
                           {t("available_offers", "Ofertas Disponibles")}
                         </Typography>
                         <Slider {...settings}>
