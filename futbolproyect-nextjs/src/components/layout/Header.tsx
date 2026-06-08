@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -23,7 +23,6 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth(); // Use AuthContext
   const router = useRouter(); // Use useRouter from next/navigation
-  const pathname = usePathname(); // Get pathname
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [languageAnchorEl, setLanguageAnchorEl] = useState<null | HTMLElement>(null);
   const isMobileMenuOpen = Boolean(anchorEl);
@@ -71,8 +70,6 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
     i18n.changeLanguage(lng);
     handleMobileMenuClose();
     handleLanguageMenuClose();
-    // In Next.js, language changes often involve routing
-    router.push(`/${lng}${pathname}`); // Use pathname
   };
 
   const handleLogout = () => {
@@ -137,6 +134,12 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             gap: 2,
           }}
         >
+          <Button color="inherit" onClick={() => changeLanguage("es")} sx={headerButtonSx}>
+            ES
+          </Button>
+          <Button color="inherit" onClick={() => changeLanguage("en")} sx={headerButtonSx}>
+            EN
+          </Button>
           {user && user.id ? (
             <>
               {(user.tipo_usuario === "ofertante" || user.isadmin) && (
@@ -175,12 +178,6 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
             </>
           ) : (
             <>
-              <Button color="inherit" onClick={() => changeLanguage("es")} sx={headerButtonSx}>
-                ES
-              </Button>
-              <Button color="inherit" onClick={() => changeLanguage("en")} sx={headerButtonSx}>
-                EN
-              </Button>
               <Button color="inherit" onClick={onShowLoginModal} sx={headerButtonSx}>
                 {t("login")}
               </Button>
