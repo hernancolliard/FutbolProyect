@@ -132,13 +132,10 @@ export default function HomePage() {
               >
                 <Box>
                   <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.75 }}>
-                    {t("advertising_home_title", "Publicita en FutbolProyect")}
+                    {t("advertising_home_title")}
                   </Typography>
                   <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-                    {t(
-                      "advertising_home_description",
-                      "Llega a jugadores, clubes, agentes, scouts y academias con espacios directos de sponsor dentro de la plataforma.",
-                    )}
+                    {t("advertising_home_description")}
                   </Typography>
                 </Box>
                 <Button
@@ -148,7 +145,7 @@ export default function HomePage() {
                   color="secondary"
                   sx={{ alignSelf: { xs: "stretch", md: "center" }, whiteSpace: "nowrap" }}
                 >
-                  {t("advertising_home_cta", "Anuncia con nosotros")}
+                  {t("advertising_home_cta")}
                 </Button>
               </Box>
             </Box>
@@ -208,7 +205,7 @@ export default function HomePage() {
               variant="contained"
               className="btn-main"
             >
-              {t("view_all_profiles", "Ver todos los perfiles")}
+              {t("view_all_profiles")}
             </Button>
           </Box>
 

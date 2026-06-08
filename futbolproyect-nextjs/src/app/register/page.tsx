@@ -3,10 +3,12 @@
 import React from "react";
 import { Container, Paper, Typography, Box } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import Register from "@/components/auth/Register"; // Reutilizamos tu componente existente
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { t } = useTranslation("common");
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>
@@ -18,7 +20,7 @@ export default function RegisterPage() {
           gutterBottom
           sx={{ fontWeight: "bold", color: "primary.main", mb: 3 }}
         >
-          Crear Cuenta
+          {t("register_title")}
         </Typography>
 
         {/* Usamos el componente Register que ya tienes. 

@@ -12,10 +12,8 @@ import {
   MenuItem,
   Link as MuiLink,
 } from "@mui/material";
-import Link from "next/link";
-import { useAuth } from "@/context/AuthContext"; // Asumiendo que tienes un register en tu contexto, si no, usa apiClient directamente
+import { useAuth } from "@/context/AuthContext";
 
-// 1. CORRECCIÓN: Definimos initialRole en las props
 interface RegisterProps {
   onClose: () => void;
   onSwitchToLogin: () => void;
@@ -30,7 +28,6 @@ export default function Register({
   const { t } = useTranslation("common");
   const { register } = useAuth();
 
-  // 2. CORRECCIÓN: Usamos initialRole como valor inicial
   const [rol, setRol] = useState(initialRole);
   const [formData, setFormData] = useState({
     name: "",
@@ -41,13 +38,13 @@ export default function Register({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 3. CORRECCIÓN: Actualizamos el rol si cambia la prop (por si el modal se reabre)
   useEffect(() => {
     setRol(initialRole);
   }, [initialRole]);
 
-  // Derivar tipo_usuario del rol
-  const tipo_usuario = ["jugador", "entrenador", "ayudante", "analista"].includes(rol) ? "postulante" : "ofertante";
+  const tipo_usuario = ["jugador", "entrenador", "ayudante", "analista"].includes(rol)
+    ? "postulante"
+    : "ofertante";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -58,17 +55,16 @@ export default function Register({
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t("passwords_do_not_match", "Las contraseñas no coinciden"));
+      setError(t("passwords_do_not_match"));
       return;
     }
 
     setLoading(true);
     try {
-      // Usar la función register del contexto
       await register(formData.name, formData.email, formData.password, tipo_usuario, rol);
       onClose();
     } catch (err: any) {
-      setError(err.message || t("register_error", "Error al registrarse."));
+      setError(err.message || t("register_error"));
     } finally {
       setLoading(false);
     }
@@ -89,30 +85,29 @@ export default function Register({
       }}
     >
       <Typography variant="h5" component="h2" gutterBottom align="center">
-        {t("register_title", "Crear Cuenta")}
+        {t("register_title")}
       </Typography>
 
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
-          {/* Selector de Rol */}
           <TextField
             select
-            label={t("i_am_a", "Soy un...")}
+            label={t("i_am_a")}
             value={rol}
             onChange={(e) => setRol(e.target.value)}
             fullWidth
           >
-            <MenuItem value="jugador">{t("player", "Jugador")}</MenuItem>
-            <MenuItem value="entrenador">{t("coach", "Entrenador")}</MenuItem>
-            <MenuItem value="ayudante">{t("assistant", "Ayudante")}</MenuItem>
-            <MenuItem value="analista">{t("analyst", "Analista")}</MenuItem>
-            <MenuItem value="club">{t("club", "Club")}</MenuItem>
-            <MenuItem value="agente">{t("agent", "Agente")}</MenuItem>
-            <MenuItem value="scout">{t("scout", "Scout")}</MenuItem>
+            <MenuItem value="jugador">{t("player")}</MenuItem>
+            <MenuItem value="entrenador">{t("coach")}</MenuItem>
+            <MenuItem value="ayudante">{t("assistant")}</MenuItem>
+            <MenuItem value="analista">{t("analyst")}</MenuItem>
+            <MenuItem value="club">{t("club")}</MenuItem>
+            <MenuItem value="agente">{t("agent")}</MenuItem>
+            <MenuItem value="scout">{t("scout")}</MenuItem>
           </TextField>
 
           <TextField
-            label={t("name", "Nombre Completo")}
+            label={t("name")}
             name="name"
             onChange={handleChange}
             required
@@ -136,7 +131,7 @@ export default function Register({
           />
           <TextField
             type="password"
-            label={t("confirm_password", "Confirmar Contraseña")}
+            label={t("confirm_password")}
             name="confirmPassword"
             onChange={handleChange}
             required
@@ -152,22 +147,20 @@ export default function Register({
             fullWidth
             disabled={loading}
           >
-            {loading
-              ? t("loading", "Cargando...")
-              : t("register_button", "Registrarse")}
+            {loading ? t("loading") : t("register_button")}
           </Button>
         </Stack>
       </form>
 
       <Box sx={{ mt: 2, textAlign: "center" }}>
         <Typography variant="body2">
-          {t("already_have_account", "¿Ya tienes cuenta?")}{" "}
+          {t("already_have_account")}{" "}
           <MuiLink
             component="button"
             onClick={onSwitchToLogin}
             sx={{ verticalAlign: "baseline" }}
           >
-            {t("login_link", "Inicia Sesión")}
+            {t("login_link")}
           </MuiLink>
         </Typography>
       </Box>

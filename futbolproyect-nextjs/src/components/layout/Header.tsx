@@ -112,10 +112,10 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
                             <Button color="inherit" component={Link} href="/all-offers" sx={headerButtonSx}>
                               {t("offers")}
                             </Button>            <Button color="inherit" component={Link} href="/perfiles" sx={headerButtonSx}>
-              {t("all_profiles", "Todos los Perfiles")}
+              {t("all_profiles")}
             </Button>
                                         <Button color="inherit" component={Link} href="/publicidad" sx={headerButtonSx}>
-                                          {t("advertise_with_us", "Anuncia con nosotros")}
+                                          {t("advertise_with_us")}
                                         </Button>
                                         <Button color="inherit" component={Link} href="/suscripcion" sx={headerButtonSx}>
                                           {t("subscriptions")}
@@ -237,14 +237,14 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
               href="/perfiles"
               onClick={handleMobileMenuClose}
             >
-              {t("all_profiles", "Todos los Perfiles")}
+              {t("all_profiles")}
             </MenuItem>
             <MenuItem
               component={Link}
               href="/publicidad"
               onClick={handleMobileMenuClose}
             >
-              {t("advertise_with_us", "Anuncia con nosotros")}
+              {t("advertise_with_us")}
             </MenuItem>
             <MenuItem
               component={Link}

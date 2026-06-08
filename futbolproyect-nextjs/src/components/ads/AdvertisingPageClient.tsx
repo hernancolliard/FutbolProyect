@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import {
   Alert,
@@ -32,86 +33,118 @@ const initialForm = {
   message: "",
 };
 
-const advertiserTypes = [
-  "Marca deportiva",
-  "Club",
-  "Academia",
-  "Agencia",
-  "Evento",
-  "Servicio profesional",
-];
-
-const advertisingPlans = [
-  {
-    name: "Plan Básico",
-    subtitle: "Visibilidad Inicial",
-    priceArs: "$30.000 ARS / mes",
-    priceUsd: "USD 20 / mes",
-    description:
-      "Ideal para cursos, academias, servicios chicos o marcas que quieren comenzar a tener presencia en FutbolProyect.",
-    includes: [
-      "Banner publicitario en una sección de la web",
-      "Link clickeable hacia web, Instagram, WhatsApp o landing",
-      "Duración: 30 días",
-      "Etiqueta de Publicidad o Sponsor",
-      "Reporte simple de clicks e impresiones",
-    ],
-    placements: ["Página de ofertas", "Página de perfiles", "Footer", "Sección de sponsors"],
-  },
-  {
-    name: "Plan Destacado",
-    subtitle: "Mayor Alcance",
-    priceArs: "$75.000 ARS / mes",
-    priceUsd: "USD 50 / mes",
-    recommended: true,
-    description:
-      "Ideal para agencias, cursos, empresas deportivas o academias que quieren mayor visibilidad dentro de FutbolProyect.",
-    includes: [
-      "Banner en Home",
-      "Banner en página de ofertas o perfiles",
-      "Logo en sección de sponsors/aliados",
-      "Link clickeable",
-      "1 publicación en Instagram o LinkedIn de FutbolProyect",
-      "Duración: 30 días",
-      "Reporte de clicks, impresiones y CTR",
-    ],
-    placements: ["Home", "Ofertas", "Perfiles", "Sección de sponsors"],
-  },
-  {
-    name: "Sponsor Principal",
-    subtitle: "Presencia Premium",
-    priceArs: "$180.000 ARS / mes",
-    priceUsd: "USD 120 / mes",
-    description:
-      "Ideal para agencias importantes, empresas, academias grandes, cursos reconocidos o servicios que quieren posicionarse fuerte dentro de FutbolProyect.",
-    includes: [
-      "Banner destacado en Home",
-      "Banner en página de ofertas",
-      "Banner en página de perfiles",
-      "Logo destacado como sponsor principal",
-      "Publicación en Instagram",
-      "Publicación en LinkedIn",
-      "Mención como sponsor/aliado destacado",
-      "Duración: 30 días",
-      "Reporte mensual completo con impresiones, clicks, CTR y ubicaciones",
-    ],
-    placements: ["Home", "Ofertas", "Perfiles", "Footer", "Sección de sponsors"],
-  },
-];
-
-const campaignConditions = [
-  "La duración mínima de una campaña es de 30 días.",
-  "Todas las publicidades son revisadas antes de su publicación.",
-  "FutbolProyect puede rechazar anuncios que prometan contratos garantizados, pruebas aseguradas o servicios engañosos.",
-  "Los anuncios deben estar relacionados con fútbol, formación deportiva, representación, scouting, análisis, tecnología deportiva o servicios para jugadores y profesionales del deporte.",
-  "Los precios pueden variar según disponibilidad, ubicación y duración de la campaña.",
-];
-
 export default function AdvertisingPageClient() {
+  const { t } = useTranslation("common");
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  const advertiserTypes = [
+    { value: "Marca deportiva", label: t("advertising_type_sports_brand") },
+    { value: "Club", label: t("advertising_type_club") },
+    { value: "Academia", label: t("advertising_type_academy") },
+    { value: "Agencia", label: t("advertising_type_agency") },
+    { value: "Evento", label: t("advertising_type_event") },
+    { value: "Servicio profesional", label: t("advertising_type_professional_service") },
+  ];
+
+  const advertisingPlans = [
+    {
+      name: t("advertising_plan_basic_name"),
+      subtitle: t("advertising_plan_basic_subtitle"),
+      priceArs: "$30.000 ARS / mes",
+      priceUsd: "USD 20 / mes",
+      description: t("advertising_plan_basic_description"),
+      includes: [
+        t("advertising_plan_basic_include_1"),
+        t("advertising_plan_basic_include_2"),
+        t("advertising_plan_basic_include_3"),
+        t("advertising_plan_basic_include_4"),
+        t("advertising_plan_basic_include_5"),
+      ],
+      placements: [
+        t("advertising_placement_offers_page"),
+        t("advertising_placement_profiles_page"),
+        t("advertising_placement_footer"),
+        t("advertising_placement_sponsors_section"),
+      ],
+    },
+    {
+      name: t("advertising_plan_featured_name"),
+      subtitle: t("advertising_plan_featured_subtitle"),
+      priceArs: "$75.000 ARS / mes",
+      priceUsd: "USD 50 / mes",
+      recommended: true,
+      description: t("advertising_plan_featured_description"),
+      includes: [
+        t("advertising_plan_featured_include_1"),
+        t("advertising_plan_featured_include_2"),
+        t("advertising_plan_featured_include_3"),
+        t("advertising_plan_featured_include_4"),
+        t("advertising_plan_featured_include_5"),
+        t("advertising_plan_featured_include_6"),
+        t("advertising_plan_featured_include_7"),
+      ],
+      placements: [
+        t("advertising_placement_home"),
+        t("advertising_placement_offers"),
+        t("advertising_placement_profiles"),
+        t("advertising_placement_sponsors_section"),
+      ],
+    },
+    {
+      name: t("advertising_plan_sponsor_name"),
+      subtitle: t("advertising_plan_sponsor_subtitle"),
+      priceArs: "$180.000 ARS / mes",
+      priceUsd: "USD 120 / mes",
+      description: t("advertising_plan_sponsor_description"),
+      includes: [
+        t("advertising_plan_sponsor_include_1"),
+        t("advertising_plan_sponsor_include_2"),
+        t("advertising_plan_sponsor_include_3"),
+        t("advertising_plan_sponsor_include_4"),
+        t("advertising_plan_sponsor_include_5"),
+        t("advertising_plan_sponsor_include_6"),
+        t("advertising_plan_sponsor_include_7"),
+        t("advertising_plan_sponsor_include_8"),
+        t("advertising_plan_sponsor_include_9"),
+      ],
+      placements: [
+        t("advertising_placement_home"),
+        t("advertising_placement_offers"),
+        t("advertising_placement_profiles"),
+        t("advertising_placement_footer"),
+        t("advertising_placement_sponsors_section"),
+      ],
+    },
+  ];
+
+  const campaignConditions = [
+    t("advertising_condition_1"),
+    t("advertising_condition_2"),
+    t("advertising_condition_3"),
+    t("advertising_condition_4"),
+    t("advertising_condition_5"),
+  ];
+
+  const availableSpaces = [
+    {
+      icon: <CampaignIcon />,
+      title: t("advertising_space_banners_title"),
+      text: t("advertising_space_banners_text"),
+    },
+    {
+      icon: <GroupsIcon />,
+      title: t("advertising_space_audience_title"),
+      text: t("advertising_space_audience_text"),
+    },
+    {
+      icon: <QueryStatsIcon />,
+      title: t("advertising_space_metrics_title"),
+      text: t("advertising_space_metrics_text"),
+    },
+  ];
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -122,7 +155,10 @@ export default function AdvertisingPageClient() {
     setForm((prev) => ({
       ...prev,
       budget: `${plan.name} - ${plan.priceArs}`,
-      message: `Quiero solicitar el ${plan.name} (${plan.subtitle}).`,
+      message: t("advertising_selected_plan_message", {
+        name: plan.name,
+        subtitle: plan.subtitle,
+      }),
     }));
 
     document
@@ -141,10 +177,7 @@ export default function AdvertisingPageClient() {
       setSuccess(true);
       setForm(initialForm);
     } catch (requestError: any) {
-      setError(
-        requestError.response?.data?.message ||
-          "No pudimos enviar tu consulta. Revisa los datos e intentalo nuevamente.",
-      );
+      setError(requestError.response?.data?.message || t("advertising_submit_error"));
     } finally {
       setSaving(false);
     }
@@ -162,7 +195,7 @@ export default function AdvertisingPageClient() {
         <Container maxWidth="lg">
           <Stack spacing={3} sx={{ maxWidth: 820 }}>
             <Chip
-              label="Publicidad directa en FutbolProyect"
+              label={t("advertising_hero_badge")}
               sx={{
                 width: "fit-content",
                 bgcolor: "rgba(255,255,255,0.12)",
@@ -172,12 +205,10 @@ export default function AdvertisingPageClient() {
               variant="outlined"
             />
             <Typography variant="h2" component="h1" sx={{ fontWeight: 900, lineHeight: 1.05 }}>
-              Anuncia tu marca ante jugadores, clubes, agentes y scouts
+              {t("advertising_hero_title")}
             </Typography>
             <Typography variant="h6" sx={{ color: "rgba(255,255,255,0.78)", maxWidth: 760 }}>
-              Ofrecemos espacios directos de sponsor dentro de la pagina principal,
-              ofertas, perfiles de jugadores y footer. Sin Google Ads: gestion manual,
-              ubicaciones claras y metricas propias.
+              {t("advertising_hero_subtitle")}
             </Typography>
           </Stack>
         </Container>
@@ -187,16 +218,12 @@ export default function AdvertisingPageClient() {
         <Box component="section" sx={{ mb: { xs: 5, md: 7 } }}>
           <Stack spacing={1.5} sx={{ maxWidth: 820, mb: 4 }}>
             <Typography variant="h3" component="h2" sx={{ fontWeight: 900 }}>
-              Planes para publicitar en FutbolProyect
+              {t("advertising_plans_title")}
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Llegá a jugadores, clubes, agencias, scouts y profesionales del fútbol
-              con espacios publicitarios pensados para el mercado futbolístico.
+              {t("advertising_plans_subtitle")}
             </Typography>
-            <Typography color="text.secondary">
-              Todas las campañas son revisadas antes de ser publicadas para proteger
-              la confianza de nuestra comunidad.
-            </Typography>
+            <Typography color="text.secondary">{t("advertising_plans_note")}</Typography>
           </Stack>
 
           <Grid container spacing={3} alignItems="stretch">
@@ -220,7 +247,7 @@ export default function AdvertisingPageClient() {
                   <Stack spacing={2} sx={{ height: "100%" }}>
                     {plan.recommended && (
                       <Chip
-                        label="Recomendado"
+                        label={t("recommended")}
                         color="secondary"
                         sx={{ width: "fit-content", fontWeight: 800 }}
                       />
@@ -242,7 +269,7 @@ export default function AdvertisingPageClient() {
                         {plan.priceArs}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        Referencia internacional: {plan.priceUsd}
+                        {t("advertising_international_reference", { price: plan.priceUsd })}
                       </Typography>
                     </Box>
 
@@ -252,7 +279,7 @@ export default function AdvertisingPageClient() {
 
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>
-                        Incluye
+                        {t("includes")}
                       </Typography>
                       <Stack spacing={1}>
                         {plan.includes.map((item) => (
@@ -269,7 +296,7 @@ export default function AdvertisingPageClient() {
 
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>
-                        Ubicaciones
+                        {t("placements")}
                       </Typography>
                       <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
                         {plan.placements.map((placement) => (
@@ -284,7 +311,7 @@ export default function AdvertisingPageClient() {
                       fullWidth
                       onClick={() => handlePlanSelect(plan)}
                     >
-                      Solicitar este plan
+                      {t("advertising_request_plan")}
                     </Button>
                   </Stack>
                 </Paper>
@@ -303,7 +330,7 @@ export default function AdvertisingPageClient() {
             }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
-              Condiciones de publicación
+              {t("advertising_conditions_title")}
             </Typography>
             <Grid container spacing={1.25}>
               {campaignConditions.map((condition) => (
@@ -324,25 +351,9 @@ export default function AdvertisingPageClient() {
           <Grid item xs={12} md={5}>
             <Stack spacing={3}>
               <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                Espacios disponibles
+                {t("advertising_spaces_title")}
               </Typography>
-              {[
-                {
-                  icon: <CampaignIcon />,
-                  title: "Banners en secciones clave",
-                  text: "Home, ofertas, perfiles, detalle del jugador y footer.",
-                },
-                {
-                  icon: <GroupsIcon />,
-                  title: "Audiencia segmentada",
-                  text: "Usuarios vinculados al futbol: jugadores, clubes, academias, agentes y scouts.",
-                },
-                {
-                  icon: <QueryStatsIcon />,
-                  title: "Metricas internas",
-                  text: "Seguimiento de impresiones, clicks y CTR desde el panel admin.",
-                },
-              ].map((item) => (
+              {availableSpaces.map((item) => (
                 <Paper
                   key={item.title}
                   variant="outlined"
@@ -372,52 +383,46 @@ export default function AdvertisingPageClient() {
               <Stack spacing={2.5}>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                    Solicitar informacion
+                    {t("advertising_form_title")}
                   </Typography>
-                  <Typography color="text.secondary">
-                    Dejanos tus datos y te contactamos para definir ubicacion, duracion y formato.
-                  </Typography>
+                  <Typography color="text.secondary">{t("advertising_form_subtitle")}</Typography>
                 </Box>
 
-                {success && (
-                  <Alert severity="success">
-                    Consulta enviada. El equipo de FutbolProyect te contactara a la brevedad.
-                  </Alert>
-                )}
+                {success && <Alert severity="success">{t("advertising_submit_success")}</Alert>}
                 {error && <Alert severity="error">{error}</Alert>}
 
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField name="name" label="Nombre" value={form.name} onChange={handleChange} fullWidth required />
+                    <TextField name="name" label={t("name_label")} value={form.name} onChange={handleChange} fullWidth required />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField name="company" label="Empresa o proyecto" value={form.company} onChange={handleChange} fullWidth />
+                    <TextField name="company" label={t("company_project_label")} value={form.company} onChange={handleChange} fullWidth />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField type="email" name="email" label="Email" value={form.email} onChange={handleChange} fullWidth required />
+                    <TextField type="email" name="email" label={t("email")} value={form.email} onChange={handleChange} fullWidth required />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField name="phone" label="Telefono / WhatsApp" value={form.phone} onChange={handleChange} fullWidth />
+                    <TextField name="phone" label={t("phone_whatsapp_label")} value={form.phone} onChange={handleChange} fullWidth />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField select name="advertiser_type" label="Tipo de anunciante" value={form.advertiser_type} onChange={handleChange} fullWidth>
+                    <TextField select name="advertiser_type" label={t("advertiser_type_label")} value={form.advertiser_type} onChange={handleChange} fullWidth>
                       {advertiserTypes.map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
+                        <MenuItem key={type.value} value={type.value}>
+                          {type.label}
                         </MenuItem>
                       ))}
                     </TextField>
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField name="budget" label="Presupuesto estimado" value={form.budget} onChange={handleChange} fullWidth />
+                    <TextField name="budget" label={t("estimated_budget_label")} value={form.budget} onChange={handleChange} fullWidth />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField name="website" label="Sitio web o red social" value={form.website} onChange={handleChange} fullWidth placeholder="https://..." />
+                    <TextField name="website" label={t("website_social_label")} value={form.website} onChange={handleChange} fullWidth placeholder="https://..." />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
                       name="message"
-                      label="Que queres promocionar?"
+                      label={t("promotion_message_label")}
                       value={form.message}
                       onChange={handleChange}
                       fullWidth
@@ -429,7 +434,7 @@ export default function AdvertisingPageClient() {
                 </Grid>
 
                 <Button type="submit" variant="contained" size="large" disabled={saving}>
-                  {saving ? "Enviando..." : "Enviar consulta"}
+                  {saving ? t("sending") : t("send_inquiry")}
                 </Button>
               </Stack>
             </Paper>
@@ -455,11 +460,10 @@ export default function AdvertisingPageClient() {
           >
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 900 }}>
-                ¿Querés anunciar en FutbolProyect?
+                {t("advertising_cta_title")}
               </Typography>
               <Typography sx={{ color: "rgba(255,255,255,0.76)", maxWidth: 760 }}>
-                Completá el formulario y te contactaremos para ayudarte a elegir el
-                mejor espacio para tu agencia, curso, empresa o servicio deportivo.
+                {t("advertising_cta_text")}
               </Typography>
             </Box>
             <Button
@@ -472,7 +476,7 @@ export default function AdvertisingPageClient() {
               }
               sx={{ whiteSpace: "nowrap" }}
             >
-              Quiero anunciar
+              {t("advertising_cta_button")}
             </Button>
           </Stack>
         </Paper>

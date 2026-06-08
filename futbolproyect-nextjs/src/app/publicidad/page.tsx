@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import AdvertisingPageClient from "@/components/ads/AdvertisingPageClient";
 
 export const metadata: Metadata = {
-  title: "Publicidad y Sponsors en FutbolProyect | Anuncia con nosotros",
+  title: "Advertising and Sponsors | FutbolProyect",
   description:
-    "Conoce los planes para publicitar en FutbolProyect y promociona tu club, academia, marca deportiva, evento o servicio ante jugadores, agentes, scouts y clubes.",
+    "Promote your club, academy, sports brand, event, or service to players, agents, scouts, and clubs on FutbolProyect.",
   alternates: {
     canonical: "/publicidad",
   },
