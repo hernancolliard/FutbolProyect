@@ -75,6 +75,7 @@ function Header({ onShowLoginModal, onShowRegisterModal, onShowCreateOfferModal 
   const handleLogout = () => {
     logout(); // Temporarily commented out
     handleMobileMenuClose();
+    router.push("/");
   };
 
   const handleCreateOfferClick = () => {

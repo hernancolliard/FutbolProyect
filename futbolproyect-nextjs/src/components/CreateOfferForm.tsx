@@ -158,7 +158,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
       }
       setTimeout(() => {
         // Redirigir a la página de detalle o listado
-        router.push(isEditMode ? `/offers/${offerId}` : "/offers");
+        router.push(isEditMode ? `/offers/${offerId}` : "/");
       }, 1500);
     } catch (err: any) {
       console.error("Error completo:", err);
