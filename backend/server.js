@@ -58,7 +58,6 @@ app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/ads", require("./routes/ads"));
 app.use("/api/contact", require("./routes/contact"));
-app.use("/api/email", require("./routes/email"));
 app.use("/api/privacy", require("./routes/privacy"));
 app.use("/api/terms", require("./routes/terms"));
 app.use("/api/sitemap", require("./routes/sitemap"));

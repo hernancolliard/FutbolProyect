@@ -1,270 +1,269 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const DEFAULT_FROM_NAME = "FutbolProyect";
-const DEFAULT_CONTACT_EMAIL = "info@futbolproyect.com";
+// Resend se configura automáticamente con la variable de entorno RESEND_API_KEY
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-let transporter;
-
-const escapeHtml = (value = "") =>
-  String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
-const withLineBreaks = (value = "") => escapeHtml(value).replace(/\n/g, "<br>");
-
-const getEmailConfig = () => {
-  const port = Number(process.env.EMAIL_PORT || 587);
-
-  return {
-    host: process.env.EMAIL_HOST,
-    port,
-    secure:
-      process.env.EMAIL_SECURE !== undefined
-        ? process.env.EMAIL_SECURE === "true"
-        : port === 465,
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-    from:
-      process.env.EMAIL_FROM ||
-      `${DEFAULT_FROM_NAME} <${process.env.EMAIL_USER || DEFAULT_CONTACT_EMAIL}>`,
-    contactTo: process.env.EMAIL_CONTACT_TO || DEFAULT_CONTACT_EMAIL,
-  };
-};
-
-const getTransporter = () => {
-  if (transporter) {
-    return transporter;
-  }
-
-  const config = getEmailConfig();
-
-  if (!config.host) {
-    throw new Error("EMAIL_HOST no esta configurado.");
-  }
-
-  transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth:
-      config.user && config.pass
-        ? {
-            user: config.user,
-            pass: config.pass,
-          }
-        : undefined,
-  });
-
-  return transporter;
-};
-
-const normalizeRecipients = (to) => {
-  if (Array.isArray(to)) {
-    return to.filter(Boolean);
-  }
-
-  return to ? [to] : [];
-};
-
-const sendEmail = async ({ to, subject, html, text, replyTo }) => {
-  const recipients = normalizeRecipients(to);
-
-  if (recipients.length === 0) {
-    throw new Error("No se indico ningun destinatario.");
-  }
-
-  if (!subject) {
-    throw new Error("El asunto del correo es obligatorio.");
-  }
-
-  const config = getEmailConfig();
-  const info = await getTransporter().sendMail({
-    from: config.from,
-    to: recipients,
-    subject,
-    html,
-    text,
-    replyTo,
-  });
-
-  console.log(`Email enviado a ${recipients.join(", ")}:`, info.messageId);
-  return info;
-};
-
+/**
+ * Envía un correo electrónico a través de Resend desde el formulario de contacto.
+ * @param {string} name - El nombre del remitente.
+ * @param {string} fromEmail - El email del remitente.
+ * @param {string} message - El mensaje del formulario.
+ */
 const sendContactEmail = async (name, fromEmail, message) => {
-  const config = getEmailConfig();
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "FutbolProyect <info@futbolproyect.com>", // ¡Importante! Este es un remitente por defecto de Resend.
+      to: ["info@futbolproyect.com"], // Tu correo donde recibes los mensajes.
+      subject: `Nuevo mensaje de contacto de: ${name}`,
+      html: `
+        <h1>Nuevo Mensaje del Formulario de Contacto</h1>
+        <p><strong>Nombre:</strong> ${name}</p>
+        <p><strong>Email del remitente:</strong> ${fromEmail}</p>
+        <hr>
+        <h2>Mensaje:</h2>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+      `,
+      reply_to: fromEmail, // Permite que al darle "Responder", se responda al email del usuario.
+    });
 
-  return sendEmail({
-    to: config.contactTo,
-    subject: `Nuevo mensaje de contacto de: ${name}`,
-    html: `
-      <h1>Nuevo Mensaje del Formulario de Contacto</h1>
-      <p><strong>Nombre:</strong> ${escapeHtml(name)}</p>
-      <p><strong>Email del remitente:</strong> ${escapeHtml(fromEmail)}</p>
-      <hr>
-      <h2>Mensaje:</h2>
-      <p>${withLineBreaks(message)}</p>
-    `,
-    text: `Nombre: ${name}\nEmail: ${fromEmail}\n\n${message}`,
-    replyTo: fromEmail,
-  });
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log("Correo de contacto enviado con éxito:", data);
+    return data;
+  } catch (error) {
+    console.error("Error al enviar correo con Resend:", error);
+    throw error;
+  }
 };
 
+/**
+ * Envía un correo de bienvenida a un nuevo usuario.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} userType - Tipo de usuario ('postulante', 'ofertante', etc.).
+ */
 const sendWelcomeEmail = async (to, userName, userType) => {
-  const safeName = escapeHtml(userName || "usuario");
-  let htmlContent = `<h1>Hola ${safeName}, te damos la bienvenida a FutbolProyect!</h1>
+  let subject = '¡Bienvenido a FutbolProyect!';
+  let htmlContent = `<h1>¡Hola ${userName}, te damos la bienvenida a FutbolProyect!</h1>
                      <p>Gracias por unirte a nuestra comunidad. Estamos emocionados de tenerte con nosotros.</p>`;
 
-  if (userType === "postulante") {
-    htmlContent += `<p><strong>Importante:</strong> Te recordamos que los perfiles con mayor puntuacion y mas completos son los que aparecen primero en nuestra plataforma. Asegurate de completar tu perfil al 100% para tener la maxima visibilidad.</p>`;
+  if (userType === 'postulante') {
+    htmlContent += `<p><b>Importante:</b> Te recordamos que los perfiles con mayor puntuación y más completos son los que aparecen primero en nuestra plataforma. ¡Asegúrate de completar tu perfil al 100% para tener la máxima visibilidad!</p>`;
   }
 
   htmlContent += `<p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    return await sendEmail({
-      to,
-      subject: "Bienvenido a FutbolProyect!",
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
       html: htmlContent,
-      text: `Hola ${userName || "usuario"}, te damos la bienvenida a FutbolProyect.`,
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de bienvenida enviado con éxito a ${to}:`, data);
+    return data;
   } catch (error) {
     console.error(`Error al enviar correo de bienvenida a ${to}:`, error);
+    // No relanzamos el error para no detener el flujo principal (ej. el registro)
   }
 };
 
+/**
+ * Envía un correo de confirmación de suscripción.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} plan - Nombre del plan.
+ * @param {Date} endDate - Fecha de finalización de la suscripción.
+ */
 const sendSubscriptionConfirmationEmail = async (to, userName, plan, endDate) => {
-  const formattedEndDate = new Date(endDate).toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const subject = 'Confirmación de Suscripción en FutbolProyect';
+  const formattedEndDate = new Date(endDate).toLocaleDateString('es-ES', {
+    year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const safeName = escapeHtml(userName || "usuario");
-  const safePlan = escapeHtml(plan);
-  const htmlContent = `<h1>Hola ${safeName}, tu suscripcion esta activa!</h1>
-                     <p>Te confirmamos que tu suscripcion al plan <strong>${safePlan}</strong> en FutbolProyect ha sido activada.</p>
-                     <p>Tu suscripcion es valida hasta el <strong>${escapeHtml(formattedEndDate)}</strong>.</p>
+  const htmlContent = `<h1>¡Hola ${userName}, tu suscripción está activa!</h1>
+                     <p>Te confirmamos que tu suscripción al plan <strong>${plan}</strong> en FutbolProyect ha sido activada.</p>
+                     <p>Tu suscripción es válida hasta el <strong>${formattedEndDate}</strong>.</p>
                      <p>Gracias por confiar en nosotros.</p>
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    return await sendEmail({
-      to,
-      subject: "Confirmacion de Suscripcion en FutbolProyect",
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
       html: htmlContent,
-      text: `Hola ${userName || "usuario"}, tu suscripcion al plan ${plan} esta activa hasta ${formattedEndDate}.`,
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de suscripción enviado con éxito a ${to}:`, data);
+    return data;
   } catch (error) {
-    console.error(`Error al enviar correo de suscripcion a ${to}:`, error);
+    console.error(`Error al enviar correo de suscripción a ${to}:`, error);
   }
 };
 
+/**
+ * Envía un correo notificando sobre una nueva oferta laboral.
+ * @param {string} to - Email del destinatario.
+ * @param {string} offerTitle - Título de la oferta.
+ * @param {string} offerLink - Enlace a la oferta.
+ */
 const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
-  const safeTitle = escapeHtml(offerTitle);
-  const safeLink = escapeHtml(offerLink);
-  const htmlContent = `<h1>Hola!</h1>
-                     <p>Hay una nueva oferta laboral que podria interesarte en FutbolProyect:</p>
-                     <h2>${safeTitle}</h2>
-                     <p>Puedes ver los detalles y postularte haciendo clic en el siguiente boton:</p>
-                     <a href="${safeLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Ver Oferta</a>
+  const subject = `¡Nueva Oferta Laboral en FutbolProyect: ${offerTitle}!`;
+  const htmlContent = `<h1>¡Hola!</h1>
+                     <p>Hay una nueva oferta laboral que podría interesarte en FutbolProyect:</p>
+                     <h2>${offerTitle}</h2>
+                     <p>Puedes ver los detalles y postularte haciendo clic en el siguiente botón:</p>
+                     <a href="${offerLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Ver Oferta</a>
                      <br>
-                     <p>No dejes pasar esta oportunidad!</p>
+                     <p>¡No dejes pasar esta oportunidad!</p>
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    return await sendEmail({
-      to,
-      subject: `Nueva Oferta Laboral en FutbolProyect: ${offerTitle}!`,
+    // Usamos un try-catch para cada correo individualmente.
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
       html: htmlContent,
-      text: `Nueva oferta laboral en FutbolProyect: ${offerTitle}\n${offerLink}`,
     });
+
+    if (error) {
+      console.error(`Error enviando notificación de oferta a ${to}:`, error.message);
+    } else {
+      console.log(`Notificación de nueva oferta enviada a ${to}.`);
+    }
   } catch (error) {
-    console.error(`Error enviando notificacion de oferta a ${to}:`, error);
+    console.error(`Error catastrófico enviando notificación de oferta a ${to}:`, error);
   }
 };
 
-const sendReplyToContactMessage = async (
-  to,
-  subject,
-  replyMessage,
-  originalMessage,
-) => {
+/**
+ * Envía la respuesta de un administrador a un mensaje de contacto.
+ * @param {string} to - Email del usuario original.
+ * @param {string} subject - Asunto del correo.
+ * @param {string} replyMessage - El mensaje de respuesta del admin.
+ * @param {string} originalMessage - El mensaje original del usuario.
+ */
+const sendReplyToContactMessage = async (to, subject, replyMessage, originalMessage) => {
   const htmlContent = `
     <p>Hola,</p>
-    <p>Gracias por contactar a FutbolProyect. Aqui esta la respuesta a tu consulta:</p>
+    <p>Gracias por contactar a FutbolProyect. Aquí está la respuesta a tu consulta:</p>
     <div style="padding: 15px; border-left: 4px solid #ccc; background-color: #f5f5f5; margin: 15px 0;">
-      <p>${withLineBreaks(replyMessage)}</p>
+      <p>${replyMessage.replace(/\n/g, "<br>")}</p>
     </div>
     <hr>
     <p><strong>Tu mensaje original:</strong></p>
     <blockquote style="border-left: 4px solid #eee; padding-left: 15px; color: #666;">
-      <p><em>${withLineBreaks(originalMessage)}</em></p>
+      <p><em>${originalMessage.replace(/\n/g, "<br>")}</em></p>
     </blockquote>
     <p>Saludos,<br>El equipo de FutbolProyect</p>
   `;
 
-  return sendEmail({
-    to,
-    subject,
-    html: htmlContent,
-    text: `${replyMessage}\n\nTu mensaje original:\n${originalMessage}`,
-  });
-};
-
-const sendPasswordResetEmail = async (to, userName, resetLink) => {
-  const safeName = escapeHtml(userName || "usuario");
-  const safeLink = escapeHtml(resetLink);
-  const htmlContent = `<h1>Hola ${safeName}!</h1>
-                     <p>Has solicitado restablecer tu contrasena en FutbolProyect.</p>
-                     <p>Por favor, haz clic en el siguiente enlace para continuar con el proceso:</p>
-                     <a href="${safeLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Restablecer Contrasena</a>
-                     <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
-                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
-
-  return sendEmail({
-    to,
-    subject: "Restablecer Contrasena en FutbolProyect",
-    html: htmlContent,
-    text: `Hola ${userName || "usuario"}, restablece tu contrasena aqui: ${resetLink}`,
-  });
-};
-
-const sendNewApplicationNotification = async (to, applicantName, offerTitle) => {
-  const safeApplicantName = escapeHtml(applicantName);
-  const safeOfferTitle = escapeHtml(offerTitle);
-  const htmlContent = `<h1>Hola!</h1>
-                     <p>Has recibido una nueva postulacion para tu oferta <strong>${safeOfferTitle}</strong>.</p>
-                     <p>El usuario <strong>${safeApplicantName}</strong> se ha postulado.</p>
-                     <p>Puedes revisar los detalles de la postulacion en tu panel de control.</p>
-                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
-
   try {
-    return await sendEmail({
-      to,
-      subject: `Nueva postulacion para tu oferta: ${offerTitle}!`,
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
       html: htmlContent,
-      text: `Has recibido una nueva postulacion de ${applicantName} para tu oferta ${offerTitle}.`,
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Respuesta de contacto enviada a ${to}.`);
+    return data;
   } catch (error) {
-    console.error(`Error enviando notificacion de postulacion a ${to}:`, error);
+    console.error(`Error enviando respuesta de contacto a ${to}:`, error);
+    throw error; // Relanzar para que la ruta de la API pueda manejarlo
   }
 };
 
-const sendAdminEmail = async ({ to, subject, message, replyTo }) =>
-  sendEmail({
-    to,
-    subject,
-    html: `<p>${withLineBreaks(message)}</p>`,
-    text: message,
-    replyTo,
-  });
+
+
+// Por ahora, solo exportamos esta función. Puedes añadir las otras después si las necesitas.
+/**
+ * Envía un correo electrónico para restablecer la contraseña.
+ * @param {string} to - Email del destinatario.
+ * @param {string} userName - Nombre del usuario.
+ * @param {string} resetLink - Enlace de restablecimiento de contraseña.
+ */
+const sendPasswordResetEmail = async (to, userName, resetLink) => {
+  const subject = 'Restablecer Contraseña en FutbolProyect';
+  const htmlContent = `<h1>¡Hola ${userName}!</h1>
+                     <p>Has solicitado restablecer tu contraseña en FutbolProyect.</p>
+                     <p>Por favor, haz clic en el siguiente enlace para continuar con el proceso:</p>
+                     <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+                     <p>Si no solicitaste este cambio, por favor ignora este correo.</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Correo de restablecimiento de contraseña enviado con éxito a ${to}:`, data);
+    return data;
+  } catch (error) {
+    console.error(`Error al enviar correo de restablecimiento de contraseña a ${to}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Envía un correo notificando sobre una nueva postulación.
+ * @param {string} to - Email del ofertante.
+ * @param {string} applicantName - Nombre del postulante.
+ * @param {string} offerTitle - Título de la oferta.
+ */
+const sendNewApplicationNotification = async (to, applicantName, offerTitle) => {
+  const subject = `¡Nueva postulación para tu oferta: ${offerTitle}!`;
+  const htmlContent = `<h1>¡Hola!</h1>
+                     <p>Has recibido una nueva postulación para tu oferta <strong>${offerTitle}</strong>.</p>
+                     <p>El usuario <strong>${applicantName}</strong> se ha postulado.</p>
+                     <p>Puedes revisar los detalles de la postulación en tu panel de control.</p>
+                     <p>Saludos,<br>El equipo de FutbolProyect</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'FutbolProyect <info@futbolproyect.com>',
+      to: [to],
+      subject: subject,
+      html: htmlContent,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log(`Notificación de nueva postulación enviada a ${to}.`);
+    return data;
+  } catch (error) {
+    console.error(`Error enviando notificación de postulación a ${to}:`, error);
+    // No relanzamos para no afectar el flujo principal
+  }
+};
 
 module.exports = {
-  sendEmail,
   sendContactEmail,
   sendWelcomeEmail,
   sendSubscriptionConfirmationEmail,
@@ -272,5 +271,4 @@ module.exports = {
   sendReplyToContactMessage,
   sendPasswordResetEmail,
   sendNewApplicationNotification,
-  sendAdminEmail,
 };
