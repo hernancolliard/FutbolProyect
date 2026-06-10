@@ -483,7 +483,7 @@ router.post(
               ),
             );
 
-            // Esperar 600ms para cumplir con el límite de 2 req/segundo de Resend
+            // Pausa corta para no saturar el servidor SMTP ni activar limites del proveedor.
             await delay(600);
           }
         } catch (emailError) {
