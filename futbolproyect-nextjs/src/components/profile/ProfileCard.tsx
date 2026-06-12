@@ -38,7 +38,11 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
                         alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
                         width={180}
                         height={180}
-                        style={{ width: '100%', height: '190px', objectFit: 'cover' }}
+                        style={{
+                            width: '100%',
+                            height: '180px',
+                            objectFit: 'contain',
+                        }}
                         onError={(e) => (e.currentTarget.src = '/images/logos/logofp.png')}
                     />
                     <Box sx={{ padding: '1rem' }}>

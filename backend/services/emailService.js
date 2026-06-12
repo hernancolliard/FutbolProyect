@@ -236,10 +236,19 @@ const sendPasswordResetEmail = async (to, userName, resetLink) => {
  * @param {string} offerTitle - Título de la oferta.
  */
 const sendNewApplicationNotification = async (to, applicantName, offerTitle) => {
-  const subject = `¡Nueva postulación para tu oferta: ${offerTitle}!`;
+  const safeApplicantName =
+    typeof applicantName === "string" && applicantName.trim()
+      ? applicantName.trim()
+      : "Un usuario";
+  const safeOfferTitle =
+    typeof offerTitle === "string" && offerTitle.trim()
+      ? offerTitle.trim()
+      : "tu oferta";
+
+  const subject = `¡Nueva postulación para tu oferta: ${safeOfferTitle}!`;
   const htmlContent = `<h1>¡Hola!</h1>
-                     <p>Has recibido una nueva postulación para tu oferta <strong>${offerTitle}</strong>.</p>
-                     <p>El usuario <strong>${applicantName}</strong> se ha postulado.</p>
+                     <p>Has recibido una nueva postulación para tu oferta <strong>${safeOfferTitle}</strong>.</p>
+                     <p>El usuario <strong>${safeApplicantName}</strong> se ha postulado.</p>
                      <p>Puedes revisar los detalles de la postulación en tu panel de control.</p>
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 

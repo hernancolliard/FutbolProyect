@@ -38,24 +38,40 @@ router.post(
       try {
         const inserted_id_oferta = result.rows[0].id_oferta;
 
-        // Obtener detalles de la oferta y del ofertante
+        // Obtener detalles de la oferta, del ofertante y del postulante.
         const offerDetailsQuery = `
-          SELECT o.titulo, u.email AS email_ofertante
+          SELECT
+            o.titulo,
+            ofertante.email AS email_ofertante,
+            postulante.nombre AS nombre_postulante,
+            postulante.apellido AS apellido_postulante
           FROM ofertas_laborales o
-          JOIN usuarios u ON o.id_usuario_ofertante = u.id
+          JOIN usuarios ofertante ON o.id_usuario_ofertante = ofertante.id
+          JOIN usuarios postulante ON postulante.id = @id_usuario_postulante
           WHERE o.id = @inserted_id_oferta
         `;
         const offerDetailsResult = await db.query(offerDetailsQuery, {
           inserted_id_oferta,
+          id_usuario_postulante,
         });
 
         if (offerDetailsResult.rows.length > 0) {
-          const { titulo, email_ofertante } = offerDetailsResult.rows[0];
-          const applicantName = req.user.name;
+          const {
+            titulo,
+            email_ofertante,
+            nombre_postulante,
+            apellido_postulante,
+          } = offerDetailsResult.rows[0];
+          const applicantName =
+            [nombre_postulante, apellido_postulante]
+              .filter(Boolean)
+              .join(" ")
+              .trim() || "Un usuario";
+
           await sendNewApplicationNotification(
             email_ofertante,
             applicantName,
-            titulo
+            titulo,
           );
         }
       } catch (emailError) {
