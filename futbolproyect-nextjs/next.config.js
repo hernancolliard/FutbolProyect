@@ -20,9 +20,9 @@ const nextConfig = {
   },
 
   images: {
-    // La optimización de imágenes está activada (unoptimized: false),
-    // lo cual es correcto para que Vercel pueda optimizar las imágenes automáticamente.
-    unoptimized: false,
+    // Las imágenes subidas ya se convierten y redimensionan a WebP en el backend.
+    // Servirlas directamente evita depender de la cuota de transformaciones de Vercel.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
