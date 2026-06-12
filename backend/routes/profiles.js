@@ -13,6 +13,7 @@ const path = require("path");
 const sharp = require("sharp");
 const { translateText } = require("../services/translationService");
 const fs = require("fs");
+const crypto = require("crypto");
 
 const { uploadToS3 } = require("../services/s3Service");
 
@@ -85,6 +86,55 @@ const getRequesterFromRequest = (req) => {
   } catch (_error) {
     return null;
   }
+};
+
+const ANONYMOUS_VOTER_ID_REGEX = /^[a-zA-Z0-9_-]{16,128}$/;
+
+const getAnonymousVoterIdFromRequest = (req) => {
+  const value = req.get("x-anonymous-voter-id") || req.body?.anonymousVoterId;
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return ANONYMOUS_VOTER_ID_REGEX.test(trimmed) ? trimmed : null;
+};
+
+const hashVoterValue = (value) => {
+  if (!value) return null;
+
+  return crypto
+    .createHmac("sha256", process.env.JWT_SECRET || "profile-rating-secret")
+    .update(value)
+    .digest("hex");
+};
+
+const getRequestIp = (req) => {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  if (typeof forwardedFor === "string" && forwardedFor.trim()) {
+    return forwardedFor.split(",")[0].trim();
+  }
+
+  return req.ip || req.socket?.remoteAddress || "";
+};
+
+const updateProfileRatingStats = async (profileIdNum) => {
+  await db.query(
+    `
+      UPDATE perfiles_usuario
+      SET average_rating = COALESCE(stats.avg_rating, 0),
+          total_ratings = COALESCE(stats.total_ratings, 0)
+      FROM (
+        SELECT profile_id, AVG(rating)::float AS avg_rating, COUNT(*) AS total_ratings
+        FROM profile_ratings
+        WHERE profile_id = @profileIdNum
+        GROUP BY profile_id
+      ) AS stats
+      WHERE id_usuario = stats.profile_id;
+    `,
+    { profileIdNum },
+  );
 };
 
 const getManagedProfileIdFromSlug = (value) => {
@@ -828,22 +878,39 @@ router.get("/:userId/stats", verificarToken, async (req, res) => {
 });
 
 // --- RUTA PROTEGIDA: OBTENER MI CALIFICACIÓN PARA UN PERFIL ---
-router.get("/:profileId/my-rating", verificarToken, async (req, res) => {
+router.get("/:profileId/my-rating", async (req, res) => {
   const { profileId } = req.params;
-  const userId = req.user.id;
+  const requester = getRequesterFromRequest(req);
+  const anonymousVoterId = getAnonymousVoterIdFromRequest(req);
+
+  if (!requester && !anonymousVoterId) {
+    return res.json({ rating: null });
+  }
 
   if (isNaN(parseInt(profileId, 10))) {
     return res.status(400).json({ message: "El ID de perfil no es válido." });
   }
 
   try {
+    const profileIdNum = parseInt(profileId, 10);
+    const params = { profileId: profileIdNum };
+    const ratingFilter = requester
+      ? "user_id = @userId"
+      : "anonymous_voter_id = @anonymousVoterId";
+
+    if (requester) {
+      params.userId = requester.id;
+    } else {
+      params.anonymousVoterId = anonymousVoterId;
+    }
+
     const result = await db.query(
       `
         SELECT rating
         FROM profile_ratings
-        WHERE profile_id = @profileId AND user_id = @userId;
+        WHERE profile_id = @profileId AND ${ratingFilter};
       `,
-      { profileId: parseInt(profileId, 10), userId },
+      params,
     );
 
     res.json({
@@ -960,10 +1027,12 @@ router.post('/:userId/view', async (req, res) => {
 // ... (Otras rutas existentes)
 
 // --- RUTA PROTEGIDA: CALIFICAR UN PERFIL ---
-router.post("/:profileId/rate", verificarToken, async (req, res) => {
+router.post("/:profileId/rate", async (req, res) => {
   const { profileId } = req.params;
   const { rating } = req.body;
-  const userId = req.user.id; // Usuario autenticado realizando la calificación
+  const requester = getRequesterFromRequest(req);
+  const userId = requester?.id;
+  const anonymousVoterId = getAnonymousVoterIdFromRequest(req);
 
   if (isNaN(parseInt(profileId, 10))) {
     return res.status(400).json({ message: "El ID de perfil no es válido." });
@@ -972,10 +1041,16 @@ router.post("/:profileId/rate", verificarToken, async (req, res) => {
   const profileIdNum = parseInt(profileId, 10);
 
   // No permitir que un usuario califique su propio perfil
-  if (userId === profileIdNum) {
+  if (userId && userId === profileIdNum) {
     return res
       .status(403)
       .json({ message: "No puedes calificar tu propio perfil." });
+  }
+
+  if (!userId && !anonymousVoterId) {
+    return res
+      .status(400)
+      .json({ message: "No se pudo identificar el navegador para registrar el voto." });
   }
 
   // Validar la calificación
@@ -985,32 +1060,94 @@ router.post("/:profileId/rate", verificarToken, async (req, res) => {
       .json({ message: "La calificación debe ser un número entre 1 y 5." });
   }
 
-      try {
-      // Registrar o actualizar la calificación del usuario para este perfil
-      const upsertRatingQuery = `
-          INSERT INTO profile_ratings (profile_id, user_id, rating)
-          VALUES (@profileIdNum, @userId, @rating)
-          ON CONFLICT (profile_id, user_id) DO UPDATE SET
-              rating = EXCLUDED.rating,
-              updated_at = CURRENT_TIMESTAMP
-          RETURNING *;
-      `;
-      await db.query(upsertRatingQuery, { profileIdNum, userId, rating });
+  try {
+    const profileExists = await db.query(
+        `SELECT 1 FROM perfiles_usuario WHERE id_usuario = @profileIdNum`,
+        { profileIdNum },
+      );
+
+    if (profileExists.rows.length === 0) {
+      return res.status(404).json({ message: "Perfil no encontrado." });
+    }
+
+    if (userId) {
+        await db.query(
+          `
+            INSERT INTO profile_ratings (profile_id, user_id, rating)
+            VALUES (@profileIdNum, @userId, @rating)
+            ON CONFLICT (profile_id, user_id) WHERE user_id IS NOT NULL DO UPDATE SET
+                rating = EXCLUDED.rating,
+                updated_at = CURRENT_TIMESTAMP;
+          `,
+          { profileIdNum, userId, rating },
+        );
+      } else {
+        const voterIpHash = hashVoterValue(getRequestIp(req));
+        const voterUserAgentHash = hashVoterValue(req.get("user-agent") || "");
+        const anonymousParams = {
+          profileIdNum,
+          anonymousVoterId,
+          voterIpHash,
+          voterUserAgentHash,
+          rating,
+        };
+
+        let ratingResult = await db.query(
+          `
+            UPDATE profile_ratings
+            SET rating = @rating,
+                voter_ip_hash = COALESCE(voter_ip_hash, @voterIpHash),
+                voter_user_agent_hash = COALESCE(voter_user_agent_hash, @voterUserAgentHash),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE profile_id = @profileIdNum
+              AND anonymous_voter_id = @anonymousVoterId
+            RETURNING *;
+          `,
+          anonymousParams,
+        );
+
+        if (ratingResult.rows.length === 0 && voterIpHash && voterUserAgentHash) {
+          ratingResult = await db.query(
+            `
+              UPDATE profile_ratings
+              SET rating = @rating,
+                  anonymous_voter_id = COALESCE(anonymous_voter_id, @anonymousVoterId),
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE profile_id = @profileIdNum
+                AND user_id IS NULL
+                AND voter_ip_hash = @voterIpHash
+                AND voter_user_agent_hash = @voterUserAgentHash
+              RETURNING *;
+            `,
+            anonymousParams,
+          );
+        }
+
+        if (ratingResult.rows.length === 0) {
+          await db.query(
+            `
+              INSERT INTO profile_ratings (
+                profile_id,
+                anonymous_voter_id,
+                voter_ip_hash,
+                voter_user_agent_hash,
+                rating
+              )
+              VALUES (
+                @profileIdNum,
+                @anonymousVoterId,
+                @voterIpHash,
+                @voterUserAgentHash,
+                @rating
+              );
+            `,
+            anonymousParams,
+          );
+        }
+      }
   
       // Actualizar las estadísticas de calificaciones en el perfil
-      const updateProfileStatsQuery = `
-        UPDATE perfiles_usuario
-        SET average_rating = stats.avg_rating,
-            total_ratings = stats.total_ratings
-        FROM (
-          SELECT profile_id, AVG(rating)::float AS avg_rating, COUNT(*) AS total_ratings
-          FROM profile_ratings
-          WHERE profile_id = @profileIdNum
-          GROUP BY profile_id
-        ) AS stats
-        WHERE id_usuario = stats.profile_id;
-      `;
-      await db.query(updateProfileStatsQuery, { profileIdNum });
+      await updateProfileRatingStats(profileIdNum);
   
       const updatedProfileRatings = await db.query(
         `SELECT average_rating, total_ratings FROM perfiles_usuario WHERE id_usuario = @profileIdNum`,

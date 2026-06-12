@@ -41,6 +41,27 @@ interface ProfilePageClientProps {
   requestedProfileId?: string;
 }
 
+const ANONYMOUS_VOTER_ID_KEY = "fp_anonymous_voter_id";
+
+const getOrCreateAnonymousVoterId = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const existing = window.localStorage.getItem(ANONYMOUS_VOTER_ID_KEY);
+    if (existing) return existing;
+
+    const newId =
+      typeof window.crypto?.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    window.localStorage.setItem(ANONYMOUS_VOTER_ID_KEY, newId);
+    return newId;
+  } catch (_error) {
+    return null;
+  }
+};
+
 export default function ProfilePageClient({
   profile: initialProfile,
   requestedProfileId,
@@ -77,10 +98,15 @@ export default function ProfilePageClient({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
+  const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
 
   useEffect(() => {
     setProfile(initialProfile);
   }, [initialProfile]);
+
+  useEffect(() => {
+    setAnonymousVoterId(getOrCreateAnonymousVoterId());
+  }, []);
 
   useEffect(() => {
     if (
@@ -146,14 +172,22 @@ export default function ProfilePageClient({
   }, [isOwnAccountProfile, profile]);
 
   useEffect(() => {
-    if (!currentUser || !profile || canEditProfile || isManagedProfile) {
+    if (!profile || canEditProfile || isManagedProfile) {
       setMyRating(null);
+      return;
+    }
+
+    if (authLoading || (!currentUser && !anonymousVoterId)) {
       return;
     }
 
     const loadMyRating = async () => {
       try {
-        const { data } = await apiClient.get(`/profiles/${profile.id}/my-rating`);
+        const { data } = await apiClient.get(`/profiles/${profile.id}/my-rating`, {
+          headers: anonymousVoterId
+            ? { "x-anonymous-voter-id": anonymousVoterId }
+            : undefined,
+        });
         setMyRating(data.rating);
       } catch (error) {
         setMyRating(null);
@@ -161,7 +195,14 @@ export default function ProfilePageClient({
     };
 
     loadMyRating();
-  }, [currentUser, profile, canEditProfile, isManagedProfile]);
+  }, [
+    anonymousVoterId,
+    authLoading,
+    currentUser,
+    profile,
+    canEditProfile,
+    isManagedProfile,
+  ]);
 
   useEffect(() => {
     // Validación segura de IDs
@@ -185,9 +226,17 @@ export default function ProfilePageClient({
   const handleRatingChange = async (event: any, newValue: number | null) => {
     if (!newValue || !profile) return;
     try {
-      const res = await apiClient.post(`/profiles/${profile.id}/rate`, {
-        rating: newValue,
-      });
+      const res = await apiClient.post(
+        `/profiles/${profile.id}/rate`,
+        {
+          rating: newValue,
+        },
+        {
+          headers: anonymousVoterId
+            ? { "x-anonymous-voter-id": anonymousVoterId }
+            : undefined,
+        },
+      );
       const updatedProfile = res.data;
       setMyRating(updatedProfile.user_rating ?? newValue);
       setProfile((prev) =>
@@ -541,15 +590,13 @@ export default function ProfilePageClient({
                       value={myRating || 0}
                       precision={1}
                       onChange={handleRatingChange}
-                      disabled={isPending || !currentUser}
+                      disabled={
+                        isPending || authLoading || (!currentUser && !anonymousVoterId)
+                      }
                     />
                     {myRating ? (
                       <Typography variant="body2" color="text.secondary">
                         {t("your_rating", "Tu calificación")}: {myRating} / 5
-                      </Typography>
-                    ) : !currentUser ? (
-                      <Typography variant="body2" color="text.secondary">
-                        {t("login_to_rate", "Iniciá sesión para calificar")}
                       </Typography>
                     ) : (
                       <Typography variant="body2" color="text.secondary">
