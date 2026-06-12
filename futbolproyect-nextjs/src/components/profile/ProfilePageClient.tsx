@@ -444,6 +444,7 @@ export default function ProfilePageClient({
                     <ShareButtons
                       title={`${profile.nombre} ${profile.apellido ? profile.apellido : ""}`.trim()}
                       url={pathname}
+                      requestRatings={Boolean(isOwnAccountProfile)}
                     />
                   </Stack>
                 </Grid>
