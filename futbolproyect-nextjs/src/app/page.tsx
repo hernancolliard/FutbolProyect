@@ -15,6 +15,7 @@ import OfferList from "@/components/shared/OfferList";
 import FeaturedProfilesCarousel from "@/components/shared/FeaturedProfilesCarousel";
 import About from "@/components/shared/About";
 import Mission from "@/components/shared/Mission";
+import HowItWorks from "@/components/shared/HowItWorks";
 import ContactPageClient from "@/components/client-components/ContactPageClient";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PromotionModal from "@/components/PromotionModal";
@@ -105,6 +106,10 @@ export default function HomePage() {
 
         <FadeInOnScroll>
           <TrustedBy />
+        </FadeInOnScroll>
+
+        <FadeInOnScroll>
+          <HowItWorks />
         </FadeInOnScroll>
 
         <Box sx={{ p: 3 }}>
