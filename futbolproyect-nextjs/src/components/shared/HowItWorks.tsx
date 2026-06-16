@@ -55,14 +55,16 @@ function HowItWorks() {
     <Box
       component="section"
       sx={{
-        maxWidth: 1180,
-        mx: "auto",
-        my: { xs: 4, md: 6 },
-        px: { xs: 2, md: 1 },
+        width: "100%",
+        py: { xs: 4, md: 6 },
+        px: { xs: 2, md: 3 },
+        background: "linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%)",
       }}
     >
       <Box
         sx={{
+          maxWidth: 1180,
+          mx: "auto",
           borderRadius: 4,
           overflow: "hidden",
           border: "1px solid rgba(25, 38, 52, 0.12)",

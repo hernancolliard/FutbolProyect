@@ -49,36 +49,48 @@ function HomeFAQ() {
     <Box
       component="section"
       sx={{
-        maxWidth: 900,
-        mx: "auto",
-        my: { xs: 4, md: 6 },
-        px: { xs: 2, md: 1 },
+        width: "100%",
+        py: { xs: 5, md: 7 },
+        px: { xs: 2, md: 3 },
+        bgcolor: "background.paper",
       }}
     >
-      <Typography variant="h4" component="h2" sx={{ fontWeight: 900, textAlign: "center", mb: 1 }}>
-        {t("home_faq_title", "Preguntas frecuentes")}
-      </Typography>
-      <Typography color="text.secondary" sx={{ textAlign: "center", mb: 3 }}>
-        {t(
-          "home_faq_subtitle",
-          "Respuestas rapidas para usuarios que llegan por primera vez a la plataforma.",
-        )}
-      </Typography>
+      <Box sx={{ maxWidth: 900, mx: "auto" }}>
+        <Typography variant="h4" component="h2" sx={{ fontWeight: 900, textAlign: "center", mb: 1 }}>
+          {t("home_faq_title", "Preguntas frecuentes")}
+        </Typography>
+        <Typography color="text.secondary" sx={{ textAlign: "center", mb: 3 }}>
+          {t(
+            "home_faq_subtitle",
+            "Respuestas rapidas para usuarios que llegan por primera vez a la plataforma.",
+          )}
+        </Typography>
 
-      {faqs.map((faq) => (
-        <Accordion key={faq.questionKey} disableGutters sx={{ mb: 1, borderRadius: 1, overflow: "hidden" }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography sx={{ fontWeight: 800 }}>
-              {t(faq.questionKey, faq.fallbackQuestion)}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography color="text.secondary">
-              {t(faq.answerKey, faq.fallbackAnswer)}
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+        {faqs.map((faq) => (
+          <Accordion
+            key={faq.questionKey}
+            disableGutters
+            sx={{
+              mb: 1,
+              borderRadius: 1,
+              overflow: "hidden",
+              border: "1px solid rgba(25, 38, 52, 0.1)",
+              "&:before": { display: "none" },
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography sx={{ fontWeight: 800 }}>
+                {t(faq.questionKey, faq.fallbackQuestion)}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography color="text.secondary">
+                {t(faq.answerKey, faq.fallbackAnswer)}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
+        ))}
+      </Box>
     </Box>
   );
 }
