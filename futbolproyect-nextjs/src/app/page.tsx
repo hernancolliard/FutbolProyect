@@ -16,6 +16,8 @@ import FeaturedProfilesCarousel from "@/components/shared/FeaturedProfilesCarous
 import About from "@/components/shared/About";
 import Mission from "@/components/shared/Mission";
 import HowItWorks from "@/components/shared/HowItWorks";
+import HomeTrustSignals from "@/components/shared/HomeTrustSignals";
+import HomeFAQ from "@/components/shared/HomeFAQ";
 import ContactPageClient from "@/components/client-components/ContactPageClient";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import PromotionModal from "@/components/PromotionModal";
@@ -110,6 +112,10 @@ export default function HomePage() {
 
         <FadeInOnScroll>
           <HowItWorks />
+        </FadeInOnScroll>
+
+        <FadeInOnScroll>
+          <HomeTrustSignals />
         </FadeInOnScroll>
 
         <Box sx={{ p: 3 }}>
@@ -222,6 +228,10 @@ export default function HomePage() {
 
           <FadeInOnScroll>
             <Mission />
+          </FadeInOnScroll>
+
+          <FadeInOnScroll>
+            <HomeFAQ />
           </FadeInOnScroll>
 
           <hr />

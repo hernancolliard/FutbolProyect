@@ -7,6 +7,7 @@ import { ParallaxBanner } from 'react-scroll-parallax';
 interface ParallaxHeroProps {
   heroTitle: string;
   heroSubtitle: string;
+  heroKicker: string;
   primaryCta?: React.ReactNode;
   secondaryCta?: React.ReactNode;
 }
@@ -14,6 +15,7 @@ interface ParallaxHeroProps {
 const ParallaxHero: React.FC<ParallaxHeroProps> = ({
   heroTitle,
   heroSubtitle,
+  heroKicker,
   primaryCta,
   secondaryCta,
 }) => {
@@ -45,7 +47,7 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
     shouldAlwaysCompleteAnimation: true,
     children: (
       <div className="hero-content">
-        <span className="hero-kicker">Bolsa especializada en futbol</span>
+        <span className="hero-kicker">{heroKicker}</span>
         <h1>{heroTitle}</h1>
         <p>{heroSubtitle}</p>
         {(primaryCta || secondaryCta) && (

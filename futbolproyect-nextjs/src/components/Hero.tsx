@@ -10,6 +10,7 @@ const Hero = () => {
 
   return (
     <ParallaxHero
+      heroKicker={t("hero_kicker", "Bolsa especializada en futbol")}
       heroTitle={t('hero_title')}
       heroSubtitle={t('hero_subtitle')}
       primaryCta={

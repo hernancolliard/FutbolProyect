@@ -1,14 +1,16 @@
 "use client";
 
 import React from "react";
-import { Container, Paper, Typography, Box } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { Container, Paper, Typography } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Register from "@/components/auth/Register"; // Reutilizamos tu componente existente
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation("common");
+  const initialRole = searchParams.get("role") || undefined;
 
   return (
     <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>
@@ -28,6 +30,7 @@ export default function RegisterPage() {
         <Register
           onClose={() => router.push("/")}
           onSwitchToLogin={() => router.push("/")}
+          initialRole={initialRole}
         />
       </Paper>
     </Container>

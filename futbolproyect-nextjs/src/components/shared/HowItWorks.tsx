@@ -16,6 +16,7 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import ConnectWithoutContactOutlinedIcon from "@mui/icons-material/ConnectWithoutContactOutlined";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
+import { useAuth } from "@/context/AuthContext";
 
 const steps = [
   {
@@ -46,6 +47,9 @@ const steps = [
 
 function HowItWorks() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canPublishOffer =
+    user?.tipo_usuario === "ofertante" || user?.isadmin === true;
 
   return (
     <Box
@@ -186,7 +190,7 @@ function HowItWorks() {
           </Button>
           <Button
             component={Link}
-            href="/create-offer"
+            href={canPublishOffer ? "/create-offer" : "/register?role=club"}
             variant="outlined"
             sx={{
               color: "white",
