@@ -13,16 +13,20 @@ const {
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const DUPLICATE_EMAIL_MESSAGE = "Ya existe un usuario registrado con ese email.";
+
+const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 
 /* =========================
    LOGIN NORMAL
 ========================= */
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = normalizeEmail(req.body.email);
 
   try {
     const result = await db.query(
-      "SELECT * FROM usuarios WHERE email = @email",
+      "SELECT * FROM usuarios WHERE LOWER(TRIM(email)) = @email",
       { email },
     );
 
@@ -72,9 +76,10 @@ router.post("/google-login", async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    const { email, name, picture } = ticket.getPayload();
+    const { email: googleEmail, name, picture } = ticket.getPayload();
+    const email = normalizeEmail(googleEmail);
 
-    let result = await db.query("SELECT * FROM usuarios WHERE email = @email", {
+    let result = await db.query("SELECT * FROM usuarios WHERE LOWER(TRIM(email)) = @email", {
       email,
     });
 
@@ -149,7 +154,8 @@ router.get("/me", verificarToken, async (req, res) => {
    REGISTRO DE NUEVO USUARIO
 ========================= */
 router.post("/register", async (req, res) => {
-  const { nombre, email, password, tipo_usuario, rol } = req.body;
+  const { nombre, password, tipo_usuario, rol } = req.body;
+  const email = normalizeEmail(req.body.email);
 
   try {
     // Validación básica
@@ -180,14 +186,12 @@ router.post("/register", async (req, res) => {
 
     // Verificar si el email ya existe
     const existingUser = await db.query(
-      "SELECT id FROM usuarios WHERE email = @email",
+      "SELECT id FROM usuarios WHERE LOWER(TRIM(email)) = @email",
       { email }
     );
 
     if (existingUser.rows.length > 0) {
-      return res
-        .status(409)
-        .json({ message: "Este email ya está registrado." });
+      return res.status(409).json({ message: DUPLICATE_EMAIL_MESSAGE });
     }
 
     // Hash de la contraseña
@@ -241,6 +245,9 @@ router.post("/register", async (req, res) => {
     });
   } catch (err) {
     console.error("Error al registrar usuario:", err);
+    if (err.code === "23505") {
+      return res.status(409).json({ message: DUPLICATE_EMAIL_MESSAGE });
+    }
     res.status(500).json({ message: "Error del servidor." });
   }
 });
@@ -249,14 +256,14 @@ router.post("/register", async (req, res) => {
    SOLICITUD DE RESTABLECIMIENTO DE CONTRASEÑA
 ========================= */
 router.post("/forgot-password", async (req, res) => {
-  const { email } = req.body;
+  const email = normalizeEmail(req.body.email);
 
   if (!email) {
     return res.status(400).json({ message: "El email es obligatorio." });
   }
 
   try {
-    const result = await db.query("SELECT id, nombre FROM usuarios WHERE email = @email", { email });
+    const result = await db.query("SELECT id, nombre FROM usuarios WHERE LOWER(TRIM(email)) = @email", { email });
     if (result.rows.length === 0) {
       // Responder igual para no revelar existencia
       return res.json({ message: "Si el correo existe, te enviamos un enlace para restablecer la contraseña." });
