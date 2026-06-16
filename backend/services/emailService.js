@@ -1,7 +1,57 @@
 const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
 // Resend se configura automáticamente con la variable de entorno RESEND_API_KEY
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend;
+let smtpTransporter;
+
+const getResendClient = () => {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY no esta configurada.");
+  }
+
+  if (!resend) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+
+  return resend;
+};
+
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const withLineBreaks = (value = "") =>
+  escapeHtml(value).replace(/\r?\n/g, "<br>");
+
+const getSmtpTransporter = () => {
+  if (smtpTransporter) {
+    return smtpTransporter;
+  }
+
+  const port = Number(process.env.EMAIL_PORT || 587);
+  smtpTransporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port,
+    secure:
+      process.env.EMAIL_SECURE !== undefined
+        ? process.env.EMAIL_SECURE === "true"
+        : port === 465,
+    auth:
+      process.env.EMAIL_USER && process.env.EMAIL_PASS
+        ? {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          }
+        : undefined,
+  });
+
+  return smtpTransporter;
+};
 
 /**
  * Envía un correo electrónico a través de Resend desde el formulario de contacto.
@@ -11,7 +61,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  */
 const sendContactEmail = async (name, fromEmail, message) => {
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: "FutbolProyect <info@futbolproyect.com>", // ¡Importante! Este es un remitente por defecto de Resend.
       to: ["info@futbolproyect.com"], // Tu correo donde recibes los mensajes.
       subject: `Nuevo mensaje de contacto de: ${name}`,
@@ -56,7 +106,7 @@ const sendWelcomeEmail = async (to, userName, userType) => {
   htmlContent += `<p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
@@ -95,7 +145,7 @@ const sendSubscriptionConfirmationEmail = async (to, userName, plan, endDate) =>
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
@@ -132,7 +182,7 @@ const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
 
   try {
     // Usamos un try-catch para cada correo individualmente.
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
@@ -157,22 +207,47 @@ const sendNewOfferNotificationEmail = async (to, offerTitle, offerLink) => {
  * @param {string} originalMessage - El mensaje original del usuario.
  */
 const sendReplyToContactMessage = async (to, subject, replyMessage, originalMessage) => {
+  if (!to) {
+    throw new Error("El mensaje de contacto no tiene un destinatario.");
+  }
+
   const htmlContent = `
     <p>Hola,</p>
     <p>Gracias por contactar a FutbolProyect. Aquí está la respuesta a tu consulta:</p>
     <div style="padding: 15px; border-left: 4px solid #ccc; background-color: #f5f5f5; margin: 15px 0;">
-      <p>${replyMessage.replace(/\n/g, "<br>")}</p>
+      <p>${withLineBreaks(replyMessage)}</p>
     </div>
     <hr>
     <p><strong>Tu mensaje original:</strong></p>
     <blockquote style="border-left: 4px solid #eee; padding-left: 15px; color: #666;">
-      <p><em>${originalMessage.replace(/\n/g, "<br>")}</em></p>
+      <p><em>${withLineBreaks(originalMessage)}</em></p>
     </blockquote>
     <p>Saludos,<br>El equipo de FutbolProyect</p>
   `;
 
   try {
-    const { data, error } = await resend.emails.send({
+    if (process.env.EMAIL_HOST) {
+      const info = await getSmtpTransporter().sendMail({
+        from:
+          process.env.EMAIL_FROM ||
+          `FutbolProyect <${process.env.EMAIL_USER || "info@futbolproyect.com"}>`,
+        to,
+        subject,
+        html: htmlContent,
+        text: `${replyMessage}\n\nTu mensaje original:\n${originalMessage}`,
+      });
+
+      console.log(`Respuesta de contacto enviada por SMTP a ${to}:`, info.messageId);
+      return info;
+    }
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error(
+        "No hay un proveedor de correo configurado. Define EMAIL_HOST o RESEND_API_KEY."
+      );
+    }
+
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
@@ -210,7 +285,7 @@ const sendPasswordResetEmail = async (to, userName, resetLink) => {
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,
@@ -253,7 +328,7 @@ const sendNewApplicationNotification = async (to, applicantName, offerTitle) => 
                      <p>Saludos,<br>El equipo de FutbolProyect</p>`;
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: 'FutbolProyect <info@futbolproyect.com>',
       to: [to],
       subject: subject,

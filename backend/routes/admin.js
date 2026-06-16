@@ -235,8 +235,10 @@ router.post('/contact-messages/:id/reply', [verificarToken, verificarAdmin], asy
   const { id } = req.params;
   const { replyMessage } = req.body;
   const adminId = req.user.id;
+  const normalizedReplyMessage =
+    typeof replyMessage === 'string' ? replyMessage.trim() : '';
 
-  if (!replyMessage) {
+  if (!normalizedReplyMessage) {
     return res.status(400).json({ message: 'Reply message is required.' });
   }
 
@@ -257,7 +259,7 @@ router.post('/contact-messages/:id/reply', [verificarToken, verificarAdmin], asy
     await sendReplyToContactMessage(
       originalMessage.email,
       `Re: Tu mensaje para FutbolProyect`,
-      replyMessage,
+      normalizedReplyMessage,
       originalMessage.message
     );
 
@@ -271,13 +273,19 @@ router.post('/contact-messages/:id/reply', [verificarToken, verificarAdmin], asy
       WHERE id = @id
       RETURNING *;
     `;
-    const updatedResult = await db.query(updateQuery, { replyMessage, adminId, id });
+    const updatedResult = await db.query(updateQuery, {
+      replyMessage: normalizedReplyMessage,
+      adminId,
+      id,
+    });
 
     res.json(updatedResult.rows[0]);
 
   } catch (error) {
     console.error('Error replying to contact message:', error);
-    res.status(500).json({ message: 'Server error while sending reply.' });
+    res.status(500).json({
+      message: 'No se pudo enviar la respuesta. Verifica la configuración del correo.',
+    });
   }
 });
 

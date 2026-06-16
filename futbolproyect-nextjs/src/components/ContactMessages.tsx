@@ -83,7 +83,11 @@ function ContactMessages() {
       handleCloseModal();
       fetchMessages(); // Refresh messages
     } catch (err) {
-      toast.error(err.message || t('reply_sent_error', 'Error al enviar la respuesta.'));
+      toast.error(
+        err.response?.data?.message ||
+          err.message ||
+          t('reply_sent_error', 'Error al enviar la respuesta.')
+      );
     } finally {
       setIsSubmitting(false);
     }
