@@ -1,5 +1,7 @@
 import { getAllOffers } from "@/lib/offers";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const offers = await getAllOffers();

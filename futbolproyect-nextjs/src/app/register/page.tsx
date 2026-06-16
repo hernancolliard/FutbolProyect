@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { Container, Paper, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Register from "@/components/auth/Register"; // Reutilizamos tu componente existente
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation("common");
@@ -34,5 +34,13 @@ export default function RegisterPage() {
         />
       </Paper>
     </Container>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }
