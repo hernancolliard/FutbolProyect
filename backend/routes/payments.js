@@ -93,7 +93,7 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
           failure: `${process.env.FRONTEND_URL}/pago-cancelado-mp`,
           pending: `${process.env.FRONTEND_URL}/pago-pendiente-mp`,
         },
-        notification_url: `${process.env.BACKEND_URL}/payments/webhook-mp`,
+        notification_url: `${process.env.BACKEND_URL}/api/payments/webhook-mp`,
       },
     });
     res.json({ init_point: response.init_point, preferenceId: response.id });
