@@ -101,9 +101,7 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
 
     const backendUrl = getBackendUrl(req);
     const frontendUrl = getFrontendUrl();
-    const useSandbox =
-      process.env.MERCADO_PAGO_SANDBOX === "true" ||
-      process.env.NODE_ENV !== "production";
+    const useSandbox = process.env.MERCADO_PAGO_SANDBOX === "true";
 
     if (!frontendUrl) {
       return res.status(500).json({ message: "Frontend URL no configurada." });
@@ -138,6 +136,13 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
     const initPoint = useSandbox
       ? response.sandbox_init_point || response.init_point
       : response.init_point;
+
+    if (!initPoint) {
+      console.error("Mercado Pago preference created without an init_point", response);
+      return res
+        .status(500)
+        .json({ message: "No se pudo generar el enlace de pago de Mercado Pago." });
+    }
 
     res.json({ init_point: initPoint, preferenceId: response.id });
   } catch (error) {
