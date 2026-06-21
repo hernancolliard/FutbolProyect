@@ -16,6 +16,21 @@ const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
 
+const getBackendUrl = (req) => {
+  if (process.env.BACKEND_URL) {
+    return process.env.BACKEND_URL.replace(/\/+$/, "");
+  }
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const protocol = forwardedProto || req.protocol;
+  const host = req.get("host");
+  return `${protocol}://${host}`;
+};
+
+const getFrontendUrl = () => {
+  if (!process.env.FRONTEND_URL) return "";
+  return process.env.FRONTEND_URL.replace(/\/+$/, "");
+};
+
 // Configura PayPal
 // --- INICIO DE LA MODIFICACIÓN ---
 
@@ -63,14 +78,35 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
           .status(400)
           .json({ message: "Ciclo de facturación no válido." });
       }
-      unit_price = planResult.rows[0].price_mp;
+      const planPriceMp = parseFloat(planResult.rows[0].price_mp);
+      if (isNaN(planPriceMp) || planPriceMp <= 0) {
+        return res
+          .status(500)
+          .json({ message: "Precio de suscripción inválido." });
+      }
+      unit_price = planPriceMp;
       title = `Suscripción ${planType} - ${billingCycle}`;
     } else if (planType === "destacar_oferta") {
+      if (!req.body.offerId) {
+        return res
+          .status(400)
+          .json({ message: "ID de oferta es requerido para destacar una oferta." });
+      }
       title = "Destacar Oferta";
-      unit_price = 5000; // Still hardcoded for featured offer
+      unit_price = 5000;
       description = planType;
     } else {
       return res.status(400).json({ message: "Tipo de plan no válido." });
+    }
+
+    const backendUrl = getBackendUrl(req);
+    const frontendUrl = getFrontendUrl();
+    const useSandbox =
+      process.env.MERCADO_PAGO_SANDBOX === "true" ||
+      process.env.NODE_ENV !== "production";
+
+    if (!frontendUrl) {
+      return res.status(500).json({ message: "Frontend URL no configurada." });
     }
 
     const preference = new Preference(client);
@@ -82,6 +118,7 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
             description: description,
             unit_price: unit_price,
             quantity: 1,
+            currency_id: "ARS",
           },
         ],
         external_reference:
@@ -89,14 +126,20 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
             ? `${userId}_${req.body.offerId}`
             : userId.toString(),
         back_urls: {
-          success: `${process.env.FRONTEND_URL}/pago-exitoso-mp`,
-          failure: `${process.env.FRONTEND_URL}/pago-cancelado-mp`,
-          pending: `${process.env.FRONTEND_URL}/pago-pendiente-mp`,
+          success: `${frontendUrl}/payment/success/mercadopago`,
+          failure: `${frontendUrl}/payment/cancelled/mercadopago`,
+          pending: `${frontendUrl}/payment/pending/mercadopago`,
         },
-        notification_url: `${process.env.BACKEND_URL}/api/payments/webhook-mp`,
+        auto_return: "approved",
+        notification_url: `${backendUrl}/api/payments/webhook-mp`,
       },
     });
-    res.json({ init_point: response.init_point, preferenceId: response.id });
+
+    const initPoint = useSandbox
+      ? response.sandbox_init_point || response.init_point
+      : response.init_point;
+
+    res.json({ init_point: initPoint, preferenceId: response.id });
   } catch (error) {
     console.error("Error al crear preferencia de Mercado Pago:", error);
     res.status(500).json({ message: "Error al crear la preferencia de pago." });
