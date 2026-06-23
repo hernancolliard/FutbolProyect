@@ -5,6 +5,7 @@ import UserManagement from "./UserManagement";
 import OfferManagement from "./OfferManagement";
 import SubscriptionManagement from "./SubscriptionManagement";
 import ContactMessages from "./ContactMessages";
+import ClubContacts from "./ClubContacts";
 import AdvertisementManagement from "./AdvertisementManagement";
 import AdvertisingLeadManagement from "./AdvertisingLeadManagement";
 import Tabs from "@mui/material/Tabs";
@@ -37,6 +38,7 @@ function AdminDashboard() {
         <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
         <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
         <Tab label={t('contact_messages_tab', 'Mensajes de Contacto')} value="contact" />
+        <Tab label={t('club_contacts_tab', 'Contactos Clubes')} value="club-contacts" />
       </Tabs>
       <Box className="admin-content" sx={{ mt: 3 }}>
         {activeTab === "users" && <UserManagement />}
@@ -45,6 +47,7 @@ function AdminDashboard() {
         {activeTab === "advertising" && <AdvertisementManagement />}
         {activeTab === "advertising-leads" && <AdvertisingLeadManagement />}
         {activeTab === "contact" && <ContactMessages />}
+        {activeTab === "club-contacts" && <ClubContacts />}
       </Box>
     </Box>
   );

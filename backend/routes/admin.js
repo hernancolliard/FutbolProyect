@@ -217,6 +217,106 @@ router.put(
   }
 );
 
+// --- Club Contacts Management ---
+// Table: club_contacts (id, club, website, email, email2, email3, phone, country, league, created_at, updated_at)
+
+// GET /api/admin/club-contacts - list with optional filters: country, league, q (search name)
+router.get('/club-contacts', [verificarToken, verificarAdmin], async (req, res) => {
+  try {
+    const { country, league, q } = req.query;
+    let baseQuery = 'SELECT * FROM club_contacts';
+    const conditions = [];
+    const params = {};
+
+    if (q) {
+      params.q = `%${q}%`;
+      conditions.push('club ILIKE @q');
+    }
+    if (country) {
+      params.country = country;
+      conditions.push('country = @country');
+    }
+    if (league) {
+      params.league = league;
+      conditions.push('league = @league');
+    }
+
+    if (conditions.length > 0) {
+      baseQuery += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    baseQuery += ' ORDER BY club ASC';
+
+    const result = await db.query(baseQuery, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching club contacts:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// POST /api/admin/club-contacts - create
+router.post('/club-contacts', [verificarToken, verificarAdmin], async (req, res) => {
+  try {
+    const { club, website, email, email2, email3, phone, country, league } = req.body;
+    if (!club) return res.status(400).json({ message: 'El nombre del club es requerido.' });
+
+    const insertQuery = `
+      INSERT INTO club_contacts (club, website, email, email2, email3, phone, country, league, created_at, updated_at)
+      VALUES (@club, @website, @email, @email2, @email3, @phone, @country, @league, NOW(), NOW())
+      RETURNING *;
+    `;
+
+    const result = await db.query(insertQuery, { club, website, email, email2, email3, phone, country, league });
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error creating club contact:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// PUT /api/admin/club-contacts/:id - update
+router.put('/club-contacts/:id', [verificarToken, verificarAdmin], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { club, website, email, email2, email3, phone, country, league } = req.body;
+
+    const updateQuery = `
+      UPDATE club_contacts SET
+        club = @club,
+        website = @website,
+        email = @email,
+        email2 = @email2,
+        email3 = @email3,
+        phone = @phone,
+        country = @country,
+        league = @league,
+        updated_at = NOW()
+      WHERE id = @id
+      RETURNING *;
+    `;
+
+    const result = await db.query(updateQuery, { id: parseInt(id, 10), club, website, email, email2, email3, phone, country, league });
+    if (result.rows.length === 0) return res.status(404).json({ message: 'Club no encontrado.' });
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating club contact:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// DELETE /api/admin/club-contacts/:id - delete
+router.delete('/club-contacts/:id', [verificarToken, verificarAdmin], async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM club_contacts WHERE id = @id', { id: parseInt(id, 10) });
+    res.json({ message: 'Contacto de club eliminado.' });
+  } catch (error) {
+    console.error('Error deleting club contact:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
 // --- Contact Messages Management ---
 
 // GET /api/admin/contact-messages - Get all contact messages
