@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const imagePaths = [
-  'frontend/public/images',
-  'frontend/src/images'
+  'futbolproyect-nextjs/public',
+  'futbolproyect-nextjs/public/images'
 ];
 
 const supportedExtensions = ['.png', '.jpg', '.jpeg'];
