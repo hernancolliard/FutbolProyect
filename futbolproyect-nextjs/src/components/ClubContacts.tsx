@@ -17,8 +17,13 @@ import {
   Paper,
   Grid,
   IconButton,
+  Checkbox,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { toast } from 'react-toastify';
 
 function ClubContacts() {
@@ -35,6 +40,10 @@ function ClubContacts() {
   // new item form
   const [newClub, setNewClub] = useState({ club: '', website: '', email: '', email2: '', email3: '', phone: '', country: '', league: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editingClub, setEditingClub] = useState({ club: '', website: '', email: '', email2: '', email3: '', phone: '', country: '', league: '' });
 
   const fetchList = async () => {
     try {
@@ -81,10 +90,86 @@ function ClubContacts() {
     try {
       await apiClient.delete(`/admin/club-contacts/${id}`);
       toast.success(t('club_deleted', 'Club eliminado.'));
+      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
       fetchList();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || t('club_delete_error', 'Error al eliminar club.'));
     }
+  };
+
+  const handleToggleSelect = (id) => {
+    setSelectedIds((current) =>
+      current.includes(id) ? current.filter((selectedId) => selectedId !== id) : [...current, id],
+    );
+  };
+
+  const handleCopyEmails = async () => {
+    if (selectedIds.length === 0) {
+      toast.warn(t('select_at_least_one', 'Seleccioná al menos un club.'));
+      return;
+    }
+
+    const selectedClubs = items.filter((item) => selectedIds.includes(item.id));
+    const emails = selectedClubs.reduce((acc, club) => {
+      if (club.email) acc.push(club.email);
+      if (club.email2) acc.push(club.email2);
+      if (club.email3) acc.push(club.email3);
+      return acc;
+    }, []);
+
+    if (emails.length === 0) {
+      toast.warn(t('no_emails_selected', 'No hay emails para copiar.'));
+      return;
+    }
+
+    const uniqueEmails = Array.from(new Set(emails));
+    const textToCopy = uniqueEmails.join(', ');
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      toast.success(t('emails_copied', 'Emails copiados al portapapeles.'));
+    } catch (err) {
+      toast.error(t('copy_error', 'No se pudo copiar al portapapeles.'));
+    }
+  };
+
+  const startEdit = (club) => {
+    setEditingId(club.id);
+    setEditingClub({
+      club: club.club || '',
+      website: club.website || '',
+      email: club.email || '',
+      email2: club.email2 || '',
+      email3: club.email3 || '',
+      phone: club.phone || '',
+      country: club.country || '',
+      league: club.league || '',
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingClub({ club: '', website: '', email: '', email2: '', email3: '', phone: '', country: '', league: '' });
+  };
+
+  const handleSave = async () => {
+    if (!editingClub.club || !editingClub.club.trim()) {
+      toast.warn(t('club_name_required', 'El nombre del club es requerido.'));
+      return;
+    }
+
+    try {
+      await apiClient.put(`/admin/club-contacts/${editingId}`, editingClub);
+      toast.success(t('club_updated', 'Club actualizado.'));
+      cancelEdit();
+      fetchList();
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || t('club_update_error', 'Error al actualizar club.'));
+    }
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditingClub((current) => ({ ...current, [field]: value }));
   };
 
   if (loading) return (<Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>);
@@ -109,6 +194,17 @@ function ClubContacts() {
         </Grid>
       </Grid>
 
+      <Grid container spacing={1} sx={{ mb: 3, alignItems: 'center' }}>
+        <Grid item>
+          <Button variant="outlined" startIcon={<ContentCopyIcon />} onClick={handleCopyEmails}>
+            {t('copy_selected_emails', 'Copiar emails seleccionados')}
+          </Button>
+        </Grid>
+        <Grid item>
+          <Typography variant="body2">{selectedIds.length} {t('clubs_selected', 'clubes seleccionados')}</Typography>
+        </Grid>
+      </Grid>
+
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6">{t('add_new_club', 'Agregar nuevo club')}</Typography>
         <Grid container spacing={1} sx={{ mt: 1 }}>
@@ -125,24 +221,79 @@ function ClubContacts() {
       </Box>
 
       <List>
-        {items.map((it) => (
-          <React.Fragment key={it.id}>
-            <ListItem secondaryAction={(
-              <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(it.id)}>
-                <DeleteIcon />
-              </IconButton>
-            )}>
-              <ListItemText
-                primary={<span style={{ display: 'flex', justifyContent: 'space-between' }}>{it.club} <a href={it.website || '#'} target="_blank" rel="noreferrer" style={{ fontSize: 12 }}>{it.website}</a></span>}
-                secondary={<>
-                  <div>{it.email || ''} {it.email2 ? `| ${it.email2}` : ''} {it.email3 ? `| ${it.email3}` : ''}</div>
-                  <div>{it.phone || ''} — {it.country || ''} — {it.league || ''}</div>
-                </>}
-              />
-            </ListItem>
-            <Divider />
-          </React.Fragment>
-        ))}
+        {items.map((it) => {
+          const isEditing = editingId === it.id;
+          return (
+            <React.Fragment key={it.id}>
+              <ListItem alignItems="flex-start" sx={{ py: 2 }}>
+                <Checkbox
+                  checked={selectedIds.includes(it.id)}
+                  onChange={() => handleToggleSelect(it.id)}
+                  sx={{ mr: 2 }}
+                />
+                <ListItemText
+                  primary={
+                    isEditing ? (
+                      <TextField
+                        label={t('club_name', 'Club')}
+                        value={editingClub.club}
+                        onChange={(e) => handleEditChange('club', e.target.value)}
+                        fullWidth
+                        sx={{ mb: 1 }}
+                      />
+                    ) : (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="subtitle1">{it.club}</Typography>
+                        <Typography component="a" href={it.website || '#'} target="_blank" rel="noreferrer" sx={{ fontSize: 12 }}>
+                          {it.website}
+                        </Typography>
+                      </Box>
+                    )
+                  }
+                  secondary={
+                    isEditing ? (
+                      <Box sx={{ mt: 1 }}>
+                        <Grid container spacing={1}>
+                          <Grid item xs={12} md={4}><TextField label={t('website', 'Página web')} value={editingClub.website} onChange={(e) => handleEditChange('website', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('email', 'Email')} value={editingClub.email} onChange={(e) => handleEditChange('email', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('email2', 'Email 2')} value={editingClub.email2} onChange={(e) => handleEditChange('email2', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('email3', 'Email 3')} value={editingClub.email3} onChange={(e) => handleEditChange('email3', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('phone', 'Teléfono')} value={editingClub.phone} onChange={(e) => handleEditChange('phone', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('country', 'País')} value={editingClub.country} onChange={(e) => handleEditChange('country', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={4}><TextField label={t('league', 'Liga')} value={editingClub.league} onChange={(e) => handleEditChange('league', e.target.value)} fullWidth /></Grid>
+                          <Grid item xs={12} md={8}>
+                            <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave} sx={{ mr: 1 }}>
+                              {t('save_button', 'Guardar')}
+                            </Button>
+                            <Button variant="outlined" startIcon={<CancelIcon />} onClick={cancelEdit}>
+                              {t('cancel_button', 'Cancelar')}
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                    ) : (
+                      <>
+                        <Typography>{[it.email, it.email2, it.email3].filter(Boolean).join(' | ')}</Typography>
+                        <Typography variant="body2" color="text.secondary">{[it.phone, it.country, it.league].filter(Boolean).join(' — ')}</Typography>
+                      </>
+                    )
+                  }
+                />
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  {!isEditing && (
+                    <IconButton edge="end" aria-label="edit" onClick={() => startEdit(it)}>
+                      <EditIcon />
+                    </IconButton>
+                  )}
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(it.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              </ListItem>
+              <Divider />
+            </React.Fragment>
+          );
+        })}
       </List>
     </Paper>
   );
