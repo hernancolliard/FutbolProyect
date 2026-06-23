@@ -233,12 +233,12 @@ router.get('/club-contacts', [verificarToken, verificarAdmin], async (req, res) 
       conditions.push('club ILIKE @q');
     }
     if (country) {
-      params.country = country;
-      conditions.push('country = @country');
+      params.country = `%${country}%`;
+      conditions.push('country ILIKE @country');
     }
     if (league) {
-      params.league = league;
-      conditions.push('league = @league');
+      params.league = `%${league}%`;
+      conditions.push('league ILIKE @league');
     }
 
     if (conditions.length > 0) {
