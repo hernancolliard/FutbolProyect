@@ -18,11 +18,19 @@
     "@paypal/react-paypal-js": "^8.9.2",
     "@react-oauth/google": "^0.13.4",
     "@tanstack/react-query": "^5.45.1",
+    "@tanstack/react-query-devtools": "^5.45.1",
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-slick": "^0.23.13",
+    "@vercel/analytics": "^2.0.1",
+    "autoprefixer": "^10.4.23",
     "axios": "^1.7.2",
     "html2canvas": "^1.4.1",
     "i18next": "^23.11.5",
     "i18next-http-backend": "^2.5.2",
     "next": "^14.2.3",
+    "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
@@ -33,20 +41,13 @@
     "react-toastify": "^10.0.5",
     "sharp": "^0.34.5",
     "slick-carousel": "^1.8.1",
-    "@types/node": "^20.14.2",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@types/react-slick": "^0.23.13",
-    "autoprefixer": "^10.4.23",
-    "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
-    "@tanstack/react-query-devtools": "^5.45.1",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "@types/prop-types": "^15.7.15",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.3",
-    "@types/prop-types": "^15.7.15"
+    "eslint-config-next": "14.2.3"
   },
   "engines": {
     "node": "20.x"
