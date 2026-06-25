@@ -55,17 +55,17 @@ function TrustedBy() {
 
   return (
     <Box className="trust-section">
-      <Stack spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
+      <Stack spacing={1.5} sx={{ mb: 3, maxWidth: 1180, mx: 'auto', alignItems: { xs: 'center', md: 'flex-start' } }}>
         <Chip
           icon={<VerifiedOutlinedIcon />}
           label={t("trust_badge", "Perfiles, ofertas y contacto en un solo lugar")}
           color="primary"
           variant="outlined"
         />
-        <Typography variant="h4" component="h2" sx={{ fontWeight: 800, textAlign: "center" }}>
+        <Typography variant="h4" component="h2" sx={{ fontWeight: 800, textAlign: { xs: 'center', md: 'left' } }}>
           {t("trust_title", "Una plataforma pensada para el mercado laboral del futbol")}
         </Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 760, textAlign: "center" }}>
+        <Typography color="text.secondary" sx={{ maxWidth: 760, textAlign: { xs: 'center', md: 'left' } }}>
           {t(
             "trust_subtitle",
             "Separa candidatos, clubes y agencias desde el primer clic para que cada usuario llegue rapido al flujo correcto.",

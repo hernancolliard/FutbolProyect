@@ -84,17 +84,17 @@ function HomeTrustSignals() {
       }}
     >
       <Box sx={{ maxWidth: 1180, mx: "auto" }}>
-        <Stack spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
+        <Stack spacing={1.5} sx={{ mb: 3, alignItems: { xs: 'center', md: 'flex-start' } }}>
           <Chip
             icon={<CheckCircleOutlineIcon />}
             label={t("trust_signals_badge", "Mas confianza desde el primer clic")}
             color="secondary"
             variant="outlined"
           />
-          <Typography variant="h4" component="h2" sx={{ fontWeight: 900, textAlign: "center" }}>
+          <Typography variant="h4" component="h2" sx={{ fontWeight: 900, textAlign: { xs: 'center', md: 'left' } }}>
             {t("trust_signals_title", "Una pagina mas clara para decidir rapido")}
           </Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 760, textAlign: "center" }}>
+          <Typography color="text.secondary" sx={{ maxWidth: 760, textAlign: { xs: 'center', md: 'left' } }}>
             {t(
               "trust_signals_subtitle",
               "La home ahora explica el valor de la plataforma, orienta cada tipo de usuario y reduce dudas antes del registro.",

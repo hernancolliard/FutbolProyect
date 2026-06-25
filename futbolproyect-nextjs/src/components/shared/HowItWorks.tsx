@@ -87,7 +87,7 @@ function HowItWorks() {
           }}
         />
 
-        <Stack spacing={1.5} sx={{ position: "relative", mb: 3 }}>
+        <Stack spacing={1.5} sx={{ position: "relative", mb: 3, alignItems: { xs: 'center', md: 'flex-start' } }}>
           <Chip
             icon={<EmojiEventsOutlinedIcon />}
             label={t("how_it_works_badge", "Proceso simple")}
@@ -108,6 +108,7 @@ function HowItWorks() {
               fontWeight: 900,
               fontSize: { xs: "2rem", md: "2.7rem" },
               maxWidth: 760,
+              textAlign: { xs: 'center', md: 'left' },
             }}
           >
             {t("how_it_works_title", "Como funciona FutbolProyect")}
@@ -117,6 +118,7 @@ function HowItWorks() {
               color: "rgba(255,255,255,0.78)",
               maxWidth: 760,
               fontSize: { xs: "1rem", md: "1.12rem" },
+              textAlign: { xs: 'center', md: 'left' },
             }}
           >
             {t(
