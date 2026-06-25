@@ -11,8 +11,8 @@ export default function AdminPage() {
 
   return (
     <AdminRoute>
-      <Box sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom textAlign="center">
+      <Box sx={{ p: { xs: 2, md: 4 }, width: '100%' }}>
+        <Typography variant="h4" component="h1" gutterBottom textAlign="center" sx={{ fontSize: { xs: '1.8rem', md: '2.5rem' } }}>
           {t("admin_dashboard_title", "Panel de Administración")}
         </Typography>
         <AdminDashboard />

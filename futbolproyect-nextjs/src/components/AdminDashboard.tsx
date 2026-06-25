@@ -23,24 +23,30 @@ function AdminDashboard() {
   };
 
   return (
-    <Box className="admin-dashboard" sx={{ mt: 4 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>
+    <Box className="admin-dashboard" sx={{ mt: 4, width: '100%' }}>
+      <Typography variant="h4" sx={{ mb: 2, fontSize: { xs: '1.5rem', md: '2rem' } }}>
         {t('admin_dashboard_title', 'Panel de Administración')}
       </Typography>
-      <Tabs
-        value={activeTab}
-        onChange={handleTabChange}
-        aria-label="admin tabs"
-      >
+      <Box sx={{ width: '100%', overflowX: 'auto' }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="admin tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
         <Tab label={t('user_management_tab', 'Gestión de Usuarios')} value="users" />
         <Tab label={t('offer_management_tab', 'Gestión de Ofertas')} value="offers" />
         <Tab label={t('subscription_management_tab', 'Gestión de Suscripciones')} value="subscriptions" />
         <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
         <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
         <Tab label={t('contact_messages_tab', 'Mensajes de Contacto')} value="contact" />
-        <Tab label={t('club_contacts_tab', 'Contactos Clubes')} value="club-contacts" />
+        <Tab label={t('club_contacts_tab', 'Contactos Clubes')} value="club-contacts" sx={{ minWidth: 120 }} />
       </Tabs>
-      <Box className="admin-content" sx={{ mt: 3 }}>
+      </Box>
+      <Box className="admin-content" sx={{ mt: 3, width: '100%' }}>
         {activeTab === "users" && <UserManagement />}
         {activeTab === "offers" && <OfferManagement />}
         {activeTab === "subscriptions" && <SubscriptionManagement />}
