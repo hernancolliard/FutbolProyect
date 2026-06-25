@@ -114,9 +114,7 @@ export default function HomePage() {
           <HowItWorks />
         </FadeInOnScroll>
 
-        <FadeInOnScroll>
-          <HomeTrustSignals />
-        </FadeInOnScroll>
+        {/* HomeTrustSignals moved to appear after offers and profiles for better flow */}
 
         <Box sx={{ p: 3 }}>
           <FadeInOnScroll>
@@ -219,6 +217,10 @@ export default function HomePage() {
               {t("view_all_profiles")}
             </Button>
           </Box>
+
+          <FadeInOnScroll>
+            <HomeTrustSignals />
+          </FadeInOnScroll>
 
           <hr />
 
