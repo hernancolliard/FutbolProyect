@@ -263,10 +263,10 @@ const OfferList = ({
 
   return (
     <FadeInOnScroll>
-      <div className="offer-list-container">
+      <Box className="offer-list-container" sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, md: 3 } }}>
         {isHomePage && featuredOffers.length > 0 && (
           <>
-            <Typography variant="h5" sx={{ mb: 2, textAlign: 'center' }}>
+            <Typography variant="h5" sx={{ mb: 2, textAlign: { xs: 'center', md: 'left' } }}>
               {t("featured_offers")}
             </Typography>
                       <Slider {...settings}>
@@ -293,7 +293,7 @@ const OfferList = ({
                       <Box sx={{ mt: 4 }}>
                         <Typography
                           variant="h5"
-                          sx={{ mb: 2, textAlign: "center", fontWeight: 900 }}
+                          sx={{ mb: 2, textAlign: { xs: 'center', md: 'left' }, fontWeight: 900 }}
                         >
                           {t("available_offers", "Ofertas Disponibles")}
                         </Typography>

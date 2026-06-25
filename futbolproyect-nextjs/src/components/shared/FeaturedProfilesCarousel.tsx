@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link'; // Use next/link
 import Slider from 'react-slick';
 import { useTranslation } from 'react-i18next';
+import { Box, Typography } from '@mui/material';
 import useIsMobile from '../../hooks/useIsMobile'; // Migrated useIsMobile
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Image from "next/image"; // Use next/image
@@ -88,8 +89,8 @@ function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
   }
 
   return (
-    <div className="featured-profiles-carousel-container">
-      <h2 className="carousel-title">{t('all_profiles_title')}</h2>
+    <Box className="featured-profiles-carousel-container" sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, md: 3 } }}>
+      <Typography variant="h5" className="carousel-title" sx={{ mb: 2, textAlign: { xs: 'center', md: 'left' } }}>{t('all_profiles_title')}</Typography>
       <Slider {...settings} className="profiles-carousel">
         {profiles.map((profile) => (
           <div key={profile.id} className="carousel-profile-card-wrapper" style={{ padding: 2 }}>
