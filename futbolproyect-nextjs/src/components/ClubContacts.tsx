@@ -18,6 +18,7 @@ import {
   Grid,
   IconButton,
   Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -44,6 +45,20 @@ function ClubContacts() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editingClub, setEditingClub] = useState({ club: '', website: '', email: '', email2: '', email3: '', phone: '', country: '', league: '' });
+
+  const isAllSelected = items.length > 0 && selectedIds.length === items.length;
+
+  useEffect(() => {
+    setSelectedIds((current) => current.filter((id) => items.some((item) => item.id === id)));
+  }, [items]);
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(items.map((item) => item.id));
+    }
+  };
 
   const fetchList = async () => {
     try {
@@ -195,6 +210,18 @@ function ClubContacts() {
       </Grid>
 
       <Grid container spacing={1} sx={{ mb: 3, alignItems: 'center' }}>
+        <Grid item>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isAllSelected}
+                indeterminate={selectedIds.length > 0 && selectedIds.length < items.length}
+                onChange={handleToggleSelectAll}
+              />
+            }
+            label={t('select_all', 'Seleccionar todos')}
+          />
+        </Grid>
         <Grid item>
           <Button variant="outlined" startIcon={<ContentCopyIcon />} onClick={handleCopyEmails}>
             {t('copy_selected_emails', 'Copiar emails seleccionados')}
