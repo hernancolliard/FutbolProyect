@@ -22,7 +22,7 @@ import MyApplicationsSection from "./MyApplicationsSection";
 import MyOffersSection from "./MyOffersSection";
 import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import AdBanner from "@/components/ads/AdBanner";
-import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, Compass, FileText, ImageIcon, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -332,6 +332,30 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     return calculatedAge;
   }, [profile?.fecha_de_nacimiento]);
 
+  const localCompletionPercent = useMemo(() => {
+    if (!profile) return 0;
+
+    const completionFields = [
+      profile.foto_perfil_url,
+      profile.telefono,
+      profile.nacionalidad,
+      profile.resumen_profesional,
+      profile.cv_url,
+      profile.posicion_principal,
+      profile.altura_cm,
+      profile.peso_kg,
+      profile.pie_dominante,
+      profile.fecha_de_nacimiento,
+      profile.idiomas,
+      profile.estadisticas,
+      profile.trayectoria,
+      profile.disponibilidad,
+    ];
+    const completedFields = completionFields.filter(Boolean).length;
+
+    return Math.round((completedFields / completionFields.length) * 100);
+  }, [profile]);
+
   if (!isHydrated) return null;
   if (!profile && authLoading) return null;
   if (!profile) {
@@ -361,6 +385,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const availabilityLabel = disponibilidad || "Disponibilidad no especificada";
   const normalizedAvailability = availabilityLabel.toLowerCase();
   const availabilityTone = normalizedAvailability.includes("disponible") || normalizedAvailability.includes("libre") ? "positive" as const : "neutral" as const;
+  const profileViews = Number(profileStats?.profile_views ?? profile.profile_views ?? 0);
+  const completionPercent = Number(profileStats?.completion_percent ?? localCompletionPercent);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -525,6 +551,28 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                         <button onClick={handleOpenEditModal} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">Editar perfil</button>
                       )}
                       <button onClick={handleCopyLink} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">Copiar enlace</button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center gap-2 text-[#071C3C]">
+                      <TrendingUp size={18} />
+                      <h2 className="text-xl font-semibold">Actividad del perfil</h2>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <Eye size={20} className="text-[#25D366]" />
+                        <p className="mt-3 break-words text-2xl font-extrabold leading-none text-[#071C3C]">{profileViews}</p>
+                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">Visitas al perfil</p>
+                      </div>
+                      <div className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                        <CheckCircle2 size={20} className="text-[#25D366]" />
+                        <p className="mt-3 break-words text-2xl font-extrabold leading-none text-[#071C3C]">{completionPercent}%</p>
+                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">Perfil completado</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full rounded-full bg-[#25D366] transition-all" style={{ width: `${Math.min(100, Math.max(0, completionPercent))}%` }} />
                     </div>
                   </div>
                 </div>

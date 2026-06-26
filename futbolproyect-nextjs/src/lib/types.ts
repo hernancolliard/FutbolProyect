@@ -37,6 +37,7 @@ export interface Profile {
   subscription_end_date: string;
   average_rating: number;
   total_ratings: number;
+  profile_views?: number;
   fecha_de_nacimiento: string;
 }
 

@@ -78,15 +78,15 @@ export function PlayerStats({ stats }: PlayerStatsProps) {
       </div>
 
       {items.length > 0 ? (
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {items.map((item, index) => {
             const Icon = icons[index % icons.length];
 
             return (
-              <div key={`${item.value}-${item.label}-${index}`} className="flex min-h-[150px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-4 text-center shadow-sm">
-                <Icon size={34} strokeWidth={1.6} className="text-[#071C3C]" />
-                <p className="mt-4 text-4xl font-extrabold leading-none text-[#071C3C]">{item.value}</p>
-                <p className="mt-2 text-xs font-extrabold uppercase text-[#071C3C]">{item.label}</p>
+              <div key={`${item.value}-${item.label}-${index}`} className="flex min-h-[132px] min-w-0 flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-3 text-center shadow-sm">
+                <Icon size={28} strokeWidth={1.6} className="shrink-0 text-[#071C3C]" />
+                <p className="mt-3 max-w-full break-words text-2xl font-extrabold leading-tight text-[#071C3C] sm:text-3xl">{item.value}</p>
+                <p className="mt-2 max-w-full break-words text-[11px] font-extrabold uppercase leading-tight text-[#071C3C]">{item.label}</p>
                 {item.detail ? <p className="mt-1 text-xs text-slate-500">{item.detail}</p> : null}
               </div>
             );
