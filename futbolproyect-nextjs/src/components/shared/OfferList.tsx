@@ -338,7 +338,7 @@ const OfferList = ({
             ))}
           </div>
         )}
-      </div>
+      </Box>
     </FadeInOnScroll>
   );
 };

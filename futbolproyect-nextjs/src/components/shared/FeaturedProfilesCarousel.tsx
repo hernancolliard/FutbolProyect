@@ -112,7 +112,7 @@ function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
           </div>
         ))}
       </Slider>
-    </div>
+    </Box>
   );
 }
 
