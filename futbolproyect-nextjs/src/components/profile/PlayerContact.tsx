@@ -36,6 +36,17 @@ export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, w
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {links.map((item) => {
           const Icon = item.icon;
+          if (item.label === "WhatsApp") {
+            return (
+              <button key={item.label} onClick={onWhatsApp} className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${item.accent ? "border-[#25D366]/20 bg-[#25D366]/10 text-[#071C3C]" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
+                <div className={`rounded-xl p-2 ${item.accent ? "bg-[#25D366] text-white" : "bg-white text-[#071C3C]"}`}>
+                  <Icon size={16} />
+                </div>
+                <span className="font-medium">{item.label}</span>
+              </button>
+            );
+          }
+
           return (
             <a key={item.label} href={item.href || "#"} target="_blank" rel="noreferrer" className={`flex items-center gap-3 rounded-2xl border p-4 transition hover:-translate-y-0.5 ${item.accent ? "border-[#25D366]/20 bg-[#25D366]/10 text-[#071C3C]" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
               <div className={`rounded-xl p-2 ${item.accent ? "bg-[#25D366] text-white" : "bg-white text-[#071C3C]"}`}>

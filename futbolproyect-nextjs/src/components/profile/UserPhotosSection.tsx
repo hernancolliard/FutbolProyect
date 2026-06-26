@@ -154,6 +154,10 @@ export default function UserPhotosSection({
         <CircularProgress />
       ) : error ? (
         <Alert severity="error">{error}</Alert>
+      ) : photos.length === 0 ? (
+        <Typography variant="body2" color="text.secondary">
+          {t("no_user_photos", "Aún no hay fotos cargadas por el usuario.")}
+        </Typography>
       ) : (
         <Grid container spacing={2}>
           {photos.map((photo) => {

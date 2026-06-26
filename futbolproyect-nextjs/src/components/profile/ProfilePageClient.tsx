@@ -9,7 +9,6 @@ import { useAuth } from "@/context/AuthContext";
 import { HeroPlayer } from "./HeroPlayer";
 import { PlayerTabs } from "./PlayerTabs";
 import { PlayerStats } from "./PlayerStats";
-import { PlayerGallery } from "./PlayerGallery";
 import { PlayerTimeline } from "./PlayerTimeline";
 import { PlayerContact } from "./PlayerContact";
 import { PlayerSidebar } from "./PlayerSidebar";
@@ -199,13 +198,24 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
   const normalizeWhatsAppUrl = (value?: string) => {
     if (!value) return "";
+
     const trimmed = value.trim();
     if (!trimmed) return "";
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    const digits = trimmed.replace(/[^0-9+]/g, "");
-    if (!digits) return "";
-    const cleaned = digits.startsWith("+") ? digits.slice(1) : digits;
-    return `https://wa.me/${cleaned}`;
+
+    const whatsappMatch = trimmed.match(/(?:https?:\/\/)?(?:wa\.me\/|api\.whatsapp\.com\/send\?phone=)([\d+]+)/i);
+    if (whatsappMatch) {
+      const normalizedPhone = whatsappMatch[1].replace(/^\+/, "");
+      return `https://wa.me/${normalizedPhone}`;
+    }
+
+    const onlyNumbers = trimmed.replace(/[^\d+]/g, "");
+    if (!onlyNumbers || onlyNumbers === "+") return "";
+
+    const hasPlus = onlyNumbers.startsWith("+");
+    const digits = onlyNumbers.replace(/\+/g, "");
+    if (digits.length < 8 || digits.length > 15) return "";
+
+    return `https://wa.me/${hasPlus ? "+" : ""}${digits}`;
   };
 
   const handleRatingChange = async (_event: any, newValue: number | null) => {
@@ -436,15 +446,12 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             {activeTab === "stats" && <PlayerStats />}
             {activeTab === "timeline" && <PlayerTimeline />}
             {activeTab === "gallery" && (
-              <div className="space-y-6">
-                <PlayerGallery imageUrl={profile.foto_perfil_url || "/images/logos/logofp.png"} />
-                <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
-                    <ImageIcon size={18} />
-                    <h2 className="text-xl font-semibold">Galería del jugador</h2>
-                  </div>
-                  <UserPhotosSection userId={profile.id} isMyProfile={canEditProfile} />
+              <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
+                  <ImageIcon size={18} />
+                  <h2 className="text-xl font-semibold">Galería del jugador</h2>
                 </div>
+                <UserPhotosSection userId={profile.id} isMyProfile={canEditProfile} />
               </div>
             )}
             {activeTab === "videos" && (
