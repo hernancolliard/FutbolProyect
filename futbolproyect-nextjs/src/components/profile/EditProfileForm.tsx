@@ -200,7 +200,7 @@ const EditProfileForm = ({
             <TextField name="linkedin_url" label={t("linkedin_placeholder")} value={formData.linkedin_url} onChange={handleChange} fullWidth />
             <TextField name="instagram_url" label={t("instagram_placeholder")} value={formData.instagram_url} onChange={handleChange} fullWidth />
             <TextField name="youtube_url" label={t("youtube_placeholder")} value={formData.youtube_url} onChange={handleChange} fullWidth />
-            <TextField name="transfermarkt_url" label={t("transfermarkt_placeholder")} value={formData.transfermarkt_url} onChange={handleChange} fullWidth />
+            <TextField name="transfermarkt_url" label={t("website_placeholder", "Web / Transfermarkt")} value={formData.transfermarkt_url} onChange={handleChange} fullWidth />
             {showWhatsAppInput ? (
               <TextField
                 name="whatsapp_url"

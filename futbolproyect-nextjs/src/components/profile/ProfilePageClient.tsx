@@ -237,9 +237,29 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     try { await navigator.clipboard.writeText(currentUrl); } catch {}
   };
 
-  const handleShare = () => {
-    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  const handleShare = async () => {
+    const title = profile ? `${profile.nombre} ${profile.apellido || ""}`.trim() : "Perfil FutbolProyect";
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title,
+          text: "Mira este perfil en FutbolProyect.",
+          url: currentUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(currentUrl);
+      alert(t("profile_link_copied", "Enlace del perfil copiado."));
+    } catch {
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        alert(t("profile_link_copied", "Enlace del perfil copiado."));
+      } catch {
+        alert(t("profile_share_error", "No se pudo compartir el perfil."));
+      }
+    }
   };
 
   const handleWhatsApp = () => {
@@ -251,8 +271,13 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
   const handleEmail = () => {
     if (profile?.email) {
-      window.location.href = `mailto:${profile.email}`;
+      const subject = encodeURIComponent("Contacto desde FutbolProyect");
+      const body = encodeURIComponent(`Hola ${profile.nombre || ""}, vi tu perfil en FutbolProyect y quiero contactarte.`);
+      window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
+      return;
     }
+
+    alert(t("profile_email_missing", "Este perfil no tiene email cargado."));
   };
 
   const handleDownloadCv = () => {
@@ -436,7 +461,20 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     </div>
                     <div className="mt-4 flex flex-wrap gap-3">
                       {!canEditProfile && (
-                        <button onClick={() => handleRatingChange(null, 5)} className="rounded-full bg-[#071C3C] px-4 py-2 text-sm font-semibold text-white">Calificar 5★</button>
+                        <div className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2">
+                          <span className="text-xs font-semibold uppercase text-slate-500">Tu voto</span>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => handleRatingChange(null, star)}
+                              className="text-[#25D366] transition hover:scale-110"
+                              aria-label={`Calificar con ${star} estrella${star === 1 ? "" : "s"}`}
+                            >
+                              <Star size={18} className={star <= Number(myRating || 0) ? "fill-[#25D366]" : "text-slate-300"} />
+                            </button>
+                          ))}
+                        </div>
                       )}
                       {canEditProfile && (
                         <button onClick={handleOpenEditModal} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">Editar perfil</button>
