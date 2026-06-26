@@ -229,6 +229,15 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     }
   };
 
+  const age = useMemo(() => {
+    if (!profile?.fecha_de_nacimiento) return "—";
+    const birth = new Date(profile.fecha_de_nacimiento);
+    if (Number.isNaN(birth.getTime())) return "—";
+    const diff = Date.now() - birth.getTime();
+    const ageDate = new Date(diff);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  }, [profile?.fecha_de_nacimiento]);
+
   if (!isHydrated) return null;
   if (!profile && authLoading) return null;
   if (!profile) {
@@ -241,14 +250,6 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const posicion_principal = p[`posicion_principal_${lang}`] || profile.posicion_principal;
   const pie_dominante = p[`pie_dominante_${lang}`] || profile.pie_dominante;
   const resumen_profesional = p[`resumen_profesional_${lang}`] || profile.resumen_profesional;
-  const age = useMemo(() => {
-    if (!profile.fecha_de_nacimiento) return "—";
-    const birth = new Date(profile.fecha_de_nacimiento);
-    if (Number.isNaN(birth.getTime())) return "—";
-    const diff = Date.now() - birth.getTime();
-    const ageDate = new Date(diff);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
-  }, [profile.fecha_de_nacimiento]);
 
   const tabs = [
     { id: "summary", label: "Resumen" },
