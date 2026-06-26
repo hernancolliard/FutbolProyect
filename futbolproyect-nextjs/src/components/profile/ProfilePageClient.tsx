@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useTransition } from "react";
-import { Profile, Video } from "@/lib/types";
+import { Profile, UserPhoto, Video } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
@@ -90,6 +90,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [myRating, setMyRating] = useState<number | null>(null);
   const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
+  const [summaryPhotos, setSummaryPhotos] = useState<UserPhoto[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
 
   useEffect(() => {
@@ -132,21 +133,28 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   useEffect(() => {
     if (!profile?.id) {
       setFeaturedVideo(null);
+      setSummaryPhotos([]);
       return;
     }
 
-    const loadFeaturedVideo = async () => {
+    const loadFeaturedMedia = async () => {
       try {
-        const { data } = await apiClient.get(`/profiles/${profile.id}/videos`);
-        const videos = Array.isArray(data) ? data : [];
+        const [videosResponse, photosResponse] = await Promise.all([
+          apiClient.get(`/profiles/${profile.id}/videos`),
+          apiClient.get(`/profiles/${profile.id}/photos`),
+        ]);
+        const videos = Array.isArray(videosResponse.data) ? videosResponse.data : [];
+        const photos = Array.isArray(photosResponse.data) ? photosResponse.data : [];
         const sortedVideos = [...videos].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
         setFeaturedVideo(sortedVideos[0] ?? null);
+        setSummaryPhotos(photos.slice(0, 5));
       } catch {
         setFeaturedVideo(null);
+        setSummaryPhotos([]);
       }
     };
 
-    loadFeaturedVideo();
+    loadFeaturedMedia();
   }, [profile?.id]);
 
   useEffect(() => {
@@ -415,6 +423,43 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                       )}
                     </div>
                   </div>
+
+                  <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="flex items-center gap-2 text-[#071C3C]">
+                      <ImageIcon size={18} />
+                      <h2 className="text-xl font-semibold">Galeria de fotos</h2>
+                    </div>
+                    {summaryPhotos.length > 0 ? (
+                      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                        {summaryPhotos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            type="button"
+                            className="aspect-[4/3] overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
+                            onClick={() => setActiveTab("gallery")}
+                            aria-label={photo.title || "Ver foto del perfil"}
+                          >
+                            <img src={photo.url} alt={photo.title || "Foto del perfil"} className="h-full w-full object-cover transition duration-300 hover:scale-105" />
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-sm text-slate-500">Aun no hay fotos cargadas.</p>
+                    )}
+                  </div>
+
+                  <PlayerStats stats={profile.estadisticas} />
+                  <PlayerTimeline timeline={profile.trayectoria} />
+
+                  {!isManagedProfile && (
+                    <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                      <div className="mb-1 flex items-center gap-2 text-[#071C3C]">
+                        <TrendingUp size={18} />
+                        <h2 className="text-xl font-semibold">Analisis de scouting</h2>
+                      </div>
+                      <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
+                    </div>
+                  )}
 
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">

@@ -268,6 +268,15 @@ const EditProfileForm = ({
             {showEmailField && (
               <TextField name="email" label={t("email_label", "Email")} value={formData.email} onChange={handleChange} fullWidth />
             )}
+            {!showEmailField && profileData.email && (
+              <TextField
+                label={t("registration_email_label", "Email de registro")}
+                value={profileData.email}
+                fullWidth
+                disabled
+                helperText={t("registration_email_help", "Este email se usa automaticamente para el contacto del perfil.")}
+              />
+            )}
             <TextField type="date" name="fecha_de_nacimiento" label={t("birth_date_placeholder")} value={formData.fecha_de_nacimiento} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
             <TextField name="nacionalidad" label={t("nationality_placeholder")} value={formData.nacionalidad} onChange={handleChange} fullWidth />
             <TextField name="telefono" label={t("contact_phone_placeholder")} value={formData.telefono} onChange={handleChange} fullWidth />
