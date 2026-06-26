@@ -311,6 +311,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const posicion_principal = p[`posicion_principal_${lang}`] || profile.posicion_principal;
   const pie_dominante = p[`pie_dominante_${lang}`] || profile.pie_dominante;
   const resumen_profesional = p[`resumen_profesional_${lang}`] || profile.resumen_profesional;
+  const idiomas = profile.idiomas || "";
+  const disponibilidad = profile.disponibilidad || "";
 
   const tabs = [
     { id: "summary", label: "Resumen" },
@@ -323,8 +325,9 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     { id: "contact", label: "Contacto" },
   ];
 
-  const availabilityLabel = profile.subscription_status === "activa" ? "Disponible para clubes" : "Con contrato";
-  const availabilityTone = profile.subscription_status === "activa" ? "positive" as const : "neutral" as const;
+  const availabilityLabel = disponibilidad || "Disponibilidad no especificada";
+  const normalizedAvailability = availabilityLabel.toLowerCase();
+  const availabilityTone = normalizedAvailability.includes("disponible") || normalizedAvailability.includes("libre") ? "positive" as const : "neutral" as const;
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -347,6 +350,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             onEditProfile={handleOpenEditModal}
             dominantFoot={pie_dominante || ""}
             positionLabel={posicion_principal || ""}
+            languagesLabel={idiomas}
           />
 
           <PlayerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
@@ -413,6 +417,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>Altura</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : ""}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>Peso</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : ""}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>Pierna hábil</span><span className="font-medium text-[#071C3C]">{pie_dominante || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Idiomas</span><span className="font-medium text-[#071C3C]">{idiomas || ""}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>Representante</span><span className="font-medium text-[#071C3C]">{profile.agente_nombre || ""}</span></div>
                       <div className="flex justify-between pb-2"><span>Disponibilidad</span><span className="font-medium text-[#25D366]">{availabilityLabel}</span></div>
                     </div>
@@ -443,8 +448,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
               </div>
             )}
 
-            {activeTab === "stats" && <PlayerStats />}
-            {activeTab === "timeline" && <PlayerTimeline />}
+            {activeTab === "stats" && <PlayerStats stats={profile.estadisticas} />}
+            {activeTab === "timeline" && <PlayerTimeline timeline={profile.trayectoria} />}
             {activeTab === "gallery" && (
               <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center gap-2 text-[#071C3C]">

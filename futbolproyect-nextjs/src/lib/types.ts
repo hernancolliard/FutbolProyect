@@ -14,6 +14,10 @@ export interface Profile {
   pie_dominante_en: string;
   resumen_profesional: string;
   resumen_profesional_en: string;
+  idiomas?: string;
+  estadisticas?: string;
+  trayectoria?: string;
+  disponibilidad?: string;
   foto_perfil_url: string;
   cv_url: string;
   linkedin_url: string;

@@ -166,6 +166,10 @@ const buildManagedProfilePayload = (body) => ({
   peso_kg: body.peso_kg || null,
   pie_dominante: body.pie_dominante?.trim() || null,
   fecha_de_nacimiento: body.fecha_de_nacimiento || null,
+  idiomas: body.idiomas?.trim() || null,
+  estadisticas: body.estadisticas?.trim() || null,
+  trayectoria: body.trayectoria?.trim() || null,
+  disponibilidad: body.disponibilidad?.trim() || null,
 });
 
 const buildManagedProfileResponseSelect = () => `
@@ -196,6 +200,10 @@ const buildManagedProfileResponseSelect = () => `
     mp.peso_kg,
     mp.pie_dominante,
     mp.fecha_de_nacimiento,
+    mp.idiomas,
+    mp.estadisticas,
+    mp.trayectoria,
+    mp.disponibilidad,
     mp.average_rating,
     mp.total_ratings,
     mp.profile_views,
@@ -597,14 +605,16 @@ router.post(
             nacionalidad, resumen_profesional, cv_url, posicion_principal,
             linkedin_url, instagram_url, youtube_url, transfermarkt_url,
             whatsapp_url, agente_nombre, agente_contacto, altura_cm, peso_kg,
-            pie_dominante, fecha_de_nacimiento
+            pie_dominante, fecha_de_nacimiento, idiomas, estadisticas,
+            trayectoria, disponibilidad
           )
           VALUES (
             @ownerUserId, @nombre, @apellido, @email, @fotoPerfilUrl, @telefono,
             @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal,
             @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url,
             @whatsapp_url, @agente_nombre, @agente_contacto, @altura_cm, @peso_kg,
-            @pie_dominante, @fecha_de_nacimiento
+            @pie_dominante, @fecha_de_nacimiento, @idiomas, @estadisticas,
+            @trayectoria, @disponibilidad
           )
           RETURNING id;
         `,
@@ -712,6 +722,10 @@ router.put(
             peso_kg = @peso_kg,
             pie_dominante = @pie_dominante,
             fecha_de_nacimiento = @fecha_de_nacimiento,
+            idiomas = @idiomas,
+            estadisticas = @estadisticas,
+            trayectoria = @trayectoria,
+            disponibilidad = @disponibilidad,
             updated_at = NOW()
           WHERE id = @profileId
             AND (owner_user_id = @userId OR @isAdmin = TRUE);
@@ -815,6 +829,10 @@ router.get("/:userId/stats", verificarToken, async (req, res) => {
         p.peso_kg,
         p.pie_dominante,
         p.fecha_de_nacimiento,
+        p.idiomas,
+        p.estadisticas,
+        p.trayectoria,
+        p.disponibilidad,
         COALESCE(p.average_rating, 0) AS average_rating,
         COALESCE(p.total_ratings, 0) AS total_ratings,
         (
@@ -856,6 +874,10 @@ router.get("/:userId/stats", verificarToken, async (req, res) => {
       "peso_kg",
       "pie_dominante",
       "fecha_de_nacimiento",
+      "idiomas",
+      "estadisticas",
+      "trayectoria",
+      "disponibilidad",
     ];
     const completedFields = completionFields.filter((field) => Boolean(stats[field]));
 
@@ -957,7 +979,7 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT u.*, COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento,
+      SELECT u.*, COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento, p.idiomas, p.estadisticas, p.trayectoria, p.disponibilidad,
              p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
@@ -1197,6 +1219,10 @@ router.put(
       peso_kg,
       pie_dominante,
       fecha_de_nacimiento,
+      idiomas,
+      estadisticas,
+      trayectoria,
+      disponibilidad,
     } = req.body;
 
     let fotoPerfilUrl = null;
@@ -1231,8 +1257,8 @@ router.put(
       }
 
       const upsertQuery = `
-        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, whatsapp_url, agente_nombre, agente_contacto, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento)
-        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @whatsapp_url, @agente_nombre, @agente_contacto, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento)
+        INSERT INTO perfiles_usuario (id_usuario, foto_perfil_url, telefono, nacionalidad, resumen_profesional, cv_url, posicion_principal, linkedin_url, instagram_url, youtube_url, transfermarkt_url, whatsapp_url, agente_nombre, agente_contacto, altura_cm, peso_kg, pie_dominante, fecha_de_nacimiento, idiomas, estadisticas, trayectoria, disponibilidad)
+        VALUES (@userId, @fotoPerfilUrl, @telefono, @nacionalidad, @resumen_profesional, @cv_url, @posicion_principal, @linkedin_url, @instagram_url, @youtube_url, @transfermarkt_url, @whatsapp_url, @agente_nombre, @agente_contacto, @altura_cm, @peso_kg, @pie_dominante, @fecha_de_nacimiento, @idiomas, @estadisticas, @trayectoria, @disponibilidad)
         ON CONFLICT (id_usuario)
         DO UPDATE SET
           foto_perfil_url = COALESCE(@fotoPerfilUrl, perfiles_usuario.foto_perfil_url),
@@ -1251,7 +1277,11 @@ router.put(
           altura_cm = @altura_cm,
           peso_kg = @peso_kg,
           pie_dominante = @pie_dominante,
-          fecha_de_nacimiento = @fecha_de_nacimiento
+          fecha_de_nacimiento = @fecha_de_nacimiento,
+          idiomas = @idiomas,
+          estadisticas = @estadisticas,
+          trayectoria = @trayectoria,
+          disponibilidad = @disponibilidad
         RETURNING *;
       `;
 
@@ -1274,6 +1304,10 @@ router.put(
         peso_kg: peso_kg || null,
         pie_dominante,
         fecha_de_nacimiento: fecha_de_nacimiento || null,
+        idiomas: idiomas?.trim() || null,
+        estadisticas: estadisticas?.trim() || null,
+        trayectoria: trayectoria?.trim() || null,
+        disponibilidad: disponibilidad?.trim() || null,
       });
 
       const result = await db.query(

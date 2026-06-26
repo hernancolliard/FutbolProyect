@@ -58,6 +58,10 @@ const EditProfileForm = ({
     peso_kg: profileData.peso_kg || "",
     pie_dominante: profileData.pie_dominante || "",
     fecha_de_nacimiento: formatDateForInput(profileData.fecha_de_nacimiento),
+    idiomas: profileData.idiomas || "",
+    estadisticas: profileData.estadisticas || "",
+    trayectoria: profileData.trayectoria || "",
+    disponibilidad: profileData.disponibilidad || "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
@@ -81,7 +85,7 @@ const EditProfileForm = ({
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-        if(value) data.append(key, value as string);
+        data.append(key, value == null ? "" : String(value));
     });
     if (selectedFile) {
       data.append("foto_perfil", selectedFile);
@@ -160,6 +164,26 @@ const EditProfileForm = ({
             <TextField type="number" name="altura_cm" label={t("height_placeholder")} value={formData.altura_cm} onChange={handleChange} fullWidth />
             <TextField type="number" name="peso_kg" label={t("weight_placeholder")} value={formData.peso_kg} onChange={handleChange} fullWidth />
             <TextField name="pie_dominante" label={t("dominant_foot_placeholder")} value={formData.pie_dominante} onChange={handleChange} fullWidth />
+            <TextField name="idiomas" label={t("languages_placeholder", "Idiomas")} value={formData.idiomas} onChange={handleChange} fullWidth helperText={t("languages_help", "Ej. Espanol nativo, Ingles intermedio, Portugues basico")} />
+            <TextField
+              name="disponibilidad"
+              label={t("availability_placeholder", "Disponibilidad")}
+              value={formData.disponibilidad}
+              onChange={handleChange}
+              select
+              fullWidth
+            >
+              <MenuItem value="">{t("not_specified", "No especificada")}</MenuItem>
+              <MenuItem value="Disponible">{t("available_status", "Disponible")}</MenuItem>
+              <MenuItem value="Libre">{t("free_agent_status", "Libre")}</MenuItem>
+              <MenuItem value="Con contrato">{t("under_contract_status", "Con contrato")}</MenuItem>
+              <MenuItem value="A prueba">{t("trial_status", "A prueba")}</MenuItem>
+            </TextField>
+
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1">{t("profile_sections_title", "Secciones del Perfil")}</Typography>
+            <TextField name="estadisticas" label={t("stats_placeholder", "Estadisticas")} value={formData.estadisticas} onChange={handleChange} fullWidth multiline rows={4} helperText={t("stats_help", "Una por linea con formato: 32 | Partidos | Temporada 2024")} />
+            <TextField name="trayectoria" label={t("career_path_placeholder", "Trayectoria deportiva / clubes")} value={formData.trayectoria} onChange={handleChange} fullWidth multiline rows={5} helperText={t("career_path_help", "Una por linea con formato: 2024 | Club Atletico Central | Primera | 32 | 18")} />
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1">{t("summary_cv_title", "Resumen y CV")}</Typography>

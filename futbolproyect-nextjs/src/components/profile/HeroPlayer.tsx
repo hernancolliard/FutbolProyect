@@ -21,6 +21,7 @@ interface HeroPlayerProps {
   onEditProfile: () => void;
   dominantFoot: string;
   positionLabel: string;
+  languagesLabel: string;
 }
 
 const flagFor = (value?: string) => {
@@ -65,6 +66,7 @@ export function HeroPlayer({
   onEditProfile,
   dominantFoot,
   positionLabel,
+  languagesLabel,
   birthDateLabel,
 }: HeroPlayerProps) {
   const heroImage = profile.foto_perfil_url || "/images/logos/logofp.png";
@@ -145,12 +147,12 @@ export function HeroPlayer({
                   </p>
                 </div>
                 <div className={`rounded-full px-3 py-1 text-sm font-medium ${availabilityTone === "positive" ? "bg-[#25D366]/20 text-[#25D366]" : "bg-white/10 text-slate-100"}`}>
-                  {availabilityTone === "positive" ? "Disponible" : "Contrato"}
+                  {availabilityLabel}
                 </div>
               </div>
               <div className="mt-4 space-y-2 text-sm text-slate-200">
                 <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> Pierna hábil: {dominantFoot || ""}</div>
-                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> Idiomas: {profile.nacionalidad ? "Disponible" : ""}</div>
+                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> Idiomas: {languagesLabel || "Sin cargar"}</div>
                 <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {birthDateLabel ? `Cumpleaños: ${birthDateLabel}` : "Sin fecha cargada"}</div>
               </div>
             </div>
