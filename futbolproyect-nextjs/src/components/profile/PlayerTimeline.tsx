@@ -10,12 +10,32 @@ interface PlayerTimelineProps {
 interface TimelineRow {
   year: string;
   club: string;
-  category: string;
-  matches: string;
-  goals: string;
+  league: string;
+  country: string;
 }
 
+const parseStructuredRows = (value?: string | null): TimelineRow[] | null => {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return null;
+
+    return parsed
+      .map((row) => ({
+        year: String(row.year || ""),
+        club: String(row.club || ""),
+        league: String(row.league || row.category || ""),
+        country: String(row.country || ""),
+      }))
+      .filter((row) => Object.values(row).some(Boolean));
+  } catch {
+    return null;
+  }
+};
+
 const parseRows = (value?: string | null): TimelineRow[] =>
+  parseStructuredRows(value) ||
   (value || "")
     .split(/\r?\n/)
     .map((item) => item.trim())
@@ -28,9 +48,8 @@ const parseRows = (value?: string | null): TimelineRow[] =>
       return {
         year: parts[0] || "",
         club: parts[1] || line,
-        category: parts[2] || "",
-        matches: parts[3] || "",
-        goals: parts[4] || "",
+        league: parts[2] || "",
+        country: parts[3] || "",
       };
     });
 
@@ -51,9 +70,8 @@ export function PlayerTimeline({ timeline }: PlayerTimelineProps) {
               <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase text-[#071C3C]">
                 <th className="px-2 py-3">A&ntilde;o</th>
                 <th className="px-2 py-3">Club</th>
-                <th className="px-2 py-3">Categoria</th>
-                <th className="px-2 py-3 text-center">Partidos</th>
-                <th className="px-2 py-3 text-center">Goles</th>
+                <th className="px-2 py-3">Liga</th>
+                <th className="px-2 py-3">Pais</th>
               </tr>
             </thead>
             <tbody>
@@ -61,9 +79,8 @@ export function PlayerTimeline({ timeline }: PlayerTimelineProps) {
                 <tr key={`${row.year}-${row.club}-${index}`} className="border-b border-slate-100 text-slate-700 last:border-0">
                   <td className="px-2 py-3 font-medium text-[#071C3C]">{row.year}</td>
                   <td className="px-2 py-3">{row.club}</td>
-                  <td className="px-2 py-3">{row.category}</td>
-                  <td className="px-2 py-3 text-center">{row.matches}</td>
-                  <td className="px-2 py-3 text-center">{row.goals}</td>
+                  <td className="px-2 py-3">{row.league}</td>
+                  <td className="px-2 py-3">{row.country}</td>
                 </tr>
               ))}
             </tbody>

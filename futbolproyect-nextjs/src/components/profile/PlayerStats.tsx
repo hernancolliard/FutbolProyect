@@ -1,15 +1,40 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Activity, BarChart3, Target, Timer, Trophy } from "lucide-react";
+import { BarChart3, CalendarDays, ListChecks, Target, Timer, Trophy } from "lucide-react";
 
 interface PlayerStatsProps {
   stats?: string | null;
 }
 
-const icons = [BarChart3, Trophy, Target, Activity, Timer];
+const icons = [CalendarDays, ListChecks, Timer, Trophy, Target];
+
+const parseStructuredStats = (value?: string | null) => {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+
+    const season = String(parsed.temporada || "").trim();
+    const seasonDetail = season ? `Temporada ${season}` : "";
+
+    return [
+      { value: season, label: "Temporada", detail: "" },
+      { value: String(parsed.partidos || "").trim(), label: "Partidos", detail: seasonDetail },
+      { value: String(parsed.minutos || "").trim(), label: "Minutos", detail: seasonDetail },
+      { value: String(parsed.goles || "").trim(), label: "Goles", detail: seasonDetail },
+      { value: String(parsed.asistencias || "").trim(), label: "Asistencias", detail: seasonDetail },
+    ].filter((item) => item.value);
+  } catch {
+    return null;
+  }
+};
 
 const parseStats = (value?: string | null) =>
+  parseStructuredStats(value) ||
   (value || "")
     .split(/\r?\n/)
     .map((item) => item.trim())

@@ -21,6 +21,108 @@ interface EditProfileFormProps {
     showEmailField?: boolean;
 }
 
+interface StatsFormData {
+  temporada: string;
+  partidos: string;
+  minutos: string;
+  goles: string;
+  asistencias: string;
+}
+
+interface CareerRow {
+  year: string;
+  club: string;
+  league: string;
+  country: string;
+}
+
+const emptyStatsForm: StatsFormData = {
+  temporada: "",
+  partidos: "",
+  minutos: "",
+  goles: "",
+  asistencias: "",
+};
+
+const emptyCareerRow: CareerRow = {
+  year: "",
+  club: "",
+  league: "",
+  country: "",
+};
+
+const parseStatsForm = (value?: string | null): StatsFormData => {
+  if (!value) return emptyStatsForm;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return {
+        temporada: String(parsed.temporada || ""),
+        partidos: String(parsed.partidos || ""),
+        minutos: String(parsed.minutos || ""),
+        goles: String(parsed.goles || ""),
+        asistencias: String(parsed.asistencias || ""),
+      };
+    }
+  } catch {
+    // Keep compatibility with the previous free-text format.
+  }
+
+  const stats = { ...emptyStatsForm };
+  value
+    .split(/\r?\n/)
+    .map((line) => line.split("|").map((part) => part.trim()))
+    .forEach(([amount, label, detail]) => {
+      const normalizedLabel = (label || "").toLowerCase();
+      if (detail && !stats.temporada) stats.temporada = detail.replace(/^temporada\s*/i, "");
+      if (normalizedLabel.includes("partido")) stats.partidos = amount || "";
+      if (normalizedLabel.includes("minuto")) stats.minutos = amount || "";
+      if (normalizedLabel.includes("gol")) stats.goles = amount || "";
+      if (normalizedLabel.includes("asistencia")) stats.asistencias = amount || "";
+    });
+
+  return stats;
+};
+
+const parseCareerRows = (value?: string | null): CareerRow[] => {
+  if (!value) return [{ ...emptyCareerRow }];
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      const rows = parsed.map((row) => ({
+        year: String(row.year || ""),
+        club: String(row.club || ""),
+        league: String(row.league || row.category || ""),
+        country: String(row.country || ""),
+      }));
+      return rows.length > 0 ? rows : [{ ...emptyCareerRow }];
+    }
+  } catch {
+    // Keep compatibility with the previous free-text format.
+  }
+
+  const rows = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.includes("|")
+        ? line.split("|").map((part) => part.trim())
+        : line.split(" - ").map((part) => part.trim());
+
+      return {
+        year: parts[0] || "",
+        club: parts[1] || "",
+        league: parts[2] || "",
+        country: parts[3] || "",
+      };
+    });
+
+  return rows.length > 0 ? rows : [{ ...emptyCareerRow }];
+};
+
 const EditProfileForm = ({
   profileData,
   onSave,
@@ -67,6 +169,8 @@ const EditProfileForm = ({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showWhatsAppInput, setShowWhatsAppInput] = useState(Boolean(profileData.whatsapp_url));
+  const [statsForm, setStatsForm] = useState<StatsFormData>(() => parseStatsForm(profileData.estadisticas));
+  const [careerRows, setCareerRows] = useState<CareerRow[]>(() => parseCareerRows(profileData.trayectoria));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -78,13 +182,43 @@ const EditProfileForm = ({
     }
   };
 
+  const handleStatsChange = (field: keyof StatsFormData, value: string) => {
+    setStatsForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleCareerChange = (index: number, field: keyof CareerRow, value: string) => {
+    setCareerRows((current) =>
+      current.map((row, rowIndex) => (rowIndex === index ? { ...row, [field]: value } : row)),
+    );
+  };
+
+  const handleAddCareerRow = () => {
+    setCareerRows((current) => [...current, { ...emptyCareerRow }]);
+  };
+
+  const handleRemoveCareerRow = (index: number) => {
+    setCareerRows((current) => {
+      const nextRows = current.filter((_, rowIndex) => rowIndex !== index);
+      return nextRows.length > 0 ? nextRows : [{ ...emptyCareerRow }];
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const cleanedCareerRows = careerRows.filter((row) =>
+      Object.values(row).some((value) => value.trim()),
+    );
+    const payload = {
+      ...formData,
+      estadisticas: JSON.stringify(statsForm),
+      trayectoria: JSON.stringify(cleanedCareerRows),
+    };
+
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
+    Object.entries(payload).forEach(([key, value]) => {
         data.append(key, value == null ? "" : String(value));
     });
     if (selectedFile) {
@@ -182,8 +316,46 @@ const EditProfileForm = ({
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1">{t("profile_sections_title", "Secciones del Perfil")}</Typography>
-            <TextField name="estadisticas" label={t("stats_placeholder", "Estadisticas")} value={formData.estadisticas} onChange={handleChange} fullWidth multiline rows={4} helperText={t("stats_help", "Una por linea con formato: 32 | Partidos | Temporada 2024")} />
-            <TextField name="trayectoria" label={t("career_path_placeholder", "Trayectoria deportiva / clubes")} value={formData.trayectoria} onChange={handleChange} fullWidth multiline rows={5} helperText={t("career_path_help", "Una por linea con formato: 2024 | Club Atletico Central | Primera | 32 | 18")} />
+            <Typography variant="subtitle2">{t("stats_placeholder", "Estadisticas")}</Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField name="temporada" label={t("season_label", "Temporada")} value={statsForm.temporada} onChange={(event) => handleStatsChange("temporada", event.target.value)} fullWidth />
+              <TextField type="number" name="partidos" label={t("matches_label", "Partidos")} value={statsForm.partidos} onChange={(event) => handleStatsChange("partidos", event.target.value)} fullWidth />
+            </Stack>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField type="number" name="minutos" label={t("minutes_label", "Minutos")} value={statsForm.minutos} onChange={(event) => handleStatsChange("minutos", event.target.value)} fullWidth />
+              <TextField type="number" name="goles" label={t("goals_label", "Goles")} value={statsForm.goles} onChange={(event) => handleStatsChange("goles", event.target.value)} fullWidth />
+              <TextField type="number" name="asistencias" label={t("assists_label", "Asistencias")} value={statsForm.asistencias} onChange={(event) => handleStatsChange("asistencias", event.target.value)} fullWidth />
+            </Stack>
+
+            <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" spacing={2}>
+              <Typography variant="subtitle2">{t("career_path_placeholder", "Trayectoria deportiva / clubes")}</Typography>
+              <Button type="button" variant="outlined" onClick={handleAddCareerRow}>
+                {t("add_club_button", "Agregar club")}
+              </Button>
+            </Stack>
+            <Stack spacing={2}>
+              {careerRows.map((row, index) => (
+                <Card key={index} variant="outlined">
+                  <CardContent>
+                    <Stack spacing={2}>
+                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                        <TextField label={t("year_label", "Año")} value={row.year} onChange={(event) => handleCareerChange(index, "year", event.target.value)} fullWidth />
+                        <TextField label={t("club_label", "Club")} value={row.club} onChange={(event) => handleCareerChange(index, "club", event.target.value)} fullWidth />
+                      </Stack>
+                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                        <TextField label={t("league_label", "Liga")} value={row.league} onChange={(event) => handleCareerChange(index, "league", event.target.value)} fullWidth />
+                        <TextField label={t("country_label", "Pais")} value={row.country} onChange={(event) => handleCareerChange(index, "country", event.target.value)} fullWidth />
+                      </Stack>
+                      <Stack direction="row" justifyContent="flex-end">
+                        <Button type="button" color="error" onClick={() => handleRemoveCareerRow(index)}>
+                          {t("remove_club_button", "Eliminar club")}
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
 
             <Divider sx={{ my: 2 }} />
             <Typography variant="subtitle1">{t("summary_cv_title", "Resumen y CV")}</Typography>
