@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useTransition } from "react";
-import { Profile } from "@/lib/types";
+import { Profile, Video } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,7 +12,6 @@ import { PlayerStats } from "./PlayerStats";
 import { PlayerGallery } from "./PlayerGallery";
 import { PlayerTimeline } from "./PlayerTimeline";
 import { PlayerContact } from "./PlayerContact";
-import { PlayerScouting } from "./PlayerScouting";
 import { PlayerSidebar } from "./PlayerSidebar";
 import { PlayerShare } from "./PlayerShare";
 import { PlayerDocuments } from "./PlayerDocuments";
@@ -32,6 +31,31 @@ interface ProfilePageClientProps {
 }
 
 const ANONYMOUS_VOTER_ID_KEY = "fp_anonymous_voter_id";
+
+const getYouTubeId = (url?: string | null) => {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+const parseDateOnly = (value?: string | null) => {
+  if (!value) return null;
+  const trimmed = String(value).trim();
+  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+  const parsed = new Date(trimmed);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatDateOnly = (value?: string | null) => {
+  const parsed = parseDateOnly(value);
+  if (!parsed) return "";
+  return parsed.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
 
 const getOrCreateAnonymousVoterId = () => {
   if (typeof window === "undefined") return null;
@@ -66,6 +90,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [profileStats, setProfileStats] = useState<any>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
   const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
+  const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
   const [activeTab, setActiveTab] = useState("summary");
 
   useEffect(() => {
@@ -104,6 +129,26 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const isManagedProfileOwner = currentUser && profile && isManagedProfile && String(currentUser.id) === String(profile.owner_user_id);
   const canEditProfile = Boolean(isOwnAccountProfile || isManagedProfileOwner);
   const canManagePlayerProfiles = currentUser?.tipo_usuario === "ofertante" && ["club", "agente", "scout"].includes(currentUser?.rol);
+
+  useEffect(() => {
+    if (!profile?.id) {
+      setFeaturedVideo(null);
+      return;
+    }
+
+    const loadFeaturedVideo = async () => {
+      try {
+        const { data } = await apiClient.get(`/profiles/${profile.id}/videos`);
+        const videos = Array.isArray(data) ? data : [];
+        const sortedVideos = [...videos].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
+        setFeaturedVideo(sortedVideos[0] ?? null);
+      } catch {
+        setFeaturedVideo(null);
+      }
+    };
+
+    loadFeaturedVideo();
+  }, [profile?.id]);
 
   useEffect(() => {
     if (!isOwnAccountProfile || !profile) return;
@@ -230,12 +275,18 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const age = useMemo(() => {
-    if (!profile?.fecha_de_nacimiento) return "—";
-    const birth = new Date(profile.fecha_de_nacimiento);
-    if (Number.isNaN(birth.getTime())) return "—";
-    const diff = Date.now() - birth.getTime();
-    const ageDate = new Date(diff);
-    return Math.abs(ageDate.getUTCFullYear() - 1970);
+    const birth = parseDateOnly(profile?.fecha_de_nacimiento);
+    if (!birth) return null;
+
+    const today = new Date();
+    let calculatedAge = today.getFullYear() - birth.getFullYear();
+    const hasHadBirthdayThisYear = today.getMonth() > birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() >= birth.getDate());
+
+    if (!hasHadBirthdayThisYear) {
+      calculatedAge -= 1;
+    }
+
+    return calculatedAge;
   }, [profile?.fecha_de_nacimiento]);
 
   if (!isHydrated) return null;
@@ -262,7 +313,6 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     { id: "contact", label: "Contacto" },
   ];
 
-  const strengthTags = ["Velocidad", "Uno contra uno", "Juego aéreo", "Definición", "Presión alta", "Perfil izquierdo"];
   const availabilityLabel = profile.subscription_status === "activa" ? "Disponible para clubes" : "Con contrato";
   const availabilityTone = profile.subscription_status === "activa" ? "positive" as const : "neutral" as const;
 
@@ -272,8 +322,9 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
         <main className="flex-1">
           <HeroPlayer
             profile={profile}
-            age={Number(age)}
-            nationalityLabel={nacionalidad || "—"}
+            age={age}
+            birthDateLabel={formatDateOnly(profile.fecha_de_nacimiento)}
+            nationalityLabel={nacionalidad || ""}
             availabilityLabel={availabilityLabel}
             availabilityTone={availabilityTone}
             onCopyLink={handleCopyLink}
@@ -284,8 +335,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             onDownloadCv={handleDownloadCv}
             canEditProfile={canEditProfile}
             onEditProfile={handleOpenEditModal}
-            dominantFoot={pie_dominante || "—"}
-            positionLabel={posicion_principal || t("not_specified", "No especificada")}
+            dominantFoot={pie_dominante || ""}
+            positionLabel={posicion_principal || ""}
           />
 
           <PlayerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
@@ -300,14 +351,29 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                       <h2 className="text-xl font-semibold">Video principal</h2>
                     </div>
                     <div className="mt-4 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
-                      <img src={profile.foto_perfil_url || "/images/logos/logofp.png"} alt="Video destacado" className="h-72 w-full object-cover" />
-                      <div className="flex items-center justify-between p-4">
-                        <div>
-                          <p className="font-semibold text-[#071C3C]">Resumen de juego</p>
-                          <p className="text-sm text-slate-500">Muestra técnica, ritmo y decisión en el campo.</p>
+                      {featuredVideo && featuredVideo.youtube_url ? (
+                        <>
+                          <div className="aspect-video w-full bg-black">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${getYouTubeId(featuredVideo.youtube_url)}`}
+                              title={featuredVideo.title || "Video destacado"}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="h-full w-full"
+                            />
+                          </div>
+                          <div className="flex items-center justify-between p-4">
+                            <div>
+                              <p className="font-semibold text-[#071C3C]">{featuredVideo.title || "Video destacado"}</p>
+                              <p className="text-sm text-slate-500">Primer video cargado por el usuario.</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex h-72 items-center justify-center p-6 text-center text-sm text-slate-500">
+                          Aún no hay videos cargados.
                         </div>
-                        <button className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#071C3C]">Reproducir</button>
-                      </div>
+                      )}
                     </div>
                   </div>
 
@@ -316,12 +382,11 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                       <BadgeInfo size={18} />
                       <h2 className="text-xl font-semibold">Descripción corta</h2>
                     </div>
-                    <p className="mt-4 text-base leading-7 text-slate-600">{resumen_profesional || t("no_summary_available", "Sin resumen disponible.")}</p>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      {strengthTags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-[#071C3C]/5 px-3 py-2 text-sm font-medium text-[#071C3C]">{tag}</span>
-                      ))}
-                    </div>
+                    {resumen_profesional ? (
+                      <p className="mt-4 text-base leading-7 text-slate-600">{resumen_profesional}</p>
+                    ) : (
+                      <p className="mt-4 text-sm text-slate-500">Aún no hay una descripción cargada.</p>
+                    )}
                   </div>
                 </div>
 
@@ -333,13 +398,12 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     </div>
                     <div className="mt-4 space-y-3 text-sm text-slate-600">
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nombre</span><span className="font-medium text-[#071C3C]">{profile.nombre} {profile.apellido}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacimiento</span><span className="font-medium text-[#071C3C]">{profile.fecha_de_nacimiento || "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacionalidad</span><span className="font-medium text-[#071C3C]">{nacionalidad || "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Pasaporte</span><span className="font-medium text-[#071C3C]">{profile.email ? "Disponible" : "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Altura</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Peso</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Pierna hábil</span><span className="font-medium text-[#071C3C]">{pie_dominante || "—"}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Representante</span><span className="font-medium text-[#071C3C]">{profile.agente_nombre || "—"}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacimiento</span><span className="font-medium text-[#071C3C]">{formatDateOnly(profile.fecha_de_nacimiento) || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacionalidad</span><span className="font-medium text-[#071C3C]">{nacionalidad || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Altura</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Peso</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Pierna hábil</span><span className="font-medium text-[#071C3C]">{pie_dominante || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Representante</span><span className="font-medium text-[#071C3C]">{profile.agente_nombre || ""}</span></div>
                       <div className="flex justify-between pb-2"><span>Disponibilidad</span><span className="font-medium text-[#25D366]">{availabilityLabel}</span></div>
                     </div>
                   </div>
@@ -401,7 +465,6 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   </div>
                   {!isManagedProfile && <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />}
                 </div>
-                <PlayerScouting />
               </div>
             )}
             {activeTab === "documents" && (
@@ -411,7 +474,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <FileText size={18} />
                     <h2 className="text-xl font-semibold">Documentos y CV</h2>
                   </div>
-                  <PlayerDocuments />
+                  <PlayerDocuments cvUrl={profile.cv_url} />
                 </div>
               </div>
             )}

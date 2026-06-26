@@ -6,7 +6,8 @@ import { Profile } from "@/lib/types";
 
 interface HeroPlayerProps {
   profile: Profile;
-  age: number;
+  age: number | null;
+  birthDateLabel: string;
   nationalityLabel: string;
   availabilityLabel: string;
   availabilityTone: "positive" | "neutral";
@@ -64,6 +65,7 @@ export function HeroPlayer({
   onEditProfile,
   dominantFoot,
   positionLabel,
+  birthDateLabel,
 }: HeroPlayerProps) {
   const heroImage = profile.foto_perfil_url || "/images/logos/logofp.png";
 
@@ -77,7 +79,7 @@ export function HeroPlayer({
         className="relative isolate flex flex-col overflow-hidden lg:flex-row"
         style={{
           backgroundImage:
-            "linear-gradient(90deg, rgba(7,28,60,0.95) 0%, rgba(7,28,60,0.82) 40%, rgba(7,28,60,0.68) 100%), url('https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1400&q=80')",
+            "linear-gradient(90deg, rgba(7,28,60,0.95) 0%, rgba(7,28,60,0.82) 40%, rgba(7,28,60,0.68) 100%), url('/images/fondo_1.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -86,7 +88,7 @@ export function HeroPlayer({
         <div className="relative flex-1 p-6 sm:p-8 lg:p-10">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100 backdrop-blur">
             <Sparkles size={16} className="text-[#25D366]" />
-            Perfil premium para clubes y scouts
+            Perfil del jugador
           </div>
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -111,20 +113,19 @@ export function HeroPlayer({
                   <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">
                     {profile.nombre} {profile.apellido}
                   </h1>
-                  <p className="mt-2 text-lg text-slate-200">{positionLabel}</p>
+                  <p className="mt-2 text-lg text-slate-200">{positionLabel || ""}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100">{profile.posicion_principal || "Posición principal"}</span>
-                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100">{profile.posicion_principal || "Posición secundaria"}</span>
+                    {positionLabel ? <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100">{positionLabel}</span> : null}
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                  { label: "Edad", value: `${age} años` },
-                  { label: "Nacimiento", value: profile.fecha_de_nacimiento || "—" },
-                  { label: "Altura", value: profile.altura_cm ? `${profile.altura_cm} cm` : "—" },
-                  { label: "Peso", value: profile.peso_kg ? `${profile.peso_kg} kg` : "—" },
+                  { label: "Edad", value: age !== null ? `${age} años` : "" },
+                  { label: "Nacimiento", value: birthDateLabel || "" },
+                  { label: "Altura", value: profile.altura_cm ? `${profile.altura_cm} cm` : "" },
+                  { label: "Peso", value: profile.peso_kg ? `${profile.peso_kg} kg` : "" },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-sm">
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-300">{item.label}</p>
@@ -148,9 +149,9 @@ export function HeroPlayer({
                 </div>
               </div>
               <div className="mt-4 space-y-2 text-sm text-slate-200">
-                <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> Pierna hábil: {dominantFoot || "—"}</div>
-                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> Idiomas: Inglés / Español</div>
-                <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> Última actualización: Hoy</div>
+                <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> Pierna hábil: {dominantFoot || ""}</div>
+                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> Idiomas: {profile.nacionalidad ? "Disponible" : ""}</div>
+                <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {birthDateLabel ? `Cumpleaños: ${birthDateLabel}` : "Sin fecha cargada"}</div>
               </div>
             </div>
           </div>
