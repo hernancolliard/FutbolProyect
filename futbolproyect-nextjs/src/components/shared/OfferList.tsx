@@ -1,30 +1,29 @@
 "use client";
+
 import "@/styles/OfferList.css";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Typography,
   Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
   Chip,
   Stack,
+  Typography,
 } from "@mui/material";
+import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import Slider from "react-slick";
 import FadeInOnScroll from "./FadeInOnScroll";
 import OfferActions from "./OfferActions";
 import useIsMobile from "@/hooks/useIsMobile";
-import Image from "next/image";
 import AdBanner from "@/components/ads/AdBanner";
-
 import { Offer } from "@/lib/types";
-
-/* ============================
-   TYPES
-============================ */
 
 interface OfferListProps {
   offers?: Offer[];
@@ -33,314 +32,307 @@ interface OfferListProps {
   showApplyButton?: boolean;
 }
 
-/* ============================
-   OFFER CARD
-============================ */
-
-const OfferCard = ({
-  offer,
-  isHomePage,
-  isMobile,
-  showApplyButton,
-  onOfferAction,
-  t,
-  i18n,
-  handleViewOffer,
-}: {
+type OfferCardProps = {
   offer: Offer;
-  isHomePage: boolean;
-  isMobile: boolean;
   showApplyButton: boolean;
   onOfferAction?: (action: string, id: string) => void;
   t: any;
   i18n: any;
   handleViewOffer: (id: string) => void;
-}) => {
-  const lang = i18n.language.startsWith("es") ? "es" : "en";
+};
 
-  const titulo = (offer as any)[`titulo_${lang}`] || offer.titulo;
-  const descripcion =
-    (offer as any)[`descripcion_${lang}`] || offer.descripcion;
-  const ubicacion = (offer as any)[`ubicacion_${lang}`] || offer.ubicacion;
-  const puesto = (offer as any)[`puesto_${lang}`] || offer.puesto;
-  const nivel = (offer as any)[`nivel_${lang}`] || (offer as any).nivel;
-  const salario = (offer as any).salario;
-  const fechaPublicacion = (offer as any).fecha_publicacion;
-  const formattedDate = fechaPublicacion
-    ? new Intl.DateTimeFormat(lang === "es" ? "es-ES" : "en-US", {
+function OfferCard({
+  offer,
+  showApplyButton,
+  onOfferAction,
+  t,
+  i18n,
+  handleViewOffer,
+}: OfferCardProps) {
+  const lang = i18n.language?.startsWith("en") ? "en" : "es";
+  const titulo = offer[`titulo_${lang}`] || offer.titulo;
+  const descripcion = offer[`descripcion_${lang}`] || offer.descripcion;
+  const ubicacion = offer[`ubicacion_${lang}`] || offer.ubicacion;
+  const puesto = offer[`puesto_${lang}`] || offer.puesto;
+  const nivel = offer[`nivel_${lang}`] || offer.nivel;
+  const formattedDate = offer.fecha_publicacion
+    ? new Intl.DateTimeFormat(lang === "es" ? "es-AR" : "en-US", {
         day: "2-digit",
         month: "short",
-      }).format(new Date(fechaPublicacion))
+      }).format(new Date(offer.fecha_publicacion))
     : null;
-
-  // Los estilos unificados ahora siempre reflejan el diseño que se usaba para isHomePage
-  const imageWidth = 267; // Siempre usar el ancho de imagen de la homepage
-  const imageHeight = 150; // Siempre usar el alto de imagen de la homepage
 
   return (
     <Card
+      elevation={0}
+      onClick={() => handleViewOffer(offer.id)}
       sx={{
         width: "100%",
-        position: "relative",
-        bgcolor: "background.paper", // Fondo blanco para todas las tarjetas
-        color: "inherit",
-        display: "flex",
-        flexDirection: "column", // Siempre en columna para diseño unificado
         height: "100%",
-        minHeight: "420px", // Altura mínima unificada
+        minHeight: 345,
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
         cursor: "pointer",
-        border: offer.is_featured
-          ? "1px solid rgba(245, 166, 35, 0.65)"
-          : "1px solid rgba(25, 38, 52, 0.08)",
-        transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease",
+        overflow: "hidden",
+        bgcolor: "#fff",
+        border: "1px solid",
+        borderColor: offer.is_featured ? "rgba(18, 98, 219, .5)" : "#dfe6ef",
+        borderRadius: 2.5,
+        boxShadow: "0 5px 18px rgba(8, 34, 70, .045)",
+        transition:
+          "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease",
         "&:hover": {
           transform: "translateY(-3px)",
-          boxShadow: "0 14px 32px rgba(17, 24, 39, 0.12)",
-          borderColor: "rgba(25, 38, 52, 0.2)",
+          boxShadow: "0 16px 35px rgba(8, 34, 70, .11)",
+          borderColor: "#8fb8f3",
         },
       }}
-      elevation={2}
-      onClick={() => handleViewOffer(offer.id)} // Siempre clickeable
     >
-      <Box
-        sx={{
-          width: "100%",
-          height: "150px",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          background: "#e0e0e0", // Fondo gris claro para el contenedor de la imagen
-          p: 1,
-        }}
-      >
-        {offer.imagen_url ? (
-          <Image
-            src={offer.imagen_url}
-            alt={titulo}
-            width={imageWidth}
-            height={imageHeight}
-            sizes="(max-width: 768px) 100vw, 300px"
-            style={{ width: "100%", height: "100%", objectFit: "contain" }}
-          />
-        ) : (
-          <Typography color="text.secondary">{t("no_image")}</Typography>
-        )}
-        {offer.is_featured && (
-          <Chip
-            label={t("featured", "Destacada")}
-            color="secondary"
-            size="small"
-            sx={{ position: "absolute", top: 12, left: 12, fontWeight: 700 }}
-          />
-        )}
-      </Box>
+      {offer.is_featured && (
+        <Box
+          sx={{
+            height: 3,
+            background: "linear-gradient(90deg, #1262db, #47a1ff)",
+          }}
+        />
+      )}
+      <CardContent sx={{ p: 2.25, pb: 1.5, flexGrow: 1 }}>
+        <Stack direction="row" justifyContent="space-between" spacing={1.5}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Stack direction="row" useFlexGap flexWrap="wrap" gap={0.75}>
+              {formattedDate && (
+                <Chip
+                  size="small"
+                  label={formattedDate}
+                  sx={{ bgcolor: "#edf5ff", color: "#1557ad", fontWeight: 700 }}
+                />
+              )}
+              {nivel && (
+                <Chip
+                  size="small"
+                  label={nivel}
+                  sx={{ bgcolor: "#edf5ff", color: "#1557ad", fontWeight: 700 }}
+                />
+              )}
+              {offer.is_featured && (
+                <Chip size="small" label="Destacada" color="primary" />
+              )}
+            </Stack>
+          </Box>
 
-      <CardContent
-        sx={{
-          flexGrow: 1,
-          p: 2,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ mb: 1, flexWrap: "wrap", gap: 1 }}
-          >
-            {formattedDate && (
-              <Chip size="small" label={formattedDate} variant="outlined" />
-            )}
-            {nivel && <Chip size="small" label={nivel} variant="outlined" />}
-            {salario && (
-              <Chip
-                size="small"
-                label={`${t("salary", "Salario:")} ${salario}`}
-                variant="outlined"
-              />
-            )}
-          </Stack>
-          <Typography
-            variant="h6"
+          <Box
             sx={{
-              color: "inherit", // Color de texto normal
-              fontWeight: 700,
-              lineHeight: 1.25,
-            }}
-          >
-            {titulo}
-          </Typography>
-
-          <Typography variant="subtitle2" color="text.secondary">
-            {t("published_by")} <strong>{offer.nombre_ofertante}</strong>
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            {t("location")} {ubicacion || t("not_specified")}
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            {t("position")} {puesto || t("not_specified")}
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              mt: 1,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
+              width: 70,
+              height: 70,
+              flexShrink: 0,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: 2,
+              bgcolor: "#f5f7fa",
+              border: "1px solid #edf0f4",
               overflow: "hidden",
             }}
           >
-            {descripcion}
-          </Typography>
-        </Box>
+            {offer.imagen_url ? (
+              <Image
+                src={offer.imagen_url}
+                alt={titulo}
+                width={70}
+                height={70}
+                sizes="70px"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  padding: 4,
+                }}
+              />
+            ) : (
+              <Image
+                src="/images/logos/logofpazul.webp"
+                alt="FutbolProyect"
+                width={48}
+                height={48}
+                style={{ width: 44, height: 44, objectFit: "contain", opacity: 0.25 }}
+              />
+            )}
+          </Box>
+        </Stack>
 
-        <CardActions sx={{ p: 0, mt: 2, justifyContent: "space-between", gap: 1 }}>
-          <Button
-            variant="contained"
-            color="primary" // Usar color primario para todos los botones de ver oferta
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewOffer(offer.id);
-            }}
-          >
-            {t("view_offer")}
-          </Button>
+        <Typography
+          component="h2"
+          sx={{
+            mt: 1.5,
+            color: "#09172d",
+            fontSize: "1.05rem",
+            lineHeight: 1.28,
+            fontWeight: 900,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {titulo}
+        </Typography>
 
-          {showApplyButton && (
-            <OfferActions
-              onOfferAction={onOfferAction}
-              offer={{ ...offer, applicants: offer.applicants ?? [] }}
-            />
-          )}
-        </CardActions>
+        <Typography variant="caption" sx={{ color: "#65738a", display: "block", mt: 0.7 }}>
+          {t("published_by", "Publicado por")}{" "}
+          <Box component="span" sx={{ color: "#31517c", fontWeight: 700 }}>
+            {offer.nombre_ofertante || "FutbolProyect"}
+          </Box>
+        </Typography>
+
+        <Stack spacing={0.65} sx={{ mt: 1.4 }}>
+          <Stack direction="row" spacing={0.8} alignItems="center">
+            <PlaceOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
+            <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
+              {ubicacion || t("not_specified", "No especificado")}
+            </Typography>
+          </Stack>
+          <Stack direction="row" spacing={0.8} alignItems="center">
+            <BadgeOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
+            <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
+              {puesto || t("not_specified", "No especificado")}
+            </Typography>
+          </Stack>
+        </Stack>
+
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 1.4,
+            color: "#354258",
+            lineHeight: 1.55,
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {descripcion || t("not_specified", "Sin descripción disponible")}
+        </Typography>
       </CardContent>
+
+      <CardActions
+        sx={{
+          px: 2.25,
+          pb: 2.1,
+          pt: 0.5,
+          justifyContent: "space-between",
+          gap: 1,
+        }}
+      >
+        <Button
+          variant="outlined"
+          size="small"
+          endIcon={<ArrowForwardRoundedIcon />}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleViewOffer(offer.id);
+          }}
+          sx={{
+            borderColor: "#1262db",
+            color: "#1262db",
+            fontWeight: 900,
+            "&:hover": { bgcolor: "#edf5ff", borderColor: "#0d4faf" },
+          }}
+        >
+          {t("view_offer", "Ver oferta")}
+        </Button>
+
+        {showApplyButton && (
+          <OfferActions
+            onOfferAction={onOfferAction}
+            offer={{ ...offer, applicants: offer.applicants ?? [] }}
+          />
+        )}
+      </CardActions>
     </Card>
   );
-};
+}
 
-/* ============================
-   OFFER LIST
-============================ */
-
-const OfferList = ({
+export default function OfferList({
   offers = [],
   onOfferAction,
   isHomePage = false,
   showApplyButton = true,
-}: OfferListProps) => {
+}: OfferListProps) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const [offersToDisplay, setOffersToDisplay] = useState<Offer[]>([]);
+  const [offersToDisplay, setOffersToDisplay] = useState<Offer[]>(offers);
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    setOffersToDisplay(offers);
-  }, [offers]);
+  useEffect(() => setOffersToDisplay(offers), [offers]);
 
-  const handleViewOffer = (id: string) => {
-    router.push(`/offers/${id}`);
-  };
-
-  const featuredOffers = offersToDisplay.filter((o) => o.is_featured);
-  const normalOffers = offersToDisplay.filter((o) => !o.is_featured);
-
-  const slides = Math.min(isMobile ? 2 : 4, offersToDisplay.length);
-
+  const handleViewOffer = (id: string) => router.push(`/offers/${id}`);
+  const featuredOffers = offersToDisplay.filter((offer) => offer.is_featured);
+  const normalOffers = offersToDisplay.filter((offer) => !offer.is_featured);
+  const slides = Math.min(isMobile ? 1 : 4, offersToDisplay.length);
   const settings = {
     dots: true,
-    infinite: true,
+    infinite: offersToDisplay.length > slides,
     speed: 500,
     slidesToShow: slides,
     slidesToScroll: slides,
   };
+  const cardProps = {
+    showApplyButton,
+    onOfferAction,
+    t,
+    i18n,
+    handleViewOffer,
+  };
 
   return (
     <FadeInOnScroll>
-      <Box className="offer-list-container" sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, md: 3 } }}>
+      <Box className="offer-list-container">
         {isHomePage && featuredOffers.length > 0 && (
           <>
-            <Typography variant="h5" sx={{ mb: 2, textAlign: { xs: 'center', md: 'left' } }}>
-              {t("featured_offers")}
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 900 }}>
+              {t("featured_offers", "Ofertas destacadas")}
             </Typography>
-                      <Slider {...settings}>
-                        {featuredOffers.map((offer) => (
-                          <div key={offer.id}>
-                            <OfferCard
-                              offer={offer}
-                              isHomePage={isHomePage}
-                              isMobile={isMobile}
-                              showApplyButton={false} // Override to false for homepage
-                              onOfferAction={onOfferAction}
-                              t={t}
-                              i18n={i18n}
-                              handleViewOffer={handleViewOffer}
-                            />
-                          </div>
-                        ))}
-                      </Slider>
-                    </>
-                    )}
-            
-                    {/* Nueva sección para ofertas normales en la página de inicio */}
-                    {isHomePage && normalOffers.length > 0 && (
-                      <Box sx={{ mt: 4 }}>
-                        <Typography
-                          variant="h5"
-                          sx={{ mb: 2, textAlign: { xs: 'center', md: 'left' }, fontWeight: 900 }}
-                        >
-                          {t("available_offers", "Ofertas Disponibles")}
-                        </Typography>
-                        <Slider {...settings}>
-                          {normalOffers.map((offer) => (
-                            <div key={offer.id}>
-                              <OfferCard
-                                offer={offer}
-                                isHomePage={isHomePage} // Mantener como isHomePage true para este render
-                                isMobile={isMobile}
-                                showApplyButton={false} // Override to false for homepage
-                                onOfferAction={onOfferAction}
-                                t={t}
-                                i18n={i18n}
-                                handleViewOffer={handleViewOffer}
-                              />
-                            </div>
-                          ))}
-                        </Slider>
-                      </Box>
-                    )}
+            <Slider {...settings}>
+              {featuredOffers.map((offer) => (
+                <Box key={offer.id} sx={{ px: 1, height: "100%" }}>
+                  <OfferCard {...cardProps} offer={offer} showApplyButton={false} />
+                </Box>
+              ))}
+            </Slider>
+          </>
+        )}
+
+        {isHomePage && normalOffers.length > 0 && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 900 }}>
+              {t("available_offers", "Ofertas disponibles")}
+            </Typography>
+            <Slider {...settings}>
+              {normalOffers.map((offer) => (
+                <Box key={offer.id} sx={{ px: 1, height: "100%" }}>
+                  <OfferCard {...cardProps} offer={offer} showApplyButton={false} />
+                </Box>
+              ))}
+            </Slider>
+          </Box>
+        )}
+
         {!isHomePage && (
-          <div className="offers-list">
+          <Box className="offers-list">
             {offersToDisplay.map((offer, index) => (
               <React.Fragment key={offer.id}>
-                <OfferCard
-                  offer={offer}
-                  isHomePage={false}
-                  isMobile={isMobile}
-                  showApplyButton={showApplyButton}
-                  onOfferAction={onOfferAction}
-                  t={t}
-                  i18n={i18n}
-                  handleViewOffer={handleViewOffer}
-                />
+                <OfferCard {...cardProps} offer={offer} />
                 {(index + 1) % 5 === 0 && (
-                  <div style={{ gridColumn: "1 / -1", width: "100%" }}>
+                  <Box sx={{ gridColumn: "1 / -1", width: "100%" }}>
                     <AdBanner placement="offers_inline" compact />
-                  </div>
+                  </Box>
                 )}
               </React.Fragment>
             ))}
-          </div>
+          </Box>
         )}
       </Box>
     </FadeInOnScroll>
   );
-};
-
-export default OfferList;
+}

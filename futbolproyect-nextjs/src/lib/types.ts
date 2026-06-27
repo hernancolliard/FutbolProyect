@@ -102,6 +102,12 @@ export interface Offer {
   nivel_es?: string;
   nivel_en?: string;
   salario?: string | number;
+  horarios?: string;
+  horarios_es?: string;
+  horarios_en?: string;
+  detalles_adicionales?: string;
+  detalles_adicionales_es?: string;
+  detalles_adicionales_en?: string;
   fecha_publicacion?: string;
   nombre_ofertante: string;
   id_usuario_ofertante: string;

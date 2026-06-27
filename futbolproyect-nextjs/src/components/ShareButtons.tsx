@@ -1,92 +1,115 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { FaFacebook, FaLinkedin, FaWhatsapp, FaInstagram, FaDownload } from 'react-icons/fa';
-import { useTranslation } from 'react-i18next';
-import { Box, Typography, Button } from '@mui/material'; // Import Material UI components
+import React, { useState } from "react";
+import {
+  FaDownload,
+  FaEnvelope,
+  FaFacebookF,
+  FaLinkedinIn,
+  FaLink,
+  FaWhatsapp,
+} from "react-icons/fa";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 
-const ShareButtons = ({ title, url, onDownload }) => {
+type ShareButtonsProps = {
+  title: string;
+  url: string;
+  onDownload?: () => void;
+};
+
+export default function ShareButtons({
+  title,
+  url,
+  onDownload,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const { t } = useTranslation('common');
-
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
-  const socialLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    linkedin: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
-    whatsapp: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // Reset message after 2 seconds
-    });
+  const actions = [
+    {
+      label: "Facebook",
+      color: "#1877f2",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: <FaFacebookF />,
+    },
+    {
+      label: "LinkedIn",
+      color: "#0a66c2",
+      href: `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`,
+      icon: <FaLinkedinIn />,
+    },
+    {
+      label: "WhatsApp",
+      color: "#159a4b",
+      href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+      icon: <FaWhatsapp />,
+    },
+    {
+      label: "Email",
+      color: "#9b315f",
+      href: `mailto:?subject=${encodedTitle}&body=${encodedUrl}`,
+      icon: <FaEnvelope />,
+    },
+  ];
+
+  const iconSx = {
+    width: 40,
+    height: 40,
+    border: "1px solid #dfe6ef",
+    bgcolor: "#fff",
+    "&:hover": { bgcolor: "#f2f6fb" },
   };
 
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 1,
-    }}>
-      <Typography variant="h6">{t('share', 'Compartir')}</Typography>
-      <Box sx={{
-        display: 'flex',
-        gap: 1,
-      }}>
-        <Button
-          component="a"
-          href={socialLinks.facebook}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Share on Facebook"
-          sx={{ minWidth: 0, padding: '8px', color: '#1877F2' }} // Facebook blue
-        >
-          <FaFacebook size={24} />
-        </Button>
-        <Button
-          component="a"
-          href={socialLinks.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Share on LinkedIn"
-          sx={{ minWidth: 0, padding: '8px', color: '#0A66C2' }} // LinkedIn blue
-        >
-          <FaLinkedin size={24} />
-        </Button>
-        <Button
-          component="a"
-          href={socialLinks.whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Share on WhatsApp"
-          sx={{ minWidth: 0, padding: '8px', color: '#25D366' }} // WhatsApp green
-        >
-          <FaWhatsapp size={24} />
-        </Button>
-        <Button
-          onClick={copyToClipboard}
-          aria-label="Copy link for Instagram"
-          sx={{ minWidth: 0, padding: '8px', color: '#C13584' }} // Instagram purple/pink
-        >
-          <FaInstagram size={24} />
-        </Button>
-        {onDownload && (
-          <Button
-            onClick={onDownload}
-            aria-label="Download"
-            sx={{ minWidth: 0, padding: '8px', color: 'text.secondary' }}
+    <Box>
+      <Stack direction="row" useFlexGap flexWrap="wrap" gap={1}>
+        {actions.map((action) => (
+          <Tooltip title={action.label} key={action.label}>
+            <IconButton
+              component="a"
+              href={action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Compartir en ${action.label}`}
+              sx={{ ...iconSx, color: action.color }}
+            >
+              {action.icon}
+            </IconButton>
+          </Tooltip>
+        ))}
+        <Tooltip title={copied ? "Enlace copiado" : "Copiar enlace"}>
+          <IconButton
+            onClick={copyToClipboard}
+            aria-label="Copiar enlace"
+            sx={{ ...iconSx, color: "#40506a" }}
           >
-            <FaDownload size={24} />
-          </Button>
+            <FaLink />
+          </IconButton>
+        </Tooltip>
+        {onDownload && (
+          <Tooltip title="Descargar imagen">
+            <IconButton
+              onClick={onDownload}
+              aria-label="Descargar imagen"
+              sx={{ ...iconSx, color: "#40506a" }}
+            >
+              <FaDownload />
+            </IconButton>
+          </Tooltip>
         )}
-      </Box>
-      {copied && <Typography variant="caption" sx={{ mt: 1 }}>{t('linkCopiedInstagram', 'Enlace copiado para Instagram')}</Typography>}
+      </Stack>
+      {copied && (
+        <Typography variant="caption" sx={{ mt: 1, color: "success.main", display: "block" }}>
+          Enlace copiado
+        </Typography>
+      )}
     </Box>
   );
-};
-
-export default ShareButtons;
+}

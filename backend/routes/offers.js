@@ -200,6 +200,7 @@ router.get("/", async (req, res) => {
     const responseData = {
       featuredOffers,
       offers,
+      totalOffers: Number(totalOffers),
       totalPages,
       currentPage: parseInt(page),
     };

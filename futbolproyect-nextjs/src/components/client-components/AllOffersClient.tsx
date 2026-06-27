@@ -1,326 +1,248 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
+import {
+  Box,
+  Button,
+  Collapse,
+  Container,
+  Stack,
+  Typography,
+} from "@mui/material";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import apiClient from "@/lib/apiClient";
 import OfferList from "@/components/shared/OfferList";
 import Pagination from "@/components/Pagination";
-import { useTranslation } from "react-i18next";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import useIsMobile from "@/hooks/useIsMobile";
 import AdBanner from "@/components/ads/AdBanner";
-import {
-  Box,
-  Typography,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Button,
-  Grid,
-  Collapse,
-  SelectChangeEvent,
-  Paper,
-  Stack,
-  Chip,
-} from "@mui/material";
+import OffersHero from "@/components/offers/OffersHero";
+import OfferFiltersSidebar, {
+  OfferFilters,
+} from "@/components/offers/OfferFiltersSidebar";
+import { Offer } from "@/lib/types";
 
-// --- Fetching Logic for React Query ---
+type OffersResponse = {
+  offers: Offer[];
+  totalPages: number;
+  currentPage: number;
+  totalOffers: number;
+};
+
+type FilterOptions = {
+  puestos: string[];
+  ubicaciones: string[];
+  niveles: string[];
+  horarios: string[];
+};
+
+const emptyFilters: OfferFilters = {
+  puesto: "",
+  ubicacion: "",
+  nivel: "",
+  horarios: "",
+  salarioMin: "",
+  salarioMax: "",
+  sort: "desc",
+};
+
 const fetchOffers = async ({
   queryKey,
-}: QueryFunctionContext<[string, object, number]>) => {
+}: QueryFunctionContext<[string, OfferFilters, number]>) => {
   const [, filters, page] = queryKey;
   const params = new URLSearchParams({
-    page: page.toString(),
+    page: String(page),
     limit: "10",
     show: "all",
-    ...(filters as Record<string, string>),
   });
 
-  // Clean empty params for a cleaner URL
-  for (const [key, value] of params.entries()) {
-    if (!value) {
-      params.delete(key);
-    }
-  }
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) params.set(key, value);
+  });
 
-  const { data } = await apiClient.get(`/offers?${params.toString()}`);
+  const { data } = await apiClient.get<OffersResponse>(
+    `/offers?${params.toString()}`,
+  );
   return data;
 };
 
 const fetchOfferFilterOptions = async () => {
-  const { data } = await apiClient.get("/offers/filter-options");
+  const { data } = await apiClient.get<FilterOptions>("/offers/filter-options");
   return data;
 };
 
-const roleFilters = [
-  { label: "Jugador", value: "jugador" },
-  { label: "Entrenador", value: "entrenador" },
-  { label: "Analista", value: "analista" },
-  { label: "Scout", value: "scout" },
-  { label: "Preparador fisico", value: "preparador" },
-];
-
-// --- Main Component for All Offers Page ---
 export default function AllOffersClient() {
-  const { t } = useTranslation("common");
-  const isMobile = useIsMobile();
+  const [draftFilters, setDraftFilters] = useState<OfferFilters>(emptyFilters);
+  const [appliedFilters, setAppliedFilters] =
+    useState<OfferFilters>(emptyFilters);
+  const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const [filters, setFilters] = useState({
-    puesto: "",
-    ubicacion: "",
-    nivel: "",
-    horarios: "",
-    salarioMin: "",
-    salarioMax: "",
-    sort: "desc",
-  });
-
-  const [debouncedFilters, setDebouncedFilters] = useState(filters);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedFilters(filters);
-      setCurrentPage(1);
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [filters]);
-
-  const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const toggleMobileFilters = () => {
-    setShowMobileFilters(!showMobileFilters);
-  };
-
-  const { data, isLoading, isError, error } = useQuery<any, Error>({
-    queryKey: ["offers", debouncedFilters, currentPage],
+  const { data, isLoading, isError, error } = useQuery<OffersResponse, Error>({
+    queryKey: ["offers", appliedFilters, currentPage],
     queryFn: fetchOffers,
     placeholderData: (previousData) => previousData,
   });
 
-  const { data: filterOptions } = useQuery({
+  const { data: filterOptions } = useQuery<FilterOptions>({
     queryKey: ["offerFilterOptions"],
     queryFn: fetchOfferFilterOptions,
   });
 
-  const puestos = filterOptions?.puestos || [];
-  const ubicaciones = filterOptions?.ubicaciones || [];
-  const niveles = filterOptions?.niveles || [];
-  const horarios = filterOptions?.horarios || [];
+  const options = filterOptions || {
+    puestos: [],
+    ubicaciones: [],
+    niveles: [],
+    horarios: [],
+  };
+
+  const applyFilters = () => {
+    setAppliedFilters(draftFilters);
+    setCurrentPage(1);
+    setShowMobileFilters(false);
+  };
+
+  const clearFilters = () => {
+    setDraftFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setCurrentPage(1);
+  };
+
+  const handleRoleChange = (puesto: string) => {
+    const next = { ...draftFilters, puesto };
+    setDraftFilters(next);
+    setAppliedFilters(next);
+    setCurrentPage(1);
+  };
+
+  const metrics = [
+    { value: data?.totalOffers ?? "—", label: "Ofertas activas" },
+    { value: options.ubicaciones.length || "—", label: "Ubicaciones" },
+    { value: options.puestos.length || "—", label: "Puestos disponibles" },
+    { value: options.horarios.length || "—", label: "Tipos de jornada" },
+  ];
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: "1200px", mx: "auto" }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        gutterBottom
-        sx={{ color: "text.primary", fontWeight: "bold", mb: 2 }}
-      >
-        {t("all_offers_title", "Todas las Ofertas de Empleo")}
-      </Typography>
+    <Box sx={{ bgcolor: "#f7f9fc", minHeight: "100vh", pb: { xs: 7, md: 10 } }}>
+      <OffersHero
+        activeRole={draftFilters.puesto}
+        metrics={metrics}
+        onRoleChange={handleRoleChange}
+      />
 
-      <Typography color="text.secondary" sx={{ maxWidth: 780, mb: 3 }}>
-        {t(
-          "all_offers_intro",
-          "Encuentra oportunidades reales en clubes, academias y proyectos deportivos. Usa los filtros para reducir por rol, ubicacion, nivel y rango salarial.",
-        )}
-      </Typography>
+      <Container maxWidth="lg" sx={{ pt: { xs: 10, md: 11 } }}>
+        <AdBanner placement="offers_top" />
 
-      <AdBanner placement="offers_top" />
-
-      <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: "wrap", gap: 1 }}>
-        {roleFilters.map((role) => (
-          <Chip
-            key={role.value}
-            clickable
-            color={filters.puesto === role.value ? "primary" : "default"}
-            label={t(`role_filter_${role.value}`, role.label)}
-            onClick={() =>
-              setFilters((prev) => ({
-                ...prev,
-                puesto: prev.puesto === role.value ? "" : role.value,
-              }))
-            }
-          />
-        ))}
-      </Stack>
-
-      {isMobile && (
         <Button
-          variant="contained"
-          onClick={toggleMobileFilters}
-          sx={{ mb: 2 }}
-        >
-          {showMobileFilters
-            ? t("hide_filters", "Ocultar Filtros")
-            : t("show_filters", "Mostrar Filtros")}
-        </Button>
-      )}
-
-      <Collapse in={!isMobile || showMobileFilters}>
-        <Paper
-          elevation={0}
+          fullWidth
+          variant="outlined"
+          startIcon={<TuneRoundedIcon />}
+          onClick={() => setShowMobileFilters((value) => !value)}
           sx={{
-            p: 2,
-            mb: 4,
-            border: "1px solid rgba(25, 38, 52, 0.12)",
-            borderRadius: 2,
+            display: { xs: "flex", md: "none" },
+            mb: 2.5,
+            py: 1.2,
+            bgcolor: "#fff",
+            borderColor: "#d9e2ef",
+            fontWeight: 800,
           }}
         >
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>{t("filter_by_position", "Filtrar por puesto")}</InputLabel>
-              <Select
-                name="puesto"
-                value={filters.puesto}
-                onChange={handleSelectChange}
-                label={t("filter_by_position", "Filtrar por puesto")}
-              >
-                <MenuItem value="">{t("all_positions", "Todos")}</MenuItem>
-                {puestos.map((puesto: string) => (
-                  <MenuItem key={puesto} value={puesto}>
-                    {puesto}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>{t("filter_by_location", "Filtrar por ubicación")}</InputLabel>
-              <Select
-                name="ubicacion"
-                value={filters.ubicacion}
-                onChange={handleSelectChange}
-                label={t("filter_by_location", "Filtrar por ubicación")}
-              >
-                <MenuItem value="">{t("all_locations", "Todas")}</MenuItem>
-                {ubicaciones.map((ubicacion: string) => (
-                  <MenuItem key={ubicacion} value={ubicacion}>
-                    {ubicacion}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>{t("filter_by_level", "Nivel")}</InputLabel>
-              <Select
-                name="nivel"
-                value={filters.nivel}
-                onChange={handleSelectChange}
-                label={t("filter_by_level", "Nivel")}
-              >
-                <MenuItem value="">
-                  {t("select_level", "Seleccionar Nivel")}
-                </MenuItem>
-                {niveles.map((nivel: string) => (
-                  <MenuItem key={nivel} value={nivel}>
-                    {nivel}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>{t("filter_by_schedule", "Jornada")}</InputLabel>
-              <Select
-                name="horarios"
-                value={filters.horarios}
-                onChange={handleSelectChange}
-                label={t("filter_by_schedule", "Jornada")}
-              >
-                <MenuItem value="">{t("all_schedules", "Todas")}</MenuItem>
-                {horarios.map((horario: string) => (
-                  <MenuItem key={horario} value={horario}>
-                    {horario}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              fullWidth
-              type="number"
-              name="salarioMin"
-              label={t("filter_by_min_salary", "Salario Mín.")}
-              value={filters.salarioMin}
-              onChange={handleTextFieldChange}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <TextField
-              fullWidth
-              type="number"
-              name="salarioMax"
-              label={t("filter_by_max_salary", "Salario Máx.")}
-              value={filters.salarioMax}
-              onChange={handleTextFieldChange}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <FormControl fullWidth>
-              <InputLabel>{t("sort_by", "Ordenar por")}</InputLabel>
-              <Select
-                name="sort"
-                value={filters.sort}
-                onChange={handleSelectChange}
-                label={t("sort_by", "Ordenar por")}
-              >
-                <MenuItem value="desc">
-                  {t("sort_by_recent", "Más recientes")}
-                </MenuItem>
-                <MenuItem value="asc">
-                  {t("sort_by_oldest", "Más antiguos")}
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-        </Grid>
-        </Paper>
-      </Collapse>
+          {showMobileFilters ? "Ocultar filtros" : "Mostrar filtros"}
+        </Button>
 
-      {isLoading ? (
-        <LoadingSpinner text={t("loading_offers", "Cargando ofertas...")} />
-      ) : isError ? (
-        <Typography color="error" sx={{ mt: 2 }}>
-          {t("error_loading_offers", "Error al cargar ofertas")}:{" "}
-          {error.message}
-        </Typography>
-      ) : (
-        <>
-          <OfferList offers={data?.offers || []} showApplyButton={false} />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={data?.totalPages || 0}
-            onPageChange={handlePageChange}
-          />
-        </>
-      )}
+        <Box sx={{ display: { xs: "block", md: "none" } }}>
+          <Collapse in={showMobileFilters}>
+            <Box sx={{ mb: 3 }}>
+              <OfferFiltersSidebar
+                filters={draftFilters}
+                ubicaciones={options.ubicaciones}
+                niveles={options.niveles}
+                horarios={options.horarios}
+                onChange={setDraftFilters}
+                onApply={applyFilters}
+                onClear={clearFilters}
+              />
+            </Box>
+          </Collapse>
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "260px minmax(0, 1fr)" },
+            gap: { xs: 3, md: 3.5 },
+            alignItems: "start",
+          }}
+        >
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            <OfferFiltersSidebar
+              filters={draftFilters}
+              ubicaciones={options.ubicaciones}
+              niveles={options.niveles}
+              horarios={options.horarios}
+              onChange={setDraftFilters}
+              onApply={applyFilters}
+              onClear={clearFilters}
+            />
+          </Box>
+
+          <Box sx={{ minWidth: 0 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              spacing={0.5}
+              sx={{ mb: 2.25 }}
+            >
+              <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
+                {data?.totalOffers
+                  ? `Mostrando ${Math.min((currentPage - 1) * 10 + 1, data.totalOffers)}–${Math.min(currentPage * 10, data.totalOffers)} de ${data.totalOffers} ofertas`
+                  : "Ofertas disponibles"}
+              </Typography>
+              <Typography sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}>
+                {appliedFilters.sort === "asc" ? "Más antiguas" : "Más recientes"}
+              </Typography>
+            </Stack>
+
+            {isLoading ? (
+              <LoadingSpinner text="Cargando ofertas..." />
+            ) : isError ? (
+              <Typography color="error" sx={{ py: 4 }}>
+                Error al cargar ofertas: {error.message}
+              </Typography>
+            ) : data?.offers.length ? (
+              <>
+                <OfferList offers={data.offers} showApplyButton={false} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={data.totalPages || 0}
+                  onPageChange={(page: number) => {
+                    setCurrentPage(page);
+                    window.scrollTo({ top: 480, behavior: "smooth" });
+                  }}
+                />
+              </>
+            ) : (
+              <Box
+                sx={{
+                  p: 5,
+                  textAlign: "center",
+                  bgcolor: "#fff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 2.5,
+                }}
+              >
+                <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
+                  No encontramos ofertas con estos filtros
+                </Typography>
+                <Button onClick={clearFilters} sx={{ mt: 1 }}>
+                  Limpiar filtros
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Container>
     </Box>
   );
 }
