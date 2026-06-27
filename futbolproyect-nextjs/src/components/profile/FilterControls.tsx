@@ -1,32 +1,34 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   Box,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
-  Grid,
-  Slider,
-  TextField,
+  Collapse,
+  Container,
+  Stack,
   Typography,
 } from "@mui/material";
-import { SelectChangeEvent } from "@mui/material/Select";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import { Profile } from "@/lib/types";
 import ProfileCard from "@/components/profile/ProfileCard";
 import AdBanner from "@/components/ads/AdBanner";
-import {
-  getPlayerPositionCategory,
-  PLAYER_POSITION_OPTIONS,
-} from "@/lib/profilePositions";
+import ProfilesHero from "@/components/profile/ProfilesHero";
+import ProfileFiltersSidebar, {
+  ProfileFilters,
+} from "@/components/profile/ProfileFiltersSidebar";
+import { getPlayerPositionCategory } from "@/lib/profilePositions";
 
 interface FilterControlsProps {
   nacionalidades: string[];
   initialProfiles: Profile[];
 }
+
+const emptyFilters: ProfileFilters = {
+  nombre: "",
+  nacionalidad: "",
+  puesto: "",
+};
 
 const normalizeForSearch = (value?: string) =>
   String(value || "")
@@ -37,21 +39,18 @@ const normalizeForSearch = (value?: string) =>
 
 const getProfileAge = (birthDate?: string) => {
   if (!birthDate) return null;
-
   const parsedDate = new Date(birthDate);
   if (Number.isNaN(parsedDate.getTime())) return null;
 
   const today = new Date();
   let age = today.getFullYear() - parsedDate.getFullYear();
   const monthDiff = today.getMonth() - parsedDate.getMonth();
-
   if (
     monthDiff < 0 ||
     (monthDiff === 0 && today.getDate() < parsedDate.getDate())
   ) {
     age -= 1;
   }
-
   return age >= 0 ? age : null;
 };
 
@@ -59,8 +58,6 @@ export default function FilterControls({
   nacionalidades,
   initialProfiles,
 }: FilterControlsProps) {
-  const { t } = useTranslation();
-
   const agesInProfiles = useMemo(
     () =>
       initialProfiles
@@ -70,214 +67,222 @@ export default function FilterControls({
   );
 
   const hasAgeData = agesInProfiles.length > 0;
-
   const ageBounds = useMemo<[number, number]>(() => {
-    if (agesInProfiles.length === 0) return [12, 45];
-
+    if (!agesInProfiles.length) return [12, 45];
     const minAge = Math.max(0, Math.min(...agesInProfiles));
     const maxAge = Math.max(minAge + 1, Math.max(...agesInProfiles));
-
     return [minAge, maxAge];
   }, [agesInProfiles]);
 
-  const [filters, setFilters] = useState({
-    nombre: "",
-    nacionalidad: "",
-    puesto: "",
-  });
-  const [ageRange, setAgeRange] = useState<[number, number]>(ageBounds);
+  const [draftFilters, setDraftFilters] =
+    useState<ProfileFilters>(emptyFilters);
+  const [appliedFilters, setAppliedFilters] =
+    useState<ProfileFilters>(emptyFilters);
+  const [draftAgeRange, setDraftAgeRange] =
+    useState<[number, number]>(ageBounds);
+  const [appliedAgeRange, setAppliedAgeRange] =
+    useState<[number, number]>(ageBounds);
   const [isAgeFilterActive, setIsAgeFilterActive] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     if (!isAgeFilterActive) {
-      setAgeRange(ageBounds);
+      setDraftAgeRange(ageBounds);
+      setAppliedAgeRange(ageBounds);
     }
   }, [ageBounds, isAgeFilterActive]);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      nombre: value,
-    }));
-  };
-
-  const handleFilterChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name as string]: value,
-    }));
-  };
-
-  const handleAgeRangeChange = (_event: Event, value: number | number[]) => {
-    if (!hasAgeData) return;
-    if (!Array.isArray(value)) return;
-    setAgeRange([value[0], value[1]]);
-    setIsAgeFilterActive(true);
+  const applyFilters = () => {
+    setAppliedFilters(draftFilters);
+    setAppliedAgeRange(draftAgeRange);
+    setShowMobileFilters(false);
   };
 
   const clearFilters = () => {
-    setFilters({ nombre: "", nacionalidad: "", puesto: "" });
-    setAgeRange(ageBounds);
+    setDraftFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setDraftAgeRange(ageBounds);
+    setAppliedAgeRange(ageBounds);
     setIsAgeFilterActive(false);
   };
 
-  const filteredProfiles = useMemo(() => {
-    return initialProfiles.filter((profile) => {
-      const searchTerm = normalizeForSearch(filters.nombre);
-      const fullName = normalizeForSearch(
-        `${profile.nombre || ""} ${profile.apellido || ""}`,
-      );
-      const matchName = !searchTerm || fullName.includes(searchTerm);
+  const handleAgeChange = (range: [number, number]) => {
+    setDraftAgeRange(range);
+    setIsAgeFilterActive(true);
+  };
 
-      const matchNac =
-        !filters.nacionalidad || profile.nacionalidad === filters.nacionalidad;
+  const handlePositionChange = (puesto: string) => {
+    const next = { ...draftFilters, puesto };
+    setDraftFilters(next);
+    setAppliedFilters(next);
+  };
 
-      const matchPuesto =
-        !filters.puesto ||
-        getPlayerPositionCategory(profile.posicion_principal) === filters.puesto;
+  const filteredProfiles = useMemo(
+    () =>
+      initialProfiles.filter((profile) => {
+        const searchTerm = normalizeForSearch(appliedFilters.nombre);
+        const fullName = normalizeForSearch(
+          `${profile.nombre || ""} ${profile.apellido || ""}`,
+        );
+        const matchName = !searchTerm || fullName.includes(searchTerm);
+        const matchNationality =
+          !appliedFilters.nacionalidad ||
+          profile.nacionalidad === appliedFilters.nacionalidad;
+        const matchPosition =
+          !appliedFilters.puesto ||
+          getPlayerPositionCategory(profile.posicion_principal) ===
+            appliedFilters.puesto;
+        const profileAge = getProfileAge(profile.fecha_de_nacimiento);
+        const matchAge =
+          !isAgeFilterActive ||
+          (profileAge !== null &&
+            profileAge >= appliedAgeRange[0] &&
+            profileAge <= appliedAgeRange[1]);
 
-      const profileAge = getProfileAge(profile.fecha_de_nacimiento);
-      const matchAge =
-        !isAgeFilterActive ||
-        (profileAge !== null &&
-          profileAge >= ageRange[0] &&
-          profileAge <= ageRange[1]);
+        return matchName && matchNationality && matchPosition && matchAge;
+      }),
+    [appliedAgeRange, appliedFilters, initialProfiles, isAgeFilterActive],
+  );
 
-      return matchName && matchNac && matchPuesto && matchAge;
-    });
-  }, [ageRange, filters, initialProfiles, isAgeFilterActive]);
+  const representedPositions = new Set(
+    initialProfiles
+      .map((profile) =>
+        getPlayerPositionCategory(profile.posicion_principal),
+      )
+      .filter(Boolean),
+  ).size;
+  const completeProfiles = initialProfiles.filter(
+    (profile) => profile.foto_perfil_url && profile.cv_url,
+  ).length;
+  const metrics = [
+    { value: initialProfiles.length, label: "Perfiles disponibles" },
+    { value: nacionalidades.length, label: "Nacionalidades" },
+    { value: representedPositions, label: "Posiciones representadas" },
+    { value: completeProfiles, label: "Perfiles completos" },
+  ];
+
+  const filtersSidebar = (
+    <ProfileFiltersSidebar
+      filters={draftFilters}
+      nacionalidades={nacionalidades}
+      ageRange={draftAgeRange}
+      ageBounds={ageBounds}
+      hasAgeData={hasAgeData}
+      onChange={setDraftFilters}
+      onAgeChange={handleAgeChange}
+      onApply={applyFilters}
+      onClear={clearFilters}
+    />
+  );
 
   return (
-    <>
-      {/* ===== FILTROS ===== */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
-          <TextField
-            name="nombre"
-            value={filters.nombre}
-            onChange={handleNameChange}
-            label={t("filter_by_name", "Buscar por nombre")}
-            placeholder={t("filter_by_name_placeholder", "Nombre o apellido")}
-            fullWidth
-          />
-        </Grid>
+    <Box sx={{ bgcolor: "#f7f9fc", minHeight: "100vh", pb: { xs: 7, md: 10 } }}>
+      <ProfilesHero
+        activePosition={draftFilters.puesto}
+        metrics={metrics}
+        onPositionChange={handlePositionChange}
+      />
 
-        <Grid item xs={12} sm={6} md={3}>
-          <FormControl fullWidth>
-            <InputLabel>
-              {t("filter_by_nationality", "Filtrar por nacionalidad")}
-            </InputLabel>
-            <Select
-              name="nacionalidad"
-              value={filters.nacionalidad}
-              onChange={handleFilterChange}
-              label={t("filter_by_nationality", "Filtrar por nacionalidad")}
-            >
-              <MenuItem value="">
-                <em>{t("all_nationalities", "Todas")}</em>
-              </MenuItem>
-              {nacionalidades.map((nac) => (
-                <MenuItem key={nac} value={nac}>
-                  {nac}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
+      <Container maxWidth="lg" sx={{ pt: { xs: 10, md: 11 } }}>
+        <AdBanner placement="profiles_top" />
 
-        <Grid item xs={12} sm={6} md={3}>
-          <FormControl fullWidth>
-            <InputLabel>
-              {t("filter_by_position", "Filtrar por puesto")}
-            </InputLabel>
-            <Select
-              name="puesto"
-              value={filters.puesto}
-              onChange={handleFilterChange}
-              label={t("filter_by_position", "Filtrar por puesto")}
-            >
-              <MenuItem value="">
-                <em>{t("all_positions", "Todos")}</em>
-              </MenuItem>
-              {PLAYER_POSITION_OPTIONS.map((position) => (
-                <MenuItem key={position.value} value={position.value}>
-                  {t(position.labelKey, position.fallback)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid
-          item
-          xs={12}
-          md={2}
-          sx={{ display: "flex", alignItems: "center" }}
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<TuneRoundedIcon />}
+          onClick={() => setShowMobileFilters((value) => !value)}
+          sx={{
+            display: { xs: "flex", md: "none" },
+            mb: 2.5,
+            py: 1.2,
+            bgcolor: "#fff",
+            borderColor: "#d9e2ef",
+            fontWeight: 800,
+          }}
         >
-          <Button variant="outlined" onClick={clearFilters} fullWidth>
-            {t("clear_filters", "Limpiar")}
-          </Button>
-        </Grid>
+          {showMobileFilters ? "Ocultar filtros" : "Mostrar filtros"}
+        </Button>
 
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              px: { xs: 1, sm: 2 },
-              py: 1.5,
-              border: "1px solid rgba(25, 38, 52, 0.12)",
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
-              {t("filter_by_age_range", "Rango de edad")}: {ageRange[0]} -{" "}
-              {ageRange[1]} {t("years_short", "años")}
-            </Typography>
-            <Slider
-              value={ageRange}
-              onChange={handleAgeRangeChange}
-              valueLabelDisplay="auto"
-              min={ageBounds[0]}
-              max={ageBounds[1]}
-              disabled={!hasAgeData}
-              disableSwap
-              marks={[
-                { value: ageBounds[0], label: String(ageBounds[0]) },
-                { value: ageBounds[1], label: String(ageBounds[1]) },
-              ]}
-            />
-            {!hasAgeData && (
-              <Typography variant="body2" color="text.secondary">
-                {t(
-                  "no_age_data_available",
-                  "Todavía no hay perfiles con fecha de nacimiento cargada.",
-                )}
+        <Box sx={{ display: { xs: "block", md: "none" } }}>
+          <Collapse in={showMobileFilters}>
+            <Box sx={{ mb: 3 }}>{filtersSidebar}</Box>
+          </Collapse>
+        </Box>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "260px minmax(0, 1fr)" },
+            gap: { xs: 3, md: 3.5 },
+            alignItems: "start",
+          }}
+        >
+          <Box sx={{ display: { xs: "none", md: "block" } }}>
+            {filtersSidebar}
+          </Box>
+
+          <Box sx={{ minWidth: 0 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              spacing={0.5}
+              sx={{ mb: 2.25 }}
+            >
+              <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
+                Mostrando {filteredProfiles.length} de {initialProfiles.length} perfiles
               </Typography>
+              <Typography
+                sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}
+              >
+                Talento disponible
+              </Typography>
+            </Stack>
+
+            {filteredProfiles.length ? (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, minmax(0, 1fr))",
+                    lg: "repeat(3, minmax(0, 1fr))",
+                  },
+                  gap: 2,
+                }}
+              >
+                {filteredProfiles.map((profile, index) => (
+                  <React.Fragment key={profile.id}>
+                    <ProfileCard profile={profile} />
+                    {(index + 1) % 8 === 0 && (
+                      <Box sx={{ gridColumn: "1 / -1" }}>
+                        <AdBanner placement="profiles_inline" compact />
+                      </Box>
+                    )}
+                  </React.Fragment>
+                ))}
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  p: 5,
+                  textAlign: "center",
+                  bgcolor: "#fff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 2.5,
+                }}
+              >
+                <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
+                  No encontramos perfiles con estos filtros
+                </Typography>
+                <Button onClick={clearFilters} sx={{ mt: 1 }}>
+                  Limpiar filtros
+                </Button>
+              </Box>
             )}
           </Box>
-        </Grid>
-      </Grid>
-
-      {/* ===== RESULTADOS ===== */}
-      {filteredProfiles.length === 0 ? (
-        <Typography>{t("no_profiles_filters")}</Typography>
-      ) : (
-        <Grid container spacing={3}>
-          {filteredProfiles.map((profile, index) => (
-            <React.Fragment key={profile.id}>
-              <Grid item xs={12} sm={6} md={4} lg={3}>
-                <ProfileCard profile={profile} />
-              </Grid>
-              {(index + 1) % 8 === 0 && (
-                <Grid item xs={12}>
-                  <AdBanner placement="profiles_inline" compact />
-                </Grid>
-              )}
-            </React.Fragment>
-          ))}
-        </Grid>
-      )}
-    </>
+        </Box>
+      </Container>
+    </Box>
   );
 }

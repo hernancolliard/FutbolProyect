@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 export const dynamic = 'force-dynamic';
-import { getTranslation } from "@/lib/i18n-server";
 import { Profile } from "@/lib/types";
-import { Typography, Paper } from "@mui/material";
 import FilterControls from "@/components/profile/FilterControls";
 import { getApiBaseUrl } from "@/lib/api";
-import AdBanner from "@/components/ads/AdBanner";
 
 /* =========================
    STATIC FETCH (BUILD TIME)
@@ -56,29 +53,12 @@ export async function generateMetadata(): Promise<Metadata> {
 ========================= */
 
 export default async function AllProfilesPage() {
-  const { t } = await getTranslation("es");
-
   const { profiles, nacionalidades } = await fetchInitialData();
 
   return (
-    <Paper sx={{ p: { xs: 2, md: 4 }, m: { xs: 1, md: 2 } }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        gutterBottom
-        sx={{ textAlign: "center" }}
-      >
-        {t("all_profiles_title")}
-      </Typography>
-
-      <Typography paragraph>{t("all_profiles_desc")}</Typography>
-
-      <AdBanner placement="profiles_top" />
-
-      <FilterControls
-        nacionalidades={nacionalidades}
-        initialProfiles={profiles}
-      />
-    </Paper>
+    <FilterControls
+      nacionalidades={nacionalidades}
+      initialProfiles={profiles}
+    />
   );
 }
