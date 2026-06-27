@@ -53,7 +53,7 @@ export default function MyApplicationsSection({
   }, [userId]);
 
   return (
-    <Stack sx={{ mt: 4 }}>
+    <Stack sx={{ mt: 4, minWidth: 0, maxWidth: "100%" }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
         {t("my_applications_title", "Mis Postulaciones")}
       </Typography>
@@ -65,8 +65,10 @@ export default function MyApplicationsSection({
       ) : applications.length > 0 ? (
         <Stack spacing={2}>
           {applications.map((app) => (
-            <Card key={app.id} variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6">{app.oferta_titulo}</Typography>
+            <Card key={app.id} variant="outlined" sx={{ p: 2, minWidth: 0 }}>
+              <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+                {app.oferta_titulo}
+              </Typography>
               <Typography variant="body2">
                 <strong>{t("status", "Estado")}:</strong> {app.estado}
               </Typography>

@@ -15,7 +15,7 @@ interface PlayerSidebarProps {
 
 export function PlayerSidebar({ imageUrl, name, availabilityLabel, onCopyLink, onShare, onWhatsApp, onDownloadCv }: PlayerSidebarProps) {
   return (
-    <motion.aside initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} className="hidden lg:block lg:sticky lg:top-6 lg:self-start">
+    <motion.aside initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hidden shrink-0 lg:block lg:sticky lg:top-6 lg:self-start">
       <div className="w-full max-w-[320px] rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-[22px] bg-slate-100">
           <img src={imageUrl} alt={name} className="max-h-full max-w-full object-contain" />

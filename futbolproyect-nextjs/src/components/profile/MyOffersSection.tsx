@@ -10,6 +10,7 @@ import {
   Button,
   Chip,
   Grid,
+  Box,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -71,7 +72,7 @@ export default function MyOffersSection({
   }, [userId]);
 
   return (
-    <Stack sx={{ mt: 4 }}>
+    <Stack sx={{ mt: 4, minWidth: 0, maxWidth: "100%" }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
         {t("my_offers_title", "Mis Ofertas Publicadas")}
       </Typography>
@@ -109,10 +110,17 @@ export default function MyOffersSection({
             </Grid>
           </Grid>
           {offers.map((offer) => (
-            <Card key={offer.id} variant="outlined" sx={{ p: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                <div>
-                  <Typography variant="h6">{offer.titulo}</Typography>
+            <Card key={offer.id} variant="outlined" sx={{ p: 2, minWidth: 0 }}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                justifyContent="space-between"
+                alignItems={{ xs: "stretch", sm: "flex-start" }}
+                gap={1.5}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
+                    {offer.titulo}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {offer.puesto} • {offer.ubicacion}
                   </Typography>
@@ -128,8 +136,14 @@ export default function MyOffersSection({
                   <Typography variant="body2" color="text.secondary">
                     {t("created", "Creada")}: {offer.fecha_publicacion ? new Date(offer.fecha_publicacion).toLocaleDateString() : "-"}
                   </Typography>
-                </div>
-                <Stack direction="row" spacing={1} alignItems="center">
+                </Box>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  useFlexGap
+                  flexWrap="wrap"
+                >
                   <Chip
                     label={offer.estado === 'abierta' ? t('open', 'Abierta') : t('closed', 'Cerrada')}
                     color={offer.estado === 'abierta' ? 'success' : 'default'}
@@ -148,7 +162,13 @@ export default function MyOffersSection({
                   )}
                 </Stack>
               </Stack>
-              <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                sx={{ mt: 2 }}
+              >
                 <Button
                   component={Link}
                   href={`/offers/${offer.id}`}

@@ -197,7 +197,13 @@ export default function ManagedPlayerProfilesSection() {
                         </Box>
                       </Stack>
 
-                      <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        flexWrap="wrap"
+                        sx={{ mt: 2 }}
+                      >
                         <Button
                           size="small"
                           variant="outlined"

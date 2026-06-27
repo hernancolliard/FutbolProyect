@@ -1,216 +1,114 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { useTranslation } from "react-i18next";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import { Box, Stack, Typography } from "@mui/material";
+import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import ConnectWithoutContactOutlinedIcon from "@mui/icons-material/ConnectWithoutContactOutlined";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
-import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
-import { useAuth } from "@/context/AuthContext";
+import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
 const steps = [
   {
-    icon: <HowToRegOutlinedIcon />,
-    titleKey: "how_it_works_step_1_title",
-    textKey: "how_it_works_step_1_text",
-    fallbackTitle: "Crea tu perfil o publica una oferta",
-    fallbackText:
-      "Jugadores y profesionales muestran su trayectoria. Clubes, agencias y academias publican necesidades concretas.",
+    icon: <PersonAddAltOutlinedIcon />,
+    title: "Creá tu perfil",
+    text: "Registrate y completá tu información profesional.",
   },
   {
-    icon: <AssignmentTurnedInOutlinedIcon />,
-    titleKey: "how_it_works_step_2_title",
-    textKey: "how_it_works_step_2_text",
-    fallbackTitle: "Muestra informacion relevante",
-    fallbackText:
-      "Agrega datos deportivos, experiencia, videos, fotos, informes y detalles de la oportunidad para filtrar mejor.",
+    icon: <CloudUploadOutlinedIcon />,
+    title: "Publicá o buscá",
+    text: "Publicá una oferta o descubrí talento y oportunidades.",
   },
   {
     icon: <ConnectWithoutContactOutlinedIcon />,
-    titleKey: "how_it_works_step_3_title",
-    textKey: "how_it_works_step_3_text",
-    fallbackTitle: "Conecta y avanza",
-    fallbackText:
-      "Postulaciones, perfiles y contacto directo ayudan a pasar de la busqueda a una conversacion real.",
+    title: "Conectá y avanzá",
+    text: "Contactá de forma segura a través de la plataforma.",
+  },
+  {
+    icon: <HandshakeOutlinedIcon />,
+    title: "Impulsá tu carrera",
+    text: "Formá alianzas y llevá tu perfil al siguiente nivel.",
   },
 ];
 
-function HowItWorks() {
-  const { t } = useTranslation();
-  const { user } = useAuth();
-  const canPublishOffer =
-    user?.tipo_usuario === "ofertante" || user?.isadmin === true;
-
+export default function HowItWorks() {
   return (
     <Box
       component="section"
       sx={{
-        width: "100%",
-        py: { xs: 4, md: 6 },
-        px: { xs: 2, md: 3 },
-        background: "linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%)",
+        p: { xs: 2.5, md: 3.5 },
+        color: "#fff",
+        borderRadius: 2.5,
+        background: "linear-gradient(115deg, #061831, #0a3269)",
+        boxShadow: "0 16px 35px rgba(4, 25, 55, .15)",
       }}
     >
+      <Typography
+        component="h2"
+        sx={{ mb: 2.5, color: "#fff", textAlign: "center", fontSize: "1.55rem", fontWeight: 900 }}
+      >
+        ¿Cómo funciona?
+      </Typography>
       <Box
         sx={{
-          maxWidth: 1180,
-          mx: "auto",
-          borderRadius: 4,
-          overflow: "hidden",
-          border: "1px solid rgba(25, 38, 52, 0.12)",
-          background:
-            "linear-gradient(135deg, rgba(25, 38, 52, 0.98), rgba(25, 38, 52, 0.88))",
-          color: "white",
-          p: { xs: 2.5, md: 4 },
-          position: "relative",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(7, auto)" },
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: { xs: 2, md: 1.2 },
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            right: { xs: -70, md: -30 },
-            top: { xs: -70, md: -40 },
-            width: 220,
-            height: 220,
-            borderRadius: "50%",
-            background: "rgba(245, 166, 35, 0.18)",
-          }}
-        />
-
-        <Stack spacing={1.5} sx={{ position: "relative", mb: 3, alignItems: { xs: 'center', md: 'flex-start' } }}>
-          <Chip
-            icon={<EmojiEventsOutlinedIcon />}
-            label={t("how_it_works_badge", "Proceso simple")}
-            color="secondary"
-            sx={{
-              width: "fit-content",
-              fontWeight: 700,
-              bgcolor: "rgba(245, 166, 35, 0.16)",
-              color: "secondary.main",
-              "& .MuiChip-icon": { color: "secondary.main" },
-            }}
-          />
-          <Typography
-            variant="h4"
-            component="h2"
-            sx={{
-              color: "white",
-              fontWeight: 900,
-              fontSize: { xs: "2rem", md: "2.7rem" },
-              maxWidth: 760,
-              textAlign: { xs: 'center', md: 'left' },
-            }}
-          >
-            {t("how_it_works_title", "Como funciona FutbolProyect")}
-          </Typography>
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,0.78)",
-              maxWidth: 760,
-              fontSize: { xs: "1rem", md: "1.12rem" },
-              textAlign: { xs: 'center', md: 'left' },
-            }}
-          >
-            {t(
-              "how_it_works_subtitle",
-              "Una forma clara de ordenar oportunidades, perfiles y contactos dentro del mercado laboral del futbol.",
+        {steps.map((step, index) => (
+          <React.Fragment key={step.title}>
+            <Stack alignItems="center" sx={{ maxWidth: 210, mx: "auto", textAlign: "center" }}>
+              <Box
+                sx={{
+                  width: 62,
+                  height: 62,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: "50%",
+                  border: "1px solid rgba(78, 151, 255, .7)",
+                  color: "#62a8ff",
+                  "& svg": { fontSize: 31 },
+                }}
+              >
+                {step.icon}
+              </Box>
+              <Stack direction="row" spacing={0.8} alignItems="center" sx={{ mt: 1.3 }}>
+                <Box
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: "50%",
+                    bgcolor: "#1262db",
+                    fontSize: ".7rem",
+                    fontWeight: 900,
+                  }}
+                >
+                  {index + 1}
+                </Box>
+                <Typography sx={{ color: "#fff", fontWeight: 900, fontSize: ".9rem" }}>
+                  {step.title}
+                </Typography>
+              </Stack>
+              <Typography variant="caption" sx={{ mt: 0.7, color: "rgba(255,255,255,.65)", lineHeight: 1.45 }}>
+                {step.text}
+              </Typography>
+            </Stack>
+            {index < steps.length - 1 && (
+              <ArrowForwardRoundedIcon
+                sx={{
+                  display: { xs: "none", md: "block" },
+                  color: "rgba(255,255,255,.45)",
+                }}
+              />
             )}
-          </Typography>
-        </Stack>
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-            gap: 2,
-            position: "relative",
-          }}
-        >
-          {steps.map((step, index) => (
-            <Card
-              key={step.titleKey}
-              elevation={0}
-              sx={{
-                height: "100%",
-                bgcolor: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.16)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <CardContent sx={{ p: 2.5 }}>
-                <Stack spacing={1.5}>
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: "14px",
-                      display: "grid",
-                      placeItems: "center",
-                      bgcolor: "secondary.main",
-                      color: "primary.main",
-                      fontWeight: 900,
-                      "& svg": { fontSize: 28 },
-                    }}
-                  >
-                    {step.icon}
-                  </Box>
-                  <Typography sx={{ color: "secondary.main", fontWeight: 900 }}>
-                    {String(index + 1).padStart(2, "0")}
-                  </Typography>
-                  <Typography variant="h6" sx={{ color: "white", fontWeight: 800 }}>
-                    {t(step.titleKey, step.fallbackTitle)}
-                  </Typography>
-                  <Typography sx={{ color: "rgba(255,255,255,0.76)" }}>
-                    {t(step.textKey, step.fallbackText)}
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1.5}
-          sx={{ position: "relative", mt: 3 }}
-        >
-          <Button
-            component={Link}
-            href="/register"
-            variant="contained"
-            color="secondary"
-          >
-            {t("how_it_works_primary_cta", "Crear mi perfil")}
-          </Button>
-          <Button
-            component={Link}
-            href={canPublishOffer ? "/create-offer" : "/register?role=club"}
-            variant="outlined"
-            sx={{
-              color: "white",
-              borderColor: "rgba(255,255,255,0.55)",
-              "&:hover": {
-                borderColor: "white",
-                bgcolor: "rgba(255,255,255,0.08)",
-              },
-            }}
-          >
-            {t("how_it_works_secondary_cta", "Publicar una oferta")}
-          </Button>
-        </Stack>
+          </React.Fragment>
+        ))}
       </Box>
     </Box>
   );
 }
-
-export default HowItWorks;

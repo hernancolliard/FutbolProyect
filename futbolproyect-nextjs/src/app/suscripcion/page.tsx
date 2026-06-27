@@ -1,115 +1,119 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import PersonSearchOutlinedIcon from "@mui/icons-material/PersonSearchOutlined";
+import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
+import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import apiClient from "@/lib/apiClient";
 import SubscribeButton from "@/components/SubscribeButton";
-import { useTranslation } from "react-i18next";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import Alert from "@mui/material/Alert";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
-// --- Fetching Logic ---
-const fetchSubscriptionPlans = async () => {
-  const { data } = await apiClient.get("/subscriptions");
-  return data;
+type SubscriptionPlan = {
+  id?: number;
+  plan_name: string;
+  price_usd: number | string;
+  price_mp?: number | string;
+  is_active?: boolean;
 };
 
-export default function SubscriptionPage() {
-  const { t } = useTranslation("common");
-  const [billingCycle, setBillingCycle] = useState("monthly");
+const fetchSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {
+  const { data } = await apiClient.get("/subscriptions");
+  return Array.isArray(data) ? data : [];
+};
 
-  const {
-    data: plans,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+const planCards = [
+  {
+    type: "ofertante",
+    title: "Plan para clubes y agencias",
+    subtitle: "Encontrá el talento que tu proyecto necesita.",
+    icon: <BusinessOutlinedIcon />,
+    benefits: [
+      "Publicar y gestionar ofertas desde tu perfil",
+      "Recibir postulaciones con información deportiva",
+      "Acceder a perfiles y material profesional",
+      "Destacar oportunidades para ganar visibilidad",
+    ],
+  },
+  {
+    type: "postulante",
+    title: "Plan para profesionales",
+    subtitle: "Mostrá tu talento y accedé a nuevas oportunidades.",
+    icon: <PersonSearchOutlinedIcon />,
+    benefits: [
+      "Postularte a ofertas abiertas",
+      "Mostrar CV, fotos, videos y enlaces deportivos",
+      "Compartir tu perfil profesional",
+      "Conectar con clubes, agencias y proyectos",
+    ],
+  },
+];
+
+export default function SubscriptionPage() {
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
+    "monthly",
+  );
+
+  const { data: plans = [], isLoading, isError, error } = useQuery<
+    SubscriptionPlan[],
+    Error
+  >({
     queryKey: ["subscriptionPlans"],
     queryFn: fetchSubscriptionPlans,
   });
 
-  const handleBillingCycleChange = (
-    event: React.MouseEvent<HTMLElement>,
-    newBillingCycle: string | null,
-  ) => {
-    if (newBillingCycle !== null) {
-      setBillingCycle(newBillingCycle);
-    }
-  };
-
-  // --- Helper to find plan price ---
-  const getPrice = (name: string) => {
-    if (!plans) return null;
-    const plan = plans.find((p: any) => p.plan_name === name);
-    return plan ? plan.price_usd : null;
-  };
-
-  const monthlyPrice = getPrice("monthly");
-  const annualPrice = getPrice("annual");
-
-  const offererBenefits = [
-    t("offerer_benefit_1", "Publicar ofertas y gestionarlas desde tu perfil"),
-    t("offerer_benefit_2", "Recibir postulantes con CV, videos y datos deportivos"),
-    t("offerer_benefit_3", "Destacar oportunidades para ganar mas visibilidad"),
-  ];
-
-  const applicantBenefits = [
-    t("applicant_benefit_1", "Postularte a ofertas abiertas"),
-    t("applicant_benefit_2", "Mostrar CV, fotos, videos y enlaces deportivos"),
-    t("applicant_benefit_3", "Compartir tu perfil profesional con clubes y agentes"),
-  ];
-
-  // Dynamic SEO update for client components
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      document.title = t(
-        "subscriptions_seo_title",
-        "Planes de Suscripción - FutbolProyect",
-      );
-      const metaDescription = document.querySelector(
-        'meta[name="description"]',
-      );
-      if (metaDescription) {
-        metaDescription.setAttribute(
-          "content",
-          t(
-            "subscriptions_seo_desc",
-            "Elige el plan de suscripción que mejor se adapte a tus necesidades en FutbolProyect. Opciones para ofertantes y para talentos que buscan oportunidades.",
-          ),
-        );
-      } else {
-        const newMetaTag = document.createElement("meta");
-        newMetaTag.name = "description";
-        newMetaTag.content = t(
-          "subscriptions_seo_desc",
-          "Elige el plan de suscripción que mejor se adapte a tus necesidades en FutbolProyect. Opciones para ofertantes y para talentos que buscan oportunidades.",
-        );
-        document.head.appendChild(newMetaTag);
-      }
+    document.title = "Planes de Suscripción | FutbolProyect";
+    const description =
+      "Elegí el plan de FutbolProyect para publicar ofertas, buscar talento o postularte a oportunidades deportivas.";
+    let metaDescription = document.querySelector<HTMLMetaElement>(
+      'meta[name="description"]',
+    );
+    if (!metaDescription) {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
     }
-  }, [t]);
+    metaDescription.content = description;
+  }, []);
+
+  const selectedPlan = plans.find((plan) => plan.plan_name === billingCycle);
+  const price = selectedPlan?.price_usd;
+  const formattedPrice =
+    price !== undefined && price !== null && price !== ""
+      ? `U$D ${price}`
+      : "Consultar";
 
   if (isLoading) {
-    return <LoadingSpinner text={t("loading_plans", "Cargando planes...")} />;
+    return <LoadingSpinner text="Cargando planes..." />;
   }
 
   if (isError) {
     return (
-      <Alert severity="error">
-        {error?.message ||
-          t(
-            "error_loading_plans",
-            "Error al cargar los planes de suscripción.",
-          )}
-      </Alert>
+      <Container maxWidth="md" sx={{ py: 8 }}>
+        <Alert severity="error">
+          {error.message || "Error al cargar los planes de suscripción."}
+        </Alert>
+      </Container>
     );
   }
 
@@ -121,157 +125,246 @@ export default function SubscriptionPage() {
         currency: "USD",
       }}
     >
-      <Stack
-        className="subscription-container"
-        spacing={4}
-        sx={{ mt: 5, alignItems: "center", px: 2 }}
-      >
-        <Typography
-          variant="h4"
+      <Box sx={{ minHeight: "100vh", bgcolor: "#f7f9fc", pb: { xs: 7, md: 10 } }}>
+        <Box
+          component="section"
           sx={{
-            color: "text.primary",
-            fontWeight: "bold",
-            textAlign: "center",
+            color: "#fff",
+            pt: { xs: 6, md: 8 },
+            pb: { xs: 10, md: 11 },
+            backgroundImage:
+              "linear-gradient(90deg, rgba(2, 15, 37, .98), rgba(3, 31, 70, .9)), url('/images/fondo_1_lowres.webp')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 58%",
           }}
         >
-          {t("subscription_plans_title", "Planes de Suscripción")}
-        </Typography>
-
-        <Typography sx={{ color: "text.secondary", textAlign: "center" }}>
-          {t(
-            "subscription_plans_subtitle",
-            "Elige el plan que mejor se adapte a ti.",
-          )}
-        </Typography>
-
-        <ToggleButtonGroup
-          color="primary"
-          value={billingCycle}
-          exclusive
-          onChange={handleBillingCycleChange}
-          aria-label="Billing Cycle"
-        >
-          <ToggleButton value="monthly">{t("monthly", "Mensual")}</ToggleButton>
-          <ToggleButton value="annual">{t("annual", "Anual")}</ToggleButton>
-        </ToggleButtonGroup>
-
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={4}
-          className="plans"
-          sx={{ width: "100%", maxWidth: "900px", justifyContent: "center" }}
-        >
-          <Card
-            sx={{
-              flex: 1,
-              minWidth: 300,
-              bgcolor: "background.paper",
-              color: "text.primary",
-              boxShadow: 3,
-            }}
-          >
-            <CardContent
+          <Container maxWidth="lg" sx={{ textAlign: "center" }}>
+            <Chip
+              icon={<SportsSoccerOutlinedIcon />}
+              label="Invertí en tu próximo paso"
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-                height: "100%",
+                color: "#fff",
+                bgcolor: "rgba(255,255,255,.09)",
+                border: "1px solid rgba(255,255,255,.22)",
+                fontWeight: 800,
+                "& .MuiChip-icon": { color: "#62a8ff" },
+              }}
+            />
+            <Typography
+              component="h1"
+              sx={{
+                mt: 2,
+                color: "#fff",
+                fontSize: { xs: "2.35rem", md: "3.45rem" },
+                lineHeight: 1.05,
+                letterSpacing: "-0.04em",
+                fontWeight: 900,
               }}
             >
-              <Typography variant="h6" gutterBottom>
-                {t("offerer_plan_title", "Plan para Ofertantes")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 2, flexGrow: 1 }}
-              >
-                {t(
-                  "offerer_plan_description",
-                  "Para clubes y agencias que buscan talento.",
-                )}
-              </Typography>
-              <Stack spacing={1.2} sx={{ width: "100%", mb: 2, textAlign: "left" }}>
-                {offererBenefits.map((benefit) => (
-                  <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
-                    <CheckCircleOutlineIcon color="primary" fontSize="small" />
-                    <Typography variant="body2">{benefit}</Typography>
-                  </Stack>
-                ))}
-              </Stack>
-              <Typography
-                variant="h4"
-                color="primary"
-                sx={{ my: 3, fontWeight: "bold" }}
-              >
-                {billingCycle === "monthly"
-                  ? `U$D ${monthlyPrice}/mes`
-                  : `U$D ${annualPrice}/año`}
-              </Typography>
-              <SubscribeButton
-                planType="ofertante"
-                billingCycle={billingCycle}
-              />
-            </CardContent>
-          </Card>
-
-          <Card
-            sx={{
-              flex: 1,
-              minWidth: 300,
-              bgcolor: "background.paper",
-              color: "text.primary",
-              boxShadow: 3,
-            }}
-          >
-            <CardContent
+              Planes para crecer dentro del{" "}
+              <Box component="span" sx={{ color: "#2f80ff" }}>
+                fútbol
+              </Box>
+            </Typography>
+            <Typography
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-                height: "100%",
+                mt: 1.5,
+                mx: "auto",
+                maxWidth: 700,
+                color: "rgba(255,255,255,.76)",
+                fontSize: { xs: "1rem", md: "1.08rem" },
               }}
             >
-              <Typography variant="h6" gutterBottom>
-                {t("applicant_plan_title", "Plan para Postulantes")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 2, flexGrow: 1 }}
+              Elegí la modalidad que mejor se adapta a tu perfil y accedé a las
+              herramientas de FutbolProyect.
+            </Typography>
+          </Container>
+        </Box>
+
+        <Container maxWidth="lg" sx={{ mt: { xs: -6, md: -5 }, position: "relative" }}>
+          <Paper
+            elevation={0}
+            sx={{
+              mx: "auto",
+              mb: 4,
+              p: 1,
+              width: "fit-content",
+              maxWidth: "100%",
+              border: "1px solid #dfe6ef",
+              borderRadius: 2.5,
+              boxShadow: "0 14px 35px rgba(8, 34, 70, .12)",
+            }}
+          >
+            <ToggleButtonGroup
+              value={billingCycle}
+              exclusive
+              onChange={(_event, value: "monthly" | "annual" | null) => {
+                if (value) setBillingCycle(value);
+              }}
+              aria-label="Ciclo de facturación"
+              sx={{
+                "& .MuiToggleButton-root": {
+                  minWidth: { xs: 130, sm: 165 },
+                  px: { xs: 2, sm: 3 },
+                  py: 1.1,
+                  border: 0,
+                  borderRadius: "10px !important",
+                  color: "#526179",
+                  fontWeight: 900,
+                },
+                "& .Mui-selected": {
+                  color: "#fff !important",
+                  bgcolor: "#1262db !important",
+                },
+              }}
+            >
+              <ToggleButton value="monthly">Mensual</ToggleButton>
+              <ToggleButton value="annual">Anual</ToggleButton>
+            </ToggleButtonGroup>
+          </Paper>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+              gap: 2.5,
+              maxWidth: 930,
+              mx: "auto",
+            }}
+          >
+            {planCards.map((plan, index) => (
+              <Card
+                key={plan.type}
+                elevation={0}
+                sx={{
+                  minWidth: 0,
+                  overflow: "visible",
+                  border: "1px solid",
+                  borderColor: index === 0 ? "rgba(18, 98, 219, .45)" : "#dfe6ef",
+                  borderRadius: 3,
+                  boxShadow:
+                    index === 0
+                      ? "0 18px 42px rgba(18, 98, 219, .12)"
+                      : "0 10px 28px rgba(8, 34, 70, .06)",
+                }}
               >
-                {t(
-                  "applicant_plan_description",
-                  "Para futbolistas que buscan oportunidades.",
-                )}
-              </Typography>
-              <Stack spacing={1.2} sx={{ width: "100%", mb: 2, textAlign: "left" }}>
-                {applicantBenefits.map((benefit) => (
-                  <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
-                    <CheckCircleOutlineIcon color="primary" fontSize="small" />
-                    <Typography variant="body2">{benefit}</Typography>
+                <CardContent
+                  sx={{
+                    p: { xs: 2.5, sm: 3.5 },
+                    "&:last-child": { pb: { xs: 2.5, sm: 3.5 } },
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        display: "grid",
+                        placeItems: "center",
+                        borderRadius: 2,
+                        bgcolor: "#edf5ff",
+                        color: "#1262db",
+                      }}
+                    >
+                      {plan.icon}
+                    </Box>
+                    <Box>
+                      <Typography
+                        component="h2"
+                        sx={{ color: "#0a1930", fontSize: "1.2rem", fontWeight: 900 }}
+                      >
+                        {plan.title}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 0.3, color: "#65738a" }}>
+                        {plan.subtitle}
+                      </Typography>
+                    </Box>
                   </Stack>
-                ))}
-              </Stack>
-              <Typography
-                variant="h4"
-                color="primary"
-                sx={{ my: 3, fontWeight: "bold" }}
+
+                  <Divider sx={{ my: 2.5 }} />
+
+                  <Stack direction="row" alignItems="flex-end" spacing={0.7}>
+                    <Typography
+                      sx={{
+                        color: "#0a1930",
+                        fontSize: { xs: "2.3rem", sm: "2.8rem" },
+                        lineHeight: 1,
+                        fontWeight: 900,
+                      }}
+                    >
+                      {formattedPrice}
+                    </Typography>
+                    {formattedPrice !== "Consultar" && (
+                      <Typography sx={{ pb: 0.3, color: "#758196" }}>
+                        /{billingCycle === "monthly" ? "mes" : "año"}
+                      </Typography>
+                    )}
+                  </Stack>
+
+                  <Stack spacing={1.3} sx={{ my: 3 }}>
+                    {plan.benefits.map((benefit) => (
+                      <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
+                        <CheckCircleRoundedIcon sx={{ mt: 0.1, color: "#1262db", fontSize: 20 }} />
+                        <Typography variant="body2" sx={{ color: "#3f4d62", lineHeight: 1.55 }}>
+                          {benefit}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+
+                  <SubscribeButton
+                    planType={plan.type}
+                    billingCycle={billingCycle}
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+
+          <Box
+            sx={{
+              mt: 4,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+              gap: 1.5,
+              maxWidth: 930,
+              mx: "auto",
+            }}
+          >
+            {[
+              {
+                icon: <SecurityOutlinedIcon />,
+                title: "Pago protegido",
+                text: "Procesado mediante proveedores de pago integrados.",
+              },
+              {
+                icon: <PaymentsOutlinedIcon />,
+                title: "Dos medios de pago",
+                text: "Mercado Pago y PayPal disponibles.",
+              },
+              {
+                icon: <SupportAgentOutlinedIcon />,
+                title: "Soporte",
+                text: "Canal de contacto para ayudarte durante el proceso.",
+              },
+            ].map((item) => (
+              <Paper
+                key={item.title}
+                elevation={0}
+                sx={{ p: 2.2, border: "1px solid #dfe6ef", borderRadius: 2.5 }}
               >
-                {billingCycle === "monthly"
-                  ? `U$D ${monthlyPrice}/mes`
-                  : `U$D ${annualPrice}/año`}
-              </Typography>
-              <SubscribeButton
-                planType="postulante"
-                billingCycle={billingCycle}
-              />
-            </CardContent>
-          </Card>
-        </Stack>
-      </Stack>
+                <Box sx={{ color: "#1262db" }}>{item.icon}</Box>
+                <Typography sx={{ mt: 0.8, color: "#0a1930", fontWeight: 900 }}>
+                  {item.title}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5, color: "#65738a" }}>
+                  {item.text}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+        </Container>
+      </Box>
     </PayPalScriptProvider>
   );
 }

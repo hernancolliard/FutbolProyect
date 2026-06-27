@@ -1,18 +1,27 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter
-import { useAuth } from "@/context/AuthContext"; // Migrated AuthContext
-import apiClient from "@/lib/apiClient"; // Centralized apiClient
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { useRouter } from "next/navigation";
+import apiClient from "@/lib/apiClient";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import { useTranslation } from "react-i18next";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-function SubscribeButton({ planType, billingCycle }) {
-  const { user } = useAuth();
-  const router = useRouter(); // Initialize useRouter
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+
+interface SubscribeButtonProps {
+  planType: string;
+  billingCycle: string;
+}
+
+function SubscribeButton({
+  planType,
+  billingCycle,
+}: SubscribeButtonProps) {
+  const router = useRouter();
   const { t } = useTranslation("common");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +35,7 @@ function SubscribeButton({ planType, billingCycle }) {
         billingCycle,
       });
       window.open(response.data.init_point, "_blank");
-    } catch (error) {
+    } catch (error: any) {
       if (error.response && error.response.status === 401) {
         setError(
           t(
@@ -49,14 +58,14 @@ function SubscribeButton({ planType, billingCycle }) {
     }
   };
 
-  const createOrder = async (data, actions) => {
+  const createOrder = async () => {
     try {
       const response = await apiClient.post("/payments/create-paypal-order", {
         planType,
         billingCycle,
       });
       return response.data.orderID;
-    } catch (error) {
+    } catch (error: any) {
       if (error.response && error.response.status === 401) {
         setError(
           t(
@@ -73,11 +82,11 @@ function SubscribeButton({ planType, billingCycle }) {
           ),
         );
       }
-      throw new Error(error);
+      throw error;
     }
   };
 
-  const onApprove = async (data, actions) => {
+  const onApprove = async (data: { orderID: string }) => {
     try {
       await apiClient.post("/payments/capture-paypal-order", {
         orderID: data.orderID,
@@ -92,7 +101,7 @@ function SubscribeButton({ planType, billingCycle }) {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -103,16 +112,30 @@ function SubscribeButton({ planType, billingCycle }) {
         color="primary"
         onClick={handleSubscribeMP}
         disabled={loading}
-        sx={{ mb: 2, width: "100%" }}
+        sx={{
+          width: "100%",
+          py: 1.2,
+          bgcolor: "#1262db",
+          fontWeight: 900,
+          "&:hover": { bgcolor: "#0d4faf" },
+        }}
       >
-        {loading ? <CircularProgress size={24} /> : "Mercado Pago"}
+        {loading ? <CircularProgress size={24} /> : "Suscribirme con Mercado Pago"}
       </Button>
 
-      <PayPalButtons
-        style={{ layout: "vertical" }}
-        createOrder={createOrder}
-        onApprove={onApprove}
-      />
+      <Divider sx={{ my: 2 }}>
+        <Typography variant="caption" sx={{ color: "#758196" }}>
+          o pagar con
+        </Typography>
+      </Divider>
+
+      <Box sx={{ width: "100%", minWidth: 0 }}>
+        <PayPalButtons
+          style={{ layout: "vertical", shape: "rect", height: 44 }}
+          createOrder={createOrder}
+          onApprove={onApprove}
+        />
+      </Box>
     </Box>
   );
 }

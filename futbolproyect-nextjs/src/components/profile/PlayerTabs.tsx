@@ -8,7 +8,7 @@ interface PlayerTabsProps {
 
 export function PlayerTabs({ tabs, activeTab, onChange }: PlayerTabsProps) {
   return (
-    <div className="mt-6 overflow-x-auto rounded-[24px] border border-slate-200 bg-white p-2 shadow-sm">
+    <div className="mt-6 w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-[24px] border border-slate-200 bg-white p-2 shadow-sm">
       <div className="flex min-w-max gap-2">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;

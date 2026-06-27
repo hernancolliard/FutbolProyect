@@ -389,9 +389,9 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const completionPercent = Number(profileStats?.completion_percent ?? localCompletionPercent);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row">
-        <main className="flex-1">
+    <div className="min-h-screen max-w-full overflow-x-clip bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6 lg:flex-row">
+        <main className="w-full min-w-0 flex-1">
           <HeroPlayer
             profile={profile}
             age={age}
@@ -414,10 +414,10 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
           <PlayerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 min-w-0 space-y-6">
             {activeTab === "summary" && (
               <div className="grid gap-6 xl:grid-cols-[1.7fr_0.9fr]">
-                <div className="space-y-6">
+                <div className="min-w-0 space-y-6">
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <PlayCircle size={18} />
@@ -493,14 +493,14 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                       <h2 className="text-xl font-semibold">Descripción corta</h2>
                     </div>
                     {resumen_profesional ? (
-                      <p className="mt-4 text-base leading-7 text-slate-600">{resumen_profesional}</p>
+                      <p className="mt-4 break-words text-base leading-7 text-slate-600">{resumen_profesional}</p>
                     ) : (
                       <p className="mt-4 text-sm text-slate-500">Aún no hay una descripción cargada.</p>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="min-w-0 space-y-6">
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <BadgeCheck size={18} />
