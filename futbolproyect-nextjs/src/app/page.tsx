@@ -188,17 +188,7 @@ export default function HomePage() {
 
             <AdBanner placement="home_profiles" />
 
-            <Box
-              id="contact-section"
-              sx={{
-                overflow: "hidden",
-                borderRadius: 2.5,
-                bgcolor: "#071a38",
-                "& > *": { mt: "0 !important" },
-              }}
-            >
-              <ContactPageClient />
-            </Box>
+            <ContactPageClient compact />
 
             <HomeFinalCta />
           </Stack>

@@ -1,22 +1,26 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
-import Modal from "@/components/ui/Modal";
+import {
+  Box,
+  Chip,
+  Container,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
+import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
+import apiClient from "@/lib/apiClient";
 import ContactFormContent from "./ContactFormContent";
-import { useTranslation } from "react-i18next";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Alert from "@mui/material/Alert";
-import CircularProgress from "@mui/material/CircularProgress";
-import apiClient from "@/lib/apiClient"; // Corrected apiClient import
 
-export default function ContactPageClient() {
-  const { t } = useTranslation('common');
-  const [showModal, setShowModal] = useState(false);
+type Props = {
+  compact?: boolean;
+};
+
+export default function ContactPageClient({ compact = false }: Props) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,76 +30,141 @@ export default function ContactPageClient() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setLoading(true);
     setError("");
     setFeedback("");
 
     try {
       await apiClient.post("/contact", formData);
-
-      setFeedback(t("contact_form_feedback", { name: formData.name, defaultValue: `¡Gracias por tu mensaje, ${formData.name}! Te contactaremos pronto.` }));
-      setFormData({ name: "", email: "", message: "" }); // Limpiamos el formulario
-    } catch (err: any) {
+      setFeedback(
+        `Gracias por tu mensaje, ${formData.name}. Te contactaremos pronto.`,
+      );
+      setFormData({ name: "", email: "", message: "" });
+    } catch (requestError: any) {
       setError(
-        err.message || t("contact_form_error", "Ocurrió un error al enviar el mensaje.")
+        requestError?.response?.data?.message ||
+          requestError?.message ||
+          "No se pudo enviar el mensaje. Intentá nuevamente.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Stack
-      className="contact-page-container"
-      alignItems="center"
-      sx={{ mt: 4 }}
+  const contactContent = (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          md: compact ? "minmax(0, .8fr) minmax(0, 1.2fr)" : "minmax(0, .85fr) minmax(0, 1.15fr)",
+        },
+        gap: { xs: 2.5, md: 3.5 },
+        alignItems: "stretch",
+      }}
     >
-      <Typography variant="h4" sx={{ mb: 2, color: 'white' }}>
-        {t("contact_page_title", "Contáctanos")}
-      </Typography>
-      <Typography sx={{ mb: 3, color: 'white' }}>{t("contact_page_subtitle", "Estamos aquí para ayudarte.")}</Typography>
-      <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
-        Email: info@futbolproyect.com
-      </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() => setShowModal(true)}
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 2.5, md: 3.5 },
+          minWidth: 0,
+          color: "#fff",
+          borderRadius: 2.8,
+          background: "linear-gradient(145deg, #071a35, #0b3268)",
+          boxShadow: "0 16px 38px rgba(4, 25, 55, .18)",
+        }}
       >
-        {t("contact_form_button", "Ir al Formulario de Contacto")}
-      </Button>
-      {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <ContactFormContent
-          formData={formData}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
-          feedback={feedback}
-          error={error}
-          loading={loading}
+        <Chip
+          icon={<SportsSoccerOutlinedIcon />}
+          label="Estamos para ayudarte"
+          sx={{
+            color: "#fff",
+            bgcolor: "rgba(255,255,255,.09)",
+            fontWeight: 800,
+            "& .MuiChip-icon": { color: "#62a8ff" },
+          }}
         />
-        {feedback && (
-          <Alert severity="success" sx={{ mt: 2 }}>
-            {feedback}
-          </Alert>
-        )}
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-      </Modal>
-    </Stack>
+        <Typography
+          component={compact ? "h2" : "h1"}
+          sx={{
+            mt: 2,
+            color: "#fff",
+            fontSize: compact
+              ? { xs: "1.65rem", md: "2rem" }
+              : { xs: "2rem", md: "2.55rem" },
+            lineHeight: 1.1,
+            fontWeight: 900,
+          }}
+        >
+          Hablemos de tu próximo paso
+        </Typography>
+        <Typography sx={{ mt: 1.2, color: "rgba(255,255,255,.72)", lineHeight: 1.65 }}>
+          Escribinos por consultas sobre perfiles, ofertas, suscripciones o
+          publicidad dentro de FutbolProyect.
+        </Typography>
+
+        <Stack spacing={1.2} sx={{ mt: 3 }}>
+          {[
+            { icon: <EmailOutlinedIcon />, text: "info@futbolproyect.com" },
+            { icon: <HelpOutlineRoundedIcon />, text: "Soporte y consultas generales" },
+            { icon: <BusinessOutlinedIcon />, text: "Clubes, agencias y publicidad" },
+          ].map((item) => (
+            <Stack key={item.text} direction="row" spacing={1.1} alignItems="center">
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 1.5,
+                  bgcolor: "rgba(255,255,255,.09)",
+                  color: "#62a8ff",
+                  flexShrink: 0,
+                  "& svg": { fontSize: 19 },
+                }}
+              >
+                {item.icon}
+              </Box>
+              <Typography variant="body2" sx={{ color: "rgba(255,255,255,.82)", overflowWrap: "anywhere" }}>
+                {item.text}
+              </Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Paper>
+
+      <ContactFormContent
+        formData={formData}
+        handleChange={handleChange}
+        handleSubmit={handleSubmit}
+        feedback={feedback}
+        error={error}
+        loading={loading}
+        compact={compact}
+      />
+    </Box>
+  );
+
+  if (compact) {
+    return (
+      <Box component="section" id="contact-section">
+        {contactContent}
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ bgcolor: "#f7f9fc", minHeight: "100vh", py: { xs: 5, md: 8 } }}>
+      <Container maxWidth="lg">{contactContent}</Container>
+    </Box>
   );
 }

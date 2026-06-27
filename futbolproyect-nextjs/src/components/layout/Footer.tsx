@@ -1,202 +1,218 @@
 "use client";
 
 import React from "react";
-import { useTranslation } from "react-i18next";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import MuiLink from "@mui/material/Link";
-import Link from "next/link";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
 import Image from "next/image";
-import Divider from "@mui/material/Divider"; // Importamos Divider
+import Link from "next/link";
+import {
+  Box,
+  Container,
+  Divider,
+  IconButton,
+  Link as MuiLink,
+  Stack,
+  Typography,
+} from "@mui/material";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AdBanner from "@/components/ads/AdBanner";
 
-function Footer() {
-  const { t } = useTranslation("common");
+const navigationLinks = [
+  { href: "/", label: "Inicio" },
+  { href: "/all-offers", label: "Ofertas" },
+  { href: "/perfiles", label: "Perfiles" },
+  { href: "/publicidad", label: "Publicidad" },
+  { href: "/suscripcion", label: "Suscripciones" },
+];
 
-  // Definimos los enlaces SEO aquí para mantener el código limpio
-  const seoLinks = [
-    { href: "/ofertas-trabajo-futbol", label: "Trabajos de Fútbol" },
-    { href: "/empleo-entrenadores-futbol", label: "Empleo Entrenadores" },
-    { href: "/trabajo-analista-datos-futbol", label: "Analista de Datos" },
-    { href: "/perfiles-jugadores-futbol", label: "Perfiles de Jugadores" },
-  ];
+const legalLinks = [
+  { href: "/terms", label: "Términos de servicio" },
+  { href: "/privacy", label: "Política de privacidad" },
+  { href: "/contact", label: "Contacto" },
+];
 
+const opportunityLinks = [
+  { href: "/ofertas-trabajo-futbol", label: "Trabajos de fútbol" },
+  { href: "/empleo-entrenadores-futbol", label: "Empleo para entrenadores" },
+  { href: "/trabajo-analista-datos-futbol", label: "Analistas de datos" },
+  { href: "/perfiles-jugadores-futbol", label: "Perfiles de jugadores" },
+];
+
+const socialLinks = [
+  {
+    href: "https://www.facebook.com/profile.php?id=61583277031848",
+    label: "Facebook",
+    image: "/images/logos/facebook.png",
+  },
+  {
+    href: "https://twitter.com",
+    label: "Twitter",
+    image: "/images/logos/twitter.png",
+  },
+  {
+    href: "https://www.instagram.com/futbol.proyect/#",
+    label: "Instagram",
+    image: "/images/logos/instagram.png",
+  },
+  {
+    href: "https://www.linkedin.com/company/109604115/",
+    label: "LinkedIn",
+    image: "/images/logos/linkedin.png",
+  },
+];
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; label: string }[];
+}) {
   return (
-    <Box
-      component="footer"
-      sx={{ bgcolor: "primary.main", color: "white", py: 4, mt: 6 }}
-    >
-      <Stack
-        spacing={3}
-        alignItems="center"
-        sx={{ maxWidth: "lg", mx: "auto", px: 2 }}
-      >
-        {/* SECCIÓN 1: Enlaces SEO (Lo nuevo) */}
-        <Box sx={{ width: "100%", textAlign: "center" }}>
-          <AdBanner placement="footer" compact />
-
-          <Typography
-            variant="subtitle2"
+    <Box>
+      <Typography sx={{ color: "#fff", fontSize: ".9rem", fontWeight: 900 }}>
+        {title}
+      </Typography>
+      <Stack spacing={1.1} sx={{ mt: 1.6 }}>
+        {links.map((link) => (
+          <MuiLink
+            key={link.href}
+            component={Link}
+            href={link.href}
+            underline="none"
             sx={{
-              opacity: 0.8,
-              mb: 1,
-              textTransform: "uppercase",
-              letterSpacing: 1,
+              width: "fit-content",
+              color: "rgba(255,255,255,.62)",
+              fontSize: ".82rem",
+              transition: "color 160ms ease",
+              "&:hover": { color: "#62a8ff" },
             }}
           >
-            Explorar Oportunidades
-          </Typography>
-          <Stack
-            direction="row"
-            spacing={{ xs: 2, md: 4 }}
-            flexWrap="wrap"
-            justifyContent="center"
-            useFlexGap
-          >
-            {seoLinks.map((link) => (
-              <MuiLink
-                key={link.href}
-                component={Link}
-                href={link.href}
-                color="inherit"
-                underline="hover"
-                variant="body2"
-                sx={{ py: 0.5 }}
-              >
-                {link.label}
-              </MuiLink>
-            ))}
-          </Stack>
-        </Box>
-
-        <Divider sx={{ width: "50%", borderColor: "rgba(255,255,255,0.2)" }} />
-
-        {/* SECCIÓN 2: Legales y Copyright */}
-        <Stack spacing={1} alignItems="center">
-          <Typography variant="body2" color="inherit">
-            &copy; 2026 FutbolProyect.{" "}
-            {t("all_rights_reserved", "Todos los derechos reservados.")}
-          </Typography>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            sx={{ flexWrap: "wrap", justifyContent: "center" }}
-          >
-            <MuiLink
-              component={Link}
-              href="/privacy"
-              color="inherit"
-              underline="hover"
-            >
-              {t("privacy_policy", "Política de Privacidad")}
-            </MuiLink>
-            <Typography variant="body2" color="inherit">
-              |
-            </Typography>
-            <MuiLink
-              component={Link}
-              href="/terms"
-              color="inherit"
-              underline="hover"
-            >
-              {t("terms_of_service", "Términos de Servicio")}
-            </MuiLink>
-            <Typography variant="body2" color="inherit">
-              |
-            </Typography>
-            <MuiLink
-              component={Link}
-              href="/publicidad"
-              color="inherit"
-              underline="hover"
-            >
-              {t("advertising_footer_link", "Publicidad")}
-            </MuiLink>
-          </Stack>
-        </Stack>
-
-        {/* SECCIÓN 3: Redes Sociales */}
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{ flexWrap: "wrap", justifyContent: "center" }}
-        >
-          <IconButton
-            component={MuiLink}
-            href="https://www.facebook.com/profile.php?id=61583277031848"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-          >
-            <Image
-              src="/images/logos/facebook.png"
-              alt="Facebook"
-              width={24}
-              height={24}
-            />
-          </IconButton>
-          <IconButton
-            component={MuiLink}
-            href="https://twitter.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-          >
-            <Image
-              src="/images/logos/twitter.png"
-              alt="Twitter"
-              width={24}
-              height={24}
-            />
-          </IconButton>
-          <IconButton
-            component={MuiLink}
-            href="https://www.instagram.com/futbol.proyect/#"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-          >
-            <Image
-              src="/images/logos/instagram.png"
-              alt="Instagram"
-              width={24}
-              height={24}
-            />
-          </IconButton>
-          <IconButton
-            component={MuiLink}
-            href="https://www.linkedin.com/company/109604115/"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-          >
-            <Image
-              src="/images/logos/linkedin.png"
-              alt="LinkedIn"
-              width={24}
-              height={24}
-            />
-          </IconButton>
-        </Stack>
-
-        {/* SECCIÓN 4: Developer */}
-        <Typography variant="caption" color="inherit" sx={{ opacity: 0.7 }}>
-          <MuiLink
-            href="https://parana-dev.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="inherit"
-            underline="hover"
-          >
-            Parana Dev - Desarrollo Web
+            {link.label}
           </MuiLink>
-        </Typography>
+        ))}
       </Stack>
     </Box>
   );
 }
 
-export default Footer;
+export default function Footer() {
+  return (
+    <Box
+      component="footer"
+      sx={{
+        mt: 0,
+        color: "#fff",
+        bgcolor: "#04142d",
+        borderTop: "1px solid rgba(72, 131, 210, .2)",
+      }}
+    >
+      <Container maxWidth="lg" sx={{ pt: { xs: 4.5, md: 5.5 }, pb: 3 }}>
+        <AdBanner placement="footer" compact />
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              md: "1.35fr .75fr .85fr 1fr .9fr",
+            },
+            gap: { xs: 3.5, md: 3 },
+            alignItems: "start",
+          }}
+        >
+          <Box>
+            <Image
+              src="/images/logos/logofpblanco.png"
+              alt="FutbolProyect"
+              width={125}
+              height={66}
+              style={{ width: 112, height: "auto", objectFit: "contain" }}
+            />
+            <Typography
+              variant="body2"
+              sx={{ mt: 1.2, maxWidth: 260, color: "rgba(255,255,255,.62)", lineHeight: 1.6 }}
+            >
+              Conectando talento y oportunidades dentro del fútbol profesional.
+            </Typography>
+            <Stack direction="row" spacing={0.7} sx={{ mt: 2 }}>
+              {socialLinks.map((social) => (
+                <IconButton
+                  key={social.label}
+                  component="a"
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  sx={{
+                    width: 34,
+                    height: 34,
+                    bgcolor: "rgba(255,255,255,.07)",
+                    border: "1px solid rgba(255,255,255,.1)",
+                    "&:hover": { bgcolor: "rgba(98,168,255,.18)" },
+                  }}
+                >
+                  <Image src={social.image} alt="" width={18} height={18} />
+                </IconButton>
+              ))}
+            </Stack>
+          </Box>
+
+          <FooterColumn title="Navegación" links={navigationLinks} />
+          <FooterColumn title="Legal" links={legalLinks} />
+          <FooterColumn title="Oportunidades" links={opportunityLinks} />
+
+          <Box>
+            <Typography sx={{ color: "#fff", fontSize: ".9rem", fontWeight: 900 }}>
+              Contacto
+            </Typography>
+            <Stack spacing={1.2} sx={{ mt: 1.6 }}>
+              <Stack direction="row" spacing={0.8} alignItems="flex-start">
+                <EmailOutlinedIcon sx={{ mt: 0.1, color: "#62a8ff", fontSize: 18 }} />
+                <MuiLink
+                  href="mailto:info@futbolproyect.com"
+                  underline="none"
+                  sx={{ color: "rgba(255,255,255,.68)", fontSize: ".82rem", overflowWrap: "anywhere" }}
+                >
+                  info@futbolproyect.com
+                </MuiLink>
+              </Stack>
+              <MuiLink
+                component={Link}
+                href="/contact"
+                underline="none"
+                sx={{ color: "#62a8ff", fontSize: ".82rem", fontWeight: 800 }}
+              >
+                Enviar una consulta
+              </MuiLink>
+            </Stack>
+          </Box>
+        </Box>
+
+        <Divider sx={{ my: 3.5, borderColor: "rgba(255,255,255,.1)" }} />
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={1}
+        >
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.48)" }}>
+            © 2026 FutbolProyect. Todos los derechos reservados.
+          </Typography>
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.42)" }}>
+            Desarrollo web por{" "}
+            <MuiLink
+              href="https://parana-dev.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ color: "#62a8ff" }}
+            >
+              Paraná Dev
+            </MuiLink>
+          </Typography>
+        </Stack>
+      </Container>
+    </Box>
+  );
+}
