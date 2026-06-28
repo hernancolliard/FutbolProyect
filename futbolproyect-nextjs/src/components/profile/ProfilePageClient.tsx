@@ -104,6 +104,13 @@ const parseCvCareer = (value?: string | null) => {
     .map((line) => ({ year: "", club: line, detail: "" }));
 };
 
+const getCvImageSource = (value?: string | null) => {
+  const source = String(value || "").trim();
+  if (!source) return "/images/logos/logofp.png";
+  if (!/^https?:\/\//i.test(source)) return source;
+  return `/api/profile-image?url=${encodeURIComponent(source)}`;
+};
+
 const getOrCreateAnonymousVoterId = () => {
   if (typeof window === "undefined") return null;
 
@@ -778,8 +785,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
       >
         <div style={{ display: "flex", gap: 30, padding: 28, borderRadius: 24, color: "#ffffff", background: "linear-gradient(135deg, #071c3c, #0b4385)" }}>
           <img
-            crossOrigin="anonymous"
-            src={profile.foto_perfil_url || "/images/logos/logofp.png"}
+            src={getCvImageSource(profile.foto_perfil_url)}
             alt=""
             style={{ width: 170, height: 190, borderRadius: 18, objectFit: "cover", border: "4px solid rgba(255,255,255,.8)" }}
           />
