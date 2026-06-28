@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useTransition } from "react";
+import React, { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Profile, UserPhoto, Video } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
@@ -23,6 +23,8 @@ import MyOffersSection from "./MyOffersSection";
 import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import AdBanner from "@/components/ads/AdBanner";
 import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
+import { toast } from "react-toastify";
+import html2canvas from "html2canvas";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -54,6 +56,52 @@ const formatDateOnly = (value?: string | null) => {
   const parsed = parseDateOnly(value);
   if (!parsed) return "";
   return parsed.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
+const parseCvStats = (value?: string | null) => {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return Object.entries(parsed)
+        .filter(([, itemValue]) => String(itemValue || "").trim())
+        .map(([label, itemValue]) => ({
+          label: label.replace(/_/g, " "),
+          value: String(itemValue),
+        }));
+    }
+  } catch {}
+
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [label, ...rest] = line.split(":");
+      return { label, value: rest.join(":").trim() };
+    });
+};
+
+const parseCvCareer = (value?: string | null) => {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((row) => ({
+          year: String(row.year || ""),
+          club: String(row.club || ""),
+          detail: [row.league || row.category, row.country].filter(Boolean).join(" · "),
+        }))
+        .filter((row) => row.year || row.club || row.detail);
+    }
+  } catch {}
+
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => ({ year: "", club: line, detail: "" }));
 };
 
 const getOrCreateAnonymousVoterId = () => {
@@ -92,6 +140,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [featuredVideo, setFeaturedVideo] = useState<Video | null>(null);
   const [summaryPhotos, setSummaryPhotos] = useState<UserPhoto[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
+  const cvTemplateRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -278,19 +327,71 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const handleEmail = () => {
-    if (profile?.email) {
-      const subject = encodeURIComponent("Contacto desde FutbolProyect");
-      const body = encodeURIComponent(`Hola ${profile.nombre || ""}, vi tu perfil en FutbolProyect y quiero contactarte.`);
-      window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
+    const email = String(profile?.email || "").trim();
+    if (!email) {
+      toast.info(t("profile_email_missing"));
       return;
     }
 
-    alert(t("profile_email_missing", "Este perfil no tiene email cargado."));
+    const subject = encodeURIComponent(t("profile_contact_email_subject"));
+    const body = encodeURIComponent(
+      t("profile_contact_email_body", { name: profile?.nombre || "" }),
+    );
+    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+
+    navigator.clipboard?.writeText(email).catch(() => undefined);
+    toast.success(t("profile_email_copied", { email }));
+
+    const link = document.createElement("a");
+    link.href = mailtoUrl;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
-  const handleDownloadCv = () => {
-    if (profile?.cv_url) {
-      window.open(profile.cv_url, "_blank", "noopener,noreferrer");
+  const handleDownloadCv = async () => {
+    if (!profile || !cvTemplateRef.current) return;
+
+    const toastId = toast.loading(t("generating_profile_cv"));
+    try {
+      const profileImage = cvTemplateRef.current.querySelector("img");
+      if (profileImage && !profileImage.complete) {
+        await new Promise<void>((resolve) => {
+          const finish = () => resolve();
+          profileImage.addEventListener("load", finish, { once: true });
+          profileImage.addEventListener("error", finish, { once: true });
+          window.setTimeout(finish, 4000);
+        });
+      }
+
+      const canvas = await html2canvas(cvTemplateRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      const fullName = `${profile.nombre || ""}-${profile.apellido || ""}`
+        .trim()
+        .replace(/\s+/g, "-");
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `${fullName || "perfil"}-FutbolProyect-CV.png`;
+      link.click();
+      toast.update(toastId, {
+        render: t("profile_cv_downloaded"),
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Error generating profile CV:", error);
+      toast.update(toastId, {
+        render: t("profile_cv_generation_error"),
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
     }
   };
 
@@ -387,6 +488,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const availabilityTone = normalizedAvailability.includes("disponible") || normalizedAvailability.includes("libre") ? "positive" as const : "neutral" as const;
   const profileViews = Number(profileStats?.profile_views ?? profile.profile_views ?? 0);
   const completionPercent = Number(profileStats?.completion_percent ?? localCompletionPercent);
+  const cvStats = parseCvStats(profile.estadisticas);
+  const cvCareer = parseCvCareer(profile.trayectoria);
 
   return (
     <div className="min-h-screen max-w-full overflow-x-clip bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -656,6 +759,115 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
       {canEditProfile && (
         <EditProfileModal open={isEditModalOpen} onClose={handleCloseEditModal} profileData={profile} onSave={handleProfileSave} saveEndpoint={isManagedProfile ? `/profiles/managed/${String(profile.id).replace("managed-", "")}` : "/profiles/me"} showEmailField={isManagedProfile} />
       )}
+
+      <div
+        ref={cvTemplateRef}
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: "-10000px",
+          top: 0,
+          width: 794,
+          minHeight: 1123,
+          padding: 48,
+          color: "#152238",
+          background: "#ffffff",
+          fontFamily: "Arial, sans-serif",
+          zIndex: -1,
+        }}
+      >
+        <div style={{ display: "flex", gap: 30, padding: 28, borderRadius: 24, color: "#ffffff", background: "linear-gradient(135deg, #071c3c, #0b4385)" }}>
+          <img
+            crossOrigin="anonymous"
+            src={profile.foto_perfil_url || "/images/logos/logofp.png"}
+            alt=""
+            style={{ width: 170, height: 190, borderRadius: 18, objectFit: "cover", border: "4px solid rgba(255,255,255,.8)" }}
+          />
+          <div style={{ flex: 1, paddingTop: 8 }}>
+            <div style={{ color: "#62a8ff", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>FutbolProyect</div>
+            <h1 style={{ margin: "12px 0 4px", fontSize: 34, lineHeight: 1.1 }}>{profile.nombre} {profile.apellido}</h1>
+            <div style={{ fontSize: 19, color: "#dbeafe" }}>{posicion_principal || t("position_not_specified")}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 20 }}>
+              {[nacionalidad, age !== null ? t("age_years", { age }) : "", availabilityLabel]
+                .filter(Boolean)
+                .map((item) => (
+                  <span key={String(item)} style={{ padding: "7px 12px", borderRadius: 20, background: "rgba(255,255,255,.12)", fontSize: 13 }}>
+                    {item}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 30, marginTop: 30 }}>
+          <aside style={{ padding: 22, borderRadius: 20, background: "#f1f6fc" }}>
+            <h2 style={{ margin: 0, color: "#071c3c", fontSize: 17 }}>{t("personal_data_title")}</h2>
+            {[
+              [t("birth_date_placeholder"), formatDateOnly(profile.fecha_de_nacimiento)],
+              [t("height_placeholder"), profile.altura_cm ? `${profile.altura_cm} cm` : ""],
+              [t("weight_placeholder"), profile.peso_kg ? `${profile.peso_kg} kg` : ""],
+              [t("dominant_foot_placeholder"), pie_dominante],
+              [t("languages_placeholder"), idiomas],
+            ].filter(([, value]) => value).map(([label, value]) => (
+              <div key={String(label)} style={{ marginTop: 17, paddingBottom: 11, borderBottom: "1px solid #d8e2ee" }}>
+                <div style={{ color: "#64748b", fontSize: 11, textTransform: "uppercase" }}>{label}</div>
+                <div style={{ marginTop: 4, color: "#152238", fontSize: 14, fontWeight: 700 }}>{value}</div>
+              </div>
+            ))}
+
+            <h2 style={{ margin: "28px 0 0", color: "#071c3c", fontSize: 17 }}>{t("contact")}</h2>
+            {[profile.email, profile.telefono, profile.agente_contacto]
+              .filter(Boolean)
+              .map((value) => (
+                <div key={String(value)} style={{ marginTop: 12, overflowWrap: "anywhere", color: "#334155", fontSize: 13 }}>{value}</div>
+              ))}
+          </aside>
+
+          <main>
+            <section>
+              <h2 style={{ margin: 0, paddingBottom: 8, borderBottom: "3px solid #1262db", color: "#071c3c", fontSize: 18 }}>{t("professional_summary_placeholder")}</h2>
+              <p style={{ margin: "13px 0 0", color: "#475569", fontSize: 14, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
+                {resumen_profesional || t("not_specified")}
+              </p>
+            </section>
+
+            {cvStats.length > 0 && (
+              <section style={{ marginTop: 28 }}>
+                <h2 style={{ margin: 0, paddingBottom: 8, borderBottom: "3px solid #1262db", color: "#071c3c", fontSize: 18 }}>{t("stats_placeholder")}</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginTop: 14 }}>
+                  {cvStats.map((item) => (
+                    <div key={`${item.label}-${item.value}`} style={{ padding: 12, borderRadius: 12, textAlign: "center", background: "#f1f6fc" }}>
+                      <div style={{ color: "#071c3c", fontSize: 20, fontWeight: 800 }}>{item.value}</div>
+                      <div style={{ marginTop: 4, color: "#64748b", fontSize: 10, textTransform: "uppercase" }}>{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {cvCareer.length > 0 && (
+              <section style={{ marginTop: 28 }}>
+                <h2 style={{ margin: 0, paddingBottom: 8, borderBottom: "3px solid #1262db", color: "#071c3c", fontSize: 18 }}>{t("career_path_placeholder")}</h2>
+                <div style={{ marginTop: 12 }}>
+                  {cvCareer.map((row, index) => (
+                    <div key={`${row.year}-${row.club}-${index}`} style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 12, padding: "10px 0", borderBottom: "1px solid #e2e8f0" }}>
+                      <strong style={{ color: "#1262db", fontSize: 13 }}>{row.year}</strong>
+                      <div>
+                        <div style={{ color: "#152238", fontSize: 14, fontWeight: 700 }}>{row.club}</div>
+                        {row.detail && <div style={{ marginTop: 3, color: "#64748b", fontSize: 12 }}>{row.detail}</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </main>
+        </div>
+
+        <div style={{ marginTop: 34, paddingTop: 14, borderTop: "1px solid #d8e2ee", color: "#64748b", fontSize: 11, textAlign: "center" }}>
+          {t("generated_profile_cv_footer")}
+        </div>
+      </div>
 
       {isImageModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={handleCloseImageModal}>

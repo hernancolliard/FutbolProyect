@@ -16,6 +16,37 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const DUPLICATE_EMAIL_MESSAGE = "Ya existe un usuario registrado con ese email.";
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+const authCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/",
+};
+
+const setAuthCookie = (res, token) => {
+  res.cookie("token", token, {
+    ...authCookieOptions,
+    maxAge: 60 * 60 * 1000,
+  });
+};
+
+const clearAuthCookies = (res) => {
+  res.clearCookie("token", authCookieOptions);
+
+  // Elimina también cookies creadas por versiones anteriores con Domain.
+  const legacyDomains = new Set([
+    process.env.COOKIE_DOMAIN,
+    process.env.NODE_ENV === "production"
+      ? "futbolproyect.onrender.com"
+      : undefined,
+  ]);
+
+  legacyDomains.forEach((domain) => {
+    if (domain) {
+      res.clearCookie("token", { ...authCookieOptions, domain });
+    }
+  });
+};
 
 /* =========================
    LOGIN NORMAL
@@ -46,14 +77,8 @@ router.post("/login", async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none", // required for cross-site cookies (frontend on different domain)
-      domain: undefined,
-      path: "/",
-      maxAge: 60 * 60 * 1000,
-    });
+    clearAuthCookies(res);
+    setAuthCookie(res, token);
 
     const { password_hash, ...userSafe } = user;
     // return token as well so client can store it as fallback
@@ -102,14 +127,8 @@ router.post("/google-login", async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    res.cookie("token", jwtToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
-      path: "/",
-      maxAge: 60 * 60 * 1000,
-    });
+    clearAuthCookies(res);
+    setAuthCookie(res, jwtToken);
 
     const { password_hash, ...userSafe } = user;
     res.json({ user: userSafe, token: jwtToken });
@@ -229,14 +248,8 @@ router.post("/register", async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      domain: process.env.COOKIE_DOMAIN || "futbolproyect.onrender.com",
-      path: "/",
-      maxAge: 60 * 60 * 1000,
-    });
+    clearAuthCookies(res);
+    setAuthCookie(res, token);
 
     res.status(201).json({
       message: "Registro exitoso.",
@@ -355,13 +368,7 @@ router.delete("/me", verificarToken, async (req, res) => {
 
     await client.query("COMMIT");
 
-    res.cookie("token", "", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      expires: new Date(0),
-    });
+    clearAuthCookies(res);
 
     res.json({ message: "Cuenta eliminada correctamente." });
   } catch (error) {
@@ -374,13 +381,7 @@ router.delete("/me", verificarToken, async (req, res) => {
 });
 
 router.post("/logout", (req, res) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(0),
-  });
+  clearAuthCookies(res);
   res.status(200).json({ message: "Logout exitoso." });
 });
 

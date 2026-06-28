@@ -5,35 +5,23 @@ const db = require("../db");
    VERIFICAR TOKEN (COOKIE O AUTH HEADER)
 ===================================================== */
 const verificarToken = (req, res, next) => {
-  let token = req.cookies?.token;
+  // El token Bearer representa explícitamente la sesión activa del cliente.
+  // La cookie queda como fallback para clientes que no usan localStorage.
+  const authHeader = req.headers.authorization;
+  let token;
 
-  // DEBUG: Log all headers to see what's coming in
-  console.log("DEBUG: Headers recibidos:", JSON.stringify(req.headers, null, 2));
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7).trim();
+  }
 
-  // Fallback: Authorization Bearer
   if (!token) {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      token = authHeader.split(" ")[1];
-    }
+    token = req.cookies?.token;
   }
 
   if (!token) {
     return res.status(401).json({
       message: "Acceso denegado. No se proporcionó un token.",
     });
-  }
-
-  // DEBUG: Verificar que la variable de entorno se carga correctamente
-  if (process.env.JWT_SECRET) {
-    console.log(
-      `DEBUG: JWT_SECRET cargada. Inicio: ${process.env.JWT_SECRET.substring(
-        0,
-        5,
-      )}, Fin: ${process.env.JWT_SECRET.slice(-5)}`,
-    );
-  } else {
-    console.error("DEBUG: ¡La variable de entorno JWT_SECRET no está definida!");
   }
 
   try {
@@ -48,12 +36,10 @@ const verificarToken = (req, res, next) => {
 
     next();
   } catch (error) {
-    // DEBUG: Loguear el error específico de JWT
-    console.error("DEBUG: Error al verificar el token JWT:", error);
+    console.error("Error al verificar el token JWT:", error.message);
 
     return res.status(401).json({
       message: "Token inválido o expirado.",
-      error: error.message, // Opcional: enviar el mensaje de error al cliente en desarrollo
     });
   }
 };

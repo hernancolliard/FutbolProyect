@@ -43,7 +43,11 @@ export const AuthProvider = ({ children }: any) => {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
-      await fetchUser();
+      if (res.data?.user) {
+        setUser(res.data.user);
+      } else {
+        await fetchUser();
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       throw error;
@@ -57,7 +61,11 @@ export const AuthProvider = ({ children }: any) => {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
-      await fetchUser();
+      if (res.data?.user) {
+        setUser(res.data.user);
+      } else {
+        await fetchUser();
+      }
     } catch (error: any) {
       console.error("Google login error:", error);
       throw error;
@@ -80,9 +88,13 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   const logout = async () => {
-    await apiClient.post("/users/logout");
-    localStorage.removeItem("token");
-    setUser(null);
+    try {
+      await apiClient.post("/users/logout");
+    } finally {
+      localStorage.removeItem("token");
+      delete apiClient.defaults.headers.Authorization;
+      setUser(null);
+    }
   };
 
   return (
