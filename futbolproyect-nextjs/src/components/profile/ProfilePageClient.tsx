@@ -372,17 +372,17 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const disponibilidad = profile.disponibilidad || "";
 
   const tabs = [
-    { id: "summary", label: "Resumen" },
-    { id: "stats", label: "Estadísticas" },
-    { id: "timeline", label: "Trayectoria" },
-    { id: "gallery", label: "Galería" },
-    { id: "videos", label: "Videos" },
+    { id: "summary", label: t("profile_tab_summary") },
+    { id: "stats", label: t("profile_tab_stats") },
+    { id: "timeline", label: t("profile_tab_timeline") },
+    { id: "gallery", label: t("profile_tab_gallery") },
+    { id: "videos", label: t("profile_tab_videos") },
     { id: "scouting", label: "Scouting" },
-    { id: "documents", label: "Documentos" },
-    { id: "contact", label: "Contacto" },
+    { id: "documents", label: t("profile_tab_documents") },
+    { id: "contact", label: t("contact") },
   ];
 
-  const availabilityLabel = disponibilidad || "Disponibilidad no especificada";
+  const availabilityLabel = disponibilidad || t("availability_not_specified");
   const normalizedAvailability = availabilityLabel.toLowerCase();
   const availabilityTone = normalizedAvailability.includes("disponible") || normalizedAvailability.includes("libre") ? "positive" as const : "neutral" as const;
   const profileViews = Number(profileStats?.profile_views ?? profile.profile_views ?? 0);

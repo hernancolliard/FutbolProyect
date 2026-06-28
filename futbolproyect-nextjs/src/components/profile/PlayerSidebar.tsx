@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Copy, Download, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PlayerSidebarProps {
   imageUrl: string;
@@ -14,6 +15,7 @@ interface PlayerSidebarProps {
 }
 
 export function PlayerSidebar({ imageUrl, name, availabilityLabel, onCopyLink, onShare, onWhatsApp, onDownloadCv }: PlayerSidebarProps) {
+  const { t } = useTranslation("common");
   return (
     <motion.aside initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="hidden shrink-0 lg:block lg:sticky lg:top-6 lg:self-start">
       <div className="w-full max-w-[320px] rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
@@ -28,13 +30,13 @@ export function PlayerSidebar({ imageUrl, name, availabilityLabel, onCopyLink, o
             <MessageCircle size={16} /> WhatsApp
           </button>
           <button onClick={onShare} className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-[#071C3C] transition hover:bg-slate-100">
-            <Share2 size={16} /> Compartir perfil
+            <Share2 size={16} /> {t("share_profile")}
           </button>
           <button onClick={onCopyLink} className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-[#071C3C] transition hover:bg-slate-100">
-            <Copy size={16} /> Copiar enlace
+            <Copy size={16} /> {t("copy_link")}
           </button>
           <button onClick={onDownloadCv} className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-[#071C3C] transition hover:bg-slate-100">
-            <Download size={16} /> Descargar CV
+            <Download size={16} /> {t("download_cv")}
           </button>
         </div>
       </div>

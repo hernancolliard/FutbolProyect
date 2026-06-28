@@ -234,7 +234,7 @@ export default function OfferDetailClient({ offerId }: Props) {
           severity="warning"
           action={
             <Button component={Link} href="/suscripcion" color="inherit">
-              Ver planes
+              {t("view_plans")}
             </Button>
           }
         >
@@ -259,7 +259,7 @@ export default function OfferDetailClient({ offerId }: Props) {
   if (!offer) {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
-        <Alert severity="info">Oferta no encontrada.</Alert>
+        <Alert severity="info">{t("offer_not_found")}</Alert>
       </Container>
     );
   }
@@ -309,7 +309,7 @@ export default function OfferDetailClient({ offerId }: Props) {
             startIcon={<ArrowBackRoundedIcon />}
             sx={{ color: "rgba(255,255,255,.85)", px: 0, mb: 3 }}
           >
-            Volver a ofertas
+            {t("back_to_offers")}
           </Button>
 
           <Box
@@ -353,7 +353,7 @@ export default function OfferDetailClient({ offerId }: Props) {
               <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} alignItems="center">
                 {offer.is_featured && (
                   <Chip
-                    label="Destacada"
+                    label={t("featured")}
                     size="small"
                     sx={{ bgcolor: "#1262db", color: "#fff", fontWeight: 800 }}
                   />
@@ -424,11 +424,11 @@ export default function OfferDetailClient({ offerId }: Props) {
           >
             <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mb: 2.5 }}>
               <Chip
-                label="Descripción"
+                label={t("description_label")}
                 sx={{ bgcolor: "#eaf3ff", color: "#1262db", fontWeight: 900 }}
               />
               {detallesAdicionales && (
-                <Chip label="Detalles adicionales" variant="outlined" />
+                <Chip label={t("additional_details")} variant="outlined" />
               )}
             </Stack>
             <Divider sx={{ mb: 3 }} />
@@ -437,7 +437,7 @@ export default function OfferDetailClient({ offerId }: Props) {
               component="h2"
               sx={{ color: "#0a1930", fontSize: "1.3rem", fontWeight: 900 }}
             >
-              Descripción de la oferta
+              {t("offer_description_title")}
             </Typography>
             <Typography
               component="div"
@@ -451,7 +451,7 @@ export default function OfferDetailClient({ offerId }: Props) {
             >
               {descripcion
                 ? renderLinkedText(descripcion)
-                : "No hay una descripción disponible para esta oferta."}
+                : t("offer_description_missing")}
             </Typography>
 
             {detallesAdicionales && (
@@ -461,7 +461,7 @@ export default function OfferDetailClient({ offerId }: Props) {
                   component="h2"
                   sx={{ color: "#0a1930", fontSize: "1.3rem", fontWeight: 900 }}
                 >
-                  Detalles adicionales
+                  {t("additional_details")}
                 </Typography>
                 <Typography
                   component="div"
@@ -525,7 +525,7 @@ export default function OfferDetailClient({ offerId }: Props) {
                     disabled={isApplying}
                     sx={{ mt: 2, py: 1.15, bgcolor: "#1262db", fontWeight: 900 }}
                   >
-                    {isApplying ? "Postulando..." : "Postularme ahora"}
+                    {isApplying ? t("applying") : t("apply_now")}
                   </Button>
                 ) : applied ? (
                   <Alert severity="success" sx={{ mt: 2 }}>
@@ -539,7 +539,7 @@ export default function OfferDetailClient({ offerId }: Props) {
                     variant="contained"
                     sx={{ mt: 2 }}
                   >
-                    Ver planes de suscripción
+                    {t("view_subscription_plans")}
                   </Button>
                 )
               ) : (
@@ -584,7 +584,7 @@ export default function OfferDetailClient({ offerId }: Props) {
                       variant="body2"
                       sx={{ color: "#17243a", fontWeight: 700, textAlign: "right" }}
                     >
-                      {row.value || "No especificado"}
+                      {row.value || t("not_specified")}
                     </Typography>
                   </Stack>
                 ))}
@@ -596,7 +596,7 @@ export default function OfferDetailClient({ offerId }: Props) {
               sx={{ p: 2.5, border: "1px solid #dfe6ef", borderRadius: 2.5 }}
             >
               <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                Compartir esta oferta
+                {t("share_this_offer")}
               </Typography>
               <Typography variant="body2" sx={{ mt: 0.6, mb: 1.5, color: "#65738a" }}>
                 Ayudá a otros profesionales a encontrar nuevas oportunidades.
@@ -661,7 +661,7 @@ export default function OfferDetailClient({ offerId }: Props) {
               "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,.08)" },
             }}
           >
-            Publicar una oferta
+            {t("publish_an_offer")}
           </Button>
         </Paper>
       </Container>

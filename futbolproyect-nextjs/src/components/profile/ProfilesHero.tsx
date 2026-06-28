@@ -14,6 +14,7 @@ import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { PLAYER_POSITION_OPTIONS } from "@/lib/profilePositions";
+import { useTranslation } from "react-i18next";
 
 type Metric = {
   label: string;
@@ -38,6 +39,7 @@ export default function ProfilesHero({
   metrics,
   onPositionChange,
 }: Props) {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -62,9 +64,9 @@ export default function ProfilesHero({
             lineHeight: 1.05,
           }}
         >
-          Perfiles de{" "}
+          {t("profiles_hero_title_prefix")}{" "}
           <Box component="span" sx={{ color: "#2f80ff" }}>
-            Fútbol
+            {t("profiles_hero_title_highlight")}
           </Box>
         </Typography>
         <Typography
@@ -76,8 +78,7 @@ export default function ProfilesHero({
             lineHeight: 1.65,
           }}
         >
-          Descubrí jugadores, talentos emergentes y profesionales disponibles
-          para potenciar tu próximo proyecto deportivo.
+          {t("profiles_hero_text")}
         </Typography>
 
         <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 3 }}>
@@ -87,7 +88,7 @@ export default function ProfilesHero({
               <Chip
                 key={position.value}
                 clickable
-                label={position.fallback}
+                label={t(position.labelKey, position.fallback)}
                 onClick={() =>
                   onPositionChange(selected ? "" : position.value)
                 }

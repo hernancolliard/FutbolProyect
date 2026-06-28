@@ -13,6 +13,7 @@ import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import { useTranslation } from "react-i18next";
 
 type Metric = {
   label: string;
@@ -26,11 +27,11 @@ type OffersHeroProps = {
 };
 
 const roles = [
-  { label: "Jugador", value: "jugador" },
-  { label: "Entrenador", value: "entrenador" },
-  { label: "Analista", value: "analista" },
-  { label: "Scout", value: "scout" },
-  { label: "Preparador físico", value: "preparador" },
+  { labelKey: "role_filter_jugador", value: "jugador" },
+  { labelKey: "role_filter_entrenador", value: "entrenador" },
+  { labelKey: "role_filter_analista", value: "analista" },
+  { labelKey: "role_filter_scout", value: "scout" },
+  { labelKey: "role_filter_preparador", value: "preparador" },
 ];
 
 const metricIcons = [
@@ -45,6 +46,7 @@ export default function OffersHero({
   metrics,
   onRoleChange,
 }: OffersHeroProps) {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -70,7 +72,7 @@ export default function OffersHero({
             lineHeight: 1.05,
           }}
         >
-          Todas las <Box component="span" sx={{ color: "#2f80ff" }}>Ofertas</Box>
+          {t("offers_hero_title_prefix")} <Box component="span" sx={{ color: "#2f80ff" }}>{t("offers_hero_title_highlight")}</Box>
         </Typography>
         <Typography
           sx={{
@@ -81,8 +83,7 @@ export default function OffersHero({
             lineHeight: 1.65,
           }}
         >
-          Encontrá oportunidades reales en clubes, academias y proyectos
-          deportivos. Filtrá por rol, ubicación, nivel y rango salarial.
+          {t("all_offers_intro")}
         </Typography>
 
         <Stack
@@ -98,7 +99,7 @@ export default function OffersHero({
               <Chip
                 key={role.value}
                 clickable
-                label={role.label}
+                label={t(role.labelKey)}
                 onClick={() => onRoleChange(selected ? "" : role.value)}
                 sx={{
                   color: "#fff",

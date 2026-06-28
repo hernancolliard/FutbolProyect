@@ -1,39 +1,26 @@
 "use client";
 
 import React, { Suspense } from "react";
-import { Container, Paper, Typography } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslation } from "react-i18next";
 import Register from "@/components/auth/Register"; // Reutilizamos tu componente existente
 
 function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useTranslation("common");
   const initialRole = searchParams.get("role") || undefined;
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          align="center"
-          gutterBottom
-          sx={{ fontWeight: "bold", color: "primary.main", mb: 3 }}
-        >
-          {t("register_title")}
-        </Typography>
-
-        {/* Usamos el componente Register que ya tienes. 
-            Ajustamos los callbacks para navegar en lugar de cerrar modal. */}
+    <Box sx={{ minHeight: "calc(100vh - 80px)", display: "grid", placeItems: "center", p: 2, bgcolor: "#f5f8fc" }}>
+      <Paper elevation={0} sx={{ position: "relative", width: "100%", maxWidth: 560, border: "1px solid #dfe6ef", borderRadius: 3, boxShadow: "0 18px 45px rgba(8,34,70,.1)" }}>
         <Register
           onClose={() => router.push("/")}
-          onSwitchToLogin={() => router.push("/")}
+          onSwitchToLogin={() => router.push("/login")}
           initialRole={initialRole}
+          showCloseButton={false}
         />
       </Paper>
-    </Container>
+    </Box>
   );
 }
 

@@ -10,61 +10,63 @@ import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import { useTranslation } from "react-i18next";
 
 const trustItems = [
   {
     icon: <VerifiedOutlinedIcon />,
-    title: "Perfiles completos",
-    text: "Información profesional, material deportivo y experiencia en un solo lugar.",
+    titleKey: "home_trust_profiles_title",
+    textKey: "home_trust_profiles_text",
   },
   {
     icon: <FactCheckOutlinedIcon />,
-    title: "Ofertas moderadas",
-    text: "Revisamos cada publicación para sostener una comunidad seria.",
+    titleKey: "home_trust_offers_title",
+    textKey: "home_trust_offers_text",
   },
   {
     icon: <SecurityOutlinedIcon />,
-    title: "Contacto seguro",
-    text: "Conversaciones dentro de la plataforma con privacidad.",
+    titleKey: "home_trust_contact_title",
+    textKey: "home_trust_contact_text",
   },
   {
     icon: <PublicOutlinedIcon />,
-    title: "Alcance global",
-    text: "Clubes y profesionales conectados desde distintas ubicaciones.",
+    titleKey: "home_trust_global_title",
+    textKey: "home_trust_global_text",
   },
 ];
 
 const networkItems = [
   {
     icon: <HubOutlinedIcon />,
-    title: "Una red profesional",
-    text: "Talento, clubes y agencias conectados.",
+    titleKey: "home_network_professional_title",
+    textKey: "home_network_professional_text",
   },
   {
     icon: <PsychologyOutlinedIcon />,
-    title: "Oportunidades reales",
-    text: "Roles y proyectos dentro del fútbol.",
+    titleKey: "home_network_opportunities_title",
+    textKey: "home_network_opportunities_text",
   },
   {
     icon: <HandshakeOutlinedIcon />,
-    title: "Conexiones útiles",
-    text: "Relaciones profesionales que generan valor.",
+    titleKey: "home_network_connections_title",
+    textKey: "home_network_connections_text",
   },
   {
     icon: <TrendingUpOutlinedIcon />,
-    title: "Crecimiento continuo",
-    text: "Herramientas para potenciar cada perfil.",
+    titleKey: "home_network_growth_title",
+    textKey: "home_network_growth_text",
   },
 ];
 
 export default function HomeTrustSignals() {
+  const { t } = useTranslation("common");
   return (
     <Box component="section">
       <Typography
         component="h2"
         sx={{ mb: 2, textAlign: "center", color: "#0a1930", fontSize: "1.45rem", fontWeight: 900 }}
       >
-        Más confianza desde el primer clic
+        {t("home_trust_title")}
       </Typography>
       <Box
         sx={{
@@ -75,16 +77,16 @@ export default function HomeTrustSignals() {
       >
         {trustItems.map((item) => (
           <Paper
-            key={item.title}
+            key={item.titleKey}
             elevation={0}
             sx={{ p: 2.2, textAlign: "center", border: "1px solid #dfe6ef", borderRadius: 2.3 }}
           >
             <Box sx={{ color: "#1262db", "& svg": { fontSize: 30 } }}>{item.icon}</Box>
             <Typography sx={{ mt: 0.8, color: "#0a1930", fontWeight: 900 }}>
-              {item.title}
+              {t(item.titleKey)}
             </Typography>
             <Typography variant="caption" sx={{ mt: 0.6, color: "#65738a", lineHeight: 1.5, display: "block" }}>
-              {item.text}
+              {t(item.textKey)}
             </Typography>
           </Paper>
         ))}
@@ -103,21 +105,20 @@ export default function HomeTrustSignals() {
       >
         <Box>
           <Typography sx={{ color: "#0a1930", fontSize: "1.2rem", fontWeight: 900 }}>
-            Una red profesional para el fútbol
+            {t("home_network_title")}
           </Typography>
           <Typography variant="body2" sx={{ mt: 0.8, color: "#65738a", lineHeight: 1.55 }}>
-            FutbolProyect conecta jugadores, entrenadores, analistas, scouts,
-            preparadores, agencias y clubes en una misma plataforma.
+            {t("home_network_text")}
           </Typography>
         </Box>
         {networkItems.map((item) => (
-          <Stack key={item.title} alignItems="center" sx={{ textAlign: "center" }}>
+          <Stack key={item.titleKey} alignItems="center" sx={{ textAlign: "center" }}>
             <Box sx={{ color: "#315b92", "& svg": { fontSize: 28 } }}>{item.icon}</Box>
             <Typography sx={{ mt: 0.7, color: "#0a1930", fontWeight: 900, fontSize: ".86rem" }}>
-              {item.title}
+              {t(item.titleKey)}
             </Typography>
             <Typography variant="caption" sx={{ mt: 0.4, color: "#65738a" }}>
-              {item.text}
+              {t(item.textKey)}
             </Typography>
           </Stack>
         ))}

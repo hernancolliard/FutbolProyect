@@ -6,7 +6,7 @@ import Footer from "./Footer";
 import Login from "@/components/auth/Login";
 import Register from "@/components/auth/Register";
 import CreateOffer from "@/components/CreateOffer";
-import { Modal, Box } from "@mui/material";
+import { Dialog, Modal, Box } from "@mui/material";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -68,26 +68,42 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
       {/* --- MODALES --- */}
 
       {isLoginOpen && (
-        <Modal open={isLoginOpen} onClose={handleCloseLogin}>
-          <Box sx={{ outline: "none" }}>
-            <Login onClose={handleCloseLogin} />
-          </Box>
-        </Modal>
+        <Dialog
+          open={isLoginOpen}
+          onClose={handleCloseLogin}
+          fullWidth
+          maxWidth="xs"
+          PaperProps={{ sx: { position: "relative", borderRadius: { xs: 0, sm: 3 }, m: { xs: 0, sm: 2 }, maxHeight: { xs: "100dvh", sm: "calc(100% - 64px)" } } }}
+          sx={{ "& .MuiDialog-container": { alignItems: { xs: "stretch", sm: "center" } } }}
+        >
+          <Login
+            onClose={handleCloseLogin}
+            onSwitchToRegister={() => {
+              handleCloseLogin();
+              handleShowRegister("player");
+            }}
+          />
+        </Dialog>
       )}
 
       {isRegisterOpen && (
-        <Modal open={isRegisterOpen} onClose={handleCloseRegister}>
-          <Box sx={{ outline: "none" }}>
-            <Register
-              onClose={handleCloseRegister}
-              initialRole={registerRole}
-              onSwitchToLogin={() => {
-                handleCloseRegister();
-                handleShowLogin();
-              }}
-            />
-          </Box>
-        </Modal>
+        <Dialog
+          open={isRegisterOpen}
+          onClose={handleCloseRegister}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{ sx: { position: "relative", borderRadius: { xs: 0, sm: 3 }, m: { xs: 0, sm: 2 }, maxHeight: { xs: "100dvh", sm: "calc(100% - 64px)" } } }}
+          sx={{ "& .MuiDialog-container": { alignItems: { xs: "stretch", sm: "center" } } }}
+        >
+          <Register
+            onClose={handleCloseRegister}
+            initialRole={registerRole}
+            onSwitchToLogin={() => {
+              handleCloseRegister();
+              handleShowLogin();
+            }}
+          />
+        </Dialog>
       )}
 
       {isCreateOfferOpen && (

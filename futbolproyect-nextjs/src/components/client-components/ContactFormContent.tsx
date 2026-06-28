@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import { useTranslation } from "react-i18next";
 
 interface ContactFormContentProps {
   formData: {
@@ -36,6 +37,7 @@ export default function ContactFormContent({
   loading,
   compact = false,
 }: ContactFormContentProps) {
+  const { t } = useTranslation("common");
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
       bgcolor: "#f8fafc",
@@ -62,10 +64,10 @@ export default function ContactFormContent({
         component="h2"
         sx={{ color: "#0a1930", fontSize: compact ? "1.2rem" : "1.4rem", fontWeight: 900 }}
       >
-        Enviá tu consulta
+        {t("contact_send_inquiry_title")}
       </Typography>
       <Typography variant="body2" sx={{ mt: 0.6, mb: 2.5, color: "#65738a" }}>
-        Completá los datos y contanos cómo podemos ayudarte.
+        {t("contact_form_intro")}
       </Typography>
 
       <Box component="form" onSubmit={handleSubmit}>
@@ -80,7 +82,7 @@ export default function ContactFormContent({
             <TextField
               type="text"
               name="name"
-              label="Nombre"
+              label={t("name_placeholder")}
               value={formData.name}
               onChange={handleChange}
               required
@@ -91,7 +93,7 @@ export default function ContactFormContent({
             <TextField
               type="email"
               name="email"
-              label="Email"
+              label={t("email_placeholder")}
               value={formData.email}
               onChange={handleChange}
               required
@@ -102,7 +104,7 @@ export default function ContactFormContent({
           </Box>
           <TextField
             name="message"
-            label="Mensaje"
+            label={t("message_label")}
             value={formData.message}
             onChange={handleChange}
             required
@@ -129,7 +131,7 @@ export default function ContactFormContent({
               "&:hover": { bgcolor: "#0d4faf" },
             }}
           >
-            {loading ? <CircularProgress size={23} color="inherit" /> : "Enviar mensaje"}
+            {loading ? <CircularProgress size={23} color="inherit" /> : t("send_message")}
           </Button>
         </Stack>
       </Box>

@@ -7,31 +7,33 @@ import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import ConnectWithoutContactOutlinedIcon from "@mui/icons-material/ConnectWithoutContactOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { useTranslation } from "react-i18next";
 
 const steps = [
   {
     icon: <PersonAddAltOutlinedIcon />,
-    title: "Creá tu perfil",
-    text: "Registrate y completá tu información profesional.",
+    titleKey: "home_how_step_1_title",
+    textKey: "home_how_step_1_text",
   },
   {
     icon: <CloudUploadOutlinedIcon />,
-    title: "Publicá o buscá",
-    text: "Publicá una oferta o descubrí talento y oportunidades.",
+    titleKey: "home_how_step_2_title",
+    textKey: "home_how_step_2_text",
   },
   {
     icon: <ConnectWithoutContactOutlinedIcon />,
-    title: "Conectá y avanzá",
-    text: "Contactá de forma segura a través de la plataforma.",
+    titleKey: "home_how_step_3_title",
+    textKey: "home_how_step_3_text",
   },
   {
     icon: <HandshakeOutlinedIcon />,
-    title: "Impulsá tu carrera",
-    text: "Formá alianzas y llevá tu perfil al siguiente nivel.",
+    titleKey: "home_how_step_4_title",
+    textKey: "home_how_step_4_text",
   },
 ];
 
 export default function HowItWorks() {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -47,7 +49,7 @@ export default function HowItWorks() {
         component="h2"
         sx={{ mb: 2.5, color: "#fff", textAlign: "center", fontSize: "1.55rem", fontWeight: 900 }}
       >
-        ¿Cómo funciona?
+        {t("home_how_title")}
       </Typography>
       <Box
         sx={{
@@ -59,7 +61,7 @@ export default function HowItWorks() {
         }}
       >
         {steps.map((step, index) => (
-          <React.Fragment key={step.title}>
+          <React.Fragment key={step.titleKey}>
             <Stack alignItems="center" sx={{ maxWidth: 210, mx: "auto", textAlign: "center" }}>
               <Box
                 sx={{
@@ -91,11 +93,11 @@ export default function HowItWorks() {
                   {index + 1}
                 </Box>
                 <Typography sx={{ color: "#fff", fontWeight: 900, fontSize: ".9rem" }}>
-                  {step.title}
+                  {t(step.titleKey)}
                 </Typography>
               </Stack>
               <Typography variant="caption" sx={{ mt: 0.7, color: "rgba(255,255,255,.65)", lineHeight: 1.45 }}>
-                {step.text}
+                {t(step.textKey)}
               </Typography>
             </Stack>
             {index < steps.length - 1 && (

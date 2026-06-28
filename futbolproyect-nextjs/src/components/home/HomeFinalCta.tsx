@@ -3,8 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { Box, Button, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export default function HomeFinalCta() {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -26,10 +28,10 @@ export default function HomeFinalCta() {
         component="h2"
         sx={{ color: "#fff", fontSize: { xs: "1.8rem", md: "2.35rem" }, fontWeight: 900 }}
       >
-        Tu próxima oportunidad puede empezar hoy
+        {t("home_final_cta_title")}
       </Typography>
       <Typography sx={{ mt: 1, color: "rgba(255,255,255,.74)" }}>
-        Creá tu perfil, publicá una oferta o encontrá talento dentro de la comunidad.
+        {t("home_final_cta_text")}
       </Typography>
       <Stack
         direction={{ xs: "column", sm: "row" }}
@@ -43,7 +45,7 @@ export default function HomeFinalCta() {
           variant="contained"
           sx={{ bgcolor: "#1262db", fontWeight: 900 }}
         >
-          Crear mi perfil gratis
+          {t("home_create_profile_free")}
         </Button>
         <Button
           component={Link}
@@ -51,7 +53,7 @@ export default function HomeFinalCta() {
           variant="outlined"
           sx={{ color: "#fff", borderColor: "rgba(255,255,255,.55)", fontWeight: 900 }}
         >
-          Ver ofertas
+          {t("hero_primary_cta")}
         </Button>
         <Button
           component={Link}
@@ -59,7 +61,7 @@ export default function HomeFinalCta() {
           variant="outlined"
           sx={{ color: "#fff", borderColor: "rgba(255,255,255,.55)", fontWeight: 900 }}
         >
-          Publicar oferta
+          {t("publish_offer")}
         </Button>
       </Stack>
     </Box>

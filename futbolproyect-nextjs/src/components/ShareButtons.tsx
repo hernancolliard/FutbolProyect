@@ -10,6 +10,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 type ShareButtonsProps = {
   title: string;
@@ -22,6 +23,7 @@ export default function ShareButtons({
   url,
   onDownload,
 }: ShareButtonsProps) {
+  const { t } = useTranslation("common");
   const [copied, setCopied] = useState(false);
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
@@ -77,27 +79,27 @@ export default function ShareButtons({
               href={action.href}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Compartir en ${action.label}`}
+              aria-label={t("share_on_network", { network: action.label })}
               sx={{ ...iconSx, color: action.color }}
             >
               {action.icon}
             </IconButton>
           </Tooltip>
         ))}
-        <Tooltip title={copied ? "Enlace copiado" : "Copiar enlace"}>
+        <Tooltip title={copied ? t("link_copied") : t("copy_link")}>
           <IconButton
             onClick={copyToClipboard}
-            aria-label="Copiar enlace"
+            aria-label={t("copy_link")}
             sx={{ ...iconSx, color: "#40506a" }}
           >
             <FaLink />
           </IconButton>
         </Tooltip>
         {onDownload && (
-          <Tooltip title="Descargar imagen">
+          <Tooltip title={t("download_image")}>
             <IconButton
               onClick={onDownload}
-              aria-label="Descargar imagen"
+              aria-label={t("download_image")}
               sx={{ ...iconSx, color: "#40506a" }}
             >
               <FaDownload />
@@ -107,7 +109,7 @@ export default function ShareButtons({
       </Stack>
       {copied && (
         <Typography variant="caption" sx={{ mt: 1, color: "success.main", display: "block" }}>
-          Enlace copiado
+          {t("link_copied")}
         </Typography>
       )}
     </Box>

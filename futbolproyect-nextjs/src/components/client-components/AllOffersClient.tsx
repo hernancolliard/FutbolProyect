@@ -21,6 +21,7 @@ import OfferFiltersSidebar, {
   OfferFilters,
 } from "@/components/offers/OfferFiltersSidebar";
 import { Offer } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 type OffersResponse = {
   offers: Offer[];
@@ -72,6 +73,7 @@ const fetchOfferFilterOptions = async () => {
 };
 
 export default function AllOffersClient() {
+  const { t } = useTranslation("common");
   const [draftFilters, setDraftFilters] = useState<OfferFilters>(emptyFilters);
   const [appliedFilters, setAppliedFilters] =
     useState<OfferFilters>(emptyFilters);
@@ -116,10 +118,10 @@ export default function AllOffersClient() {
   };
 
   const metrics = [
-    { value: data?.totalOffers ?? "—", label: "Ofertas activas" },
-    { value: options.ubicaciones.length || "—", label: "Ubicaciones" },
-    { value: options.puestos.length || "—", label: "Puestos disponibles" },
-    { value: options.horarios.length || "—", label: "Tipos de jornada" },
+    { value: data?.totalOffers ?? "—", label: t("active_offers_metric") },
+    { value: options.ubicaciones.length || "—", label: t("locations_metric") },
+    { value: options.puestos.length || "—", label: t("available_positions_metric") },
+    { value: options.horarios.length || "—", label: t("schedule_types_metric") },
   ];
 
   return (
@@ -147,7 +149,7 @@ export default function AllOffersClient() {
             fontWeight: 800,
           }}
         >
-          {showMobileFilters ? "Ocultar filtros" : "Mostrar filtros"}
+          {showMobileFilters ? t("hide_filters") : t("show_filters")}
         </Button>
 
         <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -196,19 +198,23 @@ export default function AllOffersClient() {
             >
               <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
                 {data?.totalOffers
-                  ? `Mostrando ${Math.min((currentPage - 1) * 10 + 1, data.totalOffers)}–${Math.min(currentPage * 10, data.totalOffers)} de ${data.totalOffers} ofertas`
-                  : "Ofertas disponibles"}
+                  ? t("offers_results_count", {
+                      from: Math.min((currentPage - 1) * 10 + 1, data.totalOffers),
+                      to: Math.min(currentPage * 10, data.totalOffers),
+                      total: data.totalOffers,
+                    })
+                  : t("available_offers")}
               </Typography>
               <Typography sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}>
-                {appliedFilters.sort === "asc" ? "Más antiguas" : "Más recientes"}
+                {appliedFilters.sort === "asc" ? t("oldest_first") : t("newest_first")}
               </Typography>
             </Stack>
 
             {isLoading ? (
-              <LoadingSpinner text="Cargando ofertas..." />
+              <LoadingSpinner text={t("loading_offers")} />
             ) : isError ? (
               <Typography color="error" sx={{ py: 4 }}>
-                Error al cargar ofertas: {error.message}
+                {t("offers_load_error")}: {error.message}
               </Typography>
             ) : data?.offers.length ? (
               <>
@@ -233,10 +239,10 @@ export default function AllOffersClient() {
                 }}
               >
                 <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                  No encontramos ofertas con estos filtros
+                  {t("no_offers_with_filters")}
                 </Typography>
                 <Button onClick={clearFilters} sx={{ mt: 1 }}>
-                  Limpiar filtros
+                  {t("clear_filters")}
                 </Button>
               </Box>
             )}

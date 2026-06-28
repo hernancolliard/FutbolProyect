@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
+import { useTranslation } from "react-i18next";
 
 export type OfferFilters = {
   puesto: string;
@@ -49,6 +50,7 @@ export default function OfferFiltersSidebar({
   onApply,
   onClear,
 }: Props) {
+  const { t } = useTranslation("common");
   const handleText = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange({ ...filters, [event.target.name]: event.target.value });
   };
@@ -83,10 +85,10 @@ export default function OfferFiltersSidebar({
           sx={{ px: 2.25, py: 2 }}
         >
           <Typography sx={{ fontWeight: 900, color: "#0a1930" }}>
-            Filtros
+            {t("filters")}
           </Typography>
           <Button size="small" onClick={onClear} sx={{ minWidth: 0, px: 0.5 }}>
-            Limpiar
+            {t("clear_filters")}
           </Button>
         </Stack>
         <Divider />
@@ -97,8 +99,8 @@ export default function OfferFiltersSidebar({
             name="puesto"
             value={filters.puesto}
             onChange={handleText}
-            placeholder="Buscar por puesto..."
-            inputProps={{ "aria-label": "Buscar por puesto" }}
+            placeholder={t("filter_by_position")}
+            inputProps={{ "aria-label": t("filter_by_position_aria") }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -110,14 +112,14 @@ export default function OfferFiltersSidebar({
           />
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Ubicación</InputLabel>
+            <InputLabel>{t("location_label")}</InputLabel>
             <Select
               name="ubicacion"
               value={filters.ubicacion}
               onChange={handleSelect}
-              label="Ubicación"
+              label={t("location_label")}
             >
-              <MenuItem value="">Todas</MenuItem>
+              <MenuItem value="">{t("all_locations")}</MenuItem>
               {ubicaciones.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
@@ -125,14 +127,14 @@ export default function OfferFiltersSidebar({
           </FormControl>
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Nivel</InputLabel>
+            <InputLabel>{t("level")}</InputLabel>
             <Select
               name="nivel"
               value={filters.nivel}
               onChange={handleSelect}
-              label="Nivel"
+              label={t("level")}
             >
-              <MenuItem value="">Todos</MenuItem>
+              <MenuItem value="">{t("all_levels")}</MenuItem>
               {niveles.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
@@ -140,14 +142,14 @@ export default function OfferFiltersSidebar({
           </FormControl>
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Jornada</InputLabel>
+            <InputLabel>{t("schedule_label")}</InputLabel>
             <Select
               name="horarios"
               value={filters.horarios}
               onChange={handleSelect}
-              label="Jornada"
+              label={t("schedule_label")}
             >
-              <MenuItem value="">Todas</MenuItem>
+              <MenuItem value="">{t("all_schedules")}</MenuItem>
               {horarios.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
@@ -156,7 +158,7 @@ export default function OfferFiltersSidebar({
 
           <Box>
             <Typography variant="caption" sx={{ color: "#40506a", fontWeight: 800 }}>
-              Salario
+              {t("salary")}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 0.8 }}>
               <TextField
@@ -166,8 +168,8 @@ export default function OfferFiltersSidebar({
                 name="salarioMin"
                 value={filters.salarioMin}
                 onChange={handleText}
-                placeholder="Mín."
-                inputProps={{ min: 0, "aria-label": "Salario mínimo" }}
+                placeholder={t("minimum_short")}
+                inputProps={{ min: 0, "aria-label": t("minimum_salary") }}
                 sx={fieldSx}
               />
               <TextField
@@ -177,23 +179,23 @@ export default function OfferFiltersSidebar({
                 name="salarioMax"
                 value={filters.salarioMax}
                 onChange={handleText}
-                placeholder="Máx."
-                inputProps={{ min: 0, "aria-label": "Salario máximo" }}
+                placeholder={t("maximum_short")}
+                inputProps={{ min: 0, "aria-label": t("maximum_salary") }}
                 sx={fieldSx}
               />
             </Stack>
           </Box>
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Ordenar por</InputLabel>
+            <InputLabel>{t("sort_by")}</InputLabel>
             <Select
               name="sort"
               value={filters.sort}
               onChange={handleSelect}
-              label="Ordenar por"
+              label={t("sort_by")}
             >
-              <MenuItem value="desc">Más recientes</MenuItem>
-              <MenuItem value="asc">Más antiguas</MenuItem>
+              <MenuItem value="desc">{t("newest_first")}</MenuItem>
+              <MenuItem value="asc">{t("oldest_first")}</MenuItem>
             </Select>
           </FormControl>
 
@@ -209,7 +211,7 @@ export default function OfferFiltersSidebar({
               "&:hover": { bgcolor: "#0d4faf" },
             }}
           >
-            Aplicar filtros
+            {t("apply_filters")}
           </Button>
         </Stack>
       </Paper>
@@ -225,10 +227,10 @@ export default function OfferFiltersSidebar({
         }}
       >
         <Typography sx={{ fontWeight: 900, fontSize: "1.05rem" }}>
-          ¿Buscás talento para tu club?
+          {t("offers_sidebar_title")}
         </Typography>
         <Typography variant="body2" sx={{ mt: 1, color: "rgba(255,255,255,.76)" }}>
-          Publicá tu oferta y conectá con profesionales del fútbol.
+          {t("offers_sidebar_text")}
         </Typography>
         <Button
           component={Link}
@@ -236,7 +238,7 @@ export default function OfferFiltersSidebar({
           variant="contained"
           sx={{ mt: 2, bgcolor: "#1262db", fontWeight: 800 }}
         >
-          Publicar oferta
+          {t("publish_offer")}
         </Button>
       </Paper>
     </Stack>

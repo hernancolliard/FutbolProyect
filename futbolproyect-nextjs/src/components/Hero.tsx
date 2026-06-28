@@ -16,6 +16,7 @@ import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import UpdateRoundedIcon from "@mui/icons-material/UpdateRounded";
+import { useTranslation } from "react-i18next";
 
 export type HomeMetric = {
   label: string;
@@ -34,6 +35,7 @@ const metricIcons = [
 ];
 
 export default function Hero({ metrics }: HeroProps) {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -62,11 +64,11 @@ export default function Hero({ metrics }: HeroProps) {
               fontWeight: 900,
             }}
           >
-            Tu talento.
+            {t("new_hero_title_line_1")}
             <br />
             Tu{" "}
             <Box component="span" sx={{ color: "#2f80ff" }}>
-              oportunidad.
+              {t("new_hero_title_line_2")}
             </Box>
           </Typography>
           <Typography
@@ -78,8 +80,7 @@ export default function Hero({ metrics }: HeroProps) {
               lineHeight: 1.65,
             }}
           >
-            La plataforma donde jugadores y profesionales del fútbol conectan
-            con clubes, agencias y proyectos de todo el mundo.
+            {t("new_hero_subtitle")}
           </Typography>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.3} sx={{ mt: 3 }}>
@@ -96,7 +97,7 @@ export default function Hero({ metrics }: HeroProps) {
                 "&:hover": { bgcolor: "#0d4faf" },
               }}
             >
-              Ver ofertas
+              {t("hero_primary_cta")}
             </Button>
             <Button
               component={Link}
@@ -115,7 +116,7 @@ export default function Hero({ metrics }: HeroProps) {
                 },
               }}
             >
-              Crear mi perfil gratis
+              {t("home_create_profile_free")}
             </Button>
           </Stack>
 
@@ -126,12 +127,12 @@ export default function Hero({ metrics }: HeroProps) {
             gap={2}
             sx={{ mt: 2.5 }}
           >
-            {["Perfiles completos", "Contacto seguro", "Alcance global"].map(
+            {["home_trust_profiles_title", "home_trust_contact_title", "home_trust_global_title"].map(
               (item) => (
                 <Stack key={item} direction="row" spacing={0.7} alignItems="center">
                   <CheckCircleOutlineRoundedIcon sx={{ color: "#2f80ff", fontSize: 18 }} />
                   <Typography variant="caption" sx={{ color: "rgba(255,255,255,.82)" }}>
-                    {item}
+                    {t(item)}
                   </Typography>
                 </Stack>
               ),

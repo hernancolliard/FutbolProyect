@@ -7,36 +7,38 @@ import SportsOutlinedIcon from "@mui/icons-material/SportsOutlined";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import TravelExploreRoundedIcon from "@mui/icons-material/TravelExploreRounded";
 import FitnessCenterRoundedIcon from "@mui/icons-material/FitnessCenterRounded";
+import { useTranslation } from "react-i18next";
 
 const roles = [
   {
-    title: "Jugadores",
-    text: "Mostrá tu perfil, destacá tu talento y encontrá tu próxima oportunidad.",
+    titleKey: "home_role_players_title",
+    textKey: "home_role_players_text",
     icon: <SportsSoccerRoundedIcon />,
   },
   {
-    title: "Entrenadores",
-    text: "Conectá con clubes y proyectos que buscan visión y experiencia.",
+    titleKey: "home_role_coaches_title",
+    textKey: "home_role_coaches_text",
     icon: <SportsOutlinedIcon />,
   },
   {
-    title: "Analistas",
-    text: "Impulsá tu perfil y accedé a oportunidades dentro del fútbol.",
+    titleKey: "home_role_analysts_title",
+    textKey: "home_role_analysts_text",
     icon: <QueryStatsRoundedIcon />,
   },
   {
-    title: "Scouts",
-    text: "Descubrí talento y ampliá tu red profesional globalmente.",
+    titleKey: "home_role_scouts_title",
+    textKey: "home_role_scouts_text",
     icon: <TravelExploreRoundedIcon />,
   },
   {
-    title: "Preparadores",
-    text: "Tu trabajo potencia el rendimiento. Encontrá tu próximo desafío.",
+    titleKey: "home_role_trainers_title",
+    textKey: "home_role_trainers_text",
     icon: <FitnessCenterRoundedIcon />,
   },
 ];
 
 export default function HomeRoleGrid() {
+  const { t } = useTranslation("common");
   return (
     <Box component="section">
       <Typography
@@ -49,11 +51,11 @@ export default function HomeRoleGrid() {
           fontWeight: 900,
         }}
       >
-        ¿Para quién es{" "}
+        {t("home_roles_title_prefix")}{" "}
         <Box component="span" sx={{ color: "#1262db" }}>
           FutbolProyect
         </Box>
-        ?
+        {t("home_roles_title_suffix")}
       </Typography>
       <Box
         sx={{
@@ -68,7 +70,7 @@ export default function HomeRoleGrid() {
       >
         {roles.map((role) => (
           <Paper
-            key={role.title}
+            key={role.titleKey}
             elevation={0}
             sx={{
               p: 2.2,
@@ -99,10 +101,10 @@ export default function HomeRoleGrid() {
                 {role.icon}
               </Box>
               <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                {role.title}
+                {t(role.titleKey)}
               </Typography>
               <Typography variant="caption" sx={{ color: "#647188", lineHeight: 1.5 }}>
-                {role.text}
+                {t(role.textKey)}
               </Typography>
             </Stack>
           </Paper>

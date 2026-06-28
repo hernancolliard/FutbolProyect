@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { useTranslation } from "react-i18next";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
@@ -33,6 +34,7 @@ const getAge = (birthDate?: string) => {
 };
 
 export default function ProfileCard({ profile }: ProfileCardProps) {
+  const { t } = useTranslation("common");
   const profileImageUrl =
     profile.foto_perfil_url || "/images/logos/logofpazul.webp";
   const hasCompleteProfile = Boolean(profile.foto_perfil_url && profile.cv_url);
@@ -85,7 +87,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
       >
         <Image
           src={profileImageUrl}
-          alt={`Perfil de ${fullName || "jugador"}`}
+          alt={t("profile_image_alt", { name: fullName || t("player") })}
           width={360}
           height={250}
           sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 300px"
@@ -109,7 +111,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         {hasCompleteProfile && (
           <Chip
             icon={<VerifiedOutlinedIcon />}
-            label="Perfil completo"
+            label={t("profile_complete_badge")}
             size="small"
             sx={{
               position: "absolute",
@@ -124,7 +126,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         )}
         {age !== null && (
           <Chip
-            label={`${age} años`}
+            label={t("age_years", { age })}
             size="small"
             sx={{
               position: "absolute",
@@ -154,20 +156,20 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
             overflow: "hidden",
           }}
         >
-          {fullName || "Perfil sin nombre"}
+          {fullName || t("unnamed_profile")}
         </Typography>
 
         <Stack spacing={0.65} sx={{ mt: 1.25 }}>
           <Stack direction="row" spacing={0.8} alignItems="center">
             <SportsSoccerOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
             <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
-              {profile.posicion_principal || "Posición no especificada"}
+              {profile.posicion_principal || t("position_not_specified")}
             </Typography>
           </Stack>
           <Stack direction="row" spacing={0.8} alignItems="center">
             <PlaceOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
             <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
-              {profile.nacionalidad || "Nacionalidad no especificada"}
+              {profile.nacionalidad || t("nationality_not_specified")}
             </Typography>
           </Stack>
         </Stack>
@@ -217,7 +219,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
               "&:hover": { bgcolor: "#edf5ff", borderColor: "#0d4faf" },
             }}
           >
-            Ver perfil
+            {t("view_profile")}
           </Button>
         </Box>
       </Stack>

@@ -21,6 +21,7 @@ import {
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import { PLAYER_POSITION_OPTIONS } from "@/lib/profilePositions";
+import { useTranslation } from "react-i18next";
 
 export type ProfileFilters = {
   nombre: string;
@@ -51,6 +52,7 @@ export default function ProfileFiltersSidebar({
   onApply,
   onClear,
 }: Props) {
+  const { t } = useTranslation("common");
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
       bgcolor: "#fff",
@@ -81,10 +83,10 @@ export default function ProfileFiltersSidebar({
           sx={{ px: 2.25, py: 2 }}
         >
           <Typography sx={{ fontWeight: 900, color: "#0a1930" }}>
-            Filtros
+            {t("filters")}
           </Typography>
           <Button size="small" onClick={onClear} sx={{ minWidth: 0, px: 0.5 }}>
-            Limpiar
+            {t("clear_filters")}
           </Button>
         </Stack>
         <Divider />
@@ -98,8 +100,8 @@ export default function ProfileFiltersSidebar({
             onChange={(event) =>
               onChange({ ...filters, nombre: event.target.value })
             }
-            placeholder="Nombre o apellido..."
-            inputProps={{ "aria-label": "Buscar por nombre" }}
+            placeholder={t("profile_name_search_placeholder")}
+            inputProps={{ "aria-label": t("profile_name_search_aria") }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -111,14 +113,14 @@ export default function ProfileFiltersSidebar({
           />
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Nacionalidad</InputLabel>
+            <InputLabel>{t("nationality_label")}</InputLabel>
             <Select
               name="nacionalidad"
               value={filters.nacionalidad}
               onChange={handleSelect}
-              label="Nacionalidad"
+              label={t("nationality_label")}
             >
-              <MenuItem value="">Todas</MenuItem>
+              <MenuItem value="">{t("all_nationalities")}</MenuItem>
               {nacionalidades.map((nationality) => (
                 <MenuItem key={nationality} value={nationality}>
                   {nationality}
@@ -128,17 +130,17 @@ export default function ProfileFiltersSidebar({
           </FormControl>
 
           <FormControl fullWidth size="small" sx={fieldSx}>
-            <InputLabel>Posición</InputLabel>
+            <InputLabel>{t("position_label")}</InputLabel>
             <Select
               name="puesto"
               value={filters.puesto}
               onChange={handleSelect}
-              label="Posición"
+              label={t("position_label")}
             >
-              <MenuItem value="">Todas</MenuItem>
+              <MenuItem value="">{t("all_positions")}</MenuItem>
               {PLAYER_POSITION_OPTIONS.map((position) => (
                 <MenuItem key={position.value} value={position.value}>
-                  {position.fallback}
+                  {t(position.labelKey, position.fallback)}
                 </MenuItem>
               ))}
             </Select>
@@ -149,7 +151,7 @@ export default function ProfileFiltersSidebar({
               variant="caption"
               sx={{ color: "#40506a", fontWeight: 800 }}
             >
-              Edad: {ageRange[0]}–{ageRange[1]} años
+              {t("age_range", { min: ageRange[0], max: ageRange[1] })}
             </Typography>
             <Slider
               value={ageRange}
@@ -167,7 +169,7 @@ export default function ProfileFiltersSidebar({
             />
             {!hasAgeData && (
               <Typography variant="caption" sx={{ color: "#7a8799" }}>
-                No hay edades cargadas para filtrar.
+                {t("no_ages_to_filter")}
               </Typography>
             )}
           </Box>
@@ -184,7 +186,7 @@ export default function ProfileFiltersSidebar({
               "&:hover": { bgcolor: "#0d4faf" },
             }}
           >
-            Aplicar filtros
+            {t("apply_filters")}
           </Button>
         </Stack>
       </Paper>
@@ -200,13 +202,13 @@ export default function ProfileFiltersSidebar({
         }}
       >
         <Typography sx={{ fontWeight: 900, fontSize: "1.05rem" }}>
-          ¿Buscás talento para tu club?
+          {t("offers_sidebar_title")}
         </Typography>
         <Typography
           variant="body2"
           sx={{ mt: 1, color: "rgba(255,255,255,.76)" }}
         >
-          Explorá perfiles o publicá una oferta para llegar a más profesionales.
+          {t("profiles_sidebar_text")}
         </Typography>
         <Button
           component={Link}
@@ -214,7 +216,7 @@ export default function ProfileFiltersSidebar({
           variant="contained"
           sx={{ mt: 2, bgcolor: "#1262db", fontWeight: 800 }}
         >
-          Publicar oferta
+          {t("publish_offer")}
         </Button>
       </Paper>
     </Stack>

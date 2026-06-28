@@ -27,6 +27,7 @@ import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import apiClient from "@/lib/apiClient";
 import SubscribeButton from "@/components/SubscribeButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 type SubscriptionPlan = {
   id?: number;
@@ -44,31 +45,22 @@ const fetchSubscriptionPlans = async (): Promise<SubscriptionPlan[]> => {
 const planCards = [
   {
     type: "ofertante",
-    title: "Plan para clubes y agencias",
-    subtitle: "Encontrá el talento que tu proyecto necesita.",
+    titleKey: "subscription_clubs_title",
+    subtitleKey: "subscription_clubs_subtitle",
     icon: <BusinessOutlinedIcon />,
-    benefits: [
-      "Publicar y gestionar ofertas desde tu perfil",
-      "Recibir postulaciones con información deportiva",
-      "Acceder a perfiles y material profesional",
-      "Destacar oportunidades para ganar visibilidad",
-    ],
+    benefitKeys: ["subscription_clubs_benefit_1", "subscription_clubs_benefit_2", "subscription_clubs_benefit_3", "subscription_clubs_benefit_4"],
   },
   {
     type: "postulante",
-    title: "Plan para profesionales",
-    subtitle: "Mostrá tu talento y accedé a nuevas oportunidades.",
+    titleKey: "subscription_professionals_title",
+    subtitleKey: "subscription_professionals_subtitle",
     icon: <PersonSearchOutlinedIcon />,
-    benefits: [
-      "Postularte a ofertas abiertas",
-      "Mostrar CV, fotos, videos y enlaces deportivos",
-      "Compartir tu perfil profesional",
-      "Conectar con clubes, agencias y proyectos",
-    ],
+    benefitKeys: ["subscription_professionals_benefit_1", "subscription_professionals_benefit_2", "subscription_professionals_benefit_3", "subscription_professionals_benefit_4"],
   },
 ];
 
 export default function SubscriptionPage() {
+  const { t } = useTranslation("common");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly",
   );
@@ -82,9 +74,8 @@ export default function SubscriptionPage() {
   });
 
   useEffect(() => {
-    document.title = "Planes de Suscripción | FutbolProyect";
-    const description =
-      "Elegí el plan de FutbolProyect para publicar ofertas, buscar talento o postularte a oportunidades deportivas.";
+    document.title = t("subscription_meta_title");
+    const description = t("subscription_meta_description");
     let metaDescription = document.querySelector<HTMLMetaElement>(
       'meta[name="description"]',
     );
@@ -94,24 +85,24 @@ export default function SubscriptionPage() {
       document.head.appendChild(metaDescription);
     }
     metaDescription.content = description;
-  }, []);
+  }, [t]);
 
   const selectedPlan = plans.find((plan) => plan.plan_name === billingCycle);
   const price = selectedPlan?.price_usd;
   const formattedPrice =
     price !== undefined && price !== null && price !== ""
       ? `U$D ${price}`
-      : "Consultar";
+      : t("consult_price");
 
   if (isLoading) {
-    return <LoadingSpinner text="Cargando planes..." />;
+    return <LoadingSpinner text={t("loading_plans")} />;
   }
 
   if (isError) {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
         <Alert severity="error">
-          {error.message || "Error al cargar los planes de suscripción."}
+          {error.message || t("subscription_load_error")}
         </Alert>
       </Container>
     );
@@ -141,7 +132,7 @@ export default function SubscriptionPage() {
           <Container maxWidth="lg" sx={{ textAlign: "center" }}>
             <Chip
               icon={<SportsSoccerOutlinedIcon />}
-              label="Invertí en tu próximo paso"
+              label={t("subscription_badge")}
               sx={{
                 color: "#fff",
                 bgcolor: "rgba(255,255,255,.09)",
@@ -161,9 +152,9 @@ export default function SubscriptionPage() {
                 fontWeight: 900,
               }}
             >
-              Planes para crecer dentro del{" "}
+              {t("subscription_title_prefix")}{" "}
               <Box component="span" sx={{ color: "#2f80ff" }}>
-                fútbol
+                {t("subscription_title_highlight")}
               </Box>
             </Typography>
             <Typography
@@ -175,8 +166,7 @@ export default function SubscriptionPage() {
                 fontSize: { xs: "1rem", md: "1.08rem" },
               }}
             >
-              Elegí la modalidad que mejor se adapta a tu perfil y accedé a las
-              herramientas de FutbolProyect.
+              {t("subscription_intro")}
             </Typography>
           </Container>
         </Box>
@@ -201,7 +191,7 @@ export default function SubscriptionPage() {
               onChange={(_event, value: "monthly" | "annual" | null) => {
                 if (value) setBillingCycle(value);
               }}
-              aria-label="Ciclo de facturación"
+              aria-label={t("billing_cycle")}
               sx={{
                 "& .MuiToggleButton-root": {
                   minWidth: { xs: 130, sm: 165 },
@@ -218,8 +208,8 @@ export default function SubscriptionPage() {
                 },
               }}
             >
-              <ToggleButton value="monthly">Mensual</ToggleButton>
-              <ToggleButton value="annual">Anual</ToggleButton>
+              <ToggleButton value="monthly">{t("monthly")}</ToggleButton>
+              <ToggleButton value="annual">{t("annual")}</ToggleButton>
             </ToggleButtonGroup>
           </Paper>
 
@@ -273,10 +263,10 @@ export default function SubscriptionPage() {
                         component="h2"
                         sx={{ color: "#0a1930", fontSize: "1.2rem", fontWeight: 900 }}
                       >
-                        {plan.title}
+                        {t(plan.titleKey)}
                       </Typography>
                       <Typography variant="body2" sx={{ mt: 0.3, color: "#65738a" }}>
-                        {plan.subtitle}
+                        {t(plan.subtitleKey)}
                       </Typography>
                     </Box>
                   </Stack>
@@ -294,19 +284,19 @@ export default function SubscriptionPage() {
                     >
                       {formattedPrice}
                     </Typography>
-                    {formattedPrice !== "Consultar" && (
+                    {price !== undefined && price !== null && price !== "" && (
                       <Typography sx={{ pb: 0.3, color: "#758196" }}>
-                        /{billingCycle === "monthly" ? "mes" : "año"}
+                        /{billingCycle === "monthly" ? t("month") : t("year")}
                       </Typography>
                     )}
                   </Stack>
 
                   <Stack spacing={1.3} sx={{ my: 3 }}>
-                    {plan.benefits.map((benefit) => (
-                      <Stack key={benefit} direction="row" spacing={1} alignItems="flex-start">
+                    {plan.benefitKeys.map((benefitKey) => (
+                      <Stack key={benefitKey} direction="row" spacing={1} alignItems="flex-start">
                         <CheckCircleRoundedIcon sx={{ mt: 0.1, color: "#1262db", fontSize: 20 }} />
                         <Typography variant="body2" sx={{ color: "#3f4d62", lineHeight: 1.55 }}>
-                          {benefit}
+                          {t(benefitKey)}
                         </Typography>
                       </Stack>
                     ))}
@@ -334,18 +324,18 @@ export default function SubscriptionPage() {
             {[
               {
                 icon: <SecurityOutlinedIcon />,
-                title: "Pago protegido",
-                text: "Procesado mediante proveedores de pago integrados.",
+                title: t("subscription_secure_payment_title"),
+                text: t("subscription_secure_payment_text"),
               },
               {
                 icon: <PaymentsOutlinedIcon />,
-                title: "Dos medios de pago",
-                text: "Mercado Pago y PayPal disponibles.",
+                title: t("subscription_payment_methods_title"),
+                text: t("subscription_payment_methods_text"),
               },
               {
                 icon: <SupportAgentOutlinedIcon />,
-                title: "Soporte",
-                text: "Canal de contacto para ayudarte durante el proceso.",
+                title: t("subscription_support_title"),
+                text: t("subscription_support_text"),
               },
             ].map((item) => (
               <Paper

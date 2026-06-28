@@ -18,6 +18,7 @@ import ProfileFiltersSidebar, {
   ProfileFilters,
 } from "@/components/profile/ProfileFiltersSidebar";
 import { getPlayerPositionCategory } from "@/lib/profilePositions";
+import { useTranslation } from "react-i18next";
 
 interface FilterControlsProps {
   nacionalidades: string[];
@@ -58,6 +59,7 @@ export default function FilterControls({
   nacionalidades,
   initialProfiles,
 }: FilterControlsProps) {
+  const { t } = useTranslation("common");
   const agesInProfiles = useMemo(
     () =>
       initialProfiles
@@ -155,10 +157,10 @@ export default function FilterControls({
     (profile) => profile.foto_perfil_url && profile.cv_url,
   ).length;
   const metrics = [
-    { value: initialProfiles.length, label: "Perfiles disponibles" },
-    { value: nacionalidades.length, label: "Nacionalidades" },
-    { value: representedPositions, label: "Posiciones representadas" },
-    { value: completeProfiles, label: "Perfiles completos" },
+    { value: initialProfiles.length, label: t("available_profiles_metric") },
+    { value: nacionalidades.length, label: t("nationalities_metric") },
+    { value: representedPositions, label: t("represented_positions_metric") },
+    { value: completeProfiles, label: t("complete_profiles_metric") },
   ];
 
   const filtersSidebar = (
@@ -200,7 +202,7 @@ export default function FilterControls({
             fontWeight: 800,
           }}
         >
-          {showMobileFilters ? "Ocultar filtros" : "Mostrar filtros"}
+          {showMobileFilters ? t("hide_filters") : t("show_filters")}
         </Button>
 
         <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -230,12 +232,15 @@ export default function FilterControls({
               sx={{ mb: 2.25 }}
             >
               <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
-                Mostrando {filteredProfiles.length} de {initialProfiles.length} perfiles
+                {t("profiles_results_count", {
+                  shown: filteredProfiles.length,
+                  total: initialProfiles.length,
+                })}
               </Typography>
               <Typography
                 sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}
               >
-                Talento disponible
+                {t("available_talent")}
               </Typography>
             </Stack>
 
@@ -273,10 +278,10 @@ export default function FilterControls({
                 }}
               >
                 <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                  No encontramos perfiles con estos filtros
+                  {t("no_profiles_with_filters")}
                 </Typography>
                 <Button onClick={clearFilters} sx={{ mt: 1 }}>
-                  Limpiar filtros
+                  {t("clear_filters")}
                 </Button>
               </Box>
             )}

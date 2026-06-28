@@ -15,6 +15,7 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import { Offer, Profile } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 type SectionHeaderProps = {
   title: string;
@@ -59,14 +60,15 @@ function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
 }
 
 export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
+  const { t } = useTranslation("common");
   if (!offers.length) return null;
 
   return (
     <Box component="section">
       <SectionHeader
-        title="Últimas ofertas publicadas"
+        title={t("home_latest_offers")}
         href="/all-offers"
-        action="Ver todas las ofertas"
+        action={t("view_all_offers")}
       />
       <Box
         sx={{
@@ -99,7 +101,7 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
           >
             <Stack direction="row" justifyContent="space-between" spacing={1}>
               <Chip
-                label={offer.nivel || "Oferta"}
+                label={offer.nivel || t("offer")}
                 size="small"
                 sx={{ bgcolor: "#edf5ff", color: "#1557ad", fontWeight: 800 }}
               />
@@ -146,13 +148,13 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
               <Stack direction="row" spacing={0.6} alignItems="center">
                 <BadgeOutlinedIcon sx={{ fontSize: 15, color: "#52709a" }} />
                 <Typography variant="caption" sx={{ color: "#65738a" }} noWrap>
-                  {offer.puesto || "Puesto no especificado"}
+                  {offer.puesto || t("position_not_specified")}
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={0.6} alignItems="center">
                 <PlaceOutlinedIcon sx={{ fontSize: 15, color: "#52709a" }} />
                 <Typography variant="caption" sx={{ color: "#65738a" }} noWrap>
-                  {offer.ubicacion || "Ubicación no especificada"}
+                  {offer.ubicacion || t("location_not_specified")}
                 </Typography>
               </Stack>
             </Stack>
@@ -163,7 +165,7 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
               size="small"
               sx={{ mt: "auto", alignSelf: "flex-start", fontWeight: 900 }}
             >
-              Ver oferta
+              {t("view_offer")}
             </Button>
           </Paper>
         ))}
@@ -173,15 +175,16 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
 }
 
 export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
+  const { t } = useTranslation("common");
   if (!profiles.length) return null;
 
   return (
     <Box component="section">
       <SectionHeader
-        title="Perfiles profesionales destacados"
-        subtitle="Descubrí talento y conectá con profesionales del fútbol."
+        title={t("home_featured_profiles")}
+        subtitle={t("home_featured_profiles_text")}
         href="/perfiles"
-        action="Ver todos los perfiles"
+        action={t("view_all_profiles")}
       />
       <Box
         sx={{
@@ -234,7 +237,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               <Stack sx={{ p: 1.6, minHeight: 150 }}>
                 <Stack direction="row" justifyContent="space-between" spacing={1}>
                   <Typography sx={{ color: "#0a1930", fontWeight: 900, fontSize: ".9rem" }} noWrap>
-                    {fullName || "Perfil"}
+                    {fullName || t("profile")}
                   </Typography>
                   {Number(profile.average_rating) > 0 && (
                     <Typography variant="caption" sx={{ color: "#d18a00", fontWeight: 800 }}>
@@ -243,13 +246,13 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   )}
                 </Stack>
                 <Chip
-                  label={profile.posicion_principal || "Profesional"}
+                  label={profile.posicion_principal || t("professional")}
                   size="small"
                   variant="outlined"
                   sx={{ mt: 1, alignSelf: "flex-start", maxWidth: "100%" }}
                 />
                 <Typography variant="caption" sx={{ mt: 0.8, color: "#65738a" }} noWrap>
-                  {profile.nacionalidad || "Nacionalidad no especificada"}
+                  {profile.nacionalidad || t("nationality_not_specified")}
                 </Typography>
                 <Button
                   component={Link}
@@ -258,7 +261,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   endIcon={<ArrowForwardRoundedIcon />}
                   sx={{ mt: "auto", px: 0, alignSelf: "flex-start", fontWeight: 900 }}
                 >
-                  Ver perfil
+                  {t("view_profile")}
                 </Button>
               </Stack>
             </Paper>

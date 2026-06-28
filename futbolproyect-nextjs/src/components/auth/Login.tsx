@@ -3,161 +3,166 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import GoogleLoginButton from "./GoogleLoginButton";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import Alert from "@mui/material/Alert";
-import { useAuth } from "@/context/AuthContext"; // Asegúrate de que la ruta sea correcta
 import {
+  Alert,
   Box,
-  Card,
-  CardContent,
-  Typography,
+  Button,
+  CircularProgress,
+  Divider,
+  IconButton,
   Link as MuiLink,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { useAuth } from "@/context/AuthContext";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 interface LoginProps {
   onClose: () => void;
+  onSwitchToRegister?: () => void;
+  showCloseButton?: boolean;
 }
 
-function Login({ onClose }: LoginProps) {
+export default function Login({
+  onClose,
+  onSwitchToRegister,
+  showCloseButton = true,
+}: LoginProps) {
   const { t } = useTranslation("common");
-  // Extraemos las funciones del contexto.
-  // Nota: Si 'loginWithGoogle' no existe aún en tu contexto, mira el paso 2 más abajo.
   const { login, loginWithGoogle } = useAuth();
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
+    setLoading(true);
     try {
-      // CORRECCIÓN: Delegamos la petición al contexto pasando credenciales
       await login(formData.email, formData.password);
-      onClose(); // Cerramos el modal solo si hubo éxito
-    } catch (err: any) {
-      console.error(err);
-      // Intentamos mostrar el mensaje que viene del backend o uno genérico
+      onClose();
+    } catch (requestError: any) {
       setError(
-        err.response?.data?.message ||
-          t("login_error", "Error al iniciar sesión."),
+        requestError?.response?.data?.message ||
+          requestError?.message ||
+          t("login_error"),
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      // CORRECCIÓN: Delegamos también el login de Google al contexto
-      if (loginWithGoogle) {
-        await loginWithGoogle(credentialResponse.credential);
-        onClose();
-      } else {
-        console.error("loginWithGoogle no está implementado en AuthContext");
-        setError("Error de configuración interno.");
-      }
-    } catch (err: any) {
-      setError(
-        err.message ||
-          t("login_with_google_error", "Error al iniciar sesión con Google."),
-      );
+      if (!loginWithGoogle) throw new Error(t("login_configuration_error"));
+      await loginWithGoogle(credentialResponse.credential);
+      onClose();
+    } catch (requestError: any) {
+      setError(requestError?.message || t("login_with_google_error"));
     }
   };
 
-  const handleGoogleError = () => {
-    setError(
-      t(
-        "login_with_google_error_retry",
-        "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo.",
-      ),
-    );
-  };
-
   return (
-    <Card sx={{ p: 2, maxWidth: 400, mx: "auto", mt: 4 }}>
-      <CardContent>
-        <Typography variant="h5" component="h2" gutterBottom align="center">
-          {t("login_title", "Iniciar Sesión")}
+    <Box sx={{ width: "100%", maxWidth: 480, mx: "auto", p: { xs: 2.5, sm: 4 } }}>
+      {showCloseButton && (
+        <IconButton
+          onClick={onClose}
+          aria-label={t("close")}
+          sx={{ position: "absolute", top: 12, right: 12, color: "#64748b" }}
+        >
+          <CloseRoundedIcon />
+        </IconButton>
+      )}
+
+      <Stack alignItems="center" spacing={1}>
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: "50%",
+            bgcolor: "#eaf3ff",
+            color: "#1262db",
+          }}
+        >
+          <LockOutlinedIcon />
+        </Box>
+        <Typography component="h1" variant="h4" align="center" sx={{ color: "#0a1930", fontWeight: 900 }}>
+          {t("login_title")}
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={2}>
-            <TextField
-              type="email"
-              name="email"
-              label={t("email_placeholder", "Correo Electrónico")}
-              onChange={handleChange}
-              required
-              fullWidth
-              variant="outlined"
-            />
-            <TextField
-              type="password"
-              name="password"
-              label={t("password_placeholder", "Contraseña")}
-              onChange={handleChange}
-              required
-              fullWidth
-              variant="outlined"
-            />
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button
-                variant="outlined"
-                color="secondary"
-                onClick={onClose}
-                type="button"
-              >
-                {t("cancel_button", "Cancelar")}
-              </Button>
-              <Button variant="contained" color="primary" type="submit">
-                {t("login_button", "Iniciar Sesión")}
-              </Button>
-            </Stack>
-          </Stack>
-        </form>
-        <Box sx={{ textAlign: "center", mt: 2 }}>
-          <Link
-            href="/auth/forgot-password"
-            passHref
-            style={{ textDecoration: "none" }}
-          >
-            <MuiLink
-              component="span"
-              onClick={onClose}
-              sx={{ cursor: "pointer" }}
-            >
-              {t("forgot_your_password", "¿Olvidaste tu contraseña?")}
+        <Typography variant="body2" align="center" sx={{ color: "#64748b" }}>
+          {t("login_modal_subtitle")}
+        </Typography>
+      </Stack>
+
+      <Box component="form" onSubmit={handleSubmit}>
+        <Stack spacing={2} sx={{ mt: 3 }}>
+          <TextField
+            type="email"
+            name="email"
+            label={t("email_placeholder")}
+            value={formData.email}
+            onChange={handleChange}
+            required
+            fullWidth
+            autoComplete="email"
+          />
+          <TextField
+            type="password"
+            name="password"
+            label={t("password_placeholder")}
+            value={formData.password}
+            onChange={handleChange}
+            required
+            fullWidth
+            autoComplete="current-password"
+          />
+          <Box sx={{ textAlign: "right", mt: "-4px !important" }}>
+            <MuiLink component={Link} href="/auth/forgot-password" onClick={onClose} sx={{ fontSize: ".85rem", fontWeight: 700 }}>
+              {t("forgot_your_password")}
             </MuiLink>
-          </Link>
-        </Box>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Box sx={{ mt: 2, textAlign: "center" }}>
-          <Typography variant="body2">
-            {t("or_login_with", "O inicia sesión con:")}
-          </Typography>
-          <Box sx={{ mt: 1, display: "flex", justifyContent: "center" }}>
-            <GoogleLoginButton
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-            />
           </Box>
-        </Box>
-      </CardContent>
-    </Card>
+          <Button type="submit" variant="contained" size="large" fullWidth disabled={loading} sx={{ py: 1.25, bgcolor: "#1262db", fontWeight: 900 }}>
+            {loading ? <CircularProgress size={22} color="inherit" /> : t("login_button")}
+          </Button>
+        </Stack>
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+
+      <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: ".78rem" }}>
+        {t("or_login_with")}
+      </Divider>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <GoogleLoginButton
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError(t("login_with_google_error_retry"))}
+        />
+      </Box>
+
+      <Typography variant="body2" align="center" sx={{ mt: 2.5, color: "#64748b" }}>
+        {t("no_account_yet")}{" "}
+        {onSwitchToRegister ? (
+          <MuiLink component="button" type="button" onClick={onSwitchToRegister} sx={{ fontWeight: 800 }}>
+            {t("register")}
+          </MuiLink>
+        ) : (
+          <MuiLink component={Link} href="/register" sx={{ fontWeight: 800 }}>
+            {t("register")}
+          </MuiLink>
+        )}
+      </Typography>
+    </Box>
   );
 }
-
-export default Login;
-
-

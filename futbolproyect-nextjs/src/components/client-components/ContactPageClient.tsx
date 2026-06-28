@@ -15,12 +15,14 @@ import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import apiClient from "@/lib/apiClient";
 import ContactFormContent from "./ContactFormContent";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   compact?: boolean;
 };
 
 export default function ContactPageClient({ compact = false }: Props) {
+  const { t } = useTranslation("common");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -46,14 +48,14 @@ export default function ContactPageClient({ compact = false }: Props) {
     try {
       await apiClient.post("/contact", formData);
       setFeedback(
-        `Gracias por tu mensaje, ${formData.name}. Te contactaremos pronto.`,
+        t("contact_success", { name: formData.name }),
       );
       setFormData({ name: "", email: "", message: "" });
     } catch (requestError: any) {
       setError(
         requestError?.response?.data?.message ||
           requestError?.message ||
-          "No se pudo enviar el mensaje. Intentá nuevamente.",
+          t("contact_send_error"),
       );
     } finally {
       setLoading(false);
@@ -85,7 +87,7 @@ export default function ContactPageClient({ compact = false }: Props) {
       >
         <Chip
           icon={<SportsSoccerOutlinedIcon />}
-          label="Estamos para ayudarte"
+          label={t("contact_help_badge")}
           sx={{
             color: "#fff",
             bgcolor: "rgba(255,255,255,.09)",
@@ -105,18 +107,17 @@ export default function ContactPageClient({ compact = false }: Props) {
             fontWeight: 900,
           }}
         >
-          Hablemos de tu próximo paso
+          {t("contact_heading")}
         </Typography>
         <Typography sx={{ mt: 1.2, color: "rgba(255,255,255,.72)", lineHeight: 1.65 }}>
-          Escribinos por consultas sobre perfiles, ofertas, suscripciones o
-          publicidad dentro de FutbolProyect.
+          {t("contact_intro")}
         </Typography>
 
         <Stack spacing={1.2} sx={{ mt: 3 }}>
           {[
             { icon: <EmailOutlinedIcon />, text: "info@futbolproyect.com" },
-            { icon: <HelpOutlineRoundedIcon />, text: "Soporte y consultas generales" },
-            { icon: <BusinessOutlinedIcon />, text: "Clubes, agencias y publicidad" },
+            { icon: <HelpOutlineRoundedIcon />, text: t("contact_general_support") },
+            { icon: <BusinessOutlinedIcon />, text: t("contact_business_support") },
           ].map((item) => (
             <Stack key={item.text} direction="row" spacing={1.1} alignItems="center">
               <Box

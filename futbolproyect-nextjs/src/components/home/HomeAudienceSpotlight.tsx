@@ -5,32 +5,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { Box, Button, Paper, Typography } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { useTranslation } from "react-i18next";
 
 const audiences = [
   {
-    title: "Para jugadores y staff",
-    text: "Mostrá tu talento, encontrá el equipo ideal y da el siguiente paso en tu carrera.",
+    titleKey: "home_audience_players_title",
+    textKey: "home_audience_players_text",
     image: "/mision.webp",
     href: "/register",
-    action: "Crear mi perfil",
+    actionKey: "how_it_works_primary_cta",
   },
   {
-    title: "Para clubes y agencias",
-    text: "Publicá oportunidades y encontrá profesionales para tu proyecto.",
+    titleKey: "use_case_clubs_title",
+    textKey: "home_audience_clubs_text",
     image: "/images/fondo_1_lowres.webp",
     href: "/create-offer",
-    action: "Publicar oferta",
+    actionKey: "publish_offer",
   },
   {
-    title: "Para scouts y reclutadores",
-    text: "Filtrá, evaluá y conectá con talento desde un solo lugar.",
+    titleKey: "use_case_scouts_title",
+    textKey: "home_audience_scouts_text",
     image: "/nosotros.webp",
     href: "/perfiles",
-    action: "Buscar perfiles",
+    actionKey: "home_search_profiles",
   },
 ];
 
 export default function HomeAudienceSpotlight() {
+  const { t } = useTranslation("common");
   return (
     <Box
       component="section"
@@ -42,7 +44,7 @@ export default function HomeAudienceSpotlight() {
     >
       {audiences.map((audience) => (
         <Paper
-          key={audience.title}
+          key={audience.titleKey}
           elevation={0}
           sx={{
             p: 1.5,
@@ -52,12 +54,12 @@ export default function HomeAudienceSpotlight() {
           }}
         >
           <Typography sx={{ mb: 1, color: "#0a1930", fontWeight: 900 }}>
-            {audience.title}
+            {t(audience.titleKey)}
           </Typography>
           <Box sx={{ position: "relative", height: 155, borderRadius: 1.7, overflow: "hidden" }}>
             <Image
               src={audience.image}
-              alt={audience.title}
+              alt={t(audience.titleKey)}
               fill
               sizes="(max-width: 900px) 100vw, 33vw"
               style={{ objectFit: "cover", objectPosition: "center" }}
@@ -71,7 +73,7 @@ export default function HomeAudienceSpotlight() {
             />
           </Box>
           <Typography variant="body2" sx={{ mt: 1.3, color: "#5e6c81", lineHeight: 1.55 }}>
-            {audience.text}
+            {t(audience.textKey)}
           </Typography>
           <Button
             component={Link}
@@ -80,7 +82,7 @@ export default function HomeAudienceSpotlight() {
             endIcon={<ArrowForwardRoundedIcon />}
             sx={{ mt: 1, px: 0, fontWeight: 900 }}
           >
-            {audience.action}
+            {t(audience.actionKey)}
           </Button>
         </Paper>
       ))}

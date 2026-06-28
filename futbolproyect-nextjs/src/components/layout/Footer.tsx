@@ -14,26 +14,27 @@ import {
 } from "@mui/material";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AdBanner from "@/components/ads/AdBanner";
+import { useTranslation } from "react-i18next";
 
 const navigationLinks = [
-  { href: "/", label: "Inicio" },
-  { href: "/all-offers", label: "Ofertas" },
-  { href: "/perfiles", label: "Perfiles" },
-  { href: "/publicidad", label: "Publicidad" },
-  { href: "/suscripcion", label: "Suscripciones" },
+  { href: "/", key: "home" },
+  { href: "/all-offers", key: "offers" },
+  { href: "/perfiles", key: "all_profiles" },
+  { href: "/publicidad", key: "advertising" },
+  { href: "/suscripcion", key: "subscriptions" },
 ];
 
 const legalLinks = [
-  { href: "/terms", label: "Términos de servicio" },
-  { href: "/privacy", label: "Política de privacidad" },
-  { href: "/contact", label: "Contacto" },
+  { href: "/terms", key: "terms_of_service" },
+  { href: "/privacy", key: "privacy_policy" },
+  { href: "/contact", key: "contact" },
 ];
 
 const opportunityLinks = [
-  { href: "/ofertas-trabajo-futbol", label: "Trabajos de fútbol" },
-  { href: "/empleo-entrenadores-futbol", label: "Empleo para entrenadores" },
-  { href: "/trabajo-analista-datos-futbol", label: "Analistas de datos" },
-  { href: "/perfiles-jugadores-futbol", label: "Perfiles de jugadores" },
+  { href: "/ofertas-trabajo-futbol", key: "footer_football_jobs" },
+  { href: "/empleo-entrenadores-futbol", key: "footer_coach_jobs" },
+  { href: "/trabajo-analista-datos-futbol", key: "footer_data_analysts" },
+  { href: "/perfiles-jugadores-futbol", key: "footer_player_profiles" },
 ];
 
 const socialLinks = [
@@ -95,6 +96,10 @@ function FooterColumn({
 }
 
 export default function Footer() {
+  const { t } = useTranslation("common");
+  const translatedNavigationLinks = navigationLinks.map((link) => ({ ...link, label: t(link.key) }));
+  const translatedLegalLinks = legalLinks.map((link) => ({ ...link, label: t(link.key) }));
+  const translatedOpportunityLinks = opportunityLinks.map((link) => ({ ...link, label: t(link.key) }));
   return (
     <Box
       component="footer"
@@ -132,7 +137,7 @@ export default function Footer() {
               variant="body2"
               sx={{ mt: 1.2, maxWidth: 260, color: "rgba(255,255,255,.62)", lineHeight: 1.6 }}
             >
-              Conectando talento y oportunidades dentro del fútbol profesional.
+              {t("footer_tagline")}
             </Typography>
             <Stack direction="row" spacing={0.7} sx={{ mt: 2 }}>
               {socialLinks.map((social) => (
@@ -157,13 +162,13 @@ export default function Footer() {
             </Stack>
           </Box>
 
-          <FooterColumn title="Navegación" links={navigationLinks} />
-          <FooterColumn title="Legal" links={legalLinks} />
-          <FooterColumn title="Oportunidades" links={opportunityLinks} />
+          <FooterColumn title={t("footer_navigation")} links={translatedNavigationLinks} />
+          <FooterColumn title={t("footer_legal")} links={translatedLegalLinks} />
+          <FooterColumn title={t("footer_opportunities")} links={translatedOpportunityLinks} />
 
           <Box>
             <Typography sx={{ color: "#fff", fontSize: ".9rem", fontWeight: 900 }}>
-              Contacto
+              {t("contact")}
             </Typography>
             <Stack spacing={1.2} sx={{ mt: 1.6 }}>
               <Stack direction="row" spacing={0.8} alignItems="flex-start">
@@ -182,7 +187,7 @@ export default function Footer() {
                 underline="none"
                 sx={{ color: "#62a8ff", fontSize: ".82rem", fontWeight: 800 }}
               >
-                Enviar una consulta
+                {t("footer_send_inquiry")}
               </MuiLink>
             </Stack>
           </Box>
@@ -197,10 +202,10 @@ export default function Footer() {
           spacing={1}
         >
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,.48)" }}>
-            © 2026 FutbolProyect. Todos los derechos reservados.
+            © 2026 FutbolProyect. {t("all_rights_reserved")}
           </Typography>
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,.42)" }}>
-            Desarrollo web por{" "}
+            {t("footer_web_development_by")}{" "}
             <MuiLink
               href="https://parana-dev.vercel.app/"
               target="_blank"
