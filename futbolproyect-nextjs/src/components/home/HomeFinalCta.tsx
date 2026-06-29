@@ -19,7 +19,7 @@ export default function HomeFinalCta() {
         textAlign: "center",
         color: "#fff",
         backgroundImage:
-          "linear-gradient(90deg, rgba(3, 18, 42, .97), rgba(5, 40, 83, .88)), url('/images/fondo_1_lowres.webp')",
+          "linear-gradient(90deg, rgba(3, 18, 42, .97), rgba(5, 40, 83, .88)), url('/images/estadio-futbol.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

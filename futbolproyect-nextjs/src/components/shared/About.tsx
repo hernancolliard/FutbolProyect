@@ -7,7 +7,7 @@ import { Box, Typography, Card, CardContent } from "@mui/material"; // Importar 
 const About = () => {
   const { t } = useTranslation();
 
-  const aboutImageWebp = '/nosotros.webp'; // Ruta corregida
+  const aboutImageWebp = '/agente-jugador-futbol.webp';
 
   return (
     <Card

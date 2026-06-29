@@ -81,7 +81,7 @@ export function HeroPlayer({
         className="relative isolate flex flex-col overflow-hidden lg:flex-row"
         style={{
           backgroundImage:
-            "linear-gradient(90deg, rgba(7,28,60,0.95) 0%, rgba(7,28,60,0.82) 40%, rgba(7,28,60,0.68) 100%), url('/images/fondo_1.webp')",
+            "linear-gradient(90deg, rgba(7,28,60,0.95) 0%, rgba(7,28,60,0.82) 40%, rgba(7,28,60,0.68) 100%), url('/images/estadio-futbol-1.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

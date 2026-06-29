@@ -124,7 +124,7 @@ export default function SubscriptionPage() {
             pt: { xs: 6, md: 8 },
             pb: { xs: 10, md: 11 },
             backgroundImage:
-              "linear-gradient(90deg, rgba(2, 15, 37, .98), rgba(3, 31, 70, .9)), url('/images/fondo_1_lowres.webp')",
+              "linear-gradient(90deg, rgba(2, 15, 37, .98), rgba(3, 31, 70, .9)), url('/images/estadio-futbol.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center 58%",
           }}

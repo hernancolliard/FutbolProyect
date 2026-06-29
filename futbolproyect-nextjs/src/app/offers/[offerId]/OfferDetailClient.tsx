@@ -297,7 +297,7 @@ export default function OfferDetailClient({ offerId }: Props) {
           color: "#fff",
           py: { xs: 4, md: 5.5 },
           backgroundImage:
-            "linear-gradient(90deg, rgba(2, 15, 37, .98), rgba(3, 31, 70, .9)), url('/images/fondo_1_lowres.webp')",
+            "linear-gradient(90deg, rgba(2, 15, 37, .98), rgba(3, 31, 70, .9)), url('/images/estadio-futbol.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center 58%",
         }}

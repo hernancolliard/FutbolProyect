@@ -21,8 +21,8 @@ const ParallaxHero: React.FC<ParallaxHeroProps> = ({
 }) => {
   // Original logic for high-res/low-res image loading, if still needed.
   // For simplicity, directly using high-res for now, assuming Next.js handles it.
-  const heroBackgroundImage = "/images/fondo_1.webp";
-  const heroLowResBackgroundImage = "/images/fondo_1_lowres.webp"; // If you still want to use it
+  const heroBackgroundImage = "/images/estadio-futbol-1.webp";
+  const heroLowResBackgroundImage = "/images/estadio-futbol.webp";
   const [highResImageLoaded, setHighResImageLoaded] = useState(false);
 
   useEffect(() => {

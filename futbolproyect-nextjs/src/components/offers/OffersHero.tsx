@@ -57,7 +57,7 @@ export default function OffersHero({
         pb: { xs: 11, md: 12 },
         overflow: "visible",
         backgroundImage:
-          "linear-gradient(90deg, rgba(2, 15, 37, .98) 0%, rgba(3, 28, 66, .91) 55%, rgba(3, 21, 48, .82) 100%), url('/images/fondo_1_lowres.webp')",
+          "linear-gradient(90deg, rgba(2, 15, 37, .98) 0%, rgba(3, 28, 66, .91) 55%, rgba(3, 21, 48, .82) 100%), url('/images/estadio-futbol.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center 55%",
       }}
