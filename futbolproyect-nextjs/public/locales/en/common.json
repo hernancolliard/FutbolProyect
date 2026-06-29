@@ -1,4 +1,6 @@
 {
+  "subscription_active": "Active",
+  "not_available": "Not available",
   "generating_profile_cv": "Generating profile summary...",
   "profile_cv_downloaded": "Profile CV downloaded.",
   "profile_cv_generation_error": "The profile CV could not be generated.",

@@ -16,6 +16,13 @@ const {
 // GET /api/admin/users - Obtener todos los usuarios
 router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
   try {
+    await db.query(
+      `UPDATE suscripciones
+       SET estado = 'inactiva'
+       WHERE estado = 'activa'
+         AND fecha_fin <= NOW()`
+    );
+
     const result = await db.query(
       `SELECT
         u.id,
@@ -27,7 +34,11 @@ router.get("/users", [verificarToken, verificarAdmin], async (req, res) => {
         u.profile_views,
         s.plan as subscription_plan,
         s.fecha_fin as subscription_end_date,
-        s.estado as subscription_status
+        CASE
+          WHEN s.estado = 'activa' AND s.fecha_fin > NOW() THEN 'activa'
+          WHEN s.fecha_fin IS NOT NULL AND s.fecha_fin <= NOW() THEN 'inactiva'
+          ELSE s.estado
+        END as subscription_status
       FROM
         usuarios u
       LEFT JOIN

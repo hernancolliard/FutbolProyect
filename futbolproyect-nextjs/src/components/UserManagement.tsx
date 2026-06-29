@@ -97,7 +97,15 @@ function UserManagement() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users.map((user) => (
+          {users.map((user) => {
+            const subscriptionEnd = user.subscription_end_date
+              ? new Date(user.subscription_end_date)
+              : null;
+            const hasActiveSubscription =
+              user.subscription_status === 'activa' &&
+              Boolean(subscriptionEnd && !Number.isNaN(subscriptionEnd.getTime()) && subscriptionEnd.getTime() > Date.now());
+
+            return (
             <TableRow key={user.id}>
               <TableCell>{user.id}</TableCell>
               <TableCell>{user.nombre}</TableCell>
@@ -112,11 +120,13 @@ function UserManagement() {
               <TableCell>
                 <span
                   style={{
-                    color: user.subscription_status === 'activa' ? 'green' : 'red',
+                    color: hasActiveSubscription ? 'green' : 'red',
                     fontWeight: 'bold',
                   }}
                 >
-                  {user.subscription_status || t('na', 'N/A')}
+                  {hasActiveSubscription
+                    ? t('subscription_active', 'Activa')
+                    : t('not_available', 'No disponible')}
                 </span>
               </TableCell>
               <TableCell>{user.profile_views}</TableCell>
@@ -143,7 +153,8 @@ function UserManagement() {
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+            );
+          })}
         </TableBody>
       </Table>
       {selectedUser && (

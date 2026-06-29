@@ -217,7 +217,11 @@ const buildManagedProfileResponseSelect = () => `
     mp.pie_dominante_en,
     s.plan as subscription_plan,
     s.fecha_fin as subscription_end_date,
-    s.estado as subscription_status
+    CASE
+      WHEN s.estado = 'activa' AND s.fecha_fin > NOW() THEN 'activa'
+      WHEN s.fecha_fin IS NOT NULL AND s.fecha_fin <= NOW() THEN 'inactiva'
+      ELSE s.estado
+    END as subscription_status
   FROM managed_player_profiles mp
   JOIN usuarios owner ON owner.id = mp.owner_user_id
   LEFT JOIN suscripciones s ON owner.id = s.id_usuario
@@ -364,11 +368,16 @@ router.get("/featured", async (req, res) => {
 
   try {
     let queryParams = { managedRoles: MANAGED_PROFILE_ROLES };
-    let userWhereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
+    let userWhereClauses = [
+      "u.tipo_usuario = 'postulante'",
+      "s.estado = 'activa'",
+      "s.fecha_fin > NOW()",
+    ];
     let managedWhereClauses = [
       "owner.tipo_usuario = 'ofertante'",
       "owner.rol = ANY(@managedRoles::text[])",
       "s.estado = 'activa'",
+      "s.fecha_fin > NOW()",
     ];
 
     if (nacionalidad) {
@@ -457,7 +466,11 @@ router.get("/featured-legacy-disabled", async (req, res) => {
   
     try {
       let queryParams = {}; // Usar un objeto para los parámetros nombrados
-      let whereClauses = ["u.tipo_usuario = 'postulante'", "s.estado = 'activa'"];
+      let whereClauses = [
+        "u.tipo_usuario = 'postulante'",
+        "s.estado = 'activa'",
+        "s.fecha_fin > NOW()",
+      ];
   
       if (nacionalidad) {
         queryParams.nacionalidad = nacionalidad;
@@ -983,7 +996,11 @@ router.get("/:userId", async (req, res) => {
              p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
-             s.estado as subscription_status
+             CASE
+               WHEN s.estado = 'activa' AND s.fecha_fin > NOW() THEN 'activa'
+               WHEN s.fecha_fin IS NOT NULL AND s.fecha_fin <= NOW() THEN 'inactiva'
+               ELSE s.estado
+             END as subscription_status
       FROM usuarios u
       LEFT JOIN perfiles_usuario p ON u.id = p.id_usuario
       LEFT JOIN suscripciones s ON u.id = s.id_usuario
