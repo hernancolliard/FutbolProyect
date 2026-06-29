@@ -39,6 +39,8 @@ export default function Hero({ metrics }: HeroProps) {
   return (
     <Box
       component="section"
+      aria-labelledby="home-hero-title"
+      aria-describedby="home-hero-description"
       sx={{
         position: "relative",
         minHeight: { xs: 650, md: 570 },
@@ -55,6 +57,7 @@ export default function Hero({ metrics }: HeroProps) {
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
         <Box sx={{ maxWidth: { xs: "100%", md: 580 }, position: "relative", zIndex: 1 }}>
           <Typography
+            id="home-hero-title"
             component="h1"
             sx={{
               color: "#fff",
@@ -64,13 +67,14 @@ export default function Hero({ metrics }: HeroProps) {
               fontWeight: 900,
             }}
           >
-            {t("new_hero_title_line_1")}
+            Mostrá tu fútbol.
             <br />
             <Box component="span" sx={{ color: "#2f80ff" }}>
-              {t("new_hero_title_line_2")}
+              Conectá con nuevas oportunidades.
             </Box>
           </Typography>
           <Typography
+            id="home-hero-description"
             sx={{
               mt: 2.2,
               maxWidth: 510,

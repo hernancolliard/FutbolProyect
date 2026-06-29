@@ -221,7 +221,11 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               >
                 <Image
                   src={profile.foto_perfil_url || "/images/logos/logofpazul.webp"}
-                  alt={fullName}
+                  alt={
+                    fullName
+                      ? `Perfil deportivo de ${fullName}`
+                      : "Perfil deportivo en FutbolProyect"
+                  }
                   width={220}
                   height={150}
                   style={{

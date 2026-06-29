@@ -14,8 +14,48 @@ import { Suspense } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FutbolProyect",
-  description: "Conectando el mundo del fútbol",
+  metadataBase: new URL("https://www.futbolproyect.com"),
+  title: {
+    default: "FutbolProyect | Perfiles y oportunidades en el fútbol",
+    template: "%s | FutbolProyect",
+  },
+  description:
+    "Creá tu perfil deportivo, compartí tu trayectoria y conectá con clubes, agencias, scouts y oportunidades profesionales en el fútbol.",
+  applicationName: "FutbolProyect",
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    siteName: "FutbolProyect",
+    title: "FutbolProyect | Perfiles y oportunidades en el fútbol",
+    description:
+      "Perfiles deportivos, ofertas y conexiones profesionales para jugadores, entrenadores, scouts, analistas, clubes y agencias.",
+    images: [
+      {
+        url: "/images/jugador-estadio-futbol.webp",
+        width: 1672,
+        height: 941,
+        alt: "FutbolProyect, perfiles y oportunidades en el fútbol",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FutbolProyect | Perfiles y oportunidades en el fútbol",
+    description:
+      "Creá tu perfil deportivo y conectá con clubes, agencias, scouts y oportunidades en el fútbol.",
+    images: ["/images/jugador-estadio-futbol.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   icons: {
     icon: [
       {
