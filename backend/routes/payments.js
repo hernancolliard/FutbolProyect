@@ -31,6 +31,64 @@ const getFrontendUrl = () => {
   return process.env.FRONTEND_URL.replace(/\/+$/, "");
 };
 
+const VALID_SUBSCRIPTION_PLANS = new Set(["ofertante", "postulante"]);
+const VALID_BILLING_CYCLES = new Set(["monthly", "annual"]);
+
+const getSubscriptionPaymentContext = (payment) => {
+  const metadata = payment?.metadata || {};
+  const externalReference = String(payment?.external_reference || "");
+  const referenceParts = externalReference.split("|");
+  const normalizedDescription = String(payment?.description || "").toLowerCase();
+
+  const userId = String(
+    metadata.user_id ||
+      (referenceParts.length === 3 ? referenceParts[0] : externalReference),
+  ).trim();
+  const plan = String(
+    metadata.plan_type ||
+      (referenceParts.length === 3 ? referenceParts[1] : "") ||
+      (normalizedDescription.includes("postulante")
+        ? "postulante"
+        : normalizedDescription.includes("ofertante")
+          ? "ofertante"
+          : ""),
+  ).trim().toLowerCase();
+  const cycle = String(
+    metadata.billing_cycle ||
+      (referenceParts.length === 3 ? referenceParts[2] : "") ||
+      (normalizedDescription.includes("annual")
+        ? "annual"
+        : normalizedDescription.includes("monthly")
+          ? "monthly"
+          : ""),
+  ).trim().toLowerCase();
+
+  if (
+    !/^\d+$/.test(userId) ||
+    !VALID_SUBSCRIPTION_PLANS.has(plan) ||
+    !VALID_BILLING_CYCLES.has(cycle)
+  ) {
+    return null;
+  }
+
+  return { userId: parseInt(userId, 10), plan, cycle };
+};
+
+const calculateSubscriptionEndDate = (cycle, startDate = new Date()) => {
+  const endDate = new Date(startDate);
+  if (Number.isNaN(endDate.getTime())) {
+    throw new Error(`Invalid subscription start date: ${startDate}`);
+  }
+  if (cycle === "monthly") {
+    endDate.setMonth(endDate.getMonth() + 1);
+  } else if (cycle === "annual") {
+    endDate.setFullYear(endDate.getFullYear() + 1);
+  } else {
+    throw new Error(`Unsupported billing cycle: ${cycle}`);
+  }
+  return endDate;
+};
+
 // Configura PayPal
 // --- INICIO DE LA MODIFICACIÓN ---
 
@@ -122,7 +180,15 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
         external_reference:
           planType === "destacar_oferta"
             ? `${userId}_${req.body.offerId}`
-            : userId.toString(),
+            : `${userId}|${planType}|${billingCycle}`,
+        metadata: {
+          user_id: String(userId),
+          plan_type: planType,
+          billing_cycle: billingCycle,
+          ...(req.body.offerId
+            ? { offer_id: String(req.body.offerId) }
+            : {}),
+        },
         back_urls: {
           success: `${frontendUrl}/payment/success/mercadopago`,
           failure: `${frontendUrl}/payment/cancelled/mercadopago`,
@@ -160,15 +226,21 @@ router.post("/webhook-mp", async (req, res) => {
         req.body.data?.id || req.query["data.id"] || req.query.id;
       const payment = await new Payment(client).get({ id: paymentId });
 
-      const userId = payment.external_reference;
       const status = payment.status;
-      const description = payment.description;
 
       if (status === "approved") {
-        const [plan, cycle] = description.split("-");
+        const paymentMetadata = payment.metadata || {};
+        const externalReference = String(payment.external_reference || "");
+        const isFeaturedPayment =
+          paymentMetadata.plan_type === "destacar_oferta" ||
+          externalReference.includes("_");
 
-        if (plan === "destacar_oferta") {
-          const [parsedUserId, offerId] = userId.split("_");
+        if (isFeaturedPayment) {
+          const [, referenceOfferId] = externalReference.split("_");
+          const offerId = paymentMetadata.offer_id || referenceOfferId;
+          if (!/^\d+$/.test(String(offerId || ""))) {
+            throw new Error(`Invalid featured offer payment reference: ${externalReference}`);
+          }
           const featuredUntil = new Date();
           featuredUntil.setDate(featuredUntil.getDate() + 7);
 
@@ -182,12 +254,17 @@ router.post("/webhook-mp", async (req, res) => {
             featuredUntil,
           });
         } else {
-          const fechaFin = new Date();
-          if (cycle === "monthly") {
-            fechaFin.setMonth(fechaFin.getMonth() + 1);
-          } else if (cycle === "annual") {
-            fechaFin.setFullYear(fechaFin.getFullYear() + 1);
+          const subscriptionContext = getSubscriptionPaymentContext(payment);
+          if (!subscriptionContext) {
+            throw new Error(
+              `Invalid subscription payment metadata for payment ${paymentId}`,
+            );
           }
+          const { userId, plan, cycle } = subscriptionContext;
+          const fechaFin = calculateSubscriptionEndDate(
+            cycle,
+            payment.date_approved || payment.date_created || new Date(),
+          );
 
           const queryText = `
             INSERT INTO suscripciones (id_usuario, id_mp_pago, plan, fecha_fin, estado, metodo_pago)
@@ -200,14 +277,14 @@ router.post("/webhook-mp", async (req, res) => {
               metodo_pago = 'mercadopago';
           `;
           await db.query(queryText, {
-            userId: parseInt(userId, 10),
+            userId,
             paymentId: paymentId.toString(),
             plan,
             fechaFin,
           });
 
           // Send confirmation email
-          const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId: parseInt(userId, 10) });
+          const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId });
           if (userResult.rows.length > 0) {
             const user = userResult.rows[0];
             sendSubscriptionConfirmationEmail(user.email, user.nombre, plan, fechaFin)
@@ -349,12 +426,15 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
       } else {
         // Suscripción
         const [plan, cycle] = customId.split("-");
-        const fechaFin = new Date();
-        if (cycle === "monthly") {
-          fechaFin.setMonth(fechaFin.getMonth() + 1);
-        } else if (cycle === "annual") {
-          fechaFin.setFullYear(fechaFin.getFullYear() + 1);
+        if (
+          !VALID_SUBSCRIPTION_PLANS.has(plan) ||
+          !VALID_BILLING_CYCLES.has(cycle)
+        ) {
+          return res.status(400).json({
+            message: "Los datos del plan de suscripción no son válidos.",
+          });
         }
+        const fechaFin = calculateSubscriptionEndDate(cycle);
 
         const queryText = `
           INSERT INTO suscripciones (id_usuario, id_paypal_pago, plan, fecha_fin, estado, metodo_pago)
