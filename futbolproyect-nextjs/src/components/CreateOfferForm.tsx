@@ -12,9 +12,13 @@ import Alert from "@mui/material/Alert";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
+import LinearProgress from "@mui/material/LinearProgress";
 import FileUpload from "@/components/FileUpload";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Image from "next/image";
+import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 
 // 1. Definimos la interfaz para las props (OPCIONALES)
 interface CreateOfferProps {
@@ -157,8 +161,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
         onOfferCreated();
       }
       setTimeout(() => {
-        // Redirigir a la página de detalle o listado
-        router.push(isEditMode ? `/offers/${offerId}` : "/");
+        router.push(isEditMode ? `/offers/${offerId}` : "/all-offers");
       }, 1500);
     } catch (err: any) {
       console.error("Error completo:", err);
@@ -180,24 +183,96 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
   }
 
   return (
-    <Box sx={{ maxWidth: "600px", margin: "auto", p: 2 }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {isEditMode
-          ? t("edit_offer_title", "Editar Oferta")
-          : t("create_offer_title", "Crear Oferta")}
-      </Typography>
+    <Paper
+      elevation={0}
+      sx={{
+        maxWidth: 920,
+        mx: "auto",
+        p: { xs: 2.25, sm: 3, md: 4 },
+        border: "1px solid #dfe6ef",
+        borderRadius: 3,
+        boxShadow: "0 18px 45px rgba(8, 34, 70, .1)",
+        "& .MuiOutlinedInput-root": {
+          bgcolor: "#fbfcfe",
+          borderRadius: 2,
+        },
+        "& .MuiInputLabel-root": {
+          color: "#5f6f84",
+        },
+      }}
+    >
+      <Stack direction="row" spacing={1.6} alignItems="center">
+        <Box
+          sx={{
+            width: 50,
+            height: 50,
+            flexShrink: 0,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: 2,
+            bgcolor: "#edf5ff",
+            color: "#1262db",
+          }}
+        >
+          <WorkOutlineRoundedIcon />
+        </Box>
+        <Box>
+          <Typography
+            component="h2"
+            sx={{ color: "#0a1930", fontSize: "1.45rem", fontWeight: 900 }}
+          >
+            {isEditMode
+              ? t("edit_offer_title", "Editar oferta")
+              : t("create_offer_title", "Información de la oferta")}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.35, color: "#65738a" }}>
+            Los campos marcados como obligatorios son necesarios para publicar.
+          </Typography>
+        </Box>
+      </Stack>
+
+      {uploadProgress > 0 && (
+        <Box sx={{ mt: 2.5 }}>
+          <LinearProgress
+            variant="determinate"
+            value={uploadProgress}
+            sx={{ height: 7, borderRadius: 4 }}
+          />
+          <Typography
+            variant="caption"
+            sx={{ mt: 0.6, display: "block", color: "#65738a" }}
+          >
+            Subiendo imagen: {uploadProgress}%
+          </Typography>
+        </Box>
+      )}
       {success && (
-        <Alert severity="success" sx={{ mt: 2 }}>
+        <Alert severity="success" sx={{ mt: 2.5 }}>
           {success}
         </Alert>
       )}
       {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert severity="error" sx={{ mt: 2.5 }}>
           {error}
         </Alert>
       )}
+      <Divider sx={{ my: 3 }} />
       <form onSubmit={handleSubmit}>
-        <Stack spacing={2} sx={{ mt: 2 }}>
+        <Stack
+          spacing={2.25}
+          sx={{
+            "& .MuiFormHelperText-root": {
+              mx: 0,
+              color: "#738096",
+            },
+          }}
+        >
+          <Typography
+            component="h3"
+            sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
+          >
+            Información principal
+          </Typography>
           <TextField
             name="titulo"
             label={t("offer_title_placeholder", "Título de la Oferta")}
@@ -229,55 +304,71 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
               "La descripción debe tener al menos 20 caracteres.",
             )}
           />
-          <TextField
-            name="ubicacion"
-            label={t("location_placeholder", "Ubicación")}
-            value={formData.ubicacion}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            name="puesto"
-            label={t("position_placeholder", "Puesto")}
-            value={formData.puesto}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            name="salario"
-            label={t("salary_placeholder", "Salario")}
-            value={formData.salario}
-            onChange={handleChange}
-            fullWidth
-          />
-          <TextField
-            select
-            name="nivel"
-            label={t("select_level_placeholder", "Seleccionar Nivel")}
-            value={formData.nivel}
-            onChange={handleChange}
-            fullWidth
+          <Divider sx={{ my: 0.5 }} />
+          <Typography
+            component="h3"
+            sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
           >
-            <MenuItem value="">
-              {t("select_level_placeholder", "Seleccionar Nivel")}
-            </MenuItem>
-            <MenuItem value="Profesional">
-              {t("level_professional", "Profesional")}
-            </MenuItem>
-            <MenuItem value="Semi-Profesional">
-              {" "}
-              {/* Corregido el valor para coincidir con backend */}
-              {t("level_semi_professional", "Semi-Profesional")}
-            </MenuItem>
-            <MenuItem value="Amateur">{t("level_amateur", "Amateur")}</MenuItem>
-          </TextField>
-          <TextField
-            name="horarios"
-            label={t("schedule_placeholder", "Horarios")}
-            value={formData.horarios}
-            onChange={handleChange}
-            fullWidth
-          />
+            Detalles de la oportunidad
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+              gap: 2.25,
+            }}
+          >
+            <TextField
+              name="ubicacion"
+              label={t("location_placeholder", "Ubicación")}
+              value={formData.ubicacion}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              name="puesto"
+              label={t("position_placeholder", "Puesto")}
+              value={formData.puesto}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              name="salario"
+              label={t("salary_placeholder", "Salario")}
+              value={formData.salario}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              select
+              name="nivel"
+              label={t("select_level_placeholder", "Seleccionar Nivel")}
+              value={formData.nivel}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value="">
+                {t("select_level_placeholder", "Seleccionar Nivel")}
+              </MenuItem>
+              <MenuItem value="Profesional">
+                {t("level_professional", "Profesional")}
+              </MenuItem>
+              <MenuItem value="Semi-Profesional">
+                {t("level_semi_professional", "Semi-Profesional")}
+              </MenuItem>
+              <MenuItem value="Amateur">
+                {t("level_amateur", "Amateur")}
+              </MenuItem>
+            </TextField>
+            <TextField
+              name="horarios"
+              label={t("schedule_placeholder", "Horarios")}
+              value={formData.horarios}
+              onChange={handleChange}
+              fullWidth
+              sx={{ gridColumn: { sm: "1 / -1" } }}
+            />
+          </Box>
           <TextField
             name="detalles_adicionales"
             label={t("additional_details_placeholder", "Detalles Adicionales")}
@@ -288,21 +379,45 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             rows={3}
           />
 
-          <FileUpload
-            onFilesChange={setFiles}
-            uploadProgress={uploadProgress}
-            multiple={false}
-            // @ts-ignore
-            initialFiles={
-              existingOffer?.imagen_url
-                ? [{ preview: existingOffer.imagen_url, name: "current_image" }]
-                : []
-            }
-          />
+          <Divider sx={{ my: 0.5 }} />
+          <Typography
+            component="h3"
+            sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
+          >
+            Imagen de la oferta
+          </Typography>
+          <Box
+            sx={{
+              p: { xs: 1.5, sm: 2 },
+              bgcolor: "#f8fafd",
+              border: "1px dashed #b9c8dc",
+              borderRadius: 2,
+            }}
+          >
+            <FileUpload
+              onFilesChange={setFiles}
+              uploadProgress={uploadProgress}
+              multiple={false}
+              // @ts-ignore
+              initialFiles={
+                existingOffer?.imagen_url
+                  ? [{ preview: existingOffer.imagen_url, name: "current_image" }]
+                  : []
+              }
+            />
+          </Box>
 
           {imagePreview && (
-            <Box sx={{ mt: 2, textAlign: "center" }}>
-              <Typography variant="subtitle2">
+            <Box
+              sx={{
+                p: 2,
+                textAlign: "center",
+                bgcolor: "#f8fafd",
+                border: "1px solid #dfe6ef",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ color: "#0a1930", fontWeight: 800 }}>
                 {t("image_preview", "Vista Previa de la Imagen")}
               </Typography>
               <Image
@@ -322,16 +437,15 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
           )}
 
           <Stack
-            direction="row"
-            spacing={2}
-            justifyContent="flex-end"
-            sx={{ pt: 2 }}
+            direction={{ xs: "column-reverse", sm: "row-reverse" }}
+            spacing={1.25}
+            sx={{ pt: 3, mt: 1, borderTop: "1px solid #e2e8f0" }}
           >
             <Button
               variant="contained"
-              color="primary"
               type="submit"
               disabled={isSubmitting}
+              sx={{ px: 3, py: 1.15, bgcolor: "#1262db", fontWeight: 900 }}
             >
               {isSubmitting
                 ? isEditMode
@@ -343,17 +457,20 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             </Button>
             <Button
               variant="outlined"
-              color="secondary"
-              onClick={() => router.back()}
+              onClick={() => {
+                if (onClose) onClose();
+                else router.back();
+              }}
               type="button"
               disabled={isSubmitting}
+              sx={{ px: 3, py: 1.15, fontWeight: 800 }}
             >
               {t("cancel_button", "Cancelar")}
             </Button>
           </Stack>
         </Stack>
       </form>
-    </Box>
+    </Paper>
   );
 }
 

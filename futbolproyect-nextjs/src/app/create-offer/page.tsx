@@ -1,4 +1,5 @@
 "use client";
+
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -6,16 +7,26 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
   CircularProgress,
+  Container,
+  Paper,
   Stack,
   Typography,
 } from "@mui/material";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { useAuth } from "@/context/AuthContext";
 import CreateOffer from "@/components/CreateOffer";
 import { useTranslation } from "react-i18next";
+
+const pageBackground = {
+  bgcolor: "#f7f9fc",
+  minHeight: "100vh",
+  pb: { xs: 7, md: 10 },
+};
+
+const heroBackground =
+  "linear-gradient(90deg, rgba(2, 15, 37, .97), rgba(3, 31, 70, .88)), url('/images/estadio-futbol.webp')";
 
 export default function CreateOfferPage() {
   const { user, loading } = useAuth();
@@ -25,47 +36,87 @@ export default function CreateOfferPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-        <CircularProgress />
+      <Box sx={{ ...pageBackground, display: "grid", placeItems: "center" }}>
+        <Stack alignItems="center" spacing={1.5}>
+          <CircularProgress />
+          <Typography sx={{ color: "#65738a" }}>
+            Preparando el formulario...
+          </Typography>
+        </Stack>
       </Box>
     );
   }
 
   if (!user) {
     return (
-      <Box sx={{ maxWidth: 920, mx: "auto", p: { xs: 2, md: 4 } }}>
-        <Card
+      <Box sx={pageBackground}>
+        <Box
+          component="section"
           sx={{
-            borderRadius: 3,
-            overflow: "hidden",
-            border: "1px solid rgba(25, 38, 52, 0.12)",
+            py: { xs: 5, md: 7 },
+            color: "#fff",
+            backgroundImage: heroBackground,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
-          <CardContent sx={{ p: { xs: 3, md: 5 } }}>
+          <Container maxWidth="lg">
+            <Typography
+              component="h1"
+              sx={{
+                maxWidth: 760,
+                color: "#fff",
+                fontSize: { xs: "2rem", md: "3rem" },
+                lineHeight: 1.08,
+                letterSpacing: "-0.035em",
+                fontWeight: 900,
+              }}
+            >
+              Publicá oportunidades y encontrá talento para tu proyecto
+            </Typography>
+            <Typography
+              sx={{ mt: 1.5, maxWidth: 650, color: "rgba(255,255,255,.76)", lineHeight: 1.7 }}
+            >
+              Registrate como club, agencia o scout para crear ofertas y
+              recibir postulaciones de profesionales del fútbol.
+            </Typography>
+          </Container>
+        </Box>
+
+        <Container maxWidth="md" sx={{ mt: { xs: 3, md: -3 }, position: "relative" }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2.5, md: 4 },
+              border: "1px solid #dfe6ef",
+              borderRadius: 3,
+              boxShadow: "0 18px 45px rgba(8, 34, 70, .1)",
+            }}
+          >
             <Stack spacing={2.5} alignItems="flex-start">
               <Box
                 sx={{
-                  width: 56,
-                  height: 56,
+                  width: 58,
+                  height: 58,
                   borderRadius: 2,
-                  bgcolor: "rgba(245, 166, 35, 0.18)",
-                  color: "primary.main",
+                  bgcolor: "#edf5ff",
+                  color: "#1262db",
                   display: "grid",
                   placeItems: "center",
                 }}
               >
-                <WorkOutlineIcon sx={{ fontSize: 32 }} />
+                <WorkOutlineRoundedIcon sx={{ fontSize: 32 }} />
               </Box>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 900 }}>
+              <Typography component="h2" sx={{ color: "#0a1930", fontSize: "1.5rem", fontWeight: 900 }}>
                 {t(
                   "create_offer_guest_title",
-                  "Para publicar una oferta necesitas una cuenta",
+                  "Para publicar una oferta necesitás una cuenta",
                 )}
               </Typography>
-              <Typography color="text.secondary" sx={{ maxWidth: 680 }}>
+              <Typography sx={{ maxWidth: 680, color: "#65738a", lineHeight: 1.7 }}>
                 {t(
                   "create_offer_guest_text",
-                  "Registrate como club, agencia o scout para publicar oportunidades y recibir postulaciones de profesionales del futbol.",
+                  "Creá una cuenta de organización para publicar oportunidades, gestionar candidatos y contactar profesionales.",
                 )}
               </Typography>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
@@ -73,49 +124,103 @@ export default function CreateOfferPage() {
                   component={Link}
                   href="/register?role=club"
                   variant="contained"
-                  color="secondary"
+                  sx={{ bgcolor: "#1262db", fontWeight: 900 }}
                 >
                   {t("create_offer_guest_register", "Registrarme para publicar")}
                 </Button>
-                <Button component={Link} href="/login" variant="outlined">
+                <Button component={Link} href="/login" variant="outlined" sx={{ fontWeight: 800 }}>
                   {t("create_offer_guest_login", "Ya tengo cuenta")}
                 </Button>
               </Stack>
             </Stack>
-          </CardContent>
-        </Card>
+          </Paper>
+        </Container>
       </Box>
     );
   }
 
   if (!canPublishOffer) {
     return (
-      <Box sx={{ maxWidth: 820, mx: "auto", p: { xs: 2, md: 4 } }}>
-        <Alert
-          severity="info"
-          action={
-            <Button component={Link} href="/" color="inherit" size="small">
-              {t("back_to_home", "Volver al inicio")}
-            </Button>
-          }
-          sx={{ alignItems: "center" }}
-        >
-          {t(
-            "create_offer_wrong_role",
-            "La publicacion de ofertas esta disponible para cuentas de clubes, agencias o scouts.",
-          )}
-        </Alert>
+      <Box sx={pageBackground}>
+        <Container maxWidth="md" sx={{ py: { xs: 5, md: 8 } }}>
+          <Paper
+            elevation={0}
+            sx={{ p: { xs: 2.5, md: 4 }, border: "1px solid #dfe6ef", borderRadius: 3 }}
+          >
+            <Stack spacing={2.5} alignItems="flex-start">
+              <CheckCircleOutlineRoundedIcon sx={{ color: "#1262db", fontSize: 42 }} />
+              <Typography component="h1" sx={{ color: "#0a1930", fontSize: "1.7rem", fontWeight: 900 }}>
+                Publicación para clubes, agencias y scouts
+              </Typography>
+              <Alert severity="info" sx={{ width: "100%" }}>
+                {t(
+                  "create_offer_wrong_role",
+                  "La publicación de ofertas está disponible para cuentas de clubes, agencias o scouts.",
+                )}
+              </Alert>
+              <Button component={Link} href="/" variant="outlined">
+                {t("back_to_home", "Volver al inicio")}
+              </Button>
+            </Stack>
+          </Paper>
+        </Container>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Crear oferta
-      </Typography>
+    <Box sx={pageBackground}>
+      <Box
+        component="section"
+        sx={{
+          py: { xs: 5, md: 6.5 },
+          color: "#fff",
+          backgroundImage: heroBackground,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={3}>
+            <Box>
+              <Typography
+                component="h1"
+                sx={{
+                  color: "#fff",
+                  fontSize: { xs: "2rem", md: "3rem" },
+                  lineHeight: 1.08,
+                  letterSpacing: "-0.035em",
+                  fontWeight: 900,
+                }}
+              >
+                Agregar una oferta de fútbol
+              </Typography>
+              <Typography sx={{ mt: 1.3, maxWidth: 650, color: "rgba(255,255,255,.76)", lineHeight: 1.7 }}>
+                Completá la información para llegar a jugadores, entrenadores,
+                analistas, scouts y otros profesionales.
+              </Typography>
+            </Box>
+            <Stack spacing={1} sx={{ minWidth: { md: 270 } }}>
+              {[
+                "Describí claramente el puesto",
+                "Indicá ubicación y nivel",
+                "Agregá una imagen identificatoria",
+              ].map((item) => (
+                <Stack key={item} direction="row" spacing={1} alignItems="center">
+                  <CheckCircleOutlineRoundedIcon sx={{ color: "#62a8ff", fontSize: 19 }} />
+                  <Typography variant="body2" sx={{ color: "rgba(255,255,255,.82)" }}>
+                    {item}
+                  </Typography>
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
 
-      <CreateOffer />
+      <Container maxWidth="lg" sx={{ mt: { xs: 3, md: -3 }, position: "relative" }}>
+        <CreateOffer />
+      </Container>
     </Box>
   );
 }
