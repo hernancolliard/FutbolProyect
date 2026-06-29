@@ -47,7 +47,7 @@ export default function Hero({ metrics }: HeroProps) {
         color: "#fff",
         pb: { xs: 16, md: 8 },
         backgroundImage:
-          "linear-gradient(90deg, rgba(2, 11, 28, .96) 0%, rgba(2, 17, 39, .7) 42%, rgba(2, 17, 39, .12) 72%), url('/images/home-hero-stadium.webp')",
+          "linear-gradient(90deg, rgba(2, 11, 28, .96) 0%, rgba(2, 17, 39, .7) 42%, rgba(2, 17, 39, .12) 72%), url('/images/jugador-estadio-futbol.webp')",
         backgroundSize: "cover",
         backgroundPosition: { xs: "62% center", md: "center" },
       }}
@@ -66,7 +66,6 @@ export default function Hero({ metrics }: HeroProps) {
           >
             {t("new_hero_title_line_1")}
             <br />
-            Tu{" "}
             <Box component="span" sx={{ color: "#2f80ff" }}>
               {t("new_hero_title_line_2")}
             </Box>
