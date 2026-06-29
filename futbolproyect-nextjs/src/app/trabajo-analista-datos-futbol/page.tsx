@@ -29,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("trabajo_analista_datos_futbol_seo_title"),
     description: t("trabajo_analista_datos_futbol_seo_desc"),
+    alternates: { canonical: "/ofertas/analistas-de-futbol" },
   };
 }
 

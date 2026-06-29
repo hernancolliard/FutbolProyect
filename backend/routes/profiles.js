@@ -992,7 +992,9 @@ router.get("/:userId", async (req, res) => {
 
   try {
     const query = `
-      SELECT u.*, COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento, p.idiomas, p.estadisticas, p.trayectoria, p.disponibilidad,
+      SELECT u.id, u.nombre, u.apellido, u.email, u.tipo_usuario, u.rol,
+             u.profile_views,
+             COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento, p.idiomas, p.estadisticas, p.trayectoria, p.disponibilidad,
              p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,

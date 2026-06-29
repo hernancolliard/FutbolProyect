@@ -37,16 +37,22 @@ async function fetchInitialData(): Promise<{
    SEO ESTÁTICO
 ========================= */
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Perfiles de Fútbol Profesional | FutbolProyect",
+export const metadata: Metadata = {
+  title: {
+    absolute: "Perfiles de futbolistas y profesionales | FutbolProyect",
+  },
+  description:
+    "Explorá perfiles de futbolistas, entrenadores y profesionales del fútbol. Consultá trayectoria, posición, nacionalidad y material deportivo.",
+  alternates: { canonical: "/perfiles" },
+  openGraph: {
+    type: "website",
+    url: "/perfiles",
+    title: "Perfiles de futbolistas y profesionales | FutbolProyect",
     description:
-      "Explorá perfiles de futbolistas profesionales, jugadores libres y talentos emergentes en FutbolProyect.",
-    alternates: {
-      canonical: "/perfiles",
-    },
-  };
-}
+      "Encontrá jugadores y profesionales del fútbol con perfiles deportivos, trayectoria, videos y datos de contacto.",
+    siteName: "FutbolProyect",
+  },
+};
 
 /* =========================
    PAGE

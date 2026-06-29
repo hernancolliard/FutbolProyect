@@ -24,6 +24,7 @@ import OfferActions from "./OfferActions";
 import useIsMobile from "@/hooks/useIsMobile";
 import AdBanner from "@/components/ads/AdBanner";
 import { Offer } from "@/lib/types";
+import { getOfferPath } from "@/lib/seoSlugs";
 
 interface OfferListProps {
   offers?: Offer[];
@@ -38,7 +39,7 @@ type OfferCardProps = {
   onOfferAction?: (action: string, id: string) => void;
   t: any;
   i18n: any;
-  handleViewOffer: (id: string) => void;
+  handleViewOffer: (offer: Offer) => void;
 };
 
 function OfferCard({
@@ -65,7 +66,7 @@ function OfferCard({
   return (
     <Card
       elevation={0}
-      onClick={() => handleViewOffer(offer.id)}
+      onClick={() => handleViewOffer(offer)}
       sx={{
         width: "100%",
         height: "100%",
@@ -230,7 +231,7 @@ function OfferCard({
           endIcon={<ArrowForwardRoundedIcon />}
           onClick={(event) => {
             event.stopPropagation();
-            handleViewOffer(offer.id);
+            handleViewOffer(offer);
           }}
           sx={{
             borderColor: "#1262db",
@@ -266,7 +267,7 @@ export default function OfferList({
 
   useEffect(() => setOffersToDisplay(offers), [offers]);
 
-  const handleViewOffer = (id: string) => router.push(`/offers/${id}`);
+  const handleViewOffer = (offer: Offer) => router.push(getOfferPath(offer));
   const featuredOffers = offersToDisplay.filter((offer) => offer.is_featured);
   const normalOffers = offersToDisplay.filter((offer) => !offer.is_featured);
   const slides = Math.min(isMobile ? 1 : 4, offersToDisplay.length);

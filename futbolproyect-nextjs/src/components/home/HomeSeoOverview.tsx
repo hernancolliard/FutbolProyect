@@ -9,7 +9,7 @@ import {
 
 const seoLinks = [
   {
-    href: "/perfiles-jugadores-futbol",
+    href: "/perfiles/jugadores",
     label: "Perfiles de futbolistas",
   },
   {
@@ -17,11 +17,11 @@ const seoLinks = [
     label: "Oportunidades y ofertas de fútbol",
   },
   {
-    href: "/empleo-entrenadores-futbol",
+    href: "/ofertas/entrenadores",
     label: "Ofertas para entrenadores",
   },
   {
-    href: "/trabajo-analista-datos-futbol",
+    href: "/ofertas/analistas-de-futbol",
     label: "Trabajo para analistas de fútbol",
   },
   {

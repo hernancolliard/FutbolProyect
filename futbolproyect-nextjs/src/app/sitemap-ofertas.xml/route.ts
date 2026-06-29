@@ -1,4 +1,5 @@
 import { getAllOffers } from "@/lib/offers";
+import { getOfferPath } from "@/lib/seoSlugs";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export async function GET() {
 
     const urls = offers.map(
       (offer: any) => `<url>
-  <loc>https://www.futbolproyect.com/offers/${encodeURIComponent(String(offer.id))}</loc>
+  <loc>https://www.futbolproyect.com${getOfferPath(offer)}</loc>
 </url>`,
     );
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   Box,
   Button,
@@ -186,6 +187,43 @@ export default function FilterControls({
       />
 
       <Container maxWidth="lg" sx={{ pt: { xs: 10, md: 11 } }}>
+        <Box
+          component="section"
+          aria-labelledby="profiles-seo-intro-title"
+          sx={{
+            mb: 3,
+            p: { xs: 2.25, md: 3 },
+            bgcolor: "#fff",
+            border: "1px solid #dfe6ef",
+            borderRadius: 2.5,
+          }}
+        >
+          <Typography
+            id="profiles-seo-intro-title"
+            component="h2"
+            sx={{ color: "#0a1930", fontSize: "1.35rem", fontWeight: 900 }}
+          >
+            Perfiles de futbolistas y talento deportivo
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5e6c81", lineHeight: 1.7 }}>
+            Descubrí jugadores con información sobre su posición,
+            nacionalidad, trayectoria y material deportivo. Clubes, agencias
+            y scouts pueden consultar perfiles para encontrar profesionales
+            adecuados para sus proyectos.
+          </Typography>
+          <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
+            <Button component={Link} href="/register" size="small">
+              Crear perfil deportivo
+            </Button>
+            <Button component={Link} href="/all-offers" size="small">
+              Ver oportunidades
+            </Button>
+            <Button component={Link} href="/create-offer" size="small">
+              Publicar una oferta
+            </Button>
+          </Stack>
+        </Box>
+
         <AdBanner placement="profiles_top" />
 
         <Button

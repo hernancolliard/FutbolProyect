@@ -1,4 +1,5 @@
 import { getAllProfiles } from "@/lib/profiles";
+import { getProfilePath } from "@/lib/seoSlugs";
 
 export const dynamic = "force-dynamic";
 
@@ -6,11 +7,13 @@ export async function GET() {
   try {
     const profiles = await getAllProfiles();
 
-    const urls = profiles.map(
+    const urls = profiles
+      .filter((profile: any) => Number(profile.completion_score || 0) >= 5)
+      .map(
       (profile: any) => `<url>
-  <loc>https://www.futbolproyect.com/perfiles/${encodeURIComponent(String(profile.id))}</loc>
+  <loc>https://www.futbolproyect.com${getProfilePath(profile)}</loc>
 </url>`,
-    );
+      );
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

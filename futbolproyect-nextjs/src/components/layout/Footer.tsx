@@ -31,10 +31,10 @@ const legalLinks = [
 ];
 
 const opportunityLinks = [
-  { href: "/ofertas-trabajo-futbol", key: "footer_football_jobs" },
-  { href: "/empleo-entrenadores-futbol", key: "footer_coach_jobs" },
-  { href: "/trabajo-analista-datos-futbol", key: "footer_data_analysts" },
-  { href: "/perfiles-jugadores-futbol", key: "footer_player_profiles" },
+  { href: "/ofertas/futbolistas", key: "footer_football_jobs" },
+  { href: "/ofertas/entrenadores", key: "footer_coach_jobs" },
+  { href: "/ofertas/analistas-de-futbol", key: "footer_data_analysts" },
+  { href: "/perfiles/jugadores", key: "footer_player_profiles" },
 ];
 
 const socialLinks = [

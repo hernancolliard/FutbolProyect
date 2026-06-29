@@ -16,6 +16,7 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import { Offer, Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
+import { getOfferPath, getProfilePath } from "@/lib/seoSlugs";
 
 type SectionHeaderProps = {
   title: string;
@@ -160,7 +161,7 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
             </Stack>
             <Button
               component={Link}
-              href={`/offers/${offer.id}`}
+              href={getOfferPath(offer)}
               variant="outlined"
               size="small"
               sx={{ mt: "auto", alignSelf: "flex-start", fontWeight: 900 }}
@@ -216,7 +217,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
             >
               <Box
                 component={Link}
-                href={`/profile/${profile.id}`}
+                href={getProfilePath(profile)}
                 sx={{ display: "block", height: 135, bgcolor: "#eaf0f7" }}
               >
                 <Image
@@ -260,7 +261,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                 </Typography>
                 <Button
                   component={Link}
-                  href={`/profile/${profile.id}`}
+                  href={getProfilePath(profile)}
                   size="small"
                   endIcon={<ArrowForwardRoundedIcon />}
                   sx={{ mt: "auto", px: 0, alignSelf: "flex-start", fontWeight: 900 }}

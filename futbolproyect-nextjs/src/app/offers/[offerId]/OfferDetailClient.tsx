@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,10 +40,11 @@ import { Offer } from "@/lib/types";
 
 type Props = {
   offerId: string;
+  initialOffer: Offer;
 };
 
 const fetchOffer = async (offerId: string) => {
-  const { data } = await apiClient.get<Offer>(`/offers/${offerId}`);
+  const { data } = await apiClient.get<Offer>(`/offers/public/${offerId}`);
   return data;
 };
 
@@ -91,9 +92,9 @@ const formatDate = (value: string | undefined, language: string) => {
   }).format(date);
 };
 
-export default function OfferDetailClient({ offerId }: Props) {
+export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   const { t, i18n } = useTranslation("common");
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -102,7 +103,6 @@ export default function OfferDetailClient({ offerId }: Props) {
 
   const isAdmin = Boolean(user?.isAdmin || user?.isadmin);
   const hasActiveSubscription = user?.subscription_status === "activa";
-  const canViewOfferDetail = isAdmin || hasActiveSubscription;
 
   const {
     data: offer,
@@ -112,16 +112,10 @@ export default function OfferDetailClient({ offerId }: Props) {
   } = useQuery<Offer, Error>({
     queryKey: ["offer", offerId],
     queryFn: () => fetchOffer(offerId),
-    enabled: Boolean(offerId && !authLoading && canViewOfferDetail),
-    retry: (failureCount, queryError: any) => {
-      const status = queryError?.response?.status;
-      return status !== 401 && status !== 403 && failureCount < 3;
-    },
+    initialData: initialOffer,
+    enabled: Boolean(offerId),
+    retry: 2,
   });
-
-  const accessStatus = (error as any)?.response?.status;
-  const shouldShowSubscriptionGate =
-    isError && (accessStatus === 401 || accessStatus === 403);
 
   const lang = i18n.language?.startsWith("en") ? "en" : "es";
   const titulo = offer?.[`titulo_${lang}`] || offer?.titulo || "";
@@ -141,38 +135,6 @@ export default function OfferDetailClient({ offerId }: Props) {
   const isOwner =
     Boolean(user && offer) &&
     String(user?.id) === String(offer?.id_usuario_ofertante);
-
-  const jobPostingSchema = useMemo(() => {
-    if (!offer) return null;
-    return {
-      "@context": "https://schema.org",
-      "@type": "JobPosting",
-      title: titulo,
-      description: descripcion,
-      datePosted: offer.fecha_publicacion,
-      hiringOrganization: {
-        "@type": "Organization",
-        name: offer.nombre_ofertante,
-        sameAs: "https://futbolproyect.com",
-      },
-      jobLocation: ubicacion
-        ? {
-            "@type": "Place",
-            address: { "@type": "PostalAddress", addressLocality: ubicacion },
-          }
-        : undefined,
-    };
-  }, [offer, titulo, descripcion, ubicacion]);
-
-  useEffect(() => {
-    if (!jobPostingSchema) return;
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.id = "job-posting-schema";
-    script.innerHTML = JSON.stringify(jobPostingSchema);
-    document.head.appendChild(script);
-    return () => document.getElementById("job-posting-schema")?.remove();
-  }, [jobPostingSchema]);
 
   const { mutate: deleteOffer } = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/offers/${id}`),
@@ -219,28 +181,11 @@ export default function OfferDetailClient({ offerId }: Props) {
     link.click();
   };
 
-  if (authLoading || isLoading) {
+  if (isLoading && !offer) {
     return (
       <Box sx={{ minHeight: 420, display: "grid", placeItems: "center" }}>
         <CircularProgress />
       </Box>
-    );
-  }
-
-  if (!canViewOfferDetail || shouldShowSubscriptionGate) {
-    return (
-      <Container maxWidth="md" sx={{ py: 8 }}>
-        <Alert
-          severity="warning"
-          action={
-            <Button component={Link} href="/suscripcion" color="inherit">
-              {t("view_plans")}
-            </Button>
-          }
-        >
-          Necesitás una suscripción activa para ver los detalles de la oferta.
-        </Alert>
-      </Container>
     );
   }
 

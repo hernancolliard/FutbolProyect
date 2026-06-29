@@ -296,8 +296,45 @@ router.get("/my-offers", verificarToken, async (req, res) => {
   }
 });
 
+// --- RUTA PÚBLICA: DETALLE INDEXABLE DE UNA OFERTA ABIERTA ---
+// Permite que buscadores y visitantes lean la oferta. Las acciones de postulación
+// y gestión continúan protegidas por autenticación y suscripción.
+router.get("/public/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.query(
+      `
+      SELECT
+        o.id, o.titulo, o.descripcion, o.ubicacion, o.fecha_publicacion,
+        o.imagen_url, o.detalles_adicionales, o.puesto, o.salario, o.nivel,
+        o.horarios, o.is_featured, o.id_usuario_ofertante,
+        o.titulo_es, o.titulo_en, o.descripcion_es, o.descripcion_en,
+        o.ubicacion_es, o.ubicacion_en, o.puesto_es, o.puesto_en,
+        o.nivel_es, o.nivel_en, o.horarios_es, o.horarios_en,
+        o.detalles_adicionales_es, o.detalles_adicionales_en,
+        u.nombre AS nombre_ofertante
+      FROM ofertas_laborales o
+      JOIN usuarios u ON o.id_usuario_ofertante = u.id
+      WHERE o.id = @id AND o.estado = 'abierta'
+      `,
+      { id },
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Oferta no encontrada." });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al obtener el detalle público de la oferta:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor al obtener la oferta." });
+  }
+});
+
 // --- RUTA PROTEGIDA: OBTENER UNA OFERTA POR ID ---
-// La lista de ofertas sigue siendo publica; el detalle completo requiere una suscripcion activa.
 router.get("/:id", [verificarToken, verificarSuscripcionActiva()], async (req, res) => {
   const { id } = req.params;
   try {

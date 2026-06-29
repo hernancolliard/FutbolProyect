@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import {
   Box,
@@ -72,7 +73,15 @@ const fetchOfferFilterOptions = async () => {
   return data;
 };
 
-export default function AllOffersClient() {
+type AllOffersClientProps = {
+  initialData?: OffersResponse;
+  initialFilterOptions?: FilterOptions;
+};
+
+export default function AllOffersClient({
+  initialData,
+  initialFilterOptions,
+}: AllOffersClientProps) {
   const { t } = useTranslation("common");
   const [draftFilters, setDraftFilters] = useState<OfferFilters>(emptyFilters);
   const [appliedFilters, setAppliedFilters] =
@@ -83,12 +92,20 @@ export default function AllOffersClient() {
   const { data, isLoading, isError, error } = useQuery<OffersResponse, Error>({
     queryKey: ["offers", appliedFilters, currentPage],
     queryFn: fetchOffers,
+    initialData:
+      currentPage === 1 &&
+      Object.entries(appliedFilters).every(
+        ([key, value]) => key === "sort" ? value === "desc" : !value,
+      )
+        ? initialData
+        : undefined,
     placeholderData: (previousData) => previousData,
   });
 
   const { data: filterOptions } = useQuery<FilterOptions>({
     queryKey: ["offerFilterOptions"],
     queryFn: fetchOfferFilterOptions,
+    initialData: initialFilterOptions,
   });
 
   const options = filterOptions || {
@@ -133,6 +150,43 @@ export default function AllOffersClient() {
       />
 
       <Container maxWidth="lg" sx={{ pt: { xs: 10, md: 11 } }}>
+        <Box
+          component="section"
+          aria-labelledby="offers-seo-intro-title"
+          sx={{
+            mb: 3,
+            p: { xs: 2.25, md: 3 },
+            bgcolor: "#fff",
+            border: "1px solid #dfe6ef",
+            borderRadius: 2.5,
+          }}
+        >
+          <Typography
+            id="offers-seo-intro-title"
+            component="h2"
+            sx={{ color: "#0a1930", fontSize: "1.35rem", fontWeight: 900 }}
+          >
+            Ofertas de fútbol para jugadores y profesionales
+          </Typography>
+          <Typography sx={{ mt: 1, color: "#5e6c81", lineHeight: 1.7 }}>
+            Encontrá oportunidades para futbolistas, entrenadores, analistas,
+            scouts y otros profesionales del deporte. Las ofertas son
+            publicadas por clubes, agencias y organizaciones que buscan sumar
+            talento a sus proyectos.
+          </Typography>
+          <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
+            <Button component={Link} href="/ofertas/entrenadores" size="small">
+              Ofertas para entrenadores
+            </Button>
+            <Button component={Link} href="/ofertas/analistas-de-futbol" size="small">
+              Trabajo para analistas
+            </Button>
+            <Button component={Link} href="/create-offer" size="small">
+              Publicar una oferta
+            </Button>
+          </Stack>
+        </Box>
+
         <AdBanner placement="offers_top" />
 
         <Button

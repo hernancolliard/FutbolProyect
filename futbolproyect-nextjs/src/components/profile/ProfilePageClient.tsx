@@ -25,6 +25,7 @@ import AdBanner from "@/components/ads/AdBanner";
 import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
+import { getProfileCompletion } from "@/lib/seoSlugs";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -136,7 +137,6 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isHydrated, setIsHydrated] = useState(false);
   const [profile, setProfile] = useState(initialProfile);
   const [attemptedPrivateProfileLoad, setAttemptedPrivateProfileLoad] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -148,10 +148,6 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [summaryPhotos, setSummaryPhotos] = useState<UserPhoto[]>([]);
   const [activeTab, setActiveTab] = useState("summary");
   const cvTemplateRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   useEffect(() => {
     setProfile(initialProfile);
@@ -442,29 +438,9 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
   const localCompletionPercent = useMemo(() => {
     if (!profile) return 0;
-
-    const completionFields = [
-      profile.foto_perfil_url,
-      profile.telefono,
-      profile.nacionalidad,
-      profile.resumen_profesional,
-      profile.cv_url,
-      profile.posicion_principal,
-      profile.altura_cm,
-      profile.peso_kg,
-      profile.pie_dominante,
-      profile.fecha_de_nacimiento,
-      profile.idiomas,
-      profile.estadisticas,
-      profile.trayectoria,
-      profile.disponibilidad,
-    ];
-    const completedFields = completionFields.filter(Boolean).length;
-
-    return Math.round((completedFields / completionFields.length) * 100);
+    return getProfileCompletion(profile);
   }, [profile]);
 
-  if (!isHydrated) return null;
   if (!profile && authLoading) return null;
   if (!profile) {
     return <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-600">{t("profile_not_found", "Perfil no encontrado.")}</div>;
@@ -501,7 +477,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   return (
     <div className="min-h-screen max-w-full overflow-x-clip bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto flex w-full min-w-0 max-w-7xl flex-col gap-6 lg:flex-row">
-        <main className="w-full min-w-0 flex-1">
+        <div className="w-full min-w-0 flex-1">
           <HeroPlayer
             profile={profile}
             age={age}
@@ -758,7 +734,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           <div className="mt-6">
             <AdBanner placement="player_profile_sidebar" compact />
           </div>
-        </main>
+        </div>
 
         <PlayerSidebar imageUrl={profile.foto_perfil_url || "/images/logos/logofp.png"} name={`${profile.nombre} ${profile.apellido}`} availabilityLabel={availabilityLabel} onCopyLink={handleCopyLink} onShare={handleShare} onWhatsApp={handleWhatsApp} onDownloadCv={handleDownloadCv} />
       </div>
@@ -791,7 +767,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           />
           <div style={{ flex: 1, paddingTop: 8 }}>
             <div style={{ color: "#62a8ff", fontSize: 13, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>FutbolProyect</div>
-            <h1 style={{ margin: "12px 0 4px", fontSize: 34, lineHeight: 1.1 }}>{profile.nombre} {profile.apellido}</h1>
+            <div style={{ margin: "12px 0 4px", fontSize: 34, lineHeight: 1.1, fontWeight: 700 }}>{profile.nombre} {profile.apellido}</div>
             <div style={{ fontSize: 19, color: "#dbeafe" }}>{posicion_principal || t("position_not_specified")}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginTop: 20 }}>
               {[nacionalidad, age !== null ? t("age_years", { age }) : "", availabilityLabel]
@@ -829,7 +805,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
               ))}
           </aside>
 
-          <main>
+          <div>
             <section>
               <h2 style={{ margin: 0, paddingBottom: 8, borderBottom: "3px solid #1262db", color: "#071c3c", fontSize: 18 }}>{t("professional_summary_placeholder")}</h2>
               <p style={{ margin: "13px 0 0", color: "#475569", fontSize: 14, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
@@ -867,7 +843,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                 </div>
               </section>
             )}
-          </main>
+          </div>
         </div>
 
         <div style={{ marginTop: 34, paddingTop: 14, borderTop: "1px solid #d8e2ee", color: "#64748b", fontSize: 11, textAlign: "center" }}>

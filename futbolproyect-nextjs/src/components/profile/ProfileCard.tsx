@@ -17,6 +17,7 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Profile } from "@/lib/types";
+import { getProfilePath } from "@/lib/seoSlugs";
 
 interface ProfileCardProps {
   profile: Profile;
@@ -75,7 +76,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
 
       <Box
         component={Link}
-        href={`/profile/${profile.id}`}
+        href={getProfilePath(profile)}
         sx={{
           position: "relative",
           display: "block",
@@ -143,7 +144,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
       <Stack sx={{ p: 2.25, flexGrow: 1 }}>
         <Typography
           component={Link}
-          href={`/profile/${profile.id}`}
+          href={getProfilePath(profile)}
           sx={{
             color: "#09172d",
             fontSize: "1.08rem",
@@ -208,7 +209,7 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
         <Box sx={{ mt: "auto", pt: 2 }}>
           <Button
             component={Link}
-            href={`/profile/${profile.id}`}
+            href={getProfilePath(profile)}
             variant="outlined"
             size="small"
             endIcon={<ArrowForwardRoundedIcon />}

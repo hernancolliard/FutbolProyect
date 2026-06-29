@@ -32,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("empleo_entrenadores_futbol_seo_title"),
     description: t("empleo_entrenadores_futbol_seo_desc"),
+    alternates: { canonical: "/ofertas/entrenadores" },
   };
 }
 

@@ -1,83 +1,92 @@
-import { type Metadata } from "next";
-import { getTranslation } from "@/lib/i18n-server";
-import { Profile } from "@/lib/types";
+import { cache } from "react";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import ProfilePageClient from "@/components/profile/ProfilePageClient";
 import { getApiBaseUrl } from "@/lib/api";
-import { cookies } from "next/headers";
+import { Profile } from "@/lib/types";
+import {
+  getProfileCompletion,
+  getProfilePath,
+} from "@/lib/seoSlugs";
 
-// IMPORTANTE: Forzamos renderizado dinámico para evitar errores de fetch en el build
 export const dynamic = "force-dynamic";
 
-const fetchProfile = async (userId: string): Promise<Profile | null> => {
-  const apiUrl = getApiBaseUrl();
-
-  try {
-    const token = cookies().get("token")?.value;
-    const res = await fetch(`${apiUrl}/profiles/${userId}`, {
-      cache: "no-store",
-      headers: token ? { Cookie: `token=${token}` } : undefined,
-    });
-
-    if (!res.ok) {
-      console.error(
-        `[fetchProfile] Failed to fetch profile for user ${userId}: ${res.statusText}`,
+const fetchProfile = cache(
+  async (userId: string, token?: string): Promise<Profile | null> => {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/profiles/${encodeURIComponent(userId)}`,
+        {
+          cache: "no-store",
+          headers: token ? { Cookie: `token=${token}` } : undefined,
+        },
       );
+      if (!response.ok) return null;
+      return response.json();
+    } catch (error) {
+      console.error(`Error fetching profile ${userId}:`, error);
       return null;
     }
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error(`[fetchProfile] Network error fetching profile for user ${userId}:`, error);
-    return null;
-  }
+  },
+);
+
+const getDescription = (profile: Profile, fullName: string) => {
+  const base = `Perfil deportivo de ${fullName}${profile.posicion_principal ? `, ${profile.posicion_principal}` : ""}.`;
+  const details =
+    " Consultá su trayectoria, datos deportivos, videos, estadísticas y contacto profesional en FutbolProyect.";
+  return `${base}${details}`.slice(0, 160);
 };
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: {
   params: { id: string };
-  searchParams: { lang?: string };
 }): Promise<Metadata> {
-  const { t } = await getTranslation(searchParams?.lang);
-  const profile = await fetchProfile(params.id);
+  const token = cookies().get("token")?.value;
+  const profile = await fetchProfile(params.id, token);
 
   if (!profile) {
     return {
-      title: t("profile_not_found"),
+      title: "Perfil no encontrado",
+      robots: { index: false, follow: false },
     };
   }
 
-  const lang = searchParams?.lang === "en" ? "en" : "es";
-  const resumen_profesional =
-    (profile as any)[`resumen_profesional_${lang}`] ||
-    profile.resumen_profesional;
-  const posicion_principal =
-    (profile as any)[`posicion_principal_${lang}`] ||
-    profile.posicion_principal;
-
-  const seoTitle = `${profile.nombre || ""} ${profile.apellido || ""}${posicion_principal ? ` - ${posicion_principal}` : ""} | FutbolProyect`;
-  const seoDescription = resumen_profesional
-    ? resumen_profesional.substring(0, 160)
-    : `Perfil de ${profile.nombre || ""} ${profile.apellido || ""} en FutbolProyect.`;
-
-  const url = process.env.NEXT_PUBLIC_BASE_URL
-    ? `${process.env.NEXT_PUBLIC_BASE_URL}/profile/${profile.id}`
-    : "";
+  const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
+  const title = `${fullName}${profile.posicion_principal ? ` - ${profile.posicion_principal}` : ""} | FutbolProyect`;
+  const description = getDescription(profile, fullName);
+  const canonical = getProfilePath(profile);
+  const shouldIndex = getProfileCompletion(profile) >= 50;
 
   return {
-    title: seoTitle,
-    description: seoDescription,
+    title: { absolute: title },
+    description,
+    alternates: { canonical },
+    robots: {
+      index: shouldIndex,
+      follow: true,
+    },
     openGraph: {
-      title: seoTitle,
-      description: seoDescription,
       type: "profile",
-      url: url,
+      url: canonical,
+      title,
+      description,
+      siteName: "FutbolProyect",
+      images: profile.foto_perfil_url
+        ? [
+            {
+              url: profile.foto_perfil_url,
+              alt: `Perfil deportivo de ${fullName}`,
+            },
+          ]
+        : [{ url: "/images/logos/logofpazul.webp" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
       images: [
-        {
-          url: profile.foto_perfil_url || "/images/logos/logofp.png",
-          alt: `Perfil de ${profile.nombre} ${profile.apellido || ""}`,
-        },
+        profile.foto_perfil_url || "/images/logos/logofpazul.webp",
       ],
     },
   };
@@ -88,6 +97,40 @@ export default async function ProfilePage({
 }: {
   params: { id: string };
 }) {
-  const profile = await fetchProfile(params.id);
-  return <ProfilePageClient profile={profile} requestedProfileId={params.id} />;
+  const token = cookies().get("token")?.value;
+  const profile = await fetchProfile(params.id, token);
+
+  const schema = profile
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "@id": `https://www.futbolproyect.com${getProfilePath(profile)}`,
+        name: `${profile.nombre || ""} ${profile.apellido || ""}`.trim(),
+        jobTitle: profile.posicion_principal || undefined,
+        nationality: profile.nacionalidad || undefined,
+        birthDate: profile.fecha_de_nacimiento || undefined,
+        image: profile.foto_perfil_url || undefined,
+        description: profile.resumen_profesional || undefined,
+        sameAs: [
+          profile.linkedin_url,
+          profile.instagram_url,
+          profile.youtube_url,
+          profile.transfermarkt_url,
+        ].filter(Boolean),
+      }
+    : null;
+
+  return (
+    <>
+      {schema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+          }}
+        />
+      )}
+      <ProfilePageClient profile={profile} requestedProfileId={params.id} />
+    </>
+  );
 }

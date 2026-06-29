@@ -1,4 +1,5 @@
 import apiClient from "@/lib/apiClient";
+import { Offer } from "@/lib/types";
 
 export async function getOfferById(offerId: string) {
   const res = await apiClient.get(`/offers/${offerId}`);
@@ -17,8 +18,11 @@ const getBaseUrl = () => {
   const port = process.env.PORT || 5000;
   return `http://localhost:${port}`;
 };
-export async function getAllOffers() {
+export async function getAllOffers(): Promise<Offer[]> {
   const apiUrl = getBaseUrl();
   const res = await fetch(`${apiUrl}/api/offers`, { cache: "no-store" });
-  return res.json();
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (Array.isArray(data)) return data;
+  return Array.isArray(data?.offers) ? data.offers : [];
 }

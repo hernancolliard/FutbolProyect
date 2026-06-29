@@ -1,104 +1,110 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Profile } from "@/lib/types";
+import ProfilePageClient from "@/components/profile/ProfilePageClient";
 import { getApiBaseUrl } from "@/lib/api";
+import { Profile } from "@/lib/types";
+import {
+  getProfileCompletion,
+  getProfilePath,
+  parseSeoId,
+} from "@/lib/seoSlugs";
 
-/* =========================
-   CONFIG
-========================= */
-
-// Forzamos render dinámico (Vercel friendly)
 export const dynamic = "force-dynamic";
 
-// API base (normalizado con /api)
-const API_URL = getApiBaseUrl();
+const getProfile = cache(async (slug: string): Promise<Profile | null> => {
+  const profileId = parseSeoId(slug);
 
-/* =========================
-   API HELPERS (RUNTIME)
-========================= */
-
-async function getProfileBySlug(slug: string): Promise<Profile | null> {
   try {
-    const res = await fetch(`${API_URL}/profiles/${slug}`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) return null;
-    return res.json();
+    const response = await fetch(
+      `${getApiBaseUrl()}/profiles/${encodeURIComponent(profileId)}`,
+      { cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    return response.json();
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    console.error("Error fetching public profile:", error);
     return null;
   }
-}
-
-/* =========================
-   SEO DINÁMICO
-========================= */
+});
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const profile = await getProfileBySlug(params.slug);
+  const profile = await getProfile(params.slug);
 
   if (!profile) {
     return {
-      title: "Perfil no encontrado | FutbolProyect",
-      description: "El perfil solicitado no existe o fue eliminado.",
+      title: "Perfil no encontrado",
+      robots: { index: false, follow: false },
     };
   }
 
-  const nombreCompleto = `${profile.nombre} ${profile.apellido}`;
+  const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
+  const title = `${fullName}${profile.posicion_principal ? ` - ${profile.posicion_principal}` : ""} | FutbolProyect`;
+  const description =
+    `Perfil deportivo de ${fullName}${profile.posicion_principal ? `, ${profile.posicion_principal}` : ""}. ` +
+    "Consultá su trayectoria, datos deportivos, videos, estadísticas y contacto profesional.";
+  const canonical = getProfilePath(profile);
+  const shouldIndex = getProfileCompletion(profile) >= 50;
 
   return {
-    title: `${nombreCompleto} | ${profile.posicion_principal}`,
-    description:
-      profile.resumen_profesional?.slice(0, 160) ||
-      `Perfil profesional de ${nombreCompleto}`,
+    title: { absolute: title },
+    description: description.slice(0, 160),
+    alternates: { canonical },
+    robots: { index: shouldIndex, follow: true },
     openGraph: {
-      title: `${nombreCompleto} | FutbolProyect`,
-      description: profile.resumen_profesional?.slice(0, 160),
-      images: profile.foto_perfil_url ? [{ url: profile.foto_perfil_url }] : [],
+      type: "profile",
+      url: canonical,
+      title,
+      description,
+      siteName: "FutbolProyect",
+      images: profile.foto_perfil_url
+        ? [
+            {
+              url: profile.foto_perfil_url,
+              alt: `Perfil deportivo de ${fullName}`,
+            },
+          ]
+        : [{ url: "/images/logos/logofpazul.webp" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [
+        profile.foto_perfil_url || "/images/logos/logofpazul.webp",
+      ],
     },
   };
 }
 
-/* =========================
-   PAGE
-========================= */
-
-export default async function ProfilePage({
+export default async function PublicProfilePage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const profile = await getProfileBySlug(params.slug);
-
+  const profile = await getProfile(params.slug);
   if (!profile) notFound();
 
-  const nombreCompleto = `${profile.nombre} ${profile.apellido}`;
-
-  /* =========================
-     SCHEMA.ORG
-  ========================= */
+  const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
   const schema = {
     "@context": "https://schema.org",
-    "@type": "SportsPerson",
-    "@id": `https://futbolproyect.com/perfiles/${profile.id}`,
-    name: nombreCompleto,
-    jobTitle: profile.posicion_principal,
-    nationality: profile.nacionalidad,
-    birthDate: profile.fecha_de_nacimiento,
-    image: profile.foto_perfil_url,
-    description: profile.resumen_profesional,
-    sport: "Soccer",
+    "@type": "Person",
+    "@id": `https://www.futbolproyect.com${getProfilePath(profile)}`,
+    name: fullName,
+    jobTitle: profile.posicion_principal || undefined,
+    nationality: profile.nacionalidad || undefined,
+    birthDate: profile.fecha_de_nacimiento || undefined,
+    image: profile.foto_perfil_url || undefined,
+    description: profile.resumen_profesional || undefined,
     sameAs: [
       profile.linkedin_url,
       profile.instagram_url,
       profile.youtube_url,
       profile.transfermarkt_url,
-      profile.whatsapp_url,
     ].filter(Boolean),
   };
 
@@ -106,27 +112,14 @@ export default async function ProfilePage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+        }}
       />
-
-      <main>
-        <h1>{nombreCompleto}</h1>
-
-        <p>
-          <strong>Posición:</strong> {profile.posicion_principal}
-        </p>
-
-        <p>
-          <strong>Nacionalidad:</strong> {profile.nacionalidad}
-        </p>
-
-        {profile.resumen_profesional && (
-          <section>
-            <h2>Perfil profesional</h2>
-            <p>{profile.resumen_profesional}</p>
-          </section>
-        )}
-      </main>
+      <ProfilePageClient
+        profile={profile}
+        requestedProfileId={String(profile.id)}
+      />
     </>
   );
 }
