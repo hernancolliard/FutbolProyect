@@ -1,0 +1,171 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import BlogCTA from "@/components/blog/BlogCTA";
+import RelatedPosts from "@/components/blog/RelatedPosts";
+import { blogPosts, getBlogPost } from "@/data/blogPosts";
+import styles from "@/components/blog/blog.module.css";
+
+type PageProps = {
+  params: { slug: string };
+};
+
+const BASE_URL = "https://www.futbolproyect.com";
+const dateFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+export function generateStaticParams() {
+  return blogPosts.map((post) => ({ slug: post.slug }));
+}
+
+export function generateMetadata({ params }: PageProps): Metadata {
+  const post = getBlogPost(params.slug);
+  if (!post) return {};
+
+  const canonical = `/blog/${post.slug}`;
+  return {
+    title: { absolute: `${post.seoTitle} | FutbolProyect` },
+    description: post.seoDescription,
+    keywords: post.keywords,
+    authors: [{ name: post.author }],
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      url: canonical,
+      title: post.seoTitle,
+      description: post.seoDescription,
+      publishedTime: post.date,
+      authors: [post.author],
+      section: post.category,
+      images: [{ url: post.image, alt: post.imageAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.seoTitle,
+      description: post.seoDescription,
+      images: [post.image],
+    },
+  };
+}
+
+export default function BlogPostPage({ params }: PageProps) {
+  const post = getBlogPost(params.slug);
+  if (!post) notFound();
+
+  const relatedPosts = post.relatedSlugs
+    .map((slug) => getBlogPost(slug))
+    .filter((related): related is NonNullable<typeof related> => Boolean(related));
+
+  const articleUrl = `${BASE_URL}/blog/${post.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.seoDescription,
+    image: [`${BASE_URL}${post.image}`],
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Organization",
+      name: post.author,
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "FutbolProyect",
+      url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/images/logos/logofpazul.webp`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    articleSection: post.category,
+    keywords: post.keywords.join(", "),
+  };
+
+  return (
+    <article>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <header className={styles.articleHeader}>
+        <div className={styles.container}>
+          <nav className={styles.breadcrumbs} aria-label="Migas de pan">
+            <Link href="/">Inicio</Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/blog">Blog</Link>
+            <span aria-hidden="true">/</span>
+            <span>{post.category}</span>
+          </nav>
+          <span className={styles.articleEyebrow}>{post.category}</span>
+          <h1>{post.title}</h1>
+          <p className={styles.articleDescription}>{post.description}</p>
+          <div className={styles.articleMeta}>
+            <span>Por {post.author}</span>
+            <time dateTime={post.date}>
+              {dateFormatter.format(new Date(post.date))}
+            </time>
+          </div>
+        </div>
+      </header>
+
+      <div className={styles.articleBody}>
+        <div className={styles.container}>
+          <div className={styles.articleImage}>
+            <Image
+              src={post.image}
+              alt={post.imageAlt}
+              fill
+              priority
+              sizes="(max-width: 1200px) 100vw, 1180px"
+            />
+          </div>
+
+          <div className={styles.articleLayout}>
+            <div className={styles.articleContent}>
+              {post.content.map((section) => (
+                <section key={section.heading}>
+                  <h2>{section.heading}</h2>
+                  {section.subheading && <h3>{section.subheading}</h3>}
+                  {section.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                  {section.bullets && (
+                    <ul>
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet}>{bullet}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </div>
+
+            <aside className={styles.sidebar} aria-label="Enlaces útiles">
+              <strong>También en FutbolProyect</strong>
+              <Link href="/register">Crear perfil de jugador</Link>
+              <Link href="/all-offers">Ver ofertas</Link>
+              <Link href="/create-offer">Publicar una oferta</Link>
+              <Link href="/">Ir al inicio</Link>
+            </aside>
+          </div>
+
+          <BlogCTA cta={post.cta} />
+          <RelatedPosts posts={relatedPosts} />
+        </div>
+      </div>
+    </article>
+  );
+}

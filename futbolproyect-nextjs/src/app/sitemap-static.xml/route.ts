@@ -1,7 +1,15 @@
+import { blogPosts } from "@/data/blogPosts";
+
 const BASE_URL = "https://www.futbolproyect.com";
 
 const routes = [
   { path: "/", priority: "1.0", changeFrequency: "daily" },
+  { path: "/blog", priority: "0.8", changeFrequency: "weekly" },
+  ...blogPosts.map((post) => ({
+    path: `/blog/${post.slug}`,
+    priority: "0.7",
+    changeFrequency: "monthly",
+  })),
   { path: "/all-offers", priority: "0.9", changeFrequency: "daily" },
   { path: "/perfiles", priority: "0.9", changeFrequency: "daily" },
   {
