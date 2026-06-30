@@ -245,7 +245,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                     {fullName || t("profile")}
                   </Typography>
                   {Number(profile.average_rating) > 0 && (
-                    <Typography variant="caption" sx={{ color: "#d18a00", fontWeight: 800 }}>
+                    <Typography variant="caption" sx={{ color: "#966200", fontWeight: 800 }}>
                       ★ {Number(profile.average_rating).toFixed(1)}
                     </Typography>
                   )}

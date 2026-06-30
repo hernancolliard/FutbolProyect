@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomePageClient from "@/components/home/HomePageClient";
+import HomeSeoOverview from "@/components/home/HomeSeoOverview";
 import type { Offer, Profile } from "@/lib/types";
 
 const title =
@@ -99,6 +100,7 @@ export default async function HomePage() {
     <HomePageClient
       offersData={offersData}
       featuredProfiles={featuredProfiles}
+      seoOverview={<HomeSeoOverview />}
     />
   );
 }

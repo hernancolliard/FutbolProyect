@@ -13,7 +13,6 @@ import {
 } from "@/components/home/HomeShowcases";
 import HomeAudienceSpotlight from "@/components/home/HomeAudienceSpotlight";
 import HomeFinalCta from "@/components/home/HomeFinalCta";
-import HomeSeoOverview from "@/components/home/HomeSeoOverview";
 import HowItWorks from "@/components/shared/HowItWorks";
 import HomeTrustSignals from "@/components/shared/HomeTrustSignals";
 import HomeFAQ from "@/components/shared/HomeFAQ";
@@ -38,11 +37,13 @@ type HomeOffersData = {
 type HomePageClientProps = {
   offersData: HomeOffersData;
   featuredProfiles: Profile[];
+  seoOverview: React.ReactNode;
 };
 
 export default function HomePageClient({
   offersData,
   featuredProfiles,
+  seoOverview,
 }: HomePageClientProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -98,7 +99,7 @@ export default function HomePageClient({
           }}
         >
           <Stack spacing={{ xs: 5, md: 6 }}>
-            <HomeSeoOverview />
+            {seoOverview}
 
             <HomeRoleGrid />
 

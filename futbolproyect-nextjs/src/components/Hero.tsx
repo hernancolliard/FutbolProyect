@@ -61,6 +61,7 @@ export default function Hero({ metrics }: HeroProps) {
         alt="Futbolista en un estadio representando oportunidades profesionales"
         fill
         priority
+        quality={70}
         sizes="100vw"
         style={{ objectFit: "cover" }}
       />

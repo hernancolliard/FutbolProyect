@@ -79,12 +79,15 @@ function FooterColumn({
             key={link.href}
             component={Link}
             href={link.href}
-            underline="none"
+            underline="always"
             sx={{
               width: "fit-content",
-              color: "rgba(255,255,255,.62)",
+              color: "rgba(255,255,255,.72)",
               fontSize: ".82rem",
               transition: "color 160ms ease",
+              textDecoration: "underline",
+              textDecorationColor: "rgba(255,255,255,.32)",
+              textUnderlineOffset: "3px",
               "&:hover": { color: "#62a8ff" },
             }}
           >
@@ -176,8 +179,8 @@ export default function Footer() {
                 <EmailOutlinedIcon sx={{ mt: 0.1, color: "#62a8ff", fontSize: 18 }} />
                 <MuiLink
                   href="mailto:info@futbolproyect.com"
-                  underline="none"
-                  sx={{ color: "rgba(255,255,255,.68)", fontSize: ".82rem", overflowWrap: "anywhere" }}
+                  underline="always"
+                  sx={{ color: "rgba(255,255,255,.72)", fontSize: ".82rem", overflowWrap: "anywhere", textUnderlineOffset: "3px" }}
                 >
                   info@futbolproyect.com
                 </MuiLink>
@@ -185,8 +188,8 @@ export default function Footer() {
               <MuiLink
                 component={Link}
                 href="/contact"
-                underline="none"
-                sx={{ color: "#62a8ff", fontSize: ".82rem", fontWeight: 800 }}
+                underline="always"
+                sx={{ color: "#62a8ff", fontSize: ".82rem", fontWeight: 800, textUnderlineOffset: "3px" }}
               >
                 {t("footer_send_inquiry")}
               </MuiLink>
@@ -202,10 +205,10 @@ export default function Footer() {
           alignItems={{ xs: "flex-start", sm: "center" }}
           spacing={1}
         >
-          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.48)" }}>
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.68)" }}>
             © 2026 FutbolProyect. {t("all_rights_reserved")}
           </Typography>
-          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.42)" }}>
+          <Typography variant="caption" sx={{ color: "rgba(255,255,255,.68)" }}>
             {t("footer_web_development_by")}{" "}
             <MuiLink
               href="https://parana-dev.vercel.app/"
