@@ -92,9 +92,60 @@ const formatDate = (value: string | undefined, language: string) => {
   }).format(date);
 };
 
+function SubscriptionAccessNotice({
+  title,
+  description,
+  actionLabel,
+}: {
+  title: string;
+  description: string;
+  actionLabel: string;
+}) {
+  return (
+    <Box
+      sx={{
+        mt: 2,
+        p: 2.25,
+        border: "1px solid #cfe0f5",
+        borderRadius: 2,
+        bgcolor: "#f3f8ff",
+        textAlign: "center",
+      }}
+    >
+      <Box
+        sx={{
+          width: 42,
+          height: 42,
+          mx: "auto",
+          mb: 1.2,
+          borderRadius: "50%",
+          display: "grid",
+          placeItems: "center",
+          color: "#1262db",
+          bgcolor: "#e0edff",
+        }}
+      >
+        <LockOutlinedIcon />
+      </Box>
+      <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>{title}</Typography>
+      <Typography variant="body2" sx={{ mt: 0.6, color: "#65738a", lineHeight: 1.6 }}>
+        {description}
+      </Typography>
+      <Button
+        component={Link}
+        href="/suscripcion"
+        variant="contained"
+        sx={{ mt: 1.6, bgcolor: "#1262db", fontWeight: 900 }}
+      >
+        {actionLabel}
+      </Button>
+    </Box>
+  );
+}
+
 export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   const { t, i18n } = useTranslation("common");
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -110,10 +161,16 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
     isError,
     error,
   } = useQuery<Offer, Error>({
-    queryKey: ["offer", offerId],
+    queryKey: [
+      "offer",
+      offerId,
+      user?.id || "anonymous",
+      user?.subscription_status || "none",
+    ],
     queryFn: () => fetchOffer(offerId),
     initialData: initialOffer,
-    enabled: Boolean(offerId),
+    enabled: Boolean(offerId) && !authLoading,
+    refetchOnMount: "always",
     retry: 2,
   });
 
@@ -131,6 +188,9 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
     offer?.[`detalles_adicionales_${lang}`] ||
     offer?.detalles_adicionales ||
     "";
+  const hasAdditionalDetails = Boolean(
+    detallesAdicionales || offer?.has_restricted_details,
+  );
   const publicationDate = formatDate(offer?.fecha_publicacion, lang);
   const isOwner =
     Boolean(user && offer) &&
@@ -372,7 +432,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 label={t("description_label")}
                 sx={{ bgcolor: "#eaf3ff", color: "#1262db", fontWeight: 900 }}
               />
-              {detallesAdicionales && (
+              {hasAdditionalDetails && (
                 <Chip label={t("additional_details")} variant="outlined" />
               )}
             </Stack>
@@ -399,7 +459,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 : t("offer_description_missing")}
             </Typography>
 
-            {detallesAdicionales && (
+            {hasAdditionalDetails && (
               <>
                 <Divider sx={{ my: 3.5 }} />
                 <Typography
@@ -408,18 +468,35 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 >
                   {t("additional_details")}
                 </Typography>
-                <Typography
-                  component="div"
-                  sx={{
-                    mt: 1.5,
-                    color: "#3d4b60",
-                    lineHeight: 1.8,
-                    whiteSpace: "pre-line",
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  {renderLinkedText(detallesAdicionales)}
-                </Typography>
+                {detallesAdicionales ? (
+                  <Typography
+                    component="div"
+                    sx={{
+                      mt: 1.5,
+                      color: "#3d4b60",
+                      lineHeight: 1.8,
+                      whiteSpace: "pre-line",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {renderLinkedText(detallesAdicionales)}
+                  </Typography>
+                ) : (
+                  <SubscriptionAccessNotice
+                    title={t(
+                      "offer_subscription_gate_title",
+                      "Contenido disponible con suscripción",
+                    )}
+                    description={t(
+                      "offer_details_subscription_gate_description",
+                      "Los detalles adicionales pueden incluir datos de contacto. Necesitás una suscripción activa para verlos.",
+                    )}
+                    actionLabel={t(
+                      "view_subscription_plans",
+                      "Ver planes de suscripción",
+                    )}
+                  />
+                )}
               </>
             )}
 
@@ -460,8 +537,16 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 Enviá tu perfil y formá parte de este proyecto deportivo.
               </Typography>
 
-              {user?.tipo_usuario === "postulante" && !isOwner && !isAdmin ? (
-                hasActiveSubscription && !applied ? (
+              {authLoading ? (
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                  <CircularProgress size={28} />
+                </Box>
+              ) : applied ? (
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  ¡Postulación enviada!
+                </Alert>
+              ) : user?.tipo_usuario === "postulante" && !isOwner && !isAdmin ? (
+                hasActiveSubscription ? (
                   <Button
                     fullWidth
                     variant="contained"
@@ -472,21 +557,37 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                   >
                     {isApplying ? t("applying") : t("apply_now")}
                   </Button>
-                ) : applied ? (
-                  <Alert severity="success" sx={{ mt: 2 }}>
-                    ¡Postulación enviada!
-                  </Alert>
                 ) : (
-                  <Button
-                    fullWidth
-                    component={Link}
-                    href="/suscripcion"
-                    variant="contained"
-                    sx={{ mt: 2 }}
-                  >
-                    {t("view_subscription_plans")}
-                  </Button>
+                  <SubscriptionAccessNotice
+                    title={t(
+                      "offer_subscription_gate_title",
+                      "Contenido disponible con suscripción",
+                    )}
+                    description={t(
+                      "offer_apply_subscription_gate_description",
+                      "Necesitás una suscripción activa para postularte y enviar tu perfil al responsable de la oferta.",
+                    )}
+                    actionLabel={t(
+                      "view_subscription_plans",
+                      "Ver planes de suscripción",
+                    )}
+                  />
                 )
+              ) : !user ? (
+                <SubscriptionAccessNotice
+                  title={t(
+                    "offer_subscription_gate_title",
+                    "Contenido disponible con suscripción",
+                  )}
+                  description={t(
+                    "offer_apply_subscription_gate_description",
+                    "Necesitás una suscripción activa para postularte y enviar tu perfil al responsable de la oferta.",
+                  )}
+                  actionLabel={t(
+                    "view_subscription_plans",
+                    "Ver planes de suscripción",
+                  )}
+                />
               ) : (
                 <Alert severity="info" sx={{ mt: 2 }}>
                   La postulación está disponible para perfiles de postulantes.

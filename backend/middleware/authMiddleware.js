@@ -45,6 +45,43 @@ const verificarToken = (req, res, next) => {
 };
 
 /* =====================================================
+   VERIFICAR TOKEN OPCIONAL
+   Las rutas públicas continúan funcionando sin sesión, pero pueden
+   personalizar la respuesta cuando reciben un token válido.
+===================================================== */
+const verificarTokenOpcional = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  let token;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7).trim();
+  }
+
+  if (!token) {
+    token = req.cookies?.token;
+  }
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = {
+      id: decoded.id,
+      tipo_usuario: decoded.tipo_usuario,
+      isadmin: decoded.isadmin ?? false,
+    };
+  } catch {
+    // Un token vencido o inválido en una ruta pública equivale a una visita anónima.
+    req.user = null;
+  }
+
+  next();
+};
+
+/* =====================================================
    VERIFICAR ADMINISTRADOR
 ===================================================== */
 const verificarAdmin = async (req, res, next) => {
@@ -172,6 +209,7 @@ const popularRolUsuario = async (req, res, next) => {
 
 module.exports = {
   verificarToken,
+  verificarTokenOpcional,
   verificarAdmin,
   verificarSuscripcionActiva,
   popularRolUsuario,

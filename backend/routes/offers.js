@@ -8,6 +8,7 @@ const { z } = require("zod");
 const db = require("../db");
 const {
   verificarToken,
+  verificarTokenOpcional,
   verificarAdmin,
   verificarSuscripcionActiva,
   popularRolUsuario,
@@ -299,7 +300,7 @@ router.get("/my-offers", verificarToken, async (req, res) => {
 // --- RUTA PÚBLICA: DETALLE INDEXABLE DE UNA OFERTA ABIERTA ---
 // Permite que buscadores y visitantes lean la oferta. Las acciones de postulación
 // y gestión continúan protegidas por autenticación y suscripción.
-router.get("/public/:id", async (req, res) => {
+router.get("/public/:id", verificarTokenOpcional, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -325,7 +326,61 @@ router.get("/public/:id", async (req, res) => {
       return res.status(404).json({ message: "Oferta no encontrada." });
     }
 
-    res.json(result.rows[0]);
+    const offer = result.rows[0];
+    const restrictedValues = [
+      offer.detalles_adicionales,
+      offer.detalles_adicionales_es,
+      offer.detalles_adicionales_en,
+    ];
+    const hasRestrictedDetails = restrictedValues.some(
+      (value) => typeof value === "string" && value.trim().length > 0,
+    );
+
+    let canViewRestrictedDetails = false;
+
+    if (req.user?.id) {
+      const isOwner =
+        String(req.user.id) === String(offer.id_usuario_ofertante);
+
+      if (isOwner) {
+        canViewRestrictedDetails = true;
+      } else {
+        const accessResult = await db.query(
+          `
+          SELECT
+            u.isadmin,
+            EXISTS (
+              SELECT 1
+              FROM suscripciones s
+              WHERE s.id_usuario = u.id
+                AND s.estado = 'activa'
+                AND s.fecha_fin > NOW()
+            ) AS has_active_subscription
+          FROM usuarios u
+          WHERE u.id = @userId
+          `,
+          { userId: req.user.id },
+        );
+        const access = accessResult.rows[0];
+        canViewRestrictedDetails = Boolean(
+          access?.isadmin || access?.has_active_subscription,
+        );
+      }
+    }
+
+    const response = {
+      ...offer,
+      has_restricted_details: hasRestrictedDetails,
+      can_view_restricted_details: canViewRestrictedDetails,
+    };
+
+    if (!canViewRestrictedDetails) {
+      delete response.detalles_adicionales;
+      delete response.detalles_adicionales_es;
+      delete response.detalles_adicionales_en;
+    }
+
+    res.json(response);
   } catch (error) {
     console.error("Error al obtener el detalle público de la oferta:", error);
     res

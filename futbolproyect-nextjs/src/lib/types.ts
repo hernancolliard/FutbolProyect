@@ -108,6 +108,8 @@ export interface Offer {
   detalles_adicionales?: string;
   detalles_adicionales_es?: string;
   detalles_adicionales_en?: string;
+  has_restricted_details?: boolean;
+  can_view_restricted_details?: boolean;
   fecha_publicacion?: string;
   nombre_ofertante: string;
   id_usuario_ofertante: string;
