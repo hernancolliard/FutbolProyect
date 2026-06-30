@@ -4,17 +4,50 @@ const nextConfig = {
   compress: true,
   staticPageGenerationTimeout: 120,
   trailingSlash: false,
+  experimental: {
+    optimizePackageImports: [
+      "@mui/material",
+      "@mui/icons-material",
+      "react-icons",
+    ],
+  },
 
   // Agregar headers para permitir Google OAuth popups
   async headers() {
     return [
       {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/images/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value:
-              "public, max-age=86400, s-maxage=31536000, stale-while-revalidate=604800",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/fonts/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/favicon.ico",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400",
           },
         ],
       },
@@ -33,7 +66,8 @@ const nextConfig = {
   images: {
     // Las imágenes subidas ya se convierten y redimensionan a WebP en el backend.
     // Servirlas directamente evita depender de la cuota de transformaciones de Vercel.
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: "https",

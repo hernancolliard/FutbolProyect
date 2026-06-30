@@ -47,7 +47,7 @@ export default function Hero({ metrics }: HeroProps) {
         minHeight: { xs: 650, md: 570 },
         display: "flex",
         alignItems: "center",
-        overflow: "hidden",
+        overflow: "visible",
         color: "#fff",
         pb: { xs: 16, md: 8 },
         bgcolor: "#06142c",

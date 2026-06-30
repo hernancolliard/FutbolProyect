@@ -24,7 +24,7 @@ const JobPostingSchema = ({ offer }: JobPostingSchemaProps) => {
     hiringOrganization: {
       "@type": "Organization",
       name: offer.nombre_ofertante,
-      sameAs: "https://futbolproyect.com",
+      sameAs: "https://www.futbolproyect.com",
     },
     industry: "Sports",
     occupationalCategory: "Sports Professionals",

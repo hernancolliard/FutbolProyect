@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomePageClient from "@/components/home/HomePageClient";
+import type { Offer, Profile } from "@/lib/types";
 
 const title =
   "FutbolProyect | Mostrá tu fútbol y conectá con oportunidades";
@@ -38,6 +39,66 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
-  return <HomePageClient />;
+type HomeOffersData = {
+  offers: Offer[];
+  totalOffers: number;
+};
+
+const getApiBaseUrl = () => {
+  const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!raw) {
+    return `http://localhost:${process.env.PORT || 5000}/api`;
+  }
+
+  return `${raw.replace(/\/+$/, "").replace(/\/api$/, "")}/api`;
+};
+
+async function getHomeData(): Promise<{
+  offersData: HomeOffersData;
+  featuredProfiles: Profile[];
+}> {
+  const apiBaseUrl = getApiBaseUrl();
+
+  try {
+    const [offersResponse, profilesResponse] = await Promise.all([
+      fetch(`${apiBaseUrl}/offers?limit=6&show=all`, {
+        next: { revalidate: 300 },
+      }),
+      fetch(`${apiBaseUrl}/profiles/featured`, {
+        next: { revalidate: 300 },
+      }),
+    ]);
+
+    const offersPayload = offersResponse.ok ? await offersResponse.json() : {};
+    const profilesPayload = profilesResponse.ok
+      ? await profilesResponse.json()
+      : [];
+
+    return {
+      offersData: {
+        offers: Array.isArray(offersPayload?.offers)
+          ? offersPayload.offers
+          : [],
+        totalOffers: Number(offersPayload?.totalOffers || 0),
+      },
+      featuredProfiles: Array.isArray(profilesPayload) ? profilesPayload : [],
+    };
+  } catch (error) {
+    console.error("Unable to load home data during server rendering:", error);
+    return {
+      offersData: { offers: [], totalOffers: 0 },
+      featuredProfiles: [],
+    };
+  }
+}
+
+export default async function HomePage() {
+  const { offersData, featuredProfiles } = await getHomeData();
+
+  return (
+    <HomePageClient
+      offersData={offersData}
+      featuredProfiles={featuredProfiles}
+    />
+  );
 }

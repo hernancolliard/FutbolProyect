@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
-import apiClient from "@/lib/apiClient";
 import Hero, { HomeMetric } from "@/components/Hero";
 import HomeRoleGrid from "@/components/home/HomeRoleGrid";
 import {
@@ -37,30 +35,15 @@ type HomeOffersData = {
   totalOffers: number;
 };
 
-const fetchHomePageOffers = async (): Promise<HomeOffersData> => {
-  try {
-    const { data } = await apiClient.get("/offers?limit=6&show=all");
-    return {
-      offers: Array.isArray(data?.offers) ? data.offers : [],
-      totalOffers: Number(data?.totalOffers || 0),
-    };
-  } catch (error) {
-    console.error("Error fetching home page offers:", error);
-    return { offers: [], totalOffers: 0 };
-  }
+type HomePageClientProps = {
+  offersData: HomeOffersData;
+  featuredProfiles: Profile[];
 };
 
-const fetchFeaturedProfiles = async (): Promise<Profile[]> => {
-  try {
-    const { data } = await apiClient.get("/profiles/featured");
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error("Error fetching featured profiles:", error);
-    return [];
-  }
-};
-
-export default function HomePageClient() {
+export default function HomePageClient({
+  offersData,
+  featuredProfiles,
+}: HomePageClientProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
@@ -78,25 +61,13 @@ export default function HomePageClient() {
     }
   }, []);
 
-  const { data: offersData = { offers: [], totalOffers: 0 } } =
-    useQuery<HomeOffersData>({
-      queryKey: ["homePageOffers"],
-      queryFn: fetchHomePageOffers,
-    });
-
-  const { data: featuredProfiles = [] } = useQuery<Profile[]>({
-    queryKey: ["featuredProfiles"],
-    queryFn: fetchFeaturedProfiles,
-  });
-
-  const metrics = useMemo<HomeMetric[]>(() => {
-    const locations = new Set(
-      offersData.offers.map((offer) => offer.ubicacion).filter(Boolean),
-    ).size;
-    const roles = new Set(
-      offersData.offers.map((offer) => offer.puesto).filter(Boolean),
-    ).size;
-    return [
+  const locations = new Set(
+    offersData.offers.map((offer) => offer.ubicacion).filter(Boolean),
+  ).size;
+  const roles = new Set(
+    offersData.offers.map((offer) => offer.puesto).filter(Boolean),
+  ).size;
+  const metrics: HomeMetric[] = [
       {
         value: offersData.totalOffers || offersData.offers.length || "—",
         label: "Ofertas activas",
@@ -107,8 +78,7 @@ export default function HomePageClient() {
       },
       { value: locations || "—", label: "Ubicaciones activas" },
       { value: roles || "—", label: "Roles publicados" },
-    ];
-  }, [featuredProfiles.length, offersData]);
+  ];
 
   const handleShowRegisterModal = (role: "player" | "club") => {
     setRegistrationRole(role);
