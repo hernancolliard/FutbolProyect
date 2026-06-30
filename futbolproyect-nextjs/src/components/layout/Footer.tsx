@@ -42,22 +42,22 @@ const socialLinks = [
   {
     href: "https://www.facebook.com/profile.php?id=61583277031848",
     label: "Facebook",
-    image: "/images/logos/facebook.png",
+    image: "/images/logos/facebook.webp",
   },
   {
     href: "https://twitter.com",
     label: "Twitter",
-    image: "/images/logos/twitter.png",
+    image: "/images/logos/twitter.webp",
   },
   {
     href: "https://www.instagram.com/futbol.proyect/#",
     label: "Instagram",
-    image: "/images/logos/instagram.png",
+    image: "/images/logos/instagram.webp",
   },
   {
     href: "https://www.linkedin.com/company/109604115/",
     label: "LinkedIn",
-    image: "/images/logos/linkedin.png",
+    image: "/images/logos/linkedin.webp",
   },
 ];
 
@@ -128,7 +128,7 @@ export default function Footer() {
         >
           <Box>
             <Image
-              src="/images/logos/logofpblanco.png"
+              src="/images/logos/logofpblanco.webp"
               alt="FutbolProyect"
               width={125}
               height={66}

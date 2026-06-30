@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 interface GoogleLoginButtonProps {
   onSuccess: (credentialResponse: any) => void;
@@ -24,6 +24,10 @@ export default function GoogleLoginButton({
   }
 
   return (
-    <GoogleLogin onSuccess={onSuccess} onError={onError} />
+    <GoogleOAuthProvider
+      clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+    >
+      <GoogleLogin onSuccess={onSuccess} onError={onError} />
+    </GoogleOAuthProvider>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
@@ -19,12 +20,17 @@ import HowItWorks from "@/components/shared/HowItWorks";
 import HomeTrustSignals from "@/components/shared/HomeTrustSignals";
 import HomeFAQ from "@/components/shared/HomeFAQ";
 import ContactPageClient from "@/components/client-components/ContactPageClient";
-import PromotionModal from "@/components/PromotionModal";
 import Modal from "@/components/ui/Modal";
-import Login from "@/components/auth/Login";
-import Register from "@/components/auth/Register";
 import AdBanner from "@/components/ads/AdBanner";
 import { Offer, Profile } from "@/lib/types";
+
+const PromotionModal = dynamic(() => import("@/components/PromotionModal"), {
+  ssr: false,
+});
+const Login = dynamic(() => import("@/components/auth/Login"), { ssr: false });
+const Register = dynamic(() => import("@/components/auth/Register"), {
+  ssr: false,
+});
 
 type HomeOffersData = {
   offers: Offer[];
@@ -196,29 +202,32 @@ export default function HomePageClient() {
         </Container>
       </Box>
 
-      <PromotionModal
-        isOpen={showPromotionModal}
-        onClose={() => setShowPromotionModal(false)}
-        onShowRegisterModal={handleShowRegisterModal}
-      />
-
-      <Modal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)}>
-        <Login onClose={() => setShowLoginModal(false)} />
-      </Modal>
-
-      <Modal
-        isOpen={showRegisterModal}
-        onClose={() => setShowRegisterModal(false)}
-      >
-        <Register
-          initialRole={registrationRole}
-          onClose={() => setShowRegisterModal(false)}
-          onSwitchToLogin={() => {
-            setShowRegisterModal(false);
-            setShowLoginModal(true);
-          }}
+      {showPromotionModal && (
+        <PromotionModal
+          isOpen
+          onClose={() => setShowPromotionModal(false)}
+          onShowRegisterModal={handleShowRegisterModal}
         />
-      </Modal>
+      )}
+
+      {showLoginModal && (
+        <Modal isOpen onClose={() => setShowLoginModal(false)}>
+          <Login onClose={() => setShowLoginModal(false)} />
+        </Modal>
+      )}
+
+      {showRegisterModal && (
+        <Modal isOpen onClose={() => setShowRegisterModal(false)}>
+          <Register
+            initialRole={registrationRole}
+            onClose={() => setShowRegisterModal(false)}
+            onSwitchToLogin={() => {
+              setShowRegisterModal(false);
+              setShowLoginModal(true);
+            }}
+          />
+        </Modal>
+      )}
     </Box>
   );
 }

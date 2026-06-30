@@ -34,8 +34,10 @@ export default function AdBanner({
   const { t, i18n } = useTranslation("common");
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isNearViewport, setIsNearViewport] = useState(false);
   const viewedAdsRef = useRef<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const loadTriggerRef = useRef<HTMLDivElement | null>(null);
 
   const language = useMemo(
     () => (i18n.language?.startsWith("en") ? "en" : "es"),
@@ -43,6 +45,28 @@ export default function AdBanner({
   );
 
   useEffect(() => {
+    const target = loadTriggerRef.current;
+    if (!target || typeof IntersectionObserver === "undefined") {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setIsNearViewport(true);
+        observer.disconnect();
+      },
+      { rootMargin: "400px 0px" },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isNearViewport) return;
+
     let isMounted = true;
 
     const loadAds = async () => {
@@ -69,7 +93,7 @@ export default function AdBanner({
     return () => {
       isMounted = false;
     };
-  }, [placement, language, limit]);
+  }, [placement, language, limit, isNearViewport]);
 
   useEffect(() => {
     if (!ads.length || typeof window === "undefined") return;
@@ -104,7 +128,9 @@ export default function AdBanner({
   }, [ads, placement]);
 
   if (!ads.length) {
-    return hasLoaded ? null : <Box sx={{ minHeight: compact ? 0 : 1 }} />;
+    return hasLoaded ? null : (
+      <Box ref={loadTriggerRef} sx={{ minHeight: compact ? 0 : 1 }} />
+    );
   }
 
   return (
@@ -157,6 +183,10 @@ export default function AdBanner({
                   component="img"
                   src={ad.image_url}
                   alt={ad.title}
+                  width={280}
+                  height={150}
+                  loading="lazy"
+                  decoding="async"
                   sx={{
                     width: "100%",
                     height: "100%",

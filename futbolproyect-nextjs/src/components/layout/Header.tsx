@@ -152,15 +152,15 @@ export default function Header({
           <Box
             component={Link}
             href="/"
+            prefetch={false}
             aria-label="FutbolProyect - Inicio"
             sx={{ display: "flex", alignItems: "center", flexShrink: 0, mr: { lg: 1, xl: 2 } }}
           >
             <Image
-              src="/images/logos/logofpblanco.png"
+              src="/images/logos/logofpblanco.webp"
               alt="FutbolProyect"
               width={105}
               height={60}
-              priority
               style={{ width: 98, height: "auto", objectFit: "contain" }}
             />
           </Box>
@@ -180,6 +180,7 @@ export default function Header({
                 key={item.href}
                 component={Link}
                 href={item.href}
+                prefetch={false}
                 color="inherit"
                 sx={navButtonSx(item.href)}
               >
@@ -289,7 +290,13 @@ export default function Header({
         PaperProps={{ sx: { mt: 1, minWidth: 240, maxHeight: "calc(100vh - 96px)" } }}
       >
         {navItems.map((item) => (
-          <MenuItem key={item.href} component={Link} href={item.href} onClick={closeMobileMenu}>
+          <MenuItem
+            key={item.href}
+            component={Link}
+            href={item.href}
+            prefetch={false}
+            onClick={closeMobileMenu}
+          >
             {t(item.key, item.fallback)}
           </MenuItem>
         ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Box,
@@ -46,14 +47,33 @@ export default function Hero({ metrics }: HeroProps) {
         minHeight: { xs: 650, md: 570 },
         display: "flex",
         alignItems: "center",
+        overflow: "hidden",
         color: "#fff",
         pb: { xs: 16, md: 8 },
-        backgroundImage:
-          "linear-gradient(90deg, rgba(2, 11, 28, .96) 0%, rgba(2, 17, 39, .7) 42%, rgba(2, 17, 39, .12) 72%), url('/images/jugador-estadio-futbol.webp')",
-        backgroundSize: "cover",
-        backgroundPosition: { xs: "62% center", md: "center" },
+        bgcolor: "#06142c",
+        "& > img": {
+          objectPosition: { xs: "62% center", md: "center" },
+        },
       }}
     >
+      <Image
+        src="/images/jugador-estadio-futbol.webp"
+        alt="Futbolista en un estadio representando oportunidades profesionales"
+        fill
+        priority
+        sizes="100vw"
+        style={{ objectFit: "cover" }}
+      />
+      <Box
+        aria-hidden="true"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          background:
+            "linear-gradient(90deg, rgba(2, 11, 28, .96) 0%, rgba(2, 17, 39, .7) 42%, rgba(2, 17, 39, .12) 72%)",
+        }}
+      />
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
         <Box sx={{ maxWidth: { xs: "100%", md: 580 }, position: "relative", zIndex: 1 }}>
           <Typography
@@ -90,6 +110,7 @@ export default function Hero({ metrics }: HeroProps) {
             <Button
               component={Link}
               href="/all-offers"
+              prefetch={false}
               variant="contained"
               endIcon={<ArrowForwardRoundedIcon />}
               sx={{
@@ -105,6 +126,7 @@ export default function Hero({ metrics }: HeroProps) {
             <Button
               component={Link}
               href="/register"
+              prefetch={false}
               variant="outlined"
               sx={{
                 px: 2.5,

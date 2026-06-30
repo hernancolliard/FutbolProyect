@@ -1,14 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import Header from "./Header";
 import Footer from "./Footer";
-import Login from "@/components/auth/Login";
-import Register from "@/components/auth/Register";
-import CreateOffer from "@/components/CreateOffer";
 import { Dialog, Modal, Box } from "@mui/material";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+const Login = dynamic(() => import("@/components/auth/Login"), { ssr: false });
+const Register = dynamic(() => import("@/components/auth/Register"), {
+  ssr: false,
+});
+const CreateOffer = dynamic(() => import("@/components/CreateOffer"), {
+  ssr: false,
+});
 
 interface RootClientLayoutProps {
   children: React.ReactNode;

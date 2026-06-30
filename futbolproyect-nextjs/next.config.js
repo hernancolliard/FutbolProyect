@@ -1,12 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  compress: true,
   staticPageGenerationTimeout: 120,
   trailingSlash: false,
 
   // Agregar headers para permitir Google OAuth popups
   async headers() {
     return [
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=86400, s-maxage=31536000, stale-while-revalidate=604800",
+          },
+        ],
+      },
       {
         source: "/:path*",
         headers: [
