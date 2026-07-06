@@ -5,6 +5,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.893.0",
     "@google-cloud/translate": "^9.2.0",

@@ -434,21 +434,17 @@ router.patch(
       if (isCurrentlyFeatured) {
         // Un-feature the offer
         newFeaturedStatus = false;
-        query = {
-          text: "UPDATE ofertas_laborales SET is_featured = FALSE, featured_until = NULL WHERE id = $1 RETURNING id, is_featured",
-          values: [parseInt(id, 10)],
-        };
+        query =
+          "UPDATE ofertas_laborales SET is_featured = FALSE, featured_until = NULL WHERE id = @id RETURNING id, is_featured";
       } else {
         // Feature the offer for 30 days
         newFeaturedStatus = true;
-        query = {
-          text: "UPDATE ofertas_laborales SET is_featured = TRUE, featured_until = NOW() + INTERVAL '30 days' WHERE id = $1 RETURNING id, is_featured",
-          values: [parseInt(id, 10)],
-        };
+        query =
+          "UPDATE ofertas_laborales SET is_featured = TRUE, featured_until = NOW() + INTERVAL '30 days' WHERE id = @id RETURNING id, is_featured";
       }
 
       // 3. Execute the update
-      const result = await client.query(query);
+      const result = await client.query(query, { id: parseInt(id, 10) });
       
       await client.query("COMMIT");
       client.release();

@@ -101,7 +101,7 @@ router.post("/google-login", async (req, res) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
-    const { email: googleEmail, name, picture } = ticket.getPayload();
+    const { email: googleEmail, name } = ticket.getPayload();
     const email = normalizeEmail(googleEmail);
 
     let result = await db.query("SELECT * FROM usuarios WHERE LOWER(TRIM(email)) = @email", {
@@ -111,11 +111,17 @@ router.post("/google-login", async (req, res) => {
     let user = result.rows[0];
 
     if (!user) {
+      // La columna es NOT NULL, pero este valor aleatorio nunca se usa para
+      // autenticar: las cuentas creadas aquí ingresan únicamente con Google.
+      const passwordHash = await bcrypt.hash(
+        crypto.randomBytes(32).toString("hex"),
+        12,
+      );
       const created = await db.query(
-        `INSERT INTO usuarios (nombre, email, foto_perfil, tipo_usuario)
-         VALUES (@name, @email, @picture, 'ofertante')
+        `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
+         VALUES (@name, @email, @passwordHash, 'ofertante')
          RETURNING *`,
-        { name, email, picture },
+        { name, email, passwordHash },
       );
       user = created.rows[0];
       await sendWelcomeEmail(user.email, user.nombre, user.tipo_usuario);

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -34,7 +35,7 @@ const getAge = (birthDate?: string) => {
   return age >= 0 ? age : null;
 };
 
-export default function ProfileCard({ profile }: ProfileCardProps) {
+function ProfileCard({ profile }: ProfileCardProps) {
   const { t } = useTranslation("common");
   const profileImageUrl =
     profile.foto_perfil_url || "/images/logos/logofpazul.webp";
@@ -227,3 +228,5 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
     </Paper>
   );
 }
+
+export default memo(ProfileCard);

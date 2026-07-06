@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Link from "next/link";
 import {
   Box,
@@ -56,6 +62,86 @@ const getProfileAge = (birthDate?: string) => {
   return age >= 0 ? age : null;
 };
 
+type ProfilesResultsProps = {
+  profiles: Profile[];
+  totalProfiles: number;
+  onClear: () => void;
+};
+
+const ProfilesResults = memo(function ProfilesResults({
+  profiles,
+  totalProfiles,
+  onClear,
+}: ProfilesResultsProps) {
+  const { t } = useTranslation("common");
+
+  return (
+    <Box sx={{ minWidth: 0 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        spacing={0.5}
+        sx={{ mb: 2.25 }}
+      >
+        <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
+          {t("profiles_results_count", {
+            shown: profiles.length,
+            total: totalProfiles,
+          })}
+        </Typography>
+        <Typography
+          sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}
+        >
+          {t("available_talent")}
+        </Typography>
+      </Stack>
+
+      {profiles.length ? (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(3, minmax(0, 1fr))",
+            },
+            gap: 2,
+          }}
+        >
+          {profiles.map((profile, index) => (
+            <React.Fragment key={profile.id}>
+              <ProfileCard profile={profile} />
+              {(index + 1) % 8 === 0 && (
+                <Box sx={{ gridColumn: "1 / -1" }}>
+                  <AdBanner placement="profiles_inline" compact />
+                </Box>
+              )}
+            </React.Fragment>
+          ))}
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            p: 5,
+            textAlign: "center",
+            bgcolor: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: 2.5,
+          }}
+        >
+          <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
+            {t("no_profiles_with_filters")}
+          </Typography>
+          <Button onClick={onClear} sx={{ mt: 1 }}>
+            {t("clear_filters")}
+          </Button>
+        </Box>
+      )}
+    </Box>
+  );
+});
+
 export default function FilterControls({
   nacionalidades,
   initialProfiles,
@@ -95,30 +181,32 @@ export default function FilterControls({
     }
   }, [ageBounds, isAgeFilterActive]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     setAppliedFilters(draftFilters);
     setAppliedAgeRange(draftAgeRange);
     setShowMobileFilters(false);
-  };
+  }, [draftAgeRange, draftFilters]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setDraftFilters(emptyFilters);
     setAppliedFilters(emptyFilters);
     setDraftAgeRange(ageBounds);
     setAppliedAgeRange(ageBounds);
     setIsAgeFilterActive(false);
-  };
+  }, [ageBounds]);
 
-  const handleAgeChange = (range: [number, number]) => {
+  const handleAgeChange = useCallback((range: [number, number]) => {
     setDraftAgeRange(range);
     setIsAgeFilterActive(true);
-  };
+  }, []);
 
-  const handlePositionChange = (puesto: string) => {
-    const next = { ...draftFilters, puesto };
-    setDraftFilters(next);
-    setAppliedFilters(next);
-  };
+  const handlePositionChange = useCallback((puesto: string) => {
+    setDraftFilters((currentFilters) => {
+      const nextFilters = { ...currentFilters, puesto };
+      setAppliedFilters(nextFilters);
+      return nextFilters;
+    });
+  }, []);
 
   const filteredProfiles = useMemo(
     () =>
@@ -147,22 +235,25 @@ export default function FilterControls({
     [appliedAgeRange, appliedFilters, initialProfiles, isAgeFilterActive],
   );
 
-  const representedPositions = new Set(
-    initialProfiles
-      .map((profile) =>
-        getPlayerPositionCategory(profile.posicion_principal),
-      )
-      .filter(Boolean),
-  ).size;
-  const completeProfiles = initialProfiles.filter(
-    (profile) => profile.foto_perfil_url && profile.cv_url,
-  ).length;
-  const metrics = [
-    { value: initialProfiles.length, label: t("available_profiles_metric") },
-    { value: nacionalidades.length, label: t("nationalities_metric") },
-    { value: representedPositions, label: t("represented_positions_metric") },
-    { value: completeProfiles, label: t("complete_profiles_metric") },
-  ];
+  const metrics = useMemo(() => {
+    const representedPositions = new Set(
+      initialProfiles
+        .map((profile) =>
+          getPlayerPositionCategory(profile.posicion_principal),
+        )
+        .filter(Boolean),
+    ).size;
+    const completeProfiles = initialProfiles.filter(
+      (profile) => profile.foto_perfil_url && profile.cv_url,
+    ).length;
+
+    return [
+      { value: initialProfiles.length, label: t("available_profiles_metric") },
+      { value: nacionalidades.length, label: t("nationalities_metric") },
+      { value: representedPositions, label: t("represented_positions_metric") },
+      { value: completeProfiles, label: t("complete_profiles_metric") },
+    ];
+  }, [initialProfiles, nacionalidades.length, t]);
 
   const filtersSidebar = (
     <ProfileFiltersSidebar
@@ -261,69 +352,11 @@ export default function FilterControls({
             {filtersSidebar}
           </Box>
 
-          <Box sx={{ minWidth: 0 }}>
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              justifyContent="space-between"
-              alignItems={{ xs: "flex-start", sm: "center" }}
-              spacing={0.5}
-              sx={{ mb: 2.25 }}
-            >
-              <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
-                {t("profiles_results_count", {
-                  shown: filteredProfiles.length,
-                  total: initialProfiles.length,
-                })}
-              </Typography>
-              <Typography
-                sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}
-              >
-                {t("available_talent")}
-              </Typography>
-            </Stack>
-
-            {filteredProfiles.length ? (
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2, minmax(0, 1fr))",
-                    lg: "repeat(3, minmax(0, 1fr))",
-                  },
-                  gap: 2,
-                }}
-              >
-                {filteredProfiles.map((profile, index) => (
-                  <React.Fragment key={profile.id}>
-                    <ProfileCard profile={profile} />
-                    {(index + 1) % 8 === 0 && (
-                      <Box sx={{ gridColumn: "1 / -1" }}>
-                        <AdBanner placement="profiles_inline" compact />
-                      </Box>
-                    )}
-                  </React.Fragment>
-                ))}
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  p: 5,
-                  textAlign: "center",
-                  bgcolor: "#fff",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 2.5,
-                }}
-              >
-                <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                  {t("no_profiles_with_filters")}
-                </Typography>
-                <Button onClick={clearFilters} sx={{ mt: 1 }}>
-                  {t("clear_filters")}
-                </Button>
-              </Box>
-            )}
-          </Box>
+          <ProfilesResults
+            profiles={filteredProfiles}
+            totalProfiles={initialProfiles.length}
+            onClear={clearFilters}
+          />
         </Box>
       </Container>
     </Box>
