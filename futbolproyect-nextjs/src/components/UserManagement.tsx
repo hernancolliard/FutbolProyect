@@ -1,11 +1,65 @@
 'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import NextLink from "next/link";
 import apiClient from "@/lib/apiClient"; // Centralized apiClient
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import GrantSubscriptionModal from "./GrantSubscriptionModal";
+
+const hasActiveSubscription = (user) => {
+  if (user.subscription_status !== "activa") return false;
+
+  const subscriptionEnd = user.subscription_end_date
+    ? new Date(user.subscription_end_date)
+    : null;
+
+  return Boolean(
+    subscriptionEnd &&
+      !Number.isNaN(subscriptionEnd.getTime()) &&
+      subscriptionEnd.getTime() > Date.now(),
+  );
+};
+
+const copyTextToClipboard = async (text) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textArea);
+
+  if (!copied) {
+    throw new Error("Clipboard API unavailable");
+  }
+};
 
 function UserManagement() {
   const { t } = useTranslation('common');
@@ -13,6 +67,55 @@ function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userTypeFilter, setUserTypeFilter] = useState("all");
+  const [subscriptionFilter, setSubscriptionFilter] = useState("all");
+  const [selectedUserIds, setSelectedUserIds] = useState(() => new Set());
+
+  const userTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(users.map((user) => user.tipo_usuario).filter(Boolean)),
+      ).sort(),
+    [users],
+  );
+
+  const filteredUsers = useMemo(
+    () =>
+      users.filter((user) => {
+        const matchesUserType =
+          userTypeFilter === "all" || user.tipo_usuario === userTypeFilter;
+        const isActive = hasActiveSubscription(user);
+        const matchesSubscription =
+          subscriptionFilter === "all" ||
+          (subscriptionFilter === "active" && isActive) ||
+          (subscriptionFilter === "inactive" && !isActive);
+
+        return matchesUserType && matchesSubscription;
+      }),
+    [subscriptionFilter, userTypeFilter, users],
+  );
+
+  const selectedEmails = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          users
+            .filter((user) => selectedUserIds.has(String(user.id)))
+            .map((user) => String(user.email || "").trim())
+            .filter(Boolean),
+        ),
+      ),
+    [selectedUserIds, users],
+  );
+
+  const selectedVisibleCount = filteredUsers.filter((user) =>
+    selectedUserIds.has(String(user.id)),
+  ).length;
+  const allVisibleSelected =
+    filteredUsers.length > 0 &&
+    selectedVisibleCount === filteredUsers.length;
+  const someVisibleSelected =
+    selectedVisibleCount > 0 && !allVisibleSelected;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -66,6 +169,57 @@ function UserManagement() {
     }
   };
 
+  const handleToggleUser = (userId) => {
+    setSelectedUserIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      const normalizedId = String(userId);
+
+      if (nextIds.has(normalizedId)) {
+        nextIds.delete(normalizedId);
+      } else {
+        nextIds.add(normalizedId);
+      }
+
+      return nextIds;
+    });
+  };
+
+  const handleToggleAllVisible = () => {
+    setSelectedUserIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+
+      filteredUsers.forEach((user) => {
+        const normalizedId = String(user.id);
+        if (allVisibleSelected) {
+          nextIds.delete(normalizedId);
+        } else {
+          nextIds.add(normalizedId);
+        }
+      });
+
+      return nextIds;
+    });
+  };
+
+  const handleCopyEmails = async () => {
+    if (!selectedEmails.length) return;
+
+    try {
+      await copyTextToClipboard(selectedEmails.join(", "));
+      toast.success(
+        t("emails_copied_success", {
+          defaultValue: "{{count}} emails copiados.",
+          count: selectedEmails.length,
+        }),
+      );
+    } catch (error) {
+      console.error("Error copying user emails:", error);
+      toast.error(
+        t("emails_copy_error", "No se pudieron copiar los emails."),
+      );
+    }
+  };
+
   if (loading) {
     return (
       <Typography align="center" sx={{ mt: 4 }}>
@@ -80,9 +234,100 @@ function UserManagement() {
       <Typography variant="h5" sx={{ m: 2 }}>
         {t('users_title', 'Gestión de Usuarios')}
       </Typography>
-      <Table className="management-table">
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={1.5}
+        alignItems={{ xs: "stretch", md: "center" }}
+        sx={{ px: 2, pb: 2 }}
+      >
+        <FormControl size="small" sx={{ minWidth: 190 }}>
+          <InputLabel>{t("user_type_filter", "Tipo de usuario")}</InputLabel>
+          <Select
+            value={userTypeFilter}
+            label={t("user_type_filter", "Tipo de usuario")}
+            onChange={(event) => setUserTypeFilter(event.target.value)}
+          >
+            <MenuItem value="all">
+              {t("all_user_types", "Todos los tipos")}
+            </MenuItem>
+            {userTypes.map((userType) => (
+              <MenuItem key={userType} value={userType}>
+                {userType}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 210 }}>
+          <InputLabel>
+            {t("subscription_status_filter", "Estado de suscripción")}
+          </InputLabel>
+          <Select
+            value={subscriptionFilter}
+            label={t(
+              "subscription_status_filter",
+              "Estado de suscripción",
+            )}
+            onChange={(event) => setSubscriptionFilter(event.target.value)}
+          >
+            <MenuItem value="all">
+              {t("all_subscription_statuses", "Todos los estados")}
+            </MenuItem>
+            <MenuItem value="active">
+              {t("subscription_active", "Activa")}
+            </MenuItem>
+            <MenuItem value="inactive">
+              {t("not_available", "No disponible")}
+            </MenuItem>
+          </Select>
+        </FormControl>
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t("filtered_users_count", {
+              defaultValue: "{{shown}} de {{total}} usuarios",
+              shown: filteredUsers.length,
+              total: users.length,
+            })}
+          </Typography>
+        </Box>
+
+        <Button
+          variant="contained"
+          onClick={handleCopyEmails}
+          disabled={!selectedEmails.length}
+        >
+          {t("copy_selected_emails", {
+            defaultValue: "Copiar emails ({{count}})",
+            count: selectedEmails.length,
+          })}
+        </Button>
+        <Button
+          variant="text"
+          onClick={() => setSelectedUserIds(new Set())}
+          disabled={!selectedEmails.length}
+        >
+          {t("clear_selection", "Limpiar selección")}
+        </Button>
+      </Stack>
+
+      <Table className="management-table" sx={{ minWidth: 1200 }}>
         <TableHead>
           <TableRow>
+            <TableCell padding="checkbox">
+              <Checkbox
+                checked={allVisibleSelected}
+                indeterminate={someVisibleSelected}
+                onChange={handleToggleAllVisible}
+                disabled={!filteredUsers.length}
+                inputProps={{
+                  "aria-label": t(
+                    "select_all_filtered_users",
+                    "Seleccionar todos los usuarios filtrados",
+                  ),
+                }}
+              />
+            </TableCell>
             <TableCell>{t('id_header', 'ID')}</TableCell>
             <TableCell>{t('name_header', 'Nombre')}</TableCell>
             <TableCell>{t('email_header', 'Email')}</TableCell>
@@ -97,18 +342,34 @@ function UserManagement() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {users.map((user) => {
-            const subscriptionEnd = user.subscription_end_date
-              ? new Date(user.subscription_end_date)
-              : null;
-            const hasActiveSubscription =
-              user.subscription_status === 'activa' &&
-              Boolean(subscriptionEnd && !Number.isNaN(subscriptionEnd.getTime()) && subscriptionEnd.getTime() > Date.now());
+          {filteredUsers.map((user) => {
+            const isActiveSubscription = hasActiveSubscription(user);
 
             return (
             <TableRow key={user.id}>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={selectedUserIds.has(String(user.id))}
+                  onChange={() => handleToggleUser(user.id)}
+                  inputProps={{
+                    "aria-label": t("select_user_email", {
+                      defaultValue: "Seleccionar email de {{name}}",
+                      name: user.nombre,
+                    }),
+                  }}
+                />
+              </TableCell>
               <TableCell>{user.id}</TableCell>
-              <TableCell>{user.nombre}</TableCell>
+              <TableCell>
+                <Link
+                  component={NextLink}
+                  href={`/profile/${user.id}`}
+                  underline="hover"
+                  sx={{ fontWeight: 700 }}
+                >
+                  {user.nombre}
+                </Link>
+              </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.tipo_usuario}</TableCell>
               <TableCell>{user.subscription_plan || t('na', 'N/A')}</TableCell>
@@ -120,11 +381,11 @@ function UserManagement() {
               <TableCell>
                 <span
                   style={{
-                    color: hasActiveSubscription ? 'green' : 'red',
+                    color: isActiveSubscription ? 'green' : 'red',
                     fontWeight: 'bold',
                   }}
                 >
-                  {hasActiveSubscription
+                  {isActiveSubscription
                     ? t('subscription_active', 'Activa')
                     : t('not_available', 'No disponible')}
                 </span>
