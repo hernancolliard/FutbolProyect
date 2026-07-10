@@ -61,6 +61,27 @@ const copyTextToClipboard = async (text) => {
   }
 };
 
+const escapeCsvValue = (value) => {
+  const stringValue = String(value ?? "");
+
+  if (/[",\r\n]/.test(stringValue)) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+
+  return stringValue;
+};
+
+const createMailmeteorCsv = (contacts) => {
+  const rows = [
+    ["Nombre", "Email"],
+    ...contacts.map((contact) => [contact.nombre, contact.email]),
+  ];
+
+  return rows
+    .map((row) => row.map(escapeCsvValue).join(","))
+    .join("\r\n");
+};
+
 function UserManagement() {
   const { t } = useTranslation('common');
   const [users, setUsers] = useState([]);
@@ -95,17 +116,30 @@ function UserManagement() {
     [subscriptionFilter, userTypeFilter, users],
   );
 
-  const selectedEmails = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          users
-            .filter((user) => selectedUserIds.has(String(user.id)))
-            .map((user) => String(user.email || "").trim())
-            .filter(Boolean),
-        ),
-      ),
-    [selectedUserIds, users],
+  const selectedContacts = useMemo(() => {
+    const contactsByEmail = new Map();
+
+    users
+      .filter((user) => selectedUserIds.has(String(user.id)))
+      .forEach((user) => {
+        const email = String(user.email || "").trim();
+        if (!email) return;
+
+        const normalizedEmail = email.toLowerCase();
+        if (!contactsByEmail.has(normalizedEmail)) {
+          contactsByEmail.set(normalizedEmail, {
+            nombre: String(user.nombre || "").trim(),
+            email,
+          });
+        }
+      });
+
+    return Array.from(contactsByEmail.values());
+  }, [selectedUserIds, users]);
+
+  const selectedContactsCsv = useMemo(
+    () => createMailmeteorCsv(selectedContacts),
+    [selectedContacts],
   );
 
   const selectedVisibleCount = filteredUsers.filter((user) =>
@@ -201,23 +235,40 @@ function UserManagement() {
     });
   };
 
-  const handleCopyEmails = async () => {
-    if (!selectedEmails.length) return;
+  const handleCopySelectedContacts = async () => {
+    if (!selectedContacts.length) return;
 
     try {
-      await copyTextToClipboard(selectedEmails.join(", "));
+      await copyTextToClipboard(selectedContactsCsv);
       toast.success(
-        t("emails_copied_success", {
-          defaultValue: "{{count}} emails copiados.",
-          count: selectedEmails.length,
+        t("contacts_copied_success", {
+          defaultValue: "{{count}} contactos copiados en CSV.",
+          count: selectedContacts.length,
         }),
       );
     } catch (error) {
-      console.error("Error copying user emails:", error);
+      console.error("Error copying user contacts:", error);
       toast.error(
-        t("emails_copy_error", "No se pudieron copiar los emails."),
+        t("contacts_copy_error", "No se pudieron copiar los contactos."),
       );
     }
+  };
+
+  const handleDownloadSelectedContactsCsv = () => {
+    if (!selectedContacts.length) return;
+
+    const blob = new Blob([`\uFEFF${selectedContactsCsv}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "mailmeteor-contactos.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -294,18 +345,28 @@ function UserManagement() {
 
         <Button
           variant="contained"
-          onClick={handleCopyEmails}
-          disabled={!selectedEmails.length}
+          onClick={handleCopySelectedContacts}
+          disabled={!selectedContacts.length}
         >
-          {t("copy_selected_emails", {
-            defaultValue: "Copiar emails ({{count}})",
-            count: selectedEmails.length,
+          {t("copy_selected_contacts_csv", {
+            defaultValue: "Copiar CSV ({{count}})",
+            count: selectedContacts.length,
+          })}
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={handleDownloadSelectedContactsCsv}
+          disabled={!selectedContacts.length}
+        >
+          {t("download_selected_contacts_csv", {
+            defaultValue: "Descargar CSV ({{count}})",
+            count: selectedContacts.length,
           })}
         </Button>
         <Button
           variant="text"
           onClick={() => setSelectedUserIds(new Set())}
-          disabled={!selectedEmails.length}
+          disabled={!selectedContacts.length}
         >
           {t("clear_selection", "Limpiar selección")}
         </Button>
@@ -352,8 +413,8 @@ function UserManagement() {
                   checked={selectedUserIds.has(String(user.id))}
                   onChange={() => handleToggleUser(user.id)}
                   inputProps={{
-                    "aria-label": t("select_user_email", {
-                      defaultValue: "Seleccionar email de {{name}}",
+                    "aria-label": t("select_user_contact", {
+                      defaultValue: "Seleccionar contacto de {{name}}",
                       name: user.nombre,
                     }),
                   }}
