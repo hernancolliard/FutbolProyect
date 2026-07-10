@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 const {
   sendSubscriptionConfirmationEmail,
 } = require("../services/emailService");
@@ -6,6 +7,17 @@ const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const paypal = require("@paypal/checkout-server-sdk");
 const db = require("../db");
 require("dotenv").config();
+const {
+  attachReferralToSubscription,
+  createCommissionForPayment,
+  reverseCommissionByTransaction,
+} = require("../services/affiliateService");
+const {
+  extractPaypalSubscriptionId,
+  extractPaypalTransactionId,
+  extractPaypalSaleAmount,
+  extractOriginalSaleId,
+} = require("../services/paypalPayloadService");
 
 const router = express.Router();
 
@@ -87,6 +99,68 @@ const calculateSubscriptionEndDate = (cycle, startDate = new Date()) => {
     throw new Error(`Unsupported billing cycle: ${cycle}`);
   }
   return endDate;
+};
+
+const getPaypalCapture = (captureResult) =>
+  captureResult?.purchase_units?.[0]?.payments?.captures?.[0] || null;
+
+const getPaypalCustomId = (captureResult) =>
+  captureResult?.purchase_units?.[0]?.custom_id ||
+  getPaypalCapture(captureResult)?.custom_id ||
+  null;
+
+const parsePaypalCustomId = (customId) => {
+  const value = String(customId || "");
+  if (value.startsWith("fpsub:")) {
+    const id = Number.parseInt(value.replace("fpsub:", ""), 10);
+    return Number.isFinite(id) ? { type: "subscription", subscriptionId: id } : null;
+  }
+  if (value.includes("_")) return { type: "featured_offer", value };
+  const [plan, cycle] = value.split("-");
+  if (VALID_SUBSCRIPTION_PLANS.has(plan) && VALID_BILLING_CYCLES.has(cycle)) {
+    return { type: "legacy_subscription", plan, cycle };
+  }
+  return null;
+};
+
+const verifyPaypalWebhookSignature = async (req, event) => {
+  if (!process.env.PAYPAL_WEBHOOK_ID) {
+    return process.env.NODE_ENV === "production" ? "FAILED" : "PENDING";
+  }
+
+  const transmissionId = req.get("paypal-transmission-id");
+  const transmissionTime = req.get("paypal-transmission-time");
+  const transmissionSig = req.get("paypal-transmission-sig");
+  const certUrl = req.get("paypal-cert-url");
+  const authAlgo = req.get("paypal-auth-algo");
+
+  if (!transmissionId || !transmissionTime || !transmissionSig || !certUrl || !authAlgo) {
+    return "FAILED";
+  }
+
+  try {
+    const verification = await paypalClient.execute({
+      path: "/v1/notifications/verify-webhook-signature",
+      verb: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: {
+        auth_algo: authAlgo,
+        cert_url: certUrl,
+        transmission_id: transmissionId,
+        transmission_sig: transmissionSig,
+        transmission_time: transmissionTime,
+        webhook_id: process.env.PAYPAL_WEBHOOK_ID,
+        webhook_event: event,
+      },
+    });
+
+    return verification.result?.verification_status === "SUCCESS"
+      ? "VERIFIED"
+      : "FAILED";
+  } catch (error) {
+    console.error("Error verificando webhook PayPal:", error.message);
+    return "FAILED";
+  }
 };
 
 // Configura PayPal
@@ -313,6 +387,7 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     let description = "";
     let value = "0.00";
     let custom_id;
+    let pendingSubscriptionId = null;
 
     if (planType === "ofertante" || planType === "postulante") {
       const planResult = await db.query(
@@ -340,7 +415,30 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
       }
       value = price.toFixed(2);
       description = `Suscripción ${planType} - ${billingCycle}`;
-      custom_id = `${planType}-${billingCycle}`;
+      const pendingSubscription = await db.query(
+        `INSERT INTO suscripciones
+          (id_usuario, plan, estado, metodo_pago, affiliate_referral_id)
+         VALUES
+          (@userId, @plan, 'pendiente', 'paypal',
+           (SELECT id FROM affiliate_referrals WHERE referred_user_id = @userId))
+         ON CONFLICT (id_usuario) DO UPDATE SET
+           plan = @plan,
+           estado = CASE
+             WHEN suscripciones.estado = 'activa' AND suscripciones.fecha_fin > NOW()
+             THEN suscripciones.estado
+             ELSE 'pendiente'
+           END,
+           metodo_pago = 'paypal',
+           affiliate_referral_id = COALESCE(
+             suscripciones.affiliate_referral_id,
+             (SELECT id FROM affiliate_referrals WHERE referred_user_id = @userId)
+           ),
+           updated_at = NOW()
+         RETURNING id`,
+        { userId: req.user.id, plan: planType },
+      );
+      pendingSubscriptionId = pendingSubscription.rows[0].id;
+      custom_id = `fpsub:${pendingSubscriptionId}`;
     } else if (planType === "destacar_oferta") {
       description = "Destacar Oferta";
       value = "4.00";
@@ -371,6 +469,14 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     });
 
     const order = await paypalClient.execute(request);
+    if (pendingSubscriptionId) {
+      await db.query(
+        `UPDATE suscripciones
+         SET paypal_order_id = @orderId, updated_at = NOW()
+         WHERE id = @subscriptionId`,
+        { orderId: order.result.id, subscriptionId: pendingSubscriptionId },
+      );
+    }
 
     // --- NUEVO LOG 5: Orden creada exitosamente ---
     console.log("Orden de PayPal creada con éxito. OrderID:", order.result.id);
@@ -393,7 +499,17 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
   }
 });
 
-router.post("/capture-paypal-order", verificarToken, async (req, res) => {
+router.post("/capture-paypal-order-legacy", verificarToken, async (req, res) => {
+  res.status(410).json({
+    message: "Endpoint legacy deshabilitado. Usar /api/payments/capture-paypal-order.",
+  });
+});
+
+router.post("/capture-paypal-order-legacy-disabled", verificarToken, async (req, res) => {
+  return res.status(410).json({
+    message: "Endpoint legacy deshabilitado.",
+  });
+
   const { orderID } = req.body;
   const userId = req.user.id;
 
@@ -404,7 +520,7 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
     const capture = await paypalClient.execute(request);
     const paypalPaymentId = capture.result.id;
     const status = capture.result.status;
-    const customId = capture.result.purchase_units[0].custom_id;
+    const customId = getPaypalCustomId(capture.result);
 
     if (status === "COMPLETED") {
       if (customId.includes("_")) {
@@ -469,6 +585,289 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
   } catch (error) {
     console.error("Error al capturar orden de PayPal:", error);
     res.status(500).json({ message: "Error al capturar la orden de PayPal." });
+  }
+});
+
+router.post("/capture-paypal-order", verificarToken, async (req, res) => {
+  const { orderID } = req.body;
+  const userId = req.user.id;
+
+  const request = new paypal.orders.OrdersCaptureRequest(orderID);
+  request.prefer("return=representation");
+
+  try {
+    const capture = await paypalClient.execute(request);
+    const captureRecord = getPaypalCapture(capture.result);
+    const paypalPaymentId = captureRecord?.id || capture.result.id;
+    const status = capture.result.status;
+    const customId = getPaypalCustomId(capture.result);
+    const parsedCustomId = parsePaypalCustomId(customId);
+
+    if (status !== "COMPLETED") {
+      return res.status(400).json({ message: "El pago de PayPal no se completo." });
+    }
+
+    if (parsedCustomId?.type === "featured_offer") {
+      const [, offerId] = customId.split("_");
+      const featuredUntil = new Date();
+      featuredUntil.setDate(featuredUntil.getDate() + 7);
+
+      await db.query(
+        `UPDATE ofertas_laborales
+         SET is_featured = 1, featured_until = @featuredUntil
+         WHERE id = @offerId`,
+        {
+          offerId: parseInt(offerId, 10),
+          featuredUntil,
+        },
+      );
+      return res.json({ success: true });
+    }
+
+    let plan;
+    let cycle = req.body.billingCycle;
+    let internalSubscriptionId = null;
+
+    if (parsedCustomId?.type === "subscription") {
+      const subscriptionResult = await db.query(
+        "SELECT id, plan FROM suscripciones WHERE id = @id AND id_usuario = @userId",
+        { id: parsedCustomId.subscriptionId, userId },
+      );
+      if (subscriptionResult.rows.length === 0) {
+        return res.status(400).json({ message: "Suscripcion interna no encontrada." });
+      }
+      internalSubscriptionId = subscriptionResult.rows[0].id;
+      plan = subscriptionResult.rows[0].plan;
+    } else if (parsedCustomId?.type === "legacy_subscription") {
+      plan = parsedCustomId.plan;
+      cycle = parsedCustomId.cycle;
+    } else {
+      return res.status(400).json({
+        message: "Los datos del plan de suscripcion no son validos.",
+      });
+    }
+
+    if (!VALID_SUBSCRIPTION_PLANS.has(plan) || !VALID_BILLING_CYCLES.has(cycle)) {
+      return res.status(400).json({
+        message: "Los datos del plan de suscripcion no son validos.",
+      });
+    }
+
+    const paidAt = captureRecord?.create_time || new Date();
+    const fechaFin = calculateSubscriptionEndDate(cycle, paidAt);
+    const grossAmount =
+      captureRecord?.amount?.value ||
+      capture.result.purchase_units?.[0]?.amount?.value;
+    const currency =
+      captureRecord?.amount?.currency_code ||
+      capture.result.purchase_units?.[0]?.amount?.currency_code ||
+      "USD";
+
+    const updatedSubscription = await db.query(
+      `INSERT INTO suscripciones
+        (id_usuario, id_paypal_pago, paypal_order_id, plan, fecha_fin, estado,
+         metodo_pago, first_paid_at, affiliate_referral_id)
+       VALUES
+        (@userId, @paypalPaymentId, @orderId, @plan, @fechaFin, 'activa',
+         'paypal', @paidAt, (SELECT id FROM affiliate_referrals WHERE referred_user_id = @userId))
+       ON CONFLICT (id_usuario) DO UPDATE SET
+        id_paypal_pago = @paypalPaymentId,
+        paypal_order_id = @orderId,
+        plan = @plan,
+        fecha_fin = @fechaFin,
+        estado = 'activa',
+        metodo_pago = 'paypal',
+        first_paid_at = COALESCE(suscripciones.first_paid_at, @paidAt),
+        affiliate_referral_id = COALESCE(
+          suscripciones.affiliate_referral_id,
+          (SELECT id FROM affiliate_referrals WHERE referred_user_id = @userId)
+        ),
+        updated_at = NOW()
+       RETURNING id`,
+      {
+        userId: parseInt(userId, 10),
+        paypalPaymentId: paypalPaymentId.toString(),
+        orderId: orderID,
+        plan,
+        fechaFin,
+        paidAt,
+      },
+    );
+    internalSubscriptionId = internalSubscriptionId || updatedSubscription.rows[0]?.id;
+
+    await attachReferralToSubscription({ userId: parseInt(userId, 10) });
+    if (grossAmount) {
+      await createCommissionForPayment({
+        userId: parseInt(userId, 10),
+        paypalTransactionId: paypalPaymentId.toString(),
+        paypalSubscriptionId: null,
+        grossAmount: String(grossAmount),
+        currency,
+        paymentDate: paidAt,
+      });
+    }
+
+    const userResult = await db.query("SELECT nombre, email FROM usuarios WHERE id = @userId", {
+      userId: parseInt(userId, 10),
+    });
+    if (userResult.rows.length > 0) {
+      const user = userResult.rows[0];
+      sendSubscriptionConfirmationEmail(user.email, user.nombre, plan, fechaFin)
+        .catch((emailError) => console.error("Failed to send subscription email for PayPal:", emailError));
+    }
+
+    res.json({ success: true, subscriptionId: internalSubscriptionId });
+  } catch (error) {
+    console.error("Error al capturar orden de PayPal:", error);
+    res.status(500).json({ message: "Error al capturar la orden de PayPal." });
+  }
+});
+
+router.post("/webhook-paypal", async (req, res) => {
+  const event = req.body || {};
+  const paypalEventId = String(event.id || "");
+  const eventType = String(event.event_type || "");
+  const resourceId = String(event.resource?.id || "");
+
+  if (!paypalEventId || !eventType) {
+    return res.status(400).json({ message: "Webhook PayPal invalido." });
+  }
+
+  const client = await db.getClient();
+  try {
+    await client.query("BEGIN");
+    const verificationStatus = await verifyPaypalWebhookSignature(req, event);
+    const rawBodySha256 = req.rawBody
+      ? crypto.createHash("sha256").update(req.rawBody).digest("hex")
+      : null;
+
+    const eventInsert = await client.query(
+      `INSERT INTO paypal_webhook_events
+        (paypal_event_id, event_type, resource_id, verification_status,
+         processing_status, payload, raw_body_sha256)
+       VALUES
+        (@paypalEventId, @eventType, @resourceId, @verificationStatus,
+         'RECEIVED', @payload, @rawBodySha256)
+       ON CONFLICT (paypal_event_id) DO UPDATE SET
+         updated_at = NOW()
+       RETURNING *`,
+      {
+        paypalEventId,
+        eventType,
+        resourceId: resourceId || null,
+        verificationStatus,
+        payload: event,
+        rawBodySha256,
+      },
+    );
+
+    const webhookRow = eventInsert.rows[0];
+    if (webhookRow.processing_status === "PROCESSED") {
+      await client.query("COMMIT");
+      return res.status(200).json({ ok: true, duplicate: true });
+    }
+    if (verificationStatus !== "VERIFIED") {
+      await client.query(
+        `UPDATE paypal_webhook_events
+         SET processing_status = 'FAILED',
+             error_message = 'Webhook no verificado',
+             processed_at = NOW(),
+             updated_at = NOW()
+         WHERE id = @id`,
+        { id: webhookRow.id },
+      );
+      await client.query("COMMIT");
+      return res.status(202).json({ ok: false, verificationStatus });
+    }
+
+    if (eventType === "PAYMENT.SALE.COMPLETED") {
+      const transactionId = extractPaypalTransactionId(event);
+      const subscriptionId = extractPaypalSubscriptionId(event);
+      const amount = extractPaypalSaleAmount(event);
+      const subscription = subscriptionId
+        ? await client.query(
+            `SELECT id_usuario FROM suscripciones
+             WHERE id_paypal_suscripcion = @subscriptionId OR id_paypal_pago = @subscriptionId
+             LIMIT 1`,
+            { subscriptionId },
+          )
+        : { rows: [] };
+
+      if (subscription.rows[0] && transactionId && amount) {
+        await createCommissionForPayment({
+          client,
+          userId: subscription.rows[0].id_usuario,
+          paypalTransactionId: String(transactionId),
+          paypalSubscriptionId: subscriptionId,
+          paypalWebhookEventId: webhookRow.id,
+          grossAmount: amount.value,
+          currency: amount.currency,
+          paymentDate: event.create_time || new Date(),
+        });
+      }
+    } else if (
+      eventType === "PAYMENT.SALE.REFUNDED" ||
+      eventType === "PAYMENT.SALE.REVERSED"
+    ) {
+      const originalSaleId = extractOriginalSaleId(event) || extractPaypalTransactionId(event);
+      await reverseCommissionByTransaction({
+        client,
+        paypalTransactionId: String(originalSaleId || ""),
+        reason: eventType,
+      });
+    } else if (eventType.startsWith("BILLING.SUBSCRIPTION.")) {
+      const subscriptionId = extractPaypalSubscriptionId(event);
+      const statusMap = {
+        "BILLING.SUBSCRIPTION.CREATED": "CREATED",
+        "BILLING.SUBSCRIPTION.ACTIVATED": "ACTIVE",
+        "BILLING.SUBSCRIPTION.UPDATED": "ACTIVE",
+        "BILLING.SUBSCRIPTION.CANCELLED": "CANCELLED",
+        "BILLING.SUBSCRIPTION.SUSPENDED": "SUSPENDED",
+        "BILLING.SUBSCRIPTION.EXPIRED": "EXPIRED",
+        "BILLING.SUBSCRIPTION.PAYMENT.FAILED": "PAYMENT_FAILED",
+      };
+      if (subscriptionId) {
+        await client.query(
+          `UPDATE suscripciones
+           SET estado = @status, updated_at = NOW()
+           WHERE id_paypal_suscripcion = @subscriptionId`,
+          { status: statusMap[eventType] || "UPDATED", subscriptionId },
+        );
+      }
+    }
+
+    await client.query(
+      `UPDATE paypal_webhook_events
+       SET processing_status = 'PROCESSED',
+           processed_at = NOW(),
+           updated_at = NOW()
+       WHERE id = @id`,
+      { id: webhookRow.id },
+    );
+    await client.query("COMMIT");
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error procesando webhook PayPal:", error);
+    try {
+      await db.query(
+        `UPDATE paypal_webhook_events
+         SET processing_status = 'FAILED',
+             error_message = @message,
+             processed_at = NOW(),
+             updated_at = NOW()
+         WHERE paypal_event_id = @paypalEventId`,
+        {
+          paypalEventId,
+          message: String(error.message || "Error").slice(0, 1000),
+        },
+      );
+    } catch (logError) {
+      console.error("Error registrando fallo de webhook PayPal:", logError);
+    }
+    res.status(500).json({ message: "Error del servidor." });
+  } finally {
+    client.release();
   }
 });
 

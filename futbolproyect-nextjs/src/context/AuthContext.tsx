@@ -72,10 +72,17 @@ export const AuthProvider = ({ children }: any) => {
     }
   };
 
-  const register = async (name: string, email: string, password: string, tipo_usuario: string, rol: string) => {
+  const register = async (name: string, email: string, password: string, tipo_usuario: string, rol: string, affiliateCode?: string) => {
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const res = await apiClient.post("/users/register", { nombre: name, email: normalizedEmail, password, tipo_usuario, rol });
+      const res = await apiClient.post("/users/register", {
+        nombre: name,
+        email: normalizedEmail,
+        password,
+        tipo_usuario,
+        rol,
+        affiliateCode,
+      });
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;

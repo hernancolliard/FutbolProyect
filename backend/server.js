@@ -47,8 +47,16 @@ app.use((req, res, next) => {
 // Middleware para parsear cookies
 app.use(cookieParser());
 
-// Middleware para parsear JSON con límite aumentado
-app.use(express.json({ limit: '50mb' }));
+// Middleware para parsear JSON con límite aumentado.
+// Conserva el cuerpo original de PayPal para verificación/auditoría.
+app.use(express.json({
+  limit: '50mb',
+  verify: (req, res, buf) => {
+    if (req.originalUrl.startsWith("/api/payments/webhook-paypal")) {
+      req.rawBody = Buffer.from(buf);
+    }
+  },
+}));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // RUTAS
@@ -59,6 +67,9 @@ app.use("/api/profiles", require("./routes/profiles"));
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin", require("./routes/adminAffiliates"));
+app.use("/api/affiliates", require("./routes/affiliates"));
+app.use("/api/affiliate", require("./routes/affiliates"));
 app.use("/api/ads", require("./routes/ads"));
 app.use("/api/contact", require("./routes/contact"));
 app.use("/api/privacy", require("./routes/privacy"));

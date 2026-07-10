@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import RootClientLayout from "@/components/layout/RootClientLayout";
 import I18nProvider from "@/components/I18nProvider";
@@ -8,8 +7,6 @@ import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import GoogleTagManager from "@/components/GoogleTagManager";
 import { AuthProvider } from "@/context/AuthContext";
 import { Suspense } from "react";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.futbolproyect.com"),
@@ -75,7 +72,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
+      <body>
         <Suspense fallback={null}>
           <GoogleTagManager />
         </Suspense>

@@ -48,11 +48,21 @@ export default function Register({
     email: "",
     password: "",
     confirmPassword: "",
+    affiliateCode: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => setRol(normalizeRole(initialRole)), [initialRole]);
+  useEffect(() => {
+    const ref =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("ref")
+        : null;
+    if (ref) {
+      setFormData((current) => ({ ...current, affiliateCode: ref }));
+    }
+  }, []);
 
   const tipoUsuario = ["jugador", "entrenador", "ayudante", "analista"].includes(rol)
     ? "postulante"
@@ -75,7 +85,14 @@ export default function Register({
 
     setLoading(true);
     try {
-      await register(formData.name, formData.email, formData.password, tipoUsuario, rol);
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        tipoUsuario,
+        rol,
+        formData.affiliateCode,
+      );
       onClose();
     } catch (requestError: any) {
       setError(requestError?.message || t("register_error"));
@@ -125,6 +142,7 @@ export default function Register({
             <TextField type="email" label={t("email")} name="email" value={formData.email} onChange={handleChange} required fullWidth autoComplete="email" sx={{ gridColumn: { sm: "1 / -1" } }} />
             <TextField type="password" label={t("password")} name="password" value={formData.password} onChange={handleChange} required fullWidth autoComplete="new-password" />
             <TextField type="password" label={t("confirm_password")} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required fullWidth autoComplete="new-password" />
+            <TextField label="Codigo de referido" name="affiliateCode" value={formData.affiliateCode} onChange={handleChange} fullWidth sx={{ gridColumn: { sm: "1 / -1" } }} />
           </Box>
 
           {error && <Alert severity="error">{error}</Alert>}

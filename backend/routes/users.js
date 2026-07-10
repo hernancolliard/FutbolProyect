@@ -10,6 +10,8 @@ const {
   sendPasswordResetEmail,
   sendWelcomeEmail,
 } = require("../services/emailService");
+const { createReferralForUser } = require("../services/affiliateService");
+const { clearAffiliateCookie } = require("../services/affiliateCookieService");
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -124,6 +126,17 @@ router.post("/google-login", async (req, res) => {
         { name, email, passwordHash },
       );
       user = created.rows[0];
+      try {
+        await createReferralForUser({
+          req,
+          userId: user.id,
+          userEmail: user.email,
+          manualCode: req.body.affiliateCode,
+        });
+        clearAffiliateCookie(res);
+      } catch (affiliateError) {
+        console.error("Error guardando atribucion de afiliado Google:", affiliateError);
+      }
       await sendWelcomeEmail(user.email, user.nombre, user.tipo_usuario);
     }
 
@@ -181,6 +194,8 @@ router.get("/me", verificarToken, async (req, res) => {
 router.post("/register", async (req, res) => {
   const { nombre, password, tipo_usuario, rol } = req.body;
   const email = normalizeEmail(req.body.email);
+  const affiliateCode =
+    typeof req.body.affiliateCode === "string" ? req.body.affiliateCode : "";
 
   try {
     // Validación básica
@@ -223,19 +238,44 @@ router.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Insertar el nuevo usuario
-    const result = await db.query(
-      `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario, rol)
-       VALUES (@nombre, @email, @password_hash, @tipo_usuario, @rol)
-       RETURNING id, nombre, email, tipo_usuario, rol`,
-      {
-        nombre,
-        email,
-        password_hash,
-        tipo_usuario,
-        rol,
+    const client = await db.getClient();
+    let result;
+    try {
+      await client.query("BEGIN");
+
+      // Insertar el nuevo usuario
+      result = await client.query(
+        `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario, rol)
+         VALUES (@nombre, @email, @password_hash, @tipo_usuario, @rol)
+         RETURNING id, nombre, email, tipo_usuario, rol`,
+        {
+          nombre,
+          email,
+          password_hash,
+          tipo_usuario,
+          rol,
+        }
+      );
+
+      try {
+        await createReferralForUser({
+          client,
+          req,
+          userId: result.rows[0].id,
+          userEmail: email,
+          manualCode: affiliateCode,
+        });
+      } catch (affiliateError) {
+        console.error("Error guardando atribucion de afiliado:", affiliateError);
       }
-    );
+
+      await client.query("COMMIT");
+    } catch (createError) {
+      await client.query("ROLLBACK");
+      throw createError;
+    } finally {
+      client.release();
+    }
 
     const newUser = result.rows[0];
 
@@ -256,6 +296,7 @@ router.post("/register", async (req, res) => {
 
     clearAuthCookies(res);
     setAuthCookie(res, token);
+    clearAffiliateCookie(res);
 
     res.status(201).json({
       message: "Registro exitoso.",

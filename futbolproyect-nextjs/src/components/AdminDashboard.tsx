@@ -8,6 +8,7 @@ import ContactMessages from "./ContactMessages";
 import ClubContacts from "./ClubContacts";
 import AdvertisementManagement from "./AdvertisementManagement";
 import AdvertisingLeadManagement from "./AdvertisingLeadManagement";
+import AffiliateManagement from "./AffiliateManagement";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
@@ -42,6 +43,7 @@ function AdminDashboard() {
         <Tab label={t('subscription_management_tab', 'Gestión de Suscripciones')} value="subscriptions" />
         <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
         <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
+        <Tab label="Afiliados" value="affiliates" />
         <Tab label={t('contact_messages_tab', 'Mensajes de Contacto')} value="contact" />
         <Tab label={t('club_contacts_tab', 'Contactos Clubes')} value="club-contacts" sx={{ minWidth: 120 }} />
       </Tabs>
@@ -52,6 +54,7 @@ function AdminDashboard() {
         {activeTab === "subscriptions" && <SubscriptionManagement />}
         {activeTab === "advertising" && <AdvertisementManagement />}
         {activeTab === "advertising-leads" && <AdvertisingLeadManagement />}
+        {activeTab === "affiliates" && <AffiliateManagement />}
         {activeTab === "contact" && <ContactMessages />}
         {activeTab === "club-contacts" && <ClubContacts />}
       </Box>
