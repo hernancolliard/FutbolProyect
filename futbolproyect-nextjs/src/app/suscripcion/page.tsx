@@ -59,6 +59,19 @@ const planCards = [
   },
 ];
 
+const freeBenefitKeys = [
+  "subscription_free_benefit_1",
+  "subscription_free_benefit_2",
+  "subscription_free_benefit_3",
+];
+
+const paidBenefitKeys = [
+  "subscription_paid_benefit_1",
+  "subscription_paid_benefit_2",
+  "subscription_paid_benefit_3",
+  "subscription_paid_benefit_4",
+];
+
 export default function SubscriptionPage() {
   const { t } = useTranslation("common");
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
@@ -310,6 +323,87 @@ export default function SubscriptionPage() {
               </Card>
             ))}
           </Box>
+
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 4,
+              mx: "auto",
+              maxWidth: 930,
+              p: { xs: 2.5, md: 3 },
+              border: "1px solid #dfe6ef",
+              borderRadius: 2.5,
+              bgcolor: "#fff",
+            }}
+          >
+            <Typography
+              component="h2"
+              sx={{ color: "#0a1930", fontSize: "1.35rem", fontWeight: 900 }}
+            >
+              {t("subscription_comparison_title")}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.7, color: "#65738a" }}>
+              {t("subscription_comparison_intro")}
+            </Typography>
+
+            <Box
+              sx={{
+                mt: 2.5,
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 2,
+              }}
+            >
+              {[
+                {
+                  title: t("subscription_free_column_title"),
+                  benefits: freeBenefitKeys,
+                  color: "#65738a",
+                  bgcolor: "#f7f9fc",
+                },
+                {
+                  title: t("subscription_paid_column_title"),
+                  benefits: paidBenefitKeys,
+                  color: "#1262db",
+                  bgcolor: "#edf5ff",
+                },
+              ].map((column) => (
+                <Box
+                  key={column.title}
+                  sx={{
+                    p: 2,
+                    border: "1px solid #dfe6ef",
+                    borderRadius: 2,
+                    bgcolor: column.bgcolor,
+                  }}
+                >
+                  <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
+                    {column.title}
+                  </Typography>
+                  <Stack spacing={1.1} sx={{ mt: 1.5 }}>
+                    {column.benefits.map((benefitKey) => (
+                      <Stack
+                        key={benefitKey}
+                        direction="row"
+                        spacing={1}
+                        alignItems="flex-start"
+                      >
+                        <CheckCircleRoundedIcon
+                          sx={{ mt: 0.1, color: column.color, fontSize: 19 }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "#3f4d62", lineHeight: 1.5 }}
+                        >
+                          {t(benefitKey)}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
 
           <Box
             sx={{

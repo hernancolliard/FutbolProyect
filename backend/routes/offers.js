@@ -868,7 +868,7 @@ router.patch(
 // --- RUTA PROTEGIDA: POSTULARSE A UNA OFERTA ---
 router.post(
   "/:offerId/apply",
-  verificarToken, // Solo se requiere que el usuario esté logueado
+  [verificarToken, verificarSuscripcionActiva(["postulante"])],
   async (req, res) => {
     const { offerId } = req.params;
     const userId = req.user.id;
