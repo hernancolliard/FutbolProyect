@@ -304,8 +304,25 @@ const EditProfileForm = ({
                 </MenuItem>
               ))}
             </TextField>
-            <TextField type="number" name="altura_cm" label={t("height_placeholder")} value={formData.altura_cm} onChange={handleChange} fullWidth />
-            <TextField type="number" name="peso_kg" label={t("weight_placeholder")} value={formData.peso_kg} onChange={handleChange} fullWidth />
+            <TextField
+              type="number"
+              name="altura_cm"
+              label={t("height_placeholder")}
+              value={formData.altura_cm}
+              onChange={handleChange}
+              fullWidth
+              inputProps={{ max: 250, step: "any" }}
+              helperText={t("height_input_help", "Podes escribir 172 o 1.72. Se guarda en cm.")}
+            />
+            <TextField
+              type="number"
+              name="peso_kg"
+              label={t("weight_placeholder")}
+              value={formData.peso_kg}
+              onChange={handleChange}
+              fullWidth
+              inputProps={{ min: 20, max: 250, step: "any" }}
+            />
             <TextField name="pie_dominante" label={t("dominant_foot_placeholder")} value={formData.pie_dominante} onChange={handleChange} fullWidth />
             <TextField name="idiomas" label={t("languages_placeholder", "Idiomas")} value={formData.idiomas} onChange={handleChange} fullWidth helperText={t("languages_help", "Ej. Espanol nativo, Ingles intermedio, Portugues basico")} />
             <TextField

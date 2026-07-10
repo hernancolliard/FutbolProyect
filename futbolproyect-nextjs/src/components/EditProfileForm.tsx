@@ -203,6 +203,8 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
                 value={formData.altura_cm}
                 onChange={handleChange}
                 fullWidth
+                inputProps={{ max: 250, step: "any" }}
+                helperText={t("height_input_help", "Podes escribir 172 o 1.72. Se guarda en cm.")}
               />
               <TextField
                 type="number"
@@ -211,6 +213,7 @@ function EditProfileForm({ profileData, onSave, onCancel }) {
                 value={formData.peso_kg}
                 onChange={handleChange}
                 fullWidth
+                inputProps={{ min: 20, max: 250, step: "any" }}
               />
               <TextField
                 type="text"

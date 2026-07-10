@@ -34,6 +34,57 @@ const PROFILE_POSITION_FILTERS = {
   Delantero: ["delantero", "atacante", "extremo", "punta", "wing"],
 };
 
+const normalizeNumericText = (value) => {
+  if (value === undefined || value === null) return null;
+
+  const normalizedValue = String(value).trim().replace(",", ".");
+  return normalizedValue || null;
+};
+
+const parseIntegerProfileMeasurement = (value, options) => {
+  const normalizedValue = normalizeNumericText(value);
+  if (!normalizedValue) return null;
+
+  const parsedValue = Number(normalizedValue);
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    const error = new Error(options.message);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const valueInStoredUnit =
+    options.convertMetersToCentimeters && parsedValue <= 3
+      ? parsedValue * 100
+      : parsedValue;
+  const roundedValue = Math.round(valueInStoredUnit);
+
+  if (
+    (options.min !== undefined && roundedValue < options.min) ||
+    (options.max !== undefined && roundedValue > options.max)
+  ) {
+    const error = new Error(options.message);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return roundedValue;
+};
+
+const parseHeightCm = (value) =>
+  parseIntegerProfileMeasurement(value, {
+    min: 40,
+    max: 250,
+    convertMetersToCentimeters: true,
+    message: "La altura debe ser un numero valido. Podes escribir 172 o 1.72.",
+  });
+
+const parseWeightKg = (value) =>
+  parseIntegerProfileMeasurement(value, {
+    min: 20,
+    max: 250,
+    message: "El peso debe ser un numero valido en kg.",
+  });
+
 const buildProfilePositionFilterClause = (column, position) => {
   const terms = Object.prototype.hasOwnProperty.call(
     PROFILE_POSITION_FILTERS,
@@ -162,8 +213,8 @@ const buildManagedProfilePayload = (body) => ({
   whatsapp_url: body.whatsapp_url?.trim() || null,
   agente_nombre: body.agente_nombre?.trim() || null,
   agente_contacto: body.agente_contacto?.trim() || null,
-  altura_cm: body.altura_cm || null,
-  peso_kg: body.peso_kg || null,
+  altura_cm: parseHeightCm(body.altura_cm),
+  peso_kg: parseWeightKg(body.peso_kg),
   pie_dominante: body.pie_dominante?.trim() || null,
   fecha_de_nacimiento: body.fecha_de_nacimiento || null,
   idiomas: body.idiomas?.trim() || null,
@@ -649,7 +700,11 @@ router.post(
       res.status(201).json(profileResult.rows[0]);
     } catch (error) {
       console.error("Error al crear perfil gestionado:", error);
-      res.status(500).json({ message: "Error del servidor al crear el perfil." });
+      res.status(error.statusCode || 500).json({
+        message: error.statusCode
+          ? error.message
+          : "Error del servidor al crear el perfil.",
+      });
     }
   }
 );
@@ -763,7 +818,11 @@ router.put(
       res.json(profileResult.rows[0]);
     } catch (error) {
       console.error("Error al actualizar perfil gestionado:", error);
-      res.status(500).json({ message: "Error del servidor al actualizar el perfil." });
+      res.status(error.statusCode || 500).json({
+        message: error.statusCode
+          ? error.message
+          : "Error del servidor al actualizar el perfil.",
+      });
     }
   }
 );
@@ -1259,6 +1318,9 @@ router.put(
         });
       }
 
+      const normalizedHeightCm = parseHeightCm(altura_cm);
+      const normalizedWeightKg = parseWeightKg(peso_kg);
+
       if (req.file) {
         const processedImageBuffer = await sharp(req.file.buffer)
           .rotate()
@@ -1319,8 +1381,8 @@ router.put(
         whatsapp_url,
         agente_nombre,
         agente_contacto,
-        altura_cm: altura_cm || null,
-        peso_kg: peso_kg || null,
+        altura_cm: normalizedHeightCm,
+        peso_kg: normalizedWeightKg,
         pie_dominante,
         fecha_de_nacimiento: fecha_de_nacimiento || null,
         idiomas: idiomas?.trim() || null,
@@ -1343,9 +1405,11 @@ router.put(
       res.json(updatedUser);
     } catch (error) {
       console.error("Error al actualizar el perfil:", error);
-      res
-        .status(500)
-        .json({ message: "Error del servidor al actualizar el perfil." });
+      res.status(error.statusCode || 500).json({
+        message: error.statusCode
+          ? error.message
+          : "Error del servidor al actualizar el perfil.",
+      });
     }
   }
 );
