@@ -15,6 +15,7 @@ export default function AffiliateRedirectPage() {
     if (!code) return;
 
     const allowedUtm = new URLSearchParams();
+    allowedUtm.set('ref', code);
     ["utm_source", "utm_medium", "utm_campaign"].forEach((key) => {
       const value = searchParams.get(key);
       if (value) allowedUtm.set(key, value);

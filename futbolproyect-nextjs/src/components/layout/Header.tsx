@@ -61,6 +61,7 @@ export default function Header({
   const [accountAnchor, setAccountAnchor] = useState<null | HTMLElement>(null);
 
   const isAdmin = Boolean(user?.isadmin || user?.isAdmin);
+  const isAffiliate = Boolean(user?.is_affiliate || user?.isAffiliate);
   const canPublish = Boolean(
     user && (user.tipo_usuario === "ofertante" || isAdmin),
   );
@@ -267,6 +268,16 @@ export default function Header({
           <PersonOutlineRoundedIcon fontSize="small" sx={{ mr: 1.2 }} />
           {t("my_profile", "Mi perfil")}
         </MenuItem>
+        {isAffiliate && (
+          <MenuItem
+            component={Link}
+            href={'/afiliados/dashboard'}
+            onClick={closeAccountMenu}
+          >
+            <PersonOutlineRoundedIcon fontSize={'small'} sx={{ mr: 1.2 }} />
+            Panel de afiliado
+          </MenuItem>
+        )}
         {isAdmin && (
           <MenuItem component={Link} href="/admin" onClick={closeAccountMenu}>
             <AdminPanelSettingsOutlinedIcon fontSize="small" sx={{ mr: 1.2 }} />
@@ -308,6 +319,15 @@ export default function Header({
         <Divider />
         {user ? (
           <>
+            {isAffiliate && (
+              <MenuItem
+                component={Link}
+                href={'/afiliados/dashboard'}
+                onClick={closeMobileMenu}
+              >
+                Panel de afiliado
+              </MenuItem>
+            )}
             {canPublish && (
               <MenuItem onClick={handleCreateOffer}>
                 {t("publish_offer", "Publicar oferta")}

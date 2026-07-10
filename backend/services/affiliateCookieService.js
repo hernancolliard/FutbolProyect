@@ -63,6 +63,7 @@ const getAffiliateCookieOptions = (maxAgeDays) => ({
   sameSite: "lax",
   path: "/",
   maxAge: (maxAgeDays || getAffiliateConfig().cookieDays) * 24 * 60 * 60 * 1000,
+  ...(process.env.NODE_ENV === 'production' ? { sameSite: 'none' } : {}),
 });
 
 const setAffiliateCookie = (res, value, maxAgeDays) => {

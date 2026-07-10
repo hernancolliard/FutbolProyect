@@ -165,6 +165,9 @@ router.get("/me", verificarToken, async (req, res) => {
     // include subscription info
     const result = await db.query(
       `SELECT u.id, u.nombre, u.email, u.tipo_usuario, u.rol, u.isadmin,
+              EXISTS(
+                SELECT 1 FROM affiliates a WHERE a.user_id = u.id
+              ) as is_affiliate,
               s.plan as subscription_plan,
               s.estado as subscription_status,
               s.fecha_fin as subscription_end_date

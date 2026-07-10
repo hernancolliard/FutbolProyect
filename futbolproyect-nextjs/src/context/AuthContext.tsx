@@ -43,11 +43,7 @@ export const AuthProvider = ({ children }: any) => {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
-      if (res.data?.user) {
-        setUser(res.data.user);
-      } else {
-        await fetchUser();
-      }
+      await fetchUser();
     } catch (error: any) {
       console.error("Login error:", error);
       throw error;
@@ -61,11 +57,7 @@ export const AuthProvider = ({ children }: any) => {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
-      if (res.data?.user) {
-        setUser(res.data.user);
-      } else {
-        await fetchUser();
-      }
+      await fetchUser();
     } catch (error: any) {
       console.error("Google login error:", error);
       throw error;
