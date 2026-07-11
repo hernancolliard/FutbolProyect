@@ -15,6 +15,7 @@ import { PlayerSidebar } from "./PlayerSidebar";
 import { PlayerShare } from "./PlayerShare";
 import { PlayerDocuments } from "./PlayerDocuments";
 import EditProfileModal from "./EditProfileModal";
+import ChangePasswordModal from "./ChangePasswordModal";
 import VideosSection from "./VideosSection";
 import UserPhotosSection from "./UserPhotosSection";
 import ScoutingReportsSection from "./ScoutingReportsSection";
@@ -22,7 +23,7 @@ import MyApplicationsSection from "./MyApplicationsSection";
 import MyOffersSection from "./MyOffersSection";
 import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import AdBanner from "@/components/ads/AdBanner";
-import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, KeyRound, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 import { getProfileCompletion } from "@/lib/seoSlugs";
@@ -141,6 +142,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [attemptedPrivateProfileLoad, setAttemptedPrivateProfileLoad] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
   const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
@@ -720,6 +722,23 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           {isOwnAccountProfile && currentUser?.tipo_usuario === "ofertante" && <div className="mt-6"><MyOffersSection userId={profile.id} /></div>}
 
           {isOwnAccountProfile && (
+            <div className="mt-6 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-full bg-slate-100 p-2 text-[#071C3C]">
+                    <KeyRound size={20} />
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold text-[#071C3C]">Seguridad</p>
+                    <p className="mt-1 text-sm text-slate-600">Actualizá la contraseña de acceso a tu cuenta.</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsPasswordModalOpen(true)} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C] transition hover:bg-slate-50">Cambiar contraseña</button>
+              </div>
+            </div>
+          )}
+
+          {isOwnAccountProfile && (
             <div className="mt-6 rounded-[28px] border border-red-200 bg-red-50 p-6 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
@@ -741,6 +760,13 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
       {canEditProfile && (
         <EditProfileModal open={isEditModalOpen} onClose={handleCloseEditModal} profileData={profile} onSave={handleProfileSave} saveEndpoint={isManagedProfile ? `/profiles/managed/${String(profile.id).replace("managed-", "")}` : "/profiles/me"} showEmailField={isManagedProfile} />
+      )}
+
+      {isOwnAccountProfile && (
+        <ChangePasswordModal
+          open={isPasswordModalOpen}
+          onClose={() => setIsPasswordModalOpen(false)}
+        />
       )}
 
       <div

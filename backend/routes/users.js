@@ -12,6 +12,7 @@ const {
 } = require("../services/emailService");
 const { createReferralForUser } = require("../services/affiliateService");
 const { clearAffiliateCookie } = require("../services/affiliateCookieService");
+const { validateNewPassword } = require("../passwordPolicy");
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -188,6 +189,63 @@ router.get("/me", verificarToken, async (req, res) => {
   } catch (err) {
     console.error("Error en /me:", err);
     res.status(500).json({ message: "Error al obtener datos del usuario." });
+  }
+});
+
+/* =========================
+   CAMBIO DE CONTRASEÑA DEL USUARIO AUTENTICADO
+========================= */
+router.put("/me/password", verificarToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (typeof currentPassword !== "string" || !currentPassword) {
+    return res.status(400).json({ message: "La contraseña actual es obligatoria." });
+  }
+
+  const passwordError = validateNewPassword(newPassword);
+  if (passwordError) {
+    return res.status(400).json({ message: passwordError });
+  }
+
+  if (currentPassword === newPassword) {
+    return res.status(400).json({
+      message: "La nueva contraseña debe ser diferente de la actual.",
+    });
+  }
+
+  try {
+    const result = await db.query(
+      "SELECT password_hash FROM usuarios WHERE id = @id",
+      { id: req.user.id },
+    );
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password_hash,
+    );
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ message: "La contraseña actual es incorrecta." });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await db.query(
+      `UPDATE usuarios
+       SET password_hash = @passwordHash,
+           reset_password_token = NULL,
+           reset_password_expires = NULL
+       WHERE id = @id`,
+      { passwordHash, id: req.user.id },
+    );
+
+    return res.json({ message: "Contraseña actualizada correctamente." });
+  } catch (error) {
+    console.error("Error al cambiar contraseña:", error);
+    return res.status(500).json({ message: "No se pudo actualizar la contraseña." });
   }
 });
 
