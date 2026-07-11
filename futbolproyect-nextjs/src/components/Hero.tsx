@@ -57,7 +57,7 @@ export default function Hero({ metrics }: HeroProps) {
       }}
     >
       <Image
-        src="/images/jugador-estadio-futbol.webp"
+        src="/images/estadiohero.webp"
         alt="Futbolista en un estadio representando oportunidades profesionales"
         fill
         priority
