@@ -27,8 +27,7 @@ export default function ResetPasswordClient() {
     setError("");
 
     try {
-      // forzamos el prefijo /api por si el baseURL no está bien configurado
-      await publicApi.post("/api/users/reset-password", {
+      await publicApi.post("/users/reset-password", {
         token,
         newPassword: password,
       });

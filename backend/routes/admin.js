@@ -59,11 +59,17 @@ router.delete(
   [verificarToken, verificarAdmin],
   async (req, res) => {
     const { id } = req.params;
+    const userId = parseInt(id, 10);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({ message: "ID de usuario inválido." });
+    }
+
     const client = await db.getClient(); // Obtener un cliente del pool
 
     try {
       // Opcional: verificar que no se esté eliminando a sí mismo
-      if (parseInt(id, 10) === req.user.id) {
+      if (userId === req.user.id) {
         return res.status(400).json({
           message: "No puedes eliminar tu propia cuenta de administrador.",
         });
@@ -74,17 +80,53 @@ router.delete(
       // Eliminar referencias en 'postulaciones'
       await client.query(
         "DELETE FROM postulaciones WHERE id_usuario_postulante = @id",
-        { id }
+        { id: userId }
+      );
+
+      // Una atribucion sin movimientos financieros se puede quitar. Cuando ya
+      // hay comisiones, se conserva el historial contable.
+      const commissionResult = await client.query(
+        `SELECT EXISTS (
+           SELECT 1
+           FROM affiliate_commissions
+           WHERE referred_user_id = @id
+         ) AS has_commissions`,
+        { id: userId }
+      );
+
+      if (commissionResult.rows[0].has_commissions) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          message:
+            "No se puede eliminar este usuario porque tiene comisiones de afiliados. Debes conservar su historial financiero.",
+        });
+      }
+
+      await client.query(
+        "DELETE FROM affiliate_referrals WHERE referred_user_id = @id",
+        { id: userId }
       );
 
       // Eliminar al usuario
-      await client.query("DELETE FROM usuarios WHERE id = @id", { id });
+      const deleteResult = await client.query(
+        "DELETE FROM usuarios WHERE id = @id RETURNING id",
+        { id: userId }
+      );
+
+      if (deleteResult.rowCount === 0) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ message: "Usuario no encontrado." });
+      }
 
       await client.query("COMMIT"); // Finalizar transacción
 
       res.status(200).json({ message: "Usuario eliminado exitosamente." });
     } catch (error) {
-      await client.query("ROLLBACK"); // Revertir en caso de error
+      try {
+        await client.query("ROLLBACK"); // Revertir en caso de error
+      } catch (rollbackError) {
+        console.error("Error al revertir la eliminación de usuario:", rollbackError);
+      }
       console.error("Error al eliminar usuario:", error);
       res.status(500).json({ message: "Error del servidor." });
     } finally {

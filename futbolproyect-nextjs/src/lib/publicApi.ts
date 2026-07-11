@@ -1,9 +1,20 @@
 import axios from "axios";
 
+const getPublicApiBaseUrl = () => {
+  const raw =
+    process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+
+  if (raw) {
+    const url = raw.replace(/\/+$/, "").replace(/\/api$/, "");
+    return `${url}/api`;
+  }
+
+  const port = process.env.PORT || 5000;
+  return `http://localhost:${port}/api`;
+};
+
 const publicApi = axios.create({
-  // el backend base URL puede venir de la variable de entorno; si no está definida,
-  // usamos `/api` para que las peticiones se dirijan al servidor proxy
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "/api",
+  baseURL: getPublicApiBaseUrl(),
   withCredentials: true,
 });
 

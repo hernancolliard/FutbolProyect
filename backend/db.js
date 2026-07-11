@@ -1,4 +1,5 @@
 const { Pool } = require("pg");
+const { convertNamedQuery } = require("./queryParams");
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -15,26 +16,10 @@ const pool = new Pool({
 module.exports = {
   query: async (text, params) => {
     try {
-      // Lógica para convertir parámetros con nombre a posicionales
-      if (!params) {
-        return await pool.query(text);
-      }
-
-      const pgValues = [];
-      const namedParams = {};
-
-      const newText = text.replace(/@(\w+)/g, (match, key) => {
-        if (!params.hasOwnProperty(key)) {
-          throw new Error(`Missing parameter value for key: ${key}`);
-        }
-        if (!namedParams.hasOwnProperty(key)) {
-          pgValues.push(params[key]);
-          namedParams[key] = `$${pgValues.length}`;
-        }
-        return namedParams[key];
-      });
-
-      return await pool.query(newText, pgValues);
+      const converted = convertNamedQuery(text, params);
+      return converted.values === undefined
+        ? await pool.query(converted.text)
+        : await pool.query(converted.text, converted.values);
     } catch (error) {
       // Loguear el error con más contexto antes de que se propague
       console.error("Error ejecutando la consulta:", {
@@ -48,31 +33,17 @@ module.exports = {
   },
   getClient: async () => {
     const client = await pool.connect();
-    const originalQuery = client.query;
-    const originalRelease = client.release;
 
-    // Monkey-patch a new query method that handles named parameters
-    client.query = async (text, params) => {
-      if (!params) {
-        return originalQuery.call(client, text);
-      }
-
-      const pgValues = [];
-      const namedParams = {};
-
-      const newText = text.replace(/@(\w+)/g, (match, key) => {
-        if (!params.hasOwnProperty(key)) {
-          throw new Error(`Missing parameter value for key: ${key}`);
-        }
-        if (!namedParams.hasOwnProperty(key)) {
-          pgValues.push(params[key]);
-          namedParams[key] = `$${pgValues.length}`;
-        }
-        return namedParams[key];
-      });
-      return originalQuery.call(client, newText, pgValues);
+    // No modificar client.query: los clientes del pool se reutilizan y cada
+    // modificacion se acumulaba hasta perder los valores de $1, $2, etc.
+    return {
+      query: async (text, params) => {
+        const converted = convertNamedQuery(text, params);
+        return converted.values === undefined
+          ? await client.query(converted.text)
+          : await client.query(converted.text, converted.values);
+      },
+      release: () => client.release(),
     };
-
-    return client;
   },
 };

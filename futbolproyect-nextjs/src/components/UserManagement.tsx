@@ -175,7 +175,11 @@ function UserManagement() {
         toast.success(t('user_deleted_success', 'Usuario eliminado con éxito.'));
         fetchUsers(); // Refresh the list
       } catch (error) {
-        toast.error(error.message || t('delete_user_error', 'Error al eliminar usuario.'));
+        toast.error(
+          error?.response?.data?.message ||
+            error?.message ||
+            t('delete_user_error', 'Error al eliminar usuario.'),
+        );
         console.error("Error deleting user:", error);
       }
     }

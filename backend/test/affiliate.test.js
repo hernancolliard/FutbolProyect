@@ -19,6 +19,27 @@ const {
   extractPaypalSaleAmount,
   extractOriginalSaleId,
 } = require("../services/paypalPayloadService");
+const { convertNamedQuery } = require("../queryParams");
+
+test("convierte parametros nombrados sin perder valores", () => {
+  assert.deepEqual(
+    convertNamedQuery(
+      "DELETE FROM usuarios WHERE id = @id OR referido_por = @id",
+      { id: 149 },
+    ),
+    {
+      text: "DELETE FROM usuarios WHERE id = $1 OR referido_por = $1",
+      values: [149],
+    },
+  );
+});
+
+test("mantiene parametros posicionales nativos de pg", () => {
+  assert.deepEqual(convertNamedQuery("SELECT * FROM usuarios WHERE id = $1", [149]), {
+    text: "SELECT * FROM usuarios WHERE id = $1",
+    values: [149],
+  });
+});
 
 test("crea y verifica cookie firmada", () => {
   const issuedAt = Date.UTC(2026, 6, 10);
@@ -35,7 +56,9 @@ test("crea y verifica cookie firmada", () => {
 
 test("rechaza cookie modificada", () => {
   const value = createAffiliateCookieValue({ affiliateId: 1, clickId: 2 });
-  const tampered = value.replace("1", "9");
+  const [encoded, signature] = value.split(".");
+  const replacement = signature[0] === "A" ? "B" : "A";
+  const tampered = `${encoded}.${replacement}${signature.slice(1)}`;
   assert.equal(verifyAffiliateCookieValue(tampered), null);
 });
 
