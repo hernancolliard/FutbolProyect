@@ -88,7 +88,7 @@ export default function Hero({ metrics }: HeroProps) {
               fontWeight: 900,
             }}
           >
-            Mostrá tu fútbol.
+            Mostrá tu talento.
             <br />
             <Box component="span" sx={{ color: "#2f80ff" }}>
               Conectá con nuevas oportunidades.
