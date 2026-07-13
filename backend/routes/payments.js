@@ -18,6 +18,13 @@ const {
   extractPaypalSaleAmount,
   extractOriginalSaleId,
 } = require("../services/paypalPayloadService");
+const {
+  createPaypalCheckoutAttempt,
+  createPaypalTrackingToken,
+  normalizePaypalError,
+  updatePaypalCheckoutAttempt,
+  verifyPaypalTrackingToken,
+} = require("../services/paypalCheckoutTelemetryService");
 
 const router = express.Router();
 
@@ -45,6 +52,19 @@ const getFrontendUrl = () => {
 
 const VALID_SUBSCRIPTION_PLANS = new Set(["ofertante", "postulante"]);
 const VALID_BILLING_CYCLES = new Set(["monthly", "annual"]);
+const VALID_PAYPAL_CLIENT_EVENTS = new Set([
+  "APPROVED",
+  "CANCELLED",
+  "SDK_ERROR",
+  "CLIENT_CAPTURE_ERROR",
+]);
+
+const sanitizePaypalClientEventDetails = (details) => ({
+  httpStatus: Number(details?.httpStatus) || null,
+  errorName: String(details?.errorName || "").slice(0, 100) || null,
+  errorMessage: String(details?.errorMessage || "").slice(0, 500) || null,
+  fundingSource: String(details?.fundingSource || "").slice(0, 50) || null,
+});
 
 const getSubscriptionPaymentContext = (payment) => {
   const metadata = payment?.metadata || {};
@@ -478,10 +498,19 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
       );
     }
 
-    // --- NUEVO LOG 5: Orden creada exitosamente ---
-    console.log("Orden de PayPal creada con éxito. OrderID:", order.result.id);
+    await createPaypalCheckoutAttempt({
+      orderID: order.result.id,
+      userId: req.user.id,
+      subscriptionId: pendingSubscriptionId,
+      plan: planType,
+      billingCycle,
+    });
+    const trackingToken = createPaypalTrackingToken({
+      orderID: order.result.id,
+      userId: req.user.id,
+    });
 
-    res.json({ orderID: order.result.id });
+    res.json({ orderID: order.result.id, trackingToken });
   } catch (error) {
     // --- NUEVO LOG 6: ¡ESTE ES EL MÁS IMPORTANTE! ---
     console.error(
@@ -497,6 +526,38 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
 
     res.status(500).json({ message: "Error al crear la orden de PayPal." });
   }
+});
+
+router.post("/paypal-checkout-event", async (req, res) => {
+  const { trackingToken, event } = req.body || {};
+  if (!VALID_PAYPAL_CLIENT_EVENTS.has(event)) {
+    return res.status(400).json({ message: "Evento de PayPal no valido." });
+  }
+
+  let trackingContext;
+  try {
+    trackingContext = verifyPaypalTrackingToken(trackingToken);
+  } catch (_error) {
+    return res.status(401).json({ message: "Seguimiento de PayPal no valido o vencido." });
+  }
+
+  const details = sanitizePaypalClientEventDetails(req.body.details);
+  const persisted = await updatePaypalCheckoutAttempt({
+    ...trackingContext,
+    status: event,
+    errorCode:
+      event === "SDK_ERROR" || event === "CLIENT_CAPTURE_ERROR"
+        ? details.errorName || event
+        : null,
+    errorMessage:
+      event === "SDK_ERROR" || event === "CLIENT_CAPTURE_ERROR"
+        ? details.errorMessage
+        : null,
+    details,
+    preservePaidStatus: true,
+  });
+
+  return res.status(persisted ? 200 : 202).json({ ok: true, persisted });
 });
 
 router.post("/capture-paypal-order-legacy", verificarToken, async (req, res) => {
@@ -592,8 +653,19 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
   const { orderID } = req.body;
   const userId = req.user.id;
 
+  if (!orderID || typeof orderID !== "string") {
+    return res.status(400).json({ message: "OrderID de PayPal no valido." });
+  }
+
   const request = new paypal.orders.OrdersCaptureRequest(orderID);
   request.prefer("return=representation");
+  let paypalCaptured = false;
+
+  await updatePaypalCheckoutAttempt({
+    orderID,
+    userId,
+    status: "CAPTURE_STARTED",
+  });
 
   try {
     const capture = await paypalClient.execute(request);
@@ -604,8 +676,25 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
     const parsedCustomId = parsePaypalCustomId(customId);
 
     if (status !== "COMPLETED") {
+      await updatePaypalCheckoutAttempt({
+        orderID,
+        userId,
+        status: "CAPTURE_FAILED",
+        errorCode: `PAYPAL_STATUS_${status || "UNKNOWN"}`,
+        errorMessage: "PayPal no devolvio el pago como completado.",
+        details: { paypalStatus: status || null },
+      });
       return res.status(400).json({ message: "El pago de PayPal no se completo." });
     }
+
+    paypalCaptured = true;
+    await updatePaypalCheckoutAttempt({
+      orderID,
+      userId,
+      status: "PAYPAL_COMPLETED",
+      paypalCaptureId: paypalPaymentId.toString(),
+      details: { paypalStatus: status },
+    });
 
     if (parsedCustomId?.type === "featured_offer") {
       const [, offerId] = customId.split("_");
@@ -621,6 +710,12 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
           featuredUntil,
         },
       );
+      await updatePaypalCheckoutAttempt({
+        orderID,
+        userId,
+        status: "COMPLETED",
+        paypalCaptureId: paypalPaymentId.toString(),
+      });
       return res.json({ success: true });
     }
 
@@ -634,6 +729,13 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
         { id: parsedCustomId.subscriptionId, userId },
       );
       if (subscriptionResult.rows.length === 0) {
+        await updatePaypalCheckoutAttempt({
+          orderID,
+          userId,
+          status: "PROCESSING_ERROR",
+          errorCode: "SUBSCRIPTION_NOT_FOUND",
+          errorMessage: "El pago se capturo, pero no se encontro la suscripcion interna.",
+        });
         return res.status(400).json({ message: "Suscripcion interna no encontrada." });
       }
       internalSubscriptionId = subscriptionResult.rows[0].id;
@@ -642,12 +744,26 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
       plan = parsedCustomId.plan;
       cycle = parsedCustomId.cycle;
     } else {
+      await updatePaypalCheckoutAttempt({
+        orderID,
+        userId,
+        status: "PROCESSING_ERROR",
+        errorCode: "INVALID_CUSTOM_ID",
+        errorMessage: "El pago se capturo, pero su referencia interna no es valida.",
+      });
       return res.status(400).json({
         message: "Los datos del plan de suscripcion no son validos.",
       });
     }
 
     if (!VALID_SUBSCRIPTION_PLANS.has(plan) || !VALID_BILLING_CYCLES.has(cycle)) {
+      await updatePaypalCheckoutAttempt({
+        orderID,
+        userId,
+        status: "PROCESSING_ERROR",
+        errorCode: "INVALID_SUBSCRIPTION_DATA",
+        errorMessage: "El pago se capturo, pero el plan o ciclo no es valido.",
+      });
       return res.status(400).json({
         message: "Los datos del plan de suscripcion no son validos.",
       });
@@ -716,9 +832,26 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
         .catch((emailError) => console.error("Failed to send subscription email for PayPal:", emailError));
     }
 
+    await updatePaypalCheckoutAttempt({
+      orderID,
+      userId,
+      subscriptionId: internalSubscriptionId,
+      status: "COMPLETED",
+      paypalCaptureId: paypalPaymentId.toString(),
+    });
+
     res.json({ success: true, subscriptionId: internalSubscriptionId });
   } catch (error) {
-    console.error("Error al capturar orden de PayPal:", error);
+    const normalizedError = normalizePaypalError(error);
+    await updatePaypalCheckoutAttempt({
+      orderID,
+      userId,
+      status: paypalCaptured ? "PROCESSING_ERROR" : "CAPTURE_FAILED",
+      errorCode: normalizedError.errorCode,
+      errorMessage: normalizedError.errorMessage,
+      details: normalizedError.details,
+    });
+    console.error("Error al capturar orden de PayPal:", normalizedError);
     res.status(500).json({ message: "Error al capturar la orden de PayPal." });
   }
 });
