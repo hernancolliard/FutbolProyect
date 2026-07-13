@@ -159,6 +159,8 @@
   "featured_videos_previous": "Videos anteriores",
   "featured_videos_next": "Más videos",
   "featured_videos_play": "Reproducir {{title}}",
+  "featured_videos_loading": "Cargando videos...",
+  "featured_videos_empty": "Todavía no hay videos destacados disponibles.",
   "home_how_step_1_title": "Creá tu perfil",
   "home_how_step_1_text": "Registrate y completá tu información profesional.",
   "home_how_step_2_title": "Publicá o buscá",

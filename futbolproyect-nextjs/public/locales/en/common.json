@@ -159,6 +159,8 @@
   "featured_videos_previous": "Previous videos",
   "featured_videos_next": "More videos",
   "featured_videos_play": "Play {{title}}",
+  "featured_videos_loading": "Loading videos...",
+  "featured_videos_empty": "There are no featured videos available yet.",
   "home_how_step_1_title": "Create your profile",
   "home_how_step_1_text": "Sign up and complete your professional information.",
   "home_how_step_2_title": "Post or search",

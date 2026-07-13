@@ -46,7 +46,8 @@ type HomeOffersData = {
 };
 
 const getApiBaseUrl = () => {
-  const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const raw =
+    process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
   if (!raw) {
     return `http://localhost:${process.env.PORT || 5000}/api`;
   }

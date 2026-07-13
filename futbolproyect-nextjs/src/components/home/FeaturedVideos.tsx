@@ -14,6 +14,7 @@ import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import { useTranslation } from "react-i18next";
 import VideoPlayerModal from "@/components/profile/VideoPlayerModal";
+import publicApi from "@/lib/publicApi";
 import type { FeaturedVideo } from "@/lib/types";
 
 type Props = {
@@ -38,6 +39,8 @@ const getCoverUrl = (video: FeaturedVideo) => {
 export default function FeaturedVideos({ videos }: Props) {
   const { t, i18n } = useTranslation("common");
   const railRef = useRef<HTMLDivElement | null>(null);
+  const [displayedVideos, setDisplayedVideos] = useState(videos);
+  const [isLoading, setIsLoading] = useState(videos.length === 0);
   const [selectedVideo, setSelectedVideo] = useState<FeaturedVideo | null>(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -57,10 +60,41 @@ export default function FeaturedVideos({ videos }: Props) {
   }, []);
 
   useEffect(() => {
+    if (videos.length > 0) {
+      setDisplayedVideos(videos);
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const refreshVideos = async () => {
+      setIsLoading(true);
+      try {
+        const response = await publicApi.get<FeaturedVideo[]>(
+          "/profiles/featured-videos?limit=30",
+          { signal: controller.signal },
+        );
+        setDisplayedVideos(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Unable to refresh featured videos:", error);
+          setDisplayedVideos([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    };
+
+    refreshVideos();
+    return () => controller.abort();
+  }, [videos]);
+
+  useEffect(() => {
     updateArrows();
     window.addEventListener("resize", updateArrows);
     return () => window.removeEventListener("resize", updateArrows);
-  }, [updateArrows, videos.length]);
+  }, [displayedVideos.length, updateArrows]);
 
   const scroll = (direction: -1 | 1) => {
     const rail = railRef.current;
@@ -75,8 +109,6 @@ export default function FeaturedVideos({ videos }: Props) {
     () => (selectedVideo ? getVideoTitle(selectedVideo) : ""),
     [getVideoTitle, selectedVideo],
   );
-
-  if (!videos.length) return null;
 
   return (
     <Box component="section" aria-labelledby="featured-videos-title">
@@ -123,22 +155,23 @@ export default function FeaturedVideos({ videos }: Props) {
         </Stack>
       </Stack>
 
-      <Box sx={{ position: "relative" }}>
-        <Box
-          ref={railRef}
-          onScroll={updateArrows}
-          sx={{
-            display: "flex",
-            gap: 2,
-            overflowX: "auto",
-            scrollSnapType: "x mandatory",
-            overscrollBehaviorInline: "contain",
-            pb: 0.5,
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
-          }}
-        >
-          {videos.map((video) => {
+      {displayedVideos.length > 0 ? (
+        <Box sx={{ position: "relative" }}>
+          <Box
+            ref={railRef}
+            onScroll={updateArrows}
+            sx={{
+              display: "flex",
+              gap: 2,
+              overflowX: "auto",
+              scrollSnapType: "x mandatory",
+              overscrollBehaviorInline: "contain",
+              pb: 0.5,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            {displayedVideos.map((video) => {
             const title = getVideoTitle(video);
             const coverUrl = getCoverUrl(video);
             const fullName = `${video.nombre || ""} ${video.apellido || ""}`.trim();
@@ -252,9 +285,29 @@ export default function FeaturedVideos({ videos }: Props) {
                 </Box>
               </Paper>
             );
-          })}
+            })}
+          </Box>
         </Box>
-      </Box>
+      ) : (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            textAlign: "center",
+            color: "#617086",
+            border: "1px dashed #cbd6e4",
+            borderRadius: 2.5,
+            bgcolor: "rgba(255, 255, 255, .7)",
+          }}
+        >
+          {isLoading
+            ? t("featured_videos_loading", "Cargando videos...")
+            : t(
+                "featured_videos_empty",
+                "Todavía no hay videos destacados disponibles.",
+              )}
+        </Paper>
+      )}
 
       <VideoPlayerModal
         open={Boolean(selectedVideo)}
