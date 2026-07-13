@@ -5,8 +5,10 @@ import Link from "next/link";
 import {
   Box,
   Button,
+  Checkbox,
   Divider,
   FormControl,
+  FormControlLabel,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -27,6 +29,8 @@ export type ProfileFilters = {
   nombre: string;
   nacionalidad: string;
   puesto: string;
+  hasVideo: boolean;
+  hasPhotos: boolean;
 };
 
 type Props = {
@@ -172,6 +176,43 @@ export default function ProfileFiltersSidebar({
                 {t("no_ages_to_filter")}
               </Typography>
             )}
+          </Box>
+
+          <Box>
+            <Typography
+              variant="caption"
+              sx={{ color: "#40506a", fontWeight: 800 }}
+            >
+              {t("profile_material_filters", "Material del perfil")}
+            </Typography>
+            <Stack sx={{ mt: 0.5 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={filters.hasVideo}
+                    onChange={(event) =>
+                      onChange({ ...filters, hasVideo: event.target.checked })
+                    }
+                  />
+                }
+                label={t("profiles_with_video", "Con videos")}
+                sx={{ "& .MuiFormControlLabel-label": { fontSize: ".88rem" } }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={filters.hasPhotos}
+                    onChange={(event) =>
+                      onChange({ ...filters, hasPhotos: event.target.checked })
+                    }
+                  />
+                }
+                label={t("profiles_with_photos", "Con fotos")}
+                sx={{ "& .MuiFormControlLabel-label": { fontSize: ".88rem" } }}
+              />
+            </Stack>
           </Box>
 
           <Button

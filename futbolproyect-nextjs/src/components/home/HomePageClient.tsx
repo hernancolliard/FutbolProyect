@@ -13,13 +13,14 @@ import {
 } from "@/components/home/HomeShowcases";
 import HomeAudienceSpotlight from "@/components/home/HomeAudienceSpotlight";
 import HomeFinalCta from "@/components/home/HomeFinalCta";
+import FeaturedVideos from "@/components/home/FeaturedVideos";
 import HowItWorks from "@/components/shared/HowItWorks";
 import HomeTrustSignals from "@/components/shared/HomeTrustSignals";
 import HomeFAQ from "@/components/shared/HomeFAQ";
 import ContactPageClient from "@/components/client-components/ContactPageClient";
 import Modal from "@/components/ui/Modal";
 import AdBanner from "@/components/ads/AdBanner";
-import { Offer, Profile } from "@/lib/types";
+import { FeaturedVideo, Offer, Profile } from "@/lib/types";
 
 const PromotionModal = dynamic(() => import("@/components/PromotionModal"), {
   ssr: false,
@@ -37,12 +38,14 @@ type HomeOffersData = {
 type HomePageClientProps = {
   offersData: HomeOffersData;
   featuredProfiles: Profile[];
+  featuredVideos: FeaturedVideo[];
   seoOverview: React.ReactNode;
 };
 
 export default function HomePageClient({
   offersData,
   featuredProfiles,
+  featuredVideos,
   seoOverview,
 }: HomePageClientProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -110,6 +113,8 @@ export default function HomePageClient({
             <HomeProfilesShowcase profiles={featuredProfiles} />
 
             <HowItWorks />
+
+            <FeaturedVideos videos={featuredVideos} />
 
             <HomeTrustSignals />
 

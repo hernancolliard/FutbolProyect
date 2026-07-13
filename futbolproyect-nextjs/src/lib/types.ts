@@ -39,6 +39,8 @@ export interface Profile {
   total_ratings: number;
   profile_views?: number;
   fecha_de_nacimiento: string;
+  has_video?: boolean;
+  has_photos?: boolean;
 }
 
 export interface Video {
@@ -47,6 +49,20 @@ export interface Video {
   youtube_url: string;
   cover_image_url: string;
   position: number;
+}
+
+export interface FeaturedVideo extends Video {
+  video_key: string;
+  profile_id: string;
+  is_managed_profile: boolean;
+  nombre: string;
+  apellido?: string;
+  foto_perfil_url: string;
+  posicion_principal?: string;
+  title_es?: string;
+  title_en?: string;
+  average_rating?: number;
+  total_ratings?: number;
 }
 
 export interface UserPhoto {

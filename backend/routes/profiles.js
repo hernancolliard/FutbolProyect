@@ -348,6 +348,12 @@ router.get("/", async (req, res) => {
           p.fecha_de_nacimiento,
           p.average_rating,
           p.total_ratings,
+          EXISTS (
+            SELECT 1 FROM user_videos uv WHERE uv.user_id = u.id
+          ) AS has_video,
+          EXISTS (
+            SELECT 1 FROM user_photos up WHERE up.user_id = u.id
+          ) AS has_photos,
           (
             CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
             CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
@@ -382,6 +388,16 @@ router.get("/", async (req, res) => {
           mp.fecha_de_nacimiento,
           mp.average_rating,
           mp.total_ratings,
+          EXISTS (
+            SELECT 1
+            FROM managed_profile_videos mpv
+            WHERE mpv.managed_profile_id = mp.id
+          ) AS has_video,
+          EXISTS (
+            SELECT 1
+            FROM managed_profile_photos mpp
+            WHERE mpp.managed_profile_id = mp.id
+          ) AS has_photos,
           (
             CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
             CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
@@ -508,6 +524,90 @@ router.get("/featured", async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los perfiles destacados:", error);
+    res.status(500).json({ message: "Error del servidor." });
+  }
+});
+
+// --- RUTA PÚBLICA: VIDEOS DESTACADOS DE SUSCRIPTORES ACTIVOS ---
+router.get("/featured-videos", async (req, res) => {
+  const requestedLimit = Number.parseInt(req.query.limit, 10);
+  const limit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(requestedLimit, 3), 60)
+    : 30;
+
+  try {
+    const result = await db.query(
+      `SELECT *
+       FROM (
+         SELECT
+           'user-' || uv.id AS video_key,
+           uv.id,
+           u.id::text AS profile_id,
+           FALSE AS is_managed_profile,
+           u.nombre,
+           u.apellido,
+           COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+           p.posicion_principal,
+           uv.title,
+           uv.title_es,
+           uv.title_en,
+           uv.youtube_url,
+           uv.cover_image_url,
+           uv.position,
+           COALESCE(p.average_rating, 0)::float AS average_rating,
+           COALESCE(p.total_ratings, 0)::int AS total_ratings,
+           uv.created_at
+         FROM user_videos uv
+         JOIN usuarios u ON u.id = uv.user_id
+         JOIN suscripciones s ON s.id_usuario = u.id
+         LEFT JOIN perfiles_usuario p ON p.id_usuario = u.id
+         WHERE u.tipo_usuario = 'postulante'
+           AND s.estado = 'activa'
+           AND s.fecha_fin > NOW()
+           AND NULLIF(TRIM(uv.youtube_url), '') IS NOT NULL
+
+         UNION ALL
+
+         SELECT
+           'managed-' || mpv.id AS video_key,
+           mpv.id,
+           'managed-' || mp.id AS profile_id,
+           TRUE AS is_managed_profile,
+           mp.nombre,
+           mp.apellido,
+           COALESCE(mp.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url,
+           mp.posicion_principal,
+           mpv.title,
+           mpv.title_es,
+           mpv.title_en,
+           mpv.youtube_url,
+           mpv.cover_image_url,
+           mpv.position,
+           COALESCE(mp.average_rating, 0)::float AS average_rating,
+           COALESCE(mp.total_ratings, 0)::int AS total_ratings,
+           mpv.created_at
+         FROM managed_profile_videos mpv
+         JOIN managed_player_profiles mp ON mp.id = mpv.managed_profile_id
+         JOIN usuarios owner ON owner.id = mp.owner_user_id
+         JOIN suscripciones s ON s.id_usuario = owner.id
+         WHERE owner.tipo_usuario = 'ofertante'
+           AND owner.rol = ANY(@managedRoles::text[])
+           AND s.estado = 'activa'
+           AND s.fecha_fin > NOW()
+           AND NULLIF(TRIM(mpv.youtube_url), '') IS NOT NULL
+       ) featured_videos
+       ORDER BY
+         average_rating DESC,
+         total_ratings DESC,
+         created_at DESC,
+         video_key DESC
+       LIMIT @limit`,
+      { managedRoles: MANAGED_PROFILE_ROLES, limit },
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener videos destacados:", error);
     res.status(500).json({ message: "Error del servidor." });
   }
 });

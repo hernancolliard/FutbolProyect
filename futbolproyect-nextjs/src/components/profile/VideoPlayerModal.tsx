@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Dialog, DialogContent, Box, Typography } from '@mui/material';
+import { Dialog, DialogContent, Box, IconButton, Typography } from '@mui/material';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useTranslation } from 'react-i18next';
 
 // Function to extract YouTube video ID from a URL
@@ -16,9 +17,10 @@ interface VideoPlayerModalProps {
     open: boolean;
     onClose: () => void;
     youtubeUrl: string | null;
+    title?: string;
 }
 
-const VideoPlayerModal = ({ open, onClose, youtubeUrl }: VideoPlayerModalProps) => {
+const VideoPlayerModal = ({ open, onClose, youtubeUrl, title }: VideoPlayerModalProps) => {
     const { t } = useTranslation();
     const videoId = getYouTubeId(youtubeUrl);
 
@@ -26,11 +28,26 @@ const VideoPlayerModal = ({ open, onClose, youtubeUrl }: VideoPlayerModalProps) 
         <Dialog 
             open={open} 
             onClose={onClose} 
-            maxWidth="md" 
+            maxWidth="lg"
             fullWidth
-            PaperProps={{ sx: { bgcolor: 'black' } }}
+            PaperProps={{ sx: { bgcolor: 'black', overflow: 'hidden' } }}
         >
-            <DialogContent sx={{ p: 0 }}>
+            <DialogContent sx={{ p: 0, position: 'relative' }}>
+                <IconButton
+                    aria-label={t('close', 'Cerrar')}
+                    onClick={onClose}
+                    sx={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        zIndex: 2,
+                        color: '#fff',
+                        bgcolor: 'rgba(0, 0, 0, .58)',
+                        '&:hover': { bgcolor: 'rgba(0, 0, 0, .78)' },
+                    }}
+                >
+                    <CloseRoundedIcon />
+                </IconButton>
                 {videoId ? (
                     <Box
                         sx={{
@@ -45,7 +62,7 @@ const VideoPlayerModal = ({ open, onClose, youtubeUrl }: VideoPlayerModalProps) 
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
-                            title={t('embedded_youtube_video', 'Video de YouTube insertado')}
+                            title={title || t('embedded_youtube_video', 'Video de YouTube insertado')}
                             style={{
                                 position: 'absolute',
                                 top: 0,

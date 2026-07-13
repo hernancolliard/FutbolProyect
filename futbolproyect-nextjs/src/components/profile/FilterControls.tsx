@@ -36,6 +36,8 @@ const emptyFilters: ProfileFilters = {
   nombre: "",
   nacionalidad: "",
   puesto: "",
+  hasVideo: false,
+  hasPhotos: false,
 };
 
 const normalizeForSearch = (value?: string) =>
@@ -229,8 +231,17 @@ export default function FilterControls({
           (profileAge !== null &&
             profileAge >= appliedAgeRange[0] &&
             profileAge <= appliedAgeRange[1]);
+        const matchVideo = !appliedFilters.hasVideo || Boolean(profile.has_video);
+        const matchPhotos = !appliedFilters.hasPhotos || Boolean(profile.has_photos);
 
-        return matchName && matchNationality && matchPosition && matchAge;
+        return (
+          matchName &&
+          matchNationality &&
+          matchPosition &&
+          matchAge &&
+          matchVideo &&
+          matchPhotos
+        );
       }),
     [appliedAgeRange, appliedFilters, initialProfiles, isAgeFilterActive],
   );

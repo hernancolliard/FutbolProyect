@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import HomePageClient from "@/components/home/HomePageClient";
 import HomeSeoOverview from "@/components/home/HomeSeoOverview";
-import type { Offer, Profile } from "@/lib/types";
+import type { FeaturedVideo, Offer, Profile } from "@/lib/types";
 
 const title =
   "FutbolProyect | Mostrá tu fútbol y conectá con oportunidades";
@@ -57,15 +57,19 @@ const getApiBaseUrl = () => {
 async function getHomeData(): Promise<{
   offersData: HomeOffersData;
   featuredProfiles: Profile[];
+  featuredVideos: FeaturedVideo[];
 }> {
   const apiBaseUrl = getApiBaseUrl();
 
   try {
-    const [offersResponse, profilesResponse] = await Promise.all([
+    const [offersResponse, profilesResponse, videosResponse] = await Promise.all([
       fetch(`${apiBaseUrl}/offers?limit=6&show=all`, {
         next: { revalidate: 300 },
       }),
       fetch(`${apiBaseUrl}/profiles/featured`, {
+        next: { revalidate: 300 },
+      }),
+      fetch(`${apiBaseUrl}/profiles/featured-videos?limit=30`, {
         next: { revalidate: 300 },
       }),
     ]);
@@ -74,6 +78,7 @@ async function getHomeData(): Promise<{
     const profilesPayload = profilesResponse.ok
       ? await profilesResponse.json()
       : [];
+    const videosPayload = videosResponse.ok ? await videosResponse.json() : [];
 
     return {
       offersData: {
@@ -83,23 +88,26 @@ async function getHomeData(): Promise<{
         totalOffers: Number(offersPayload?.totalOffers || 0),
       },
       featuredProfiles: Array.isArray(profilesPayload) ? profilesPayload : [],
+      featuredVideos: Array.isArray(videosPayload) ? videosPayload : [],
     };
   } catch (error) {
     console.error("Unable to load home data during server rendering:", error);
     return {
       offersData: { offers: [], totalOffers: 0 },
       featuredProfiles: [],
+      featuredVideos: [],
     };
   }
 }
 
 export default async function HomePage() {
-  const { offersData, featuredProfiles } = await getHomeData();
+  const { offersData, featuredProfiles, featuredVideos } = await getHomeData();
 
   return (
     <HomePageClient
       offersData={offersData}
       featuredProfiles={featuredProfiles}
+      featuredVideos={featuredVideos}
       seoOverview={<HomeSeoOverview />}
     />
   );
