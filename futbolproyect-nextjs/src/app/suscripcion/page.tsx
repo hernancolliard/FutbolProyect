@@ -324,6 +324,10 @@ export default function SubscriptionPage() {
             ))}
           </Box>
 
+          <Alert severity="info" sx={{ mt: 3, mx: "auto", maxWidth: 930 }}>
+            {t("subscription_featured_offer_separate_purchase")}
+          </Alert>
+
           <Paper
             elevation={0}
             sx={{

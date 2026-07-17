@@ -15,6 +15,8 @@ import {
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import apiClient from "@/lib/apiClient";
+import { useAuth } from "@/context/AuthContext";
+import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 interface Offer {
   [key: string]: any;
@@ -48,6 +50,10 @@ export default function MyOffersSection({
   userId,
 }: MyOffersSectionProps) {
   const { t, i18n } = useTranslation();
+  const { user } = useAuth();
+  const hasOfferManagementAccess = Boolean(
+    user?.isadmin || hasCompatibleActiveSubscription(user),
+  );
   const language = i18n.language?.startsWith("en") ? "en" : "es";
   const localizedField = (offer: Offer, field: string) =>
     offer[`${field}_${language}`] || offer[field] || "";
@@ -62,6 +68,10 @@ export default function MyOffersSection({
 
   useEffect(() => {
     const loadOffers = async () => {
+      if (!hasOfferManagementAccess) {
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       try {
         const data = await fetchUserOffers(userId);
@@ -73,7 +83,20 @@ export default function MyOffersSection({
       }
     };
     loadOffers();
-  }, [userId]);
+  }, [hasOfferManagementAccess, userId]);
+
+  if (!hasOfferManagementAccess) {
+    return (
+      <Stack spacing={2} alignItems="flex-start" sx={{ mt: 4 }}>
+        <Alert severity="info">
+          {t("offer_management_subscription_gate_description")}
+        </Alert>
+        <Button component={Link} href="/suscripcion" variant="contained">
+          {t("view_subscription_plans")}
+        </Button>
+      </Stack>
+    );
+  }
 
   return (
     <Stack sx={{ mt: 4, minWidth: 0, maxWidth: "100%" }}>

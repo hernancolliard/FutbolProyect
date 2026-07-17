@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const db = require("../db");
+const { getRequiredSubscriptionPlan } = require("../subscriptionAccess");
 
 /* =====================================================
    VERIFICAR TOKEN (COOKIE O AUTH HEADER)
@@ -156,13 +157,23 @@ const verificarSuscripcionActiva =
       }
 
       // 3️⃣ Verificar suscripción activa
+      const requiredPlan = getRequiredSubscriptionPlan(tipoUsuarioNormalizado);
+
+      if (!requiredPlan) {
+        return res.status(403).json({
+          message:
+            "No existe un plan de suscripcion compatible con tu tipo de usuario.",
+        });
+      }
+
       const subResult = await db.query(
         `SELECT id, plan, estado, fecha_fin 
          FROM suscripciones
          WHERE id_usuario = @id
            AND estado = 'activa'
-           AND fecha_fin > NOW()`,
-        { id: req.user.id },
+           AND fecha_fin > NOW()
+           AND LOWER(TRIM(plan)) = @requiredPlan`,
+        { id: req.user.id, requiredPlan },
       );
 
       if (subResult.rows.length === 0) {

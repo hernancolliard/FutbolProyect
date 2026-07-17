@@ -18,6 +18,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import { useAuth } from "@/context/AuthContext";
 import CreateOffer from "@/components/CreateOffer";
 import { useTranslation } from "react-i18next";
+import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 const pageBackground = {
   bgcolor: "#f7f9fc",
@@ -33,6 +34,8 @@ export default function CreateOfferPage() {
   const { t } = useTranslation("common");
   const canPublishOffer =
     user?.tipo_usuario === "ofertante" || user?.isadmin === true;
+  const canUseOfferManagement =
+    user?.isadmin === true || hasCompatibleActiveSubscription(user);
 
   if (loading) {
     return (
@@ -159,6 +162,32 @@ export default function CreateOfferPage() {
               </Alert>
               <Button component={Link} href="/" variant="outlined">
                 {t("back_to_home", "Volver al inicio")}
+              </Button>
+            </Stack>
+          </Paper>
+        </Container>
+      </Box>
+    );
+  }
+
+  if (!canUseOfferManagement) {
+    return (
+      <Box sx={pageBackground}>
+        <Container maxWidth="md" sx={{ py: { xs: 5, md: 8 } }}>
+          <Paper
+            elevation={0}
+            sx={{ p: { xs: 2.5, md: 4 }, border: "1px solid #dfe6ef", borderRadius: 3 }}
+          >
+            <Stack spacing={2.5} alignItems="flex-start">
+              <WorkOutlineRoundedIcon sx={{ color: "#1262db", fontSize: 42 }} />
+              <Typography component="h1" sx={{ color: "#0a1930", fontSize: "1.7rem", fontWeight: 900 }}>
+                {t("offer_subscription_gate_title")}
+              </Typography>
+              <Alert severity="info" sx={{ width: "100%" }}>
+                {t("offer_management_subscription_gate_description")}
+              </Alert>
+              <Button component={Link} href="/suscripcion" variant="contained">
+                {t("view_subscription_plans")}
               </Button>
             </Stack>
           </Paper>

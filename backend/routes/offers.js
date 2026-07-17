@@ -273,8 +273,11 @@ router.get("/filter-options", async (req, res) => {
 });
 
 // --- RUTA PROTEGIDA: OBTENER MIS OFERTAS ---
-router.get("/my-offers", verificarToken, async (req, res) => {
-  try {
+router.get(
+  "/my-offers",
+  [verificarToken, verificarSuscripcionActiva(["ofertante", "agencia"])],
+  async (req, res) => {
+    try {
     const userId = req.user.id;
 
     const query = `
@@ -294,11 +297,12 @@ router.get("/my-offers", verificarToken, async (req, res) => {
 
     const result = await db.query(query, { userId });
     res.json(result.rows);
-  } catch (error) {
-    console.error("Error al obtener mis ofertas:", error);
-    res.status(500).json({ message: "Error del servidor al obtener las ofertas." });
-  }
-});
+    } catch (error) {
+      console.error("Error al obtener mis ofertas:", error);
+      res.status(500).json({ message: "Error del servidor al obtener las ofertas." });
+    }
+  },
+);
 
 // --- RUTA PÚBLICA: DETALLE INDEXABLE DE UNA OFERTA ABIERTA ---
 // Permite que buscadores y visitantes lean la oferta. Las acciones de postulación
@@ -358,6 +362,11 @@ router.get("/public/:id", verificarTokenOpcional, async (req, res) => {
               WHERE s.id_usuario = u.id
                 AND s.estado = 'activa'
                 AND s.fecha_fin > NOW()
+                AND LOWER(TRIM(s.plan)) = CASE
+                  WHEN LOWER(TRIM(u.tipo_usuario)) = 'postulante' THEN 'postulante'
+                  WHEN LOWER(TRIM(u.tipo_usuario)) IN ('ofertante', 'agencia') THEN 'ofertante'
+                  ELSE ''
+                END
             ) AS has_active_subscription
           FROM usuarios u
           WHERE u.id = @userId
@@ -604,6 +613,7 @@ router.post(
 router.put(
   "/:id",
   verificarToken,
+  verificarSuscripcionActiva(["ofertante", "agencia"]),
   popularRolUsuario,
   upload.fields([{ name: "imagen_url", maxCount: 1 }]),
   processOfferImages,
@@ -749,7 +759,11 @@ router.put(
 // --- RUTA PROTEGIDA: OBTENER POSTULANTES DE UNA OFERTA ---
 router.get(
   "/:offerId/applications",
-  [verificarToken, popularRolUsuario],
+  [
+    verificarToken,
+    verificarSuscripcionActiva(["ofertante", "agencia"]),
+    popularRolUsuario,
+  ],
   async (req, res) => {
     const { offerId } = req.params;
     const userId = req.user.id;
@@ -813,7 +827,11 @@ router.get(
 // --- RUTA PROTEGIDA: ACTUALIZAR ESTADO DE UNA POSTULACIÓN ---
 router.patch(
   "/:offerId/applications/:applicationId/status",
-  [verificarToken, popularRolUsuario],
+  [
+    verificarToken,
+    verificarSuscripcionActiva(["ofertante", "agencia"]),
+    popularRolUsuario,
+  ],
   async (req, res) => {
     const { offerId, applicationId } = req.params;
     const { estado } = req.body;

@@ -11,6 +11,8 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import { useAuth } from "@/context/AuthContext";
+import { getRequiredSubscriptionPlan } from "@/lib/subscriptionAccess";
 
 interface SubscribeButtonProps {
   planType: string;
@@ -36,12 +38,17 @@ function SubscribeButton({
 }: SubscribeButtonProps) {
   const router = useRouter();
   const { t } = useTranslation("common");
+  const { user } = useAuth();
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [paypalProcessing, setPaypalProcessing] = useState(false);
   const lastPayPalOrderId = useRef("");
   const trackingTokens = useRef<Record<string, string>>({});
+  const requiredPlan = getRequiredSubscriptionPlan(user?.tipo_usuario);
+  const isPlanMismatch = Boolean(
+    user && requiredPlan && requiredPlan !== planType,
+  );
 
   const reportPayPalEvent = async (
     event: PayPalClientEvent,
@@ -83,7 +90,8 @@ function SubscribeButton({
       } else {
         console.error("Error al crear la preferencia de MP:", error);
         setError(
-          error.message ||
+          error.response?.data?.message ||
+            error.message ||
             t(
               "payment_error_mp",
               "Error al iniciar el proceso de pago con Mercado Pago.",
@@ -121,10 +129,11 @@ function SubscribeButton({
       } else {
         console.error("Error creating PayPal order:", error);
         setError(
-          t(
-            "payment_error_paypal_generic",
-            "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo.",
-          ),
+          error.response?.data?.message ||
+            t(
+              "payment_error_paypal_generic",
+              "No se pudo iniciar el pago con PayPal. Por favor, intenta de nuevo.",
+            ),
         );
       }
       throw error;
@@ -208,6 +217,14 @@ function SubscribeButton({
       ),
     );
   };
+
+  if (isPlanMismatch) {
+    return (
+      <Alert severity="info">
+        {t("subscription_plan_account_mismatch")}
+      </Alert>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", minWidth: 0, overflow: "hidden" }}>

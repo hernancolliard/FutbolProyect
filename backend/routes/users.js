@@ -200,6 +200,11 @@ router.get("/me", verificarToken, async (req, res) => {
        LEFT JOIN suscripciones s ON u.id = s.id_usuario
          AND s.estado = 'activa'
          AND s.fecha_fin > NOW()
+         AND LOWER(TRIM(s.plan)) = CASE
+           WHEN LOWER(TRIM(u.tipo_usuario)) = 'postulante' THEN 'postulante'
+           WHEN LOWER(TRIM(u.tipo_usuario)) IN ('ofertante', 'agencia') THEN 'ofertante'
+           ELSE ''
+         END
        WHERE u.id = @id`,
       { id: req.user.id },
     );

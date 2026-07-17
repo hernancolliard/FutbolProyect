@@ -6,6 +6,9 @@ const {
 const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const paypal = require("@paypal/checkout-server-sdk");
 const db = require("../db");
+const {
+  isSubscriptionPlanCompatible,
+} = require("../subscriptionAccess");
 require("dotenv").config();
 const {
   attachReferralToSubscription,
@@ -221,6 +224,12 @@ router.post("/create-preference-mp", verificarToken, async (req, res) => {
     let description = `${planType}-${billingCycle}`;
 
     if (planType === "ofertante" || planType === "postulante") {
+      if (!isSubscriptionPlanCompatible(req.user.tipo_usuario, planType)) {
+        return res.status(403).json({
+          message: "El plan seleccionado no corresponde a tu tipo de usuario.",
+        });
+      }
+
       const planResult = await db.query(
         "SELECT price_mp FROM subscription_plans WHERE plan_name = @planName",
         { planName: billingCycle }
@@ -355,6 +364,21 @@ router.post("/webhook-mp", async (req, res) => {
             );
           }
           const { userId, plan, cycle } = subscriptionContext;
+          const subscriptionUserResult = await db.query(
+            "SELECT nombre, email, tipo_usuario FROM usuarios WHERE id = @userId",
+            { userId },
+          );
+          const subscriptionUser = subscriptionUserResult.rows[0];
+
+          if (
+            !subscriptionUser ||
+            !isSubscriptionPlanCompatible(subscriptionUser.tipo_usuario, plan)
+          ) {
+            throw new Error(
+              `Subscription plan ${plan} is incompatible with user ${userId}`,
+            );
+          }
+
           const fechaFin = calculateSubscriptionEndDate(
             cycle,
             payment.date_approved || payment.date_created || new Date(),
@@ -378,10 +402,13 @@ router.post("/webhook-mp", async (req, res) => {
           });
 
           // Send confirmation email
-          const userResult = await db.query('SELECT nombre, email FROM usuarios WHERE id = @userId', { userId });
-          if (userResult.rows.length > 0) {
-            const user = userResult.rows[0];
-            sendSubscriptionConfirmationEmail(user.email, user.nombre, plan, fechaFin)
+          if (subscriptionUser.email) {
+            sendSubscriptionConfirmationEmail(
+              subscriptionUser.email,
+              subscriptionUser.nombre,
+              plan,
+              fechaFin,
+            )
               .catch(emailError => console.error("Failed to send subscription email for MP:", emailError));
           }
         }
@@ -410,6 +437,12 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
     let pendingSubscriptionId = null;
 
     if (planType === "ofertante" || planType === "postulante") {
+      if (!isSubscriptionPlanCompatible(req.user.tipo_usuario, planType)) {
+        return res.status(403).json({
+          message: "El plan seleccionado no corresponde a tu tipo de usuario.",
+        });
+      }
+
       const planResult = await db.query(
         "SELECT price_usd FROM subscription_plans WHERE plan_name = @planName",
         { planName: billingCycle }
@@ -766,6 +799,19 @@ router.post("/capture-paypal-order", verificarToken, async (req, res) => {
       });
       return res.status(400).json({
         message: "Los datos del plan de suscripcion no son validos.",
+      });
+    }
+
+    if (!isSubscriptionPlanCompatible(req.user.tipo_usuario, plan)) {
+      await updatePaypalCheckoutAttempt({
+        orderID,
+        userId,
+        status: "PROCESSING_ERROR",
+        errorCode: "SUBSCRIPTION_PLAN_MISMATCH",
+        errorMessage: "El pago se capturo, pero el plan no corresponde al usuario.",
+      });
+      return res.status(403).json({
+        message: "El plan seleccionado no corresponde a tu tipo de usuario.",
       });
     }
 

@@ -23,6 +23,8 @@ import {
   Typography,
 } from "@mui/material";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useAuth } from "@/context/AuthContext";
+import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 type Applicant = {
   id: number;
@@ -50,12 +52,19 @@ const statusOptions = [
 
 export default function ApplicantsPage() {
   const { t } = useTranslation("common");
+  const { user, loading: authLoading } = useAuth();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const params = useParams();
   const offerId = params.offerId;
+  const isAdmin = Boolean(user?.isadmin || user?.isAdmin);
+  const hasOfferManagementAccess = Boolean(
+    isAdmin ||
+      (["ofertante", "agencia"].includes(user?.tipo_usuario) &&
+        hasCompatibleActiveSubscription(user)),
+  );
 
   const statusCounts = useMemo(() => {
     return applicants.reduce<Record<string, number>>((acc, applicant) => {
@@ -66,6 +75,11 @@ export default function ApplicantsPage() {
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      if (authLoading) return;
+      if (!hasOfferManagementAccess) {
+        setLoading(false);
+        return;
+      }
       if (!offerId) return;
       setLoading(true);
       try {
@@ -73,7 +87,8 @@ export default function ApplicantsPage() {
         setApplicants(response.data);
       } catch (err: any) {
         setError(
-          err.message ||
+          err.response?.data?.message ||
+            err.message ||
             t("error_loading_applicants_page", "Error al cargar la página de postulantes."),
         );
       } finally {
@@ -82,7 +97,7 @@ export default function ApplicantsPage() {
     };
 
     fetchApplicants();
-  }, [offerId, t]);
+  }, [authLoading, hasOfferManagementAccess, offerId, t]);
 
   const handleStatusChange = async (applicationId: number, estado: string) => {
     setUpdatingId(applicationId);
@@ -102,8 +117,21 @@ export default function ApplicantsPage() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return <LoadingSpinner text={t("loading_applicants_page", "Cargando postulantes...")} />;
+  }
+
+  if (!hasOfferManagementAccess) {
+    return (
+      <Stack spacing={2} alignItems="flex-start" sx={{ p: { xs: 2, md: 4 } }}>
+        <Alert severity="info">
+          {t("offer_management_subscription_gate_description")}
+        </Alert>
+        <Button component={Link} href="/suscripcion" variant="contained">
+          {t("view_subscription_plans")}
+        </Button>
+      </Stack>
+    );
   }
 
   if (error) return <Alert severity="error">{error}</Alert>;

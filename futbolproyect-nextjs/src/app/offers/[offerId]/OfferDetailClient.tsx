@@ -38,6 +38,7 @@ import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal";
 import OfferActions from "@/components/shared/OfferActions";
 import ShareButtons from "@/components/ShareButtons";
 import { Offer } from "@/lib/types";
+import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 type Props = {
   offerId: string;
@@ -154,7 +155,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   const offerCardRef = useRef<HTMLDivElement | null>(null);
 
   const isAdmin = Boolean(user?.isAdmin || user?.isadmin);
-  const hasActiveSubscription = user?.subscription_status === "activa";
+  const hasActiveSubscription = hasCompatibleActiveSubscription(user);
 
   const {
     data: offer,
@@ -167,6 +168,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
       offerId,
       user?.id || "anonymous",
       user?.subscription_status || "none",
+      user?.subscription_plan || "none",
     ],
     queryFn: () => fetchOffer(offerId),
     initialData: initialOffer,

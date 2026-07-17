@@ -269,7 +269,11 @@ const buildManagedProfileResponseSelect = () => `
     s.plan as subscription_plan,
     s.fecha_fin as subscription_end_date,
     CASE
-      WHEN s.estado = 'activa' AND s.fecha_fin > NOW() THEN 'activa'
+      WHEN s.estado = 'activa'
+        AND s.fecha_fin > NOW()
+        AND LOWER(TRIM(s.plan)) = 'ofertante'
+      THEN 'activa'
+      WHEN s.estado = 'activa' THEN 'inactiva'
       WHEN s.fecha_fin IS NOT NULL AND s.fecha_fin <= NOW() THEN 'inactiva'
       ELSE s.estado
     END as subscription_status
@@ -439,12 +443,14 @@ router.get("/featured", async (req, res) => {
       "u.tipo_usuario = 'postulante'",
       "s.estado = 'activa'",
       "s.fecha_fin > NOW()",
+      "LOWER(TRIM(s.plan)) = 'postulante'",
     ];
     let managedWhereClauses = [
       "owner.tipo_usuario = 'ofertante'",
       "owner.rol = ANY(@managedRoles::text[])",
       "s.estado = 'activa'",
       "s.fecha_fin > NOW()",
+      "LOWER(TRIM(s.plan)) = 'ofertante'",
     ];
 
     if (nacionalidad) {
@@ -564,6 +570,7 @@ router.get("/featured-videos", async (req, res) => {
          WHERE u.tipo_usuario = 'postulante'
            AND s.estado = 'activa'
            AND s.fecha_fin > NOW()
+           AND LOWER(TRIM(s.plan)) = 'postulante'
            AND NULLIF(TRIM(uv.youtube_url), '') IS NOT NULL
 
          UNION ALL
@@ -594,6 +601,7 @@ router.get("/featured-videos", async (req, res) => {
            AND owner.rol = ANY(@managedRoles::text[])
            AND s.estado = 'activa'
            AND s.fecha_fin > NOW()
+           AND LOWER(TRIM(s.plan)) = 'ofertante'
            AND NULLIF(TRIM(mpv.youtube_url), '') IS NOT NULL
        ) featured_videos
        ORDER BY
@@ -621,6 +629,7 @@ router.get("/featured-legacy-disabled", async (req, res) => {
         "u.tipo_usuario = 'postulante'",
         "s.estado = 'activa'",
         "s.fecha_fin > NOW()",
+        "LOWER(TRIM(s.plan)) = 'postulante'",
       ];
   
       if (nacionalidad) {
@@ -1158,7 +1167,15 @@ router.get("/:userId", async (req, res) => {
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
              CASE
-               WHEN s.estado = 'activa' AND s.fecha_fin > NOW() THEN 'activa'
+               WHEN s.estado = 'activa'
+                 AND s.fecha_fin > NOW()
+                 AND LOWER(TRIM(s.plan)) = CASE
+                   WHEN LOWER(TRIM(u.tipo_usuario)) = 'postulante' THEN 'postulante'
+                   WHEN LOWER(TRIM(u.tipo_usuario)) IN ('ofertante', 'agencia') THEN 'ofertante'
+                   ELSE ''
+                 END
+               THEN 'activa'
+               WHEN s.estado = 'activa' THEN 'inactiva'
                WHEN s.fecha_fin IS NOT NULL AND s.fecha_fin <= NOW() THEN 'inactiva'
                ELSE s.estado
              END as subscription_status

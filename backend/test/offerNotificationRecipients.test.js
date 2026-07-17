@@ -22,5 +22,9 @@ test("selecciona para avisos de ofertas solo postulantes con suscripcion activa 
   assert.match(executedQuery, /s\.id_usuario\s*=\s*u\.id/);
   assert.match(executedQuery, /s\.estado\s*=\s*'activa'/);
   assert.match(executedQuery, /s\.fecha_fin\s*>\s*NOW\(\)/);
+  assert.match(
+    executedQuery,
+    /LOWER\(TRIM\(s\.plan\)\)\s*=\s*'postulante'/,
+  );
   assert.match(executedQuery, /EXISTS\s*\(/);
 });

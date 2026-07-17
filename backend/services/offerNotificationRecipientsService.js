@@ -9,6 +9,7 @@ const ACTIVE_OFFER_NOTIFICATION_RECIPIENTS_QUERY = `
       WHERE s.id_usuario = u.id
         AND s.estado = 'activa'
         AND s.fecha_fin > NOW()
+        AND LOWER(TRIM(s.plan)) = 'postulante'
     )
 `;
 
