@@ -17,6 +17,9 @@ const validate = require("../middleware/validateMiddleware");
 const { translateText } = require("../services/translationService");
 const { uploadToS3 } = require("../services/s3Service");
 const { sendNewOfferNotificationEmail } = require("../services/emailService");
+const {
+  getActiveOfferNotificationRecipients,
+} = require("../services/offerNotificationRecipientsService");
 const { offerSchema } = require("../offerSchema");
 
 // --- Configuración de Caché en Memoria ---
@@ -546,13 +549,10 @@ router.post(
       // Invalidar el caché para que la nueva oferta aparezca inmediatamente
       myCache.flushAll();
 
-      // Enviar notificación por correo electrónico a todos los postulantes
+      // Enviar notificaciones solo a postulantes con suscripción activa y vigente.
       (async () => {
         try {
-          const userResult = await db.query(
-            "SELECT email FROM usuarios WHERE tipo_usuario = 'postulante'",
-          );
-          const applicants = userResult.rows;
+          const applicants = await getActiveOfferNotificationRecipients(db);
 
           if (applicants.length === 0) {
             return;
