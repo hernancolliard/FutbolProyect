@@ -139,7 +139,7 @@ export default function FeaturedProfilesClient() {
       </Grid>
 
       {isLoading ? (
-        <LoadingSpinner text="Cargando perfiles..." />
+        <LoadingSpinner text={t("loading_profiles")} />
       ) : isError ? (
         <Box className="error-message" sx={{ color: 'red', mt: 2 }}>
           {t('error_loading_profiles', 'Hubo un error al cargar los perfiles:')} {error?.message}
@@ -164,7 +164,7 @@ export default function FeaturedProfilesClient() {
                   <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Image
                       src={profile.foto_perfil_url || '/images/logos/logofp.png'}
-                      alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
+                      alt={t("profile_image_alt", { name: `${profile.nombre} ${profile.apellido || ''}`.trim() })}
                       width={180}
                       height={180}
                       style={{ width: '100%', height: '180px', objectFit: 'contain' }}

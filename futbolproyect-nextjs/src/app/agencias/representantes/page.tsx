@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function AgenciasRepresentantesPage() {
   return (
     <ProfileSeoLanding
-      h1="Agencias y representantes de fútbol"
-      mainText="FutbolProyect permite a agencias y representantes descubrir jugadores, revisar perfiles deportivos y conectar talento con clubes y oportunidades.\n\nPublicá búsquedas, evaluá trayectoria y material audiovisual, y ampliá tu red profesional dentro del fútbol."
-      h2="Perfiles para agencias y representantes"
-      ctaText="Registrar mi agencia"
+      translationPrefix="agencies_landing"
       ctaLink="/register"
     />
   );

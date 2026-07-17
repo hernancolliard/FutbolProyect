@@ -21,14 +21,17 @@ interface MyOffersListProps {
 }
 
 function MyOffersList({ offers }: MyOffersListProps) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const language = i18n.language?.startsWith("en") ? "en" : "es";
+  const localizedField = (offer: Offer, field: string) =>
+    (offer as any)[`${field}_${language}`] || (offer as any)[field] || "";
   const { user } = useAuth(); // Get user from AuthContext
 
   const handleOfferAction = (action: string, offerId: string) => {
     // This is a placeholder function.
     // In a real application, you would implement the logic for editing or deleting an offer.
     toast.info(
-      `Acción: ${action} en oferta ID: ${offerId} (Funcionalidad completa de edición/eliminación pendiente)`,
+      t("offer_action_pending", { action, offerId }),
     );
     // Example: router.push(`/offers/edit/${offerId}`);
     // Example: call API to delete offer
@@ -50,11 +53,11 @@ function MyOffersList({ offers }: MyOffersListProps) {
                   href={`/offers/${offer.id}`}
                   sx={{ textDecoration: "none" }}
                 >
-                  {offer.titulo}
+                  {localizedField(offer, "titulo")}
                 </Typography>
                 <Typography>
                   <strong>{t("status", "Estado")}:</strong>{" "}
-                  {(offer as any).estado || "Activa"}
+                  {(offer as any).estado || t("active")}
                 </Typography>
                 <Typography>
                   <strong>{t("date", "Fecha")}:</strong>{" "}
@@ -66,7 +69,7 @@ function MyOffersList({ offers }: MyOffersListProps) {
                     : ""}
                 </Typography>
                 <Typography>
-                  {offer.descripcion ? offer.descripcion.substring(0, 100) : ""}
+                  {localizedField(offer, "descripcion").substring(0, 100)}
                   ...
                 </Typography>
                 {/* Render OfferActions if the user is the offer owner or an admin */}

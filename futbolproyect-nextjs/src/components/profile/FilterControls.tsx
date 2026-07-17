@@ -305,23 +305,20 @@ export default function FilterControls({
             component="h2"
             sx={{ color: "#0a1930", fontSize: "1.35rem", fontWeight: 900 }}
           >
-            Perfiles de futbolistas y talento deportivo
+            {t("profiles_seo_intro_title")}
           </Typography>
           <Typography sx={{ mt: 1, color: "#5e6c81", lineHeight: 1.7 }}>
-            Descubrí jugadores con información sobre su posición,
-            nacionalidad, trayectoria y material deportivo. Clubes, agencias
-            y scouts pueden consultar perfiles para encontrar profesionales
-            adecuados para sus proyectos.
+            {t("profiles_seo_intro_text")}
           </Typography>
           <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
             <Button component={Link} href="/register" size="small">
-              Crear perfil deportivo
+              {t("create_sports_profile")}
             </Button>
             <Button component={Link} href="/all-offers" size="small">
-              Ver oportunidades
+              {t("view_opportunities")}
             </Button>
             <Button component={Link} href="/create-offer" size="small">
-              Publicar una oferta
+              {t("publish_offer")}
             </Button>
           </Stack>
         </Box>

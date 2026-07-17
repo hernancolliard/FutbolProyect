@@ -2,11 +2,13 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import publicApi from "@/lib/publicApi";
 
 export default function ResetPasswordClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useTranslation("common");
 
   const token = searchParams.get("token");
 
@@ -19,7 +21,7 @@ export default function ResetPasswordClient() {
     e.preventDefault();
 
     if (!token) {
-      setError("Token inválido o ausente");
+      setError(t("reset_token_invalid"));
       return;
     }
 
@@ -32,11 +34,11 @@ export default function ResetPasswordClient() {
         newPassword: password,
       });
 
-      setSuccess("Contraseña actualizada correctamente");
+      setSuccess(t("password_updated_success"));
       setTimeout(() => router.push("/auth/login"), 2000);
     } catch (err: any) {
       setError(
-        err.response?.data?.message || "Error al restablecer la contraseña",
+        err.response?.data?.message || t("reset_password_error"),
       );
     } finally {
       setLoading(false);
@@ -47,12 +49,12 @@ export default function ResetPasswordClient() {
     <form onSubmit={handleSubmit}>
       <input
         type="password"
-        placeholder="Nueva contraseña"
+        placeholder={t("new_password_label")}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      <button disabled={loading}>Cambiar contraseña</button>
+      <button disabled={loading}>{t("change_password")}</button>
 
       {error && <p>{error}</p>}
       {success && <p>{success}</p>}

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Link as MuiLink,
@@ -10,31 +13,33 @@ import {
 const seoLinks = [
   {
     href: "/perfiles/jugadores",
-    label: "Perfiles de futbolistas",
+    labelKey: "seo_link_player_profiles",
   },
   {
     href: "/all-offers",
-    label: "Oportunidades y ofertas de fútbol",
+    labelKey: "seo_link_football_opportunities",
   },
   {
     href: "/ofertas/entrenadores",
-    label: "Ofertas para entrenadores",
+    labelKey: "coach_offers",
   },
   {
     href: "/ofertas/analistas-de-futbol",
-    label: "Trabajo para analistas de fútbol",
+    labelKey: "seo_link_analyst_jobs",
   },
   {
     href: "/perfiles",
-    label: "Buscar jugadores y profesionales",
+    labelKey: "seo_link_find_players",
   },
   {
     href: "/create-offer",
-    label: "Publicar una oferta",
+    labelKey: "publish_offer",
   },
 ];
 
 export default function HomeSeoOverview() {
+  const { t } = useTranslation("common");
+
   return (
     <Box component="section" aria-labelledby="home-seo-overview-title">
       <Paper
@@ -55,27 +60,33 @@ export default function HomeSeoOverview() {
             fontWeight: 900,
           }}
         >
-          Perfiles y oportunidades para profesionales del fútbol
+          {t(
+            "home_seo_overview_title",
+            "Perfiles y oportunidades para profesionales del fútbol",
+          )}
         </Typography>
         <Typography
           sx={{ mt: 1.2, maxWidth: 900, color: "#5e6c81", lineHeight: 1.7 }}
         >
-          En FutbolProyect, futbolistas, entrenadores, scouts y analistas de
-          fútbol pueden crear un perfil deportivo con su trayectoria, fotos,
-          videos y datos profesionales. La plataforma facilita conexiones con
-          clubes, agencias y representantes que buscan talento para sus
-          proyectos.
+          {t(
+            "home_seo_overview_text_1",
+            "En FutbolProyect, futbolistas, entrenadores, scouts y analistas de fútbol pueden crear un perfil deportivo con su trayectoria, fotos, videos y datos profesionales. La plataforma facilita conexiones con clubes, agencias y representantes que buscan talento para sus proyectos.",
+          )}
         </Typography>
         <Typography
           sx={{ mt: 1, maxWidth: 900, color: "#5e6c81", lineHeight: 1.7 }}
         >
-          Explorá perfiles de jugadores, encontrá ofertas para profesionales
-          del fútbol o publicá una oportunidad para llegar a candidatos con
-          experiencia y material deportivo.
+          {t(
+            "home_seo_overview_text_2",
+            "Explorá perfiles de jugadores, encontrá ofertas para profesionales del fútbol o publicá una oportunidad para llegar a candidatos con experiencia y material deportivo.",
+          )}
         </Typography>
         <Stack
           component="nav"
-          aria-label="Enlaces a perfiles y oportunidades de fútbol"
+          aria-label={t(
+            "home_seo_links_aria",
+            "Enlaces a perfiles y oportunidades de fútbol",
+          )}
           direction="row"
           useFlexGap
           flexWrap="wrap"
@@ -102,7 +113,7 @@ export default function HomeSeoOverview() {
                 },
               }}
             >
-              {link.label}
+              {t(link.labelKey)}
             </MuiLink>
           ))}
         </Stack>

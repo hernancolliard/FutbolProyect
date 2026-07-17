@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Chip,
@@ -16,6 +16,7 @@ import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import apiClient from "@/lib/apiClient";
 import ContactFormContent from "./ContactFormContent";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   compact?: boolean;
@@ -23,6 +24,7 @@ type Props = {
 
 export default function ContactPageClient({ compact = false }: Props) {
   const { t } = useTranslation("common");
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,6 +33,37 @@ export default function ContactPageClient({ compact = false }: Props) {
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const reportOfferId = params.get("reportOfferId")?.trim();
+    if (!reportOfferId) return;
+
+    const reportOfferTitle = params.get("reportOfferTitle")?.trim();
+    const reportMessage = [
+      t(
+        "report_offer_message_intro",
+        "Quiero denunciar una posible estafa o contenido engañoso en una oferta.",
+      ),
+      "",
+      `${t("report_offer_label", "Oferta")}: ${reportOfferTitle || `#FP-${reportOfferId}`}`,
+      `ID: #FP-${reportOfferId}`,
+      `${t("report_offer_link_label", "Enlace")}: ${window.location.origin}/offers/${reportOfferId}`,
+      "",
+      t(
+        "report_offer_details_prompt",
+        "Motivo y detalles de la denuncia: ",
+      ),
+    ].join("\n");
+
+    setFormData((current) => ({
+      name: current.name || user?.nombre || "",
+      email: current.email || user?.email || "",
+      message: current.message || reportMessage,
+    }));
+  }, [t, user?.email, user?.nombre]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((current) => ({

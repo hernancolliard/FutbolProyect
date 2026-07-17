@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Globe2, Instagram, Linkedin, Mail, MessageCircle, Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PlayerContactProps {
   email?: string;
@@ -14,6 +15,7 @@ interface PlayerContactProps {
 }
 
 export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, websiteUrl, onWhatsApp, onEmail }: PlayerContactProps) {
+  const { t } = useTranslation("common");
   const normalizeExternalUrl = (url?: string) => {
     if (!url) return undefined;
     const trimmed = url.trim();
@@ -33,11 +35,11 @@ export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, w
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">Contacto</p>
-          <h3 className="mt-1 text-xl font-semibold text-[#071C3C]">Conecta con el jugador</h3>
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">{t("contact")}</p>
+          <h3 className="mt-1 text-xl font-semibold text-[#071C3C]">{t("connect_with_player")}</h3>
         </div>
         <button onClick={onWhatsApp} className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 font-semibold text-white">
-          <MessageCircle size={16} /> Contactar
+          <MessageCircle size={16} /> {t("contact_action")}
         </button>
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -87,7 +89,7 @@ export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, w
         })}
       </div>
       <button onClick={onEmail} className="mt-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 font-semibold text-[#071C3C] transition hover:bg-slate-50">
-        <Send size={16} /> Enviar email
+        <Send size={16} /> {t("send_email")}
       </button>
     </motion.div>
   );

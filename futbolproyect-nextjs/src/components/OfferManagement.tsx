@@ -8,7 +8,8 @@ import { useTranslation } from "react-i18next";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, CircularProgress, Button, Switch } from "@mui/material";
 
 function OfferManagement() {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
+  const language = i18n.language?.startsWith('en') ? 'en' : 'es';
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter(); // Initialize useRouter
@@ -86,7 +87,7 @@ function OfferManagement() {
           {offers.map((offer) => (
             <TableRow key={offer.id}>
               <TableCell>{offer.id}</TableCell>
-              <TableCell>{offer.titulo}</TableCell>
+              <TableCell>{offer[`titulo_${language}`] || offer.titulo}</TableCell>
               <TableCell>{offer.nombre_ofertante}</TableCell>
               <TableCell>
                 <Switch

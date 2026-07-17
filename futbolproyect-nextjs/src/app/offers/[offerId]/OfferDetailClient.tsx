@@ -31,6 +31,7 @@ import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import apiClient from "@/lib/apiClient";
 import { useAuth } from "@/context/AuthContext";
 import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal";
@@ -195,6 +196,10 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   const isOwner =
     Boolean(user && offer) &&
     String(user?.id) === String(offer?.id_usuario_ofertante);
+  const reportOfferHref = `/contact?${new URLSearchParams({
+    reportOfferId: String(offer?.id || offerId),
+    reportOfferTitle: titulo,
+  }).toString()}`;
 
   const { mutate: deleteOffer } = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/offers/${id}`),
@@ -227,7 +232,10 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
 
   const handleOfferAction = (action: string, id: string) => {
     if (action === "edit") router.push(`/offers/edit/${id}`);
-    if (action === "delete" && window.confirm("¿Eliminar esta oferta?")) {
+    if (
+      action === "delete" &&
+      window.confirm(t("confirm_delete_this_offer", "¿Eliminar esta oferta?"))
+    ) {
       deleteOffer(id);
     }
   };
@@ -255,7 +263,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
         <Alert severity="error">
           {(error as any)?.response?.data?.message ||
             error.message ||
-            "Error al cargar la oferta."}
+            t("offer_load_error", "Error al cargar la oferta.")}
         </Alert>
       </Container>
     );
@@ -270,21 +278,21 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   }
 
   const summaryRows = [
-    { label: "Ubicación", value: ubicacion, icon: <PlaceOutlinedIcon /> },
-    { label: "Puesto", value: puesto, icon: <BadgeOutlinedIcon /> },
-    { label: "Nivel", value: nivel, icon: <WorkspacePremiumOutlinedIcon /> },
-    { label: "Jornada", value: horarios, icon: <ScheduleOutlinedIcon /> },
+    { label: t("location_label", "Ubicación"), value: ubicacion, icon: <PlaceOutlinedIcon /> },
+    { label: t("position_label", "Puesto"), value: puesto, icon: <BadgeOutlinedIcon /> },
+    { label: t("filter_by_level", "Nivel"), value: nivel, icon: <WorkspacePremiumOutlinedIcon /> },
+    { label: t("schedule_label", "Jornada"), value: horarios, icon: <ScheduleOutlinedIcon /> },
     {
-      label: "Publicación",
+      label: t("offer_publication", "Publicación"),
       value: publicationDate,
       icon: <CalendarMonthOutlinedIcon />,
     },
     {
-      label: "Salario",
+      label: t("offer_salary", "Salario"),
       value: offer.salario ? String(offer.salario) : "",
       icon: <PaymentsOutlinedIcon />,
     },
-    { label: "ID de oferta", value: `#FP-${offer.id}`, icon: <NumbersRoundedIcon /> },
+    { label: t("offer_id", "ID de oferta"), value: `#FP-${offer.id}`, icon: <NumbersRoundedIcon /> },
   ];
 
   const quickFacts = [
@@ -385,7 +393,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
               </Typography>
               {offer.nombre_ofertante && (
                 <Typography sx={{ mt: 1, color: "rgba(255,255,255,.76)" }}>
-                  Publicado por {offer.nombre_ofertante}
+                  {t("published_by", "Publicado por")} {offer.nombre_ofertante}
                 </Typography>
               )}
               <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 2.2 }}>
@@ -508,7 +516,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                     variant="contained"
                     onClick={() => setShowPaymentModal(true)}
                   >
-                    Destacar oferta
+                    {t("highlight_offer", "Destacar oferta")}
                   </Button>
                   <OfferActions
                     offer={offer}
@@ -531,10 +539,13 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
               }}
             >
               <Typography sx={{ color: "#0a1930", fontSize: "1.15rem", fontWeight: 900 }}>
-                Postulate a esta oferta
+                {t("apply_to_this_offer", "Postulate a esta oferta")}
               </Typography>
               <Typography variant="body2" sx={{ mt: 0.7, color: "#65738a" }}>
-                Enviá tu perfil y formá parte de este proyecto deportivo.
+                {t(
+                  "apply_offer_intro",
+                  "Enviá tu perfil y formá parte de este proyecto deportivo.",
+                )}
               </Typography>
 
               {authLoading ? (
@@ -543,7 +554,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 </Box>
               ) : applied ? (
                 <Alert severity="success" sx={{ mt: 2 }}>
-                  ¡Postulación enviada!
+                  {t("application_sent", "¡Postulación enviada!")}
                 </Alert>
               ) : user?.tipo_usuario === "postulante" && !isOwner && !isAdmin ? (
                 hasActiveSubscription ? (
@@ -590,14 +601,20 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 />
               ) : (
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  La postulación está disponible para perfiles de postulantes.
+                  {t(
+                    "application_applicant_only",
+                    "La postulación está disponible para perfiles de postulantes.",
+                  )}
                 </Alert>
               )}
 
               <Stack direction="row" spacing={0.7} alignItems="center" sx={{ mt: 1.5 }}>
                 <LockOutlinedIcon sx={{ fontSize: 15, color: "#7a8799" }} />
                 <Typography variant="caption" sx={{ color: "#7a8799" }}>
-                  Tu información se envía de forma confidencial.
+                  {t(
+                    "application_confidential",
+                    "Tu información se envía de forma confidencial.",
+                  )}
                 </Typography>
               </Stack>
             </Paper>
@@ -607,7 +624,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
               sx={{ p: 2.5, border: "1px solid #dfe6ef", borderRadius: 2.5 }}
             >
               <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                Resumen de la oferta
+                {t("offer_summary", "Resumen de la oferta")}
               </Typography>
               <Stack divider={<Divider flexItem />} sx={{ mt: 1.5 }}>
                 {summaryRows.map((row) => (
@@ -645,7 +662,10 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 {t("share_this_offer")}
               </Typography>
               <Typography variant="body2" sx={{ mt: 0.6, mb: 1.5, color: "#65738a" }}>
-                Ayudá a otros profesionales a encontrar nuevas oportunidades.
+                {t(
+                  "share_offer_help",
+                  "Ayudá a otros profesionales a encontrar nuevas oportunidades.",
+                )}
               </Typography>
               <ShareButtons
                 title={titulo}
@@ -655,6 +675,47 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
             </Paper>
           </Stack>
         </Box>
+
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 3,
+            p: { xs: 2.25, md: 2.75 },
+            borderRadius: 2.5,
+            border: "1px solid #f0c36a",
+            bgcolor: "#fff9e8",
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "flex-start", md: "center" },
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Stack direction="row" spacing={1.5} alignItems="flex-start">
+            <ReportProblemOutlinedIcon sx={{ color: "#a86100", mt: 0.2, flexShrink: 0 }} />
+            <Box>
+              <Typography sx={{ color: "#553400", fontWeight: 900 }}>
+                {t("offer_safety_notice_title", "Verificá la oferta antes de avanzar")}
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.5, color: "#76531c", lineHeight: 1.65 }}>
+                {t(
+                  "offer_safety_notice_text",
+                  "FutbolProyect solo facilita la publicación y el contacto: no es el empleador ni garantiza la identidad del anunciante, la veracidad de la oferta o sus condiciones. No envíes dinero, claves ni documentación sensible sin verificar a la contraparte.",
+                )}
+              </Typography>
+            </Box>
+          </Stack>
+          <Button
+            component={Link}
+            href={reportOfferHref}
+            variant="outlined"
+            color="warning"
+            startIcon={<ReportProblemOutlinedIcon />}
+            sx={{ whiteSpace: "nowrap", fontWeight: 900 }}
+          >
+            {t("report_possible_scam", "Denunciar posible estafa")}
+          </Button>
+        </Paper>
 
         <Paper
           elevation={0}
@@ -688,10 +749,13 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
             </Box>
             <Box>
               <Typography sx={{ fontWeight: 900, fontSize: "1.15rem" }}>
-                ¿Sos un club o academia?
+                {t("club_academy_cta_title", "¿Sos un club o academia?")}
               </Typography>
               <Typography variant="body2" sx={{ color: "rgba(255,255,255,.72)" }}>
-                Publicá tus ofertas y encontrá el talento que tu proyecto necesita.
+                {t(
+                  "club_academy_cta_text",
+                  "Publicá tus ofertas y encontrá el talento que tu proyecto necesita.",
+                )}
               </Typography>
             </Box>
           </Stack>

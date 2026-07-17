@@ -4,13 +4,15 @@ import React from 'react';
 import { useRouter } from 'next/navigation'; // Import useRouter
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
+import { useTranslation } from 'react-i18next';
 
 const AdminRoute = ({ children }) => {
+  const { t } = useTranslation('common');
   const { user, loading } = useAuth();
   const router = useRouter();
 
   if (loading) {
-    return <LoadingSpinner text="Cargando..." />;
+    return <LoadingSpinner text={t('loading')} />;
   }
 
   if (!user || !user.isadmin) {

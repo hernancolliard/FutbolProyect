@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
+  FormControlLabel,
   IconButton,
   Link as MuiLink,
   MenuItem,
@@ -52,6 +55,7 @@ export default function Register({
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => setRol(normalizeRole(initialRole)), [initialRole]);
   useEffect(() => {
@@ -83,6 +87,16 @@ export default function Register({
       return;
     }
 
+    if (!acceptedTerms) {
+      setError(
+        t(
+          "legal_acceptance_required",
+          "Debes aceptar los Términos y Condiciones y la Política de Privacidad para registrarte.",
+        ),
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       await register(
@@ -92,6 +106,7 @@ export default function Register({
         tipoUsuario,
         rol,
         formData.affiliateCode,
+        acceptedTerms,
       );
       onClose();
     } catch (requestError: any) {
@@ -142,8 +157,42 @@ export default function Register({
             <TextField type="email" label={t("email")} name="email" value={formData.email} onChange={handleChange} required fullWidth autoComplete="email" sx={{ gridColumn: { sm: "1 / -1" } }} />
             <TextField type="password" label={t("password")} name="password" value={formData.password} onChange={handleChange} required fullWidth autoComplete="new-password" />
             <TextField type="password" label={t("confirm_password")} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required fullWidth autoComplete="new-password" />
-            <TextField label="Codigo de referido" name="affiliateCode" value={formData.affiliateCode} onChange={handleChange} fullWidth sx={{ gridColumn: { sm: "1 / -1" } }} />
+            <TextField label={t("referral_code", "Código de referido")} name="affiliateCode" value={formData.affiliateCode} onChange={handleChange} fullWidth sx={{ gridColumn: { sm: "1 / -1" } }} />
           </Box>
+
+          <FormControlLabel
+            sx={{ alignItems: "flex-start", mx: 0 }}
+            control={
+              <Checkbox
+                checked={acceptedTerms}
+                onChange={(event) => setAcceptedTerms(event.target.checked)}
+                required
+                inputProps={{
+                  "aria-label": t(
+                    "accept_legal_policies_label",
+                    "Aceptar términos y política de privacidad",
+                  ),
+                }}
+                sx={{ pt: 0.2, pl: 0 }}
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ color: "#536176", lineHeight: 1.55 }}>
+                {t("legal_acceptance_prefix", "Acepto los")} {" "}
+                <MuiLink component={Link} href="/terms" target="_blank" rel="noopener noreferrer" sx={{ fontWeight: 800 }}>
+                  {t("terms_and_conditions", "Términos y Condiciones")}
+                </MuiLink>{" "}
+                {t("legal_acceptance_connector", "y la")} {" "}
+                <MuiLink component={Link} href="/privacy" target="_blank" rel="noopener noreferrer" sx={{ fontWeight: 800 }}>
+                  {t("privacy_policy", "Política de Privacidad")}
+                </MuiLink>
+                {t(
+                  "legal_content_consent",
+                  ", incluido el tratamiento de mis datos y el uso de las imágenes y videos que publique para mostrar y promocionar FutbolProyect en su sitio y redes oficiales.",
+                )}
+              </Typography>
+            }
+          />
 
           {error && <Alert severity="error">{error}</Alert>}
           <Button type="submit" variant="contained" size="large" fullWidth disabled={loading} sx={{ py: 1.25, bgcolor: "#1262db", fontWeight: 900 }}>

@@ -6,6 +6,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 import { Offer } from "@/lib/types";
 
@@ -22,6 +23,7 @@ const OfferActions: React.FC<OfferActionsProps> = ({
 }) => {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { t } = useTranslation("common");
 
   // No mostrar nada si está cargando o no hay usuario logueado
   if (loading || !user) return null;
@@ -40,7 +42,7 @@ const OfferActions: React.FC<OfferActionsProps> = ({
         startIcon={<EditIcon />}
         onClick={() => onOfferAction?.("edit", offer.id)}
       >
-        Editar
+        {t("edit_button")}
       </Button>
 
       <Button
@@ -50,7 +52,7 @@ const OfferActions: React.FC<OfferActionsProps> = ({
         startIcon={<DeleteIcon />}
         onClick={() => onOfferAction?.("delete", offer.id)}
       >
-        Eliminar
+        {t("delete_button")}
       </Button>
     </Box>
   );

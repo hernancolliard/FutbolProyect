@@ -166,23 +166,26 @@ export default function AllOffersClient({
             component="h2"
             sx={{ color: "#0a1930", fontSize: "1.35rem", fontWeight: 900 }}
           >
-            Ofertas de fútbol para jugadores y profesionales
+            {t(
+              "offers_seo_intro_title",
+              "Ofertas de fútbol para jugadores y profesionales",
+            )}
           </Typography>
           <Typography sx={{ mt: 1, color: "#5e6c81", lineHeight: 1.7 }}>
-            Encontrá oportunidades para futbolistas, entrenadores, analistas,
-            scouts y otros profesionales del deporte. Las ofertas son
-            publicadas por clubes, agencias y organizaciones que buscan sumar
-            talento a sus proyectos.
+            {t(
+              "offers_seo_intro_text",
+              "Encontrá oportunidades para futbolistas, entrenadores, analistas, scouts y otros profesionales del deporte. Las ofertas son publicadas por clubes, agencias y organizaciones que buscan sumar talento a sus proyectos.",
+            )}
           </Typography>
           <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
             <Button component={Link} href="/ofertas/entrenadores" size="small">
-              Ofertas para entrenadores
+              {t("coach_offers", "Ofertas para entrenadores")}
             </Button>
             <Button component={Link} href="/ofertas/analistas-de-futbol" size="small">
-              Trabajo para analistas
+              {t("analyst_jobs", "Trabajo para analistas")}
             </Button>
             <Button component={Link} href="/create-offer" size="small">
-              Publicar una oferta
+              {t("publish_offer", "Publicar una oferta")}
             </Button>
           </Stack>
         </Box>

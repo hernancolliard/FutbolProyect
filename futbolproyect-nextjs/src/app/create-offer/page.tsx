@@ -40,7 +40,7 @@ export default function CreateOfferPage() {
         <Stack alignItems="center" spacing={1.5}>
           <CircularProgress />
           <Typography sx={{ color: "#65738a" }}>
-            Preparando el formulario...
+            {t("create_offer_preparing_form")}
           </Typography>
         </Stack>
       </Box>
@@ -72,13 +72,12 @@ export default function CreateOfferPage() {
                 fontWeight: 900,
               }}
             >
-              Publicá oportunidades y encontrá talento para tu proyecto
+              {t("create_offer_hero_title")}
             </Typography>
             <Typography
               sx={{ mt: 1.5, maxWidth: 650, color: "rgba(255,255,255,.76)", lineHeight: 1.7 }}
             >
-              Registrate como club, agencia o scout para crear ofertas y
-              recibir postulaciones de profesionales del fútbol.
+              {t("create_offer_hero_text")}
             </Typography>
           </Container>
         </Box>
@@ -150,7 +149,7 @@ export default function CreateOfferPage() {
             <Stack spacing={2.5} alignItems="flex-start">
               <CheckCircleOutlineRoundedIcon sx={{ color: "#1262db", fontSize: 42 }} />
               <Typography component="h1" sx={{ color: "#0a1930", fontSize: "1.7rem", fontWeight: 900 }}>
-                Publicación para clubes, agencias y scouts
+                {t("create_offer_role_title")}
               </Typography>
               <Alert severity="info" sx={{ width: "100%" }}>
                 {t(
@@ -193,18 +192,17 @@ export default function CreateOfferPage() {
                   fontWeight: 900,
                 }}
               >
-                Agregar una oferta de fútbol
+                {t("create_offer_page_title")}
               </Typography>
               <Typography sx={{ mt: 1.3, maxWidth: 650, color: "rgba(255,255,255,.76)", lineHeight: 1.7 }}>
-                Completá la información para llegar a jugadores, entrenadores,
-                analistas, scouts y otros profesionales.
+                {t("create_offer_page_text")}
               </Typography>
             </Box>
             <Stack spacing={1} sx={{ minWidth: { md: 270 } }}>
               {[
-                "Describí claramente el puesto",
-                "Indicá ubicación y nivel",
-                "Agregá una imagen identificatoria",
+                t("create_offer_tip_description"),
+                t("create_offer_tip_location"),
+                t("create_offer_tip_image"),
               ].map((item) => (
                 <Stack key={item} direction="row" spacing={1} alignItems="center">
                   <CheckCircleOutlineRoundedIcon sx={{ color: "#62a8ff", fontSize: 19 }} />

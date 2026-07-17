@@ -16,6 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Video } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 interface VideoCardProps {
   video: Video | null;
@@ -34,6 +35,8 @@ const VideoCard = ({
   onDelete,
   isMyProfile,
 }: VideoCardProps) => {
+  const { t } = useTranslation("common");
+
   if (!video) {
     return (
       <Card sx={{ height: "100%", display: "flex", minHeight: 180 }}>
@@ -53,7 +56,7 @@ const VideoCard = ({
             sx={{ fontSize: 40, color: "text.secondary" }}
           />
           <Typography sx={{ mt: 1, color: "text.secondary" }}>
-            Añadir Video
+            {t("add_video")}
           </Typography>
         </CardActionArea>
       </Card>
@@ -109,14 +112,14 @@ const VideoCard = ({
       {isMyProfile && (
         <CardActions sx={{ p: 0, justifyContent: "flex-end" }}>
           <IconButton
-            aria-label="edit"
+            aria-label={t("edit_button")}
             size="small"
             onClick={() => onEdit(video)}
           >
             <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
-            aria-label="delete"
+            aria-label={t("delete_button")}
             size="small"
             onClick={() => onDelete(video.id)}
           >

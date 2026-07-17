@@ -13,9 +13,7 @@ export default function OfertasFutbolistasPage() {
   return (
     <OfferSeoLanding
       role="jugador"
-      h1="Ofertas para futbolistas"
-      mainText="Encontrá oportunidades para jugadores de fútbol publicadas por clubes, agencias y organizaciones deportivas. Consultá cada propuesta, sus requisitos, ubicación y nivel competitivo.\n\nCreá un perfil deportivo con tu trayectoria, posición, fotos y videos para presentar tu experiencia profesional."
-      h2="Oportunidades para jugadores de fútbol"
+      translationPrefix="player_offers_landing"
     />
   );
 }

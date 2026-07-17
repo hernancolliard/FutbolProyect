@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Dialog, DialogContent, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 // Función para extraer el ID del video de una URL de YouTube
 const getYouTubeId = (url) => {
@@ -12,6 +13,7 @@ const getYouTubeId = (url) => {
 };
 
 const VideoPlayerModal = ({ open, onClose, youtubeUrl }) => {
+  const { t } = useTranslation('common');
   const videoId = getYouTubeId(youtubeUrl);
 
   return (
@@ -37,7 +39,7 @@ const VideoPlayerModal = ({ open, onClose, youtubeUrl }) => {
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              title="Embedded youtube"
+              title={t('embedded_youtube_video')}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -49,7 +51,7 @@ const VideoPlayerModal = ({ open, onClose, youtubeUrl }) => {
           </Box>
         ) : (
           <Box sx={{ p: 4, color: 'white', textAlign: 'center' }}>
-            URL de video no válida.
+            {t('invalid_video_url')}
           </Box>
         )}
       </DialogContent>

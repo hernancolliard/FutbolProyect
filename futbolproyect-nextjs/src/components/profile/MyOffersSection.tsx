@@ -17,6 +17,7 @@ import Link from "next/link";
 import apiClient from "@/lib/apiClient";
 
 interface Offer {
+  [key: string]: any;
   id: number;
   titulo: string;
   descripcion: string;
@@ -46,7 +47,10 @@ const fetchUserOffers = async (
 export default function MyOffersSection({
   userId,
 }: MyOffersSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language?.startsWith("en") ? "en" : "es";
+  const localizedField = (offer: Offer, field: string) =>
+    offer[`${field}_${language}`] || offer[field] || "";
   const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,16 +123,16 @@ export default function MyOffersSection({
               >
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="h6" sx={{ overflowWrap: "anywhere" }}>
-                    {offer.titulo}
+                    {localizedField(offer, "titulo")}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {offer.puesto} • {offer.ubicacion}
+                    {localizedField(offer, "puesto")} • {localizedField(offer, "ubicacion")}
                   </Typography>
                   <Typography variant="body2">
                     <strong>{t("salary", "Salario")}:</strong> {offer.salario}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>{t("level", "Nivel")}:</strong> {offer.nivel}
+                    <strong>{t("level", "Nivel")}:</strong> {localizedField(offer, "nivel")}
                   </Typography>
                   <Typography variant="body2">
                     <strong>{t("applications", "Postulaciones")}:</strong> {offer.total_applications}

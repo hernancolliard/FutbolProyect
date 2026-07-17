@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import BlogCTA from "@/components/blog/BlogCTA";
 import RelatedPosts from "@/components/blog/RelatedPosts";
+import { BlogArticleHeader, BlogSidebar } from "@/components/blog/BlogArticleUi";
 import { blogPosts, getBlogPost } from "@/data/blogPosts";
 import styles from "@/components/blog/blog.module.css";
 
@@ -12,13 +12,6 @@ type PageProps = {
 };
 
 const BASE_URL = "https://www.futbolproyect.com";
-const dateFormatter = new Intl.DateTimeFormat("es-AR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
@@ -100,26 +93,7 @@ export default function BlogPostPage({ params }: PageProps) {
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <header className={styles.articleHeader}>
-        <div className={styles.container}>
-          <nav className={styles.breadcrumbs} aria-label="Migas de pan">
-            <Link href="/">Inicio</Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/blog">Blog</Link>
-            <span aria-hidden="true">/</span>
-            <span>{post.category}</span>
-          </nav>
-          <span className={styles.articleEyebrow}>{post.category}</span>
-          <h1>{post.title}</h1>
-          <p className={styles.articleDescription}>{post.description}</p>
-          <div className={styles.articleMeta}>
-            <span>Por {post.author}</span>
-            <time dateTime={post.date}>
-              {dateFormatter.format(new Date(post.date))}
-            </time>
-          </div>
-        </div>
-      </header>
+      <BlogArticleHeader post={post} />
 
       <div className={styles.articleBody}>
         <div className={styles.container}>
@@ -153,13 +127,7 @@ export default function BlogPostPage({ params }: PageProps) {
               ))}
             </div>
 
-            <aside className={styles.sidebar} aria-label="Enlaces útiles">
-              <strong>También en FutbolProyect</strong>
-              <Link href="/register">Crear perfil de jugador</Link>
-              <Link href="/all-offers">Ver ofertas</Link>
-              <Link href="/create-offer">Publicar una oferta</Link>
-              <Link href="/">Ir al inicio</Link>
-            </aside>
+            <BlogSidebar />
           </div>
 
           <BlogCTA cta={post.cta} />

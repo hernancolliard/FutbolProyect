@@ -226,7 +226,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
               : t("create_offer_title", "Información de la oferta")}
           </Typography>
           <Typography variant="body2" sx={{ mt: 0.35, color: "#65738a" }}>
-            Los campos marcados como obligatorios son necesarios para publicar.
+            {t("create_offer_required_fields_help")}
           </Typography>
         </Box>
       </Stack>
@@ -242,7 +242,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             variant="caption"
             sx={{ mt: 0.6, display: "block", color: "#65738a" }}
           >
-            Subiendo imagen: {uploadProgress}%
+            {t("uploading_image_progress", { progress: uploadProgress })}
           </Typography>
         </Box>
       )}
@@ -271,7 +271,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             component="h3"
             sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
           >
-            Información principal
+            {t("offer_main_information", "Información principal")}
           </Typography>
           <TextField
             name="titulo"
@@ -309,7 +309,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             component="h3"
             sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
           >
-            Detalles de la oportunidad
+            {t("offer_opportunity_details", "Detalles de la oportunidad")}
           </Typography>
           <Box
             sx={{
@@ -384,7 +384,7 @@ function CreateOfferForm({ onOfferCreated, onClose }: CreateOfferProps) {
             component="h3"
             sx={{ color: "#0a1930", fontSize: "1rem", fontWeight: 900 }}
           >
-            Imagen de la oferta
+            {t("offer_image_section", "Imagen de la oferta")}
           </Typography>
           <Box
             sx={{

@@ -13,9 +13,7 @@ export default function OfertasEntrenadoresPage() {
   return (
     <OfferSeoLanding
       role="entrenador"
-      h1="Ofertas para entrenadores de fútbol"
-      mainText="Explorá oportunidades para entrenadores, directores técnicos y asistentes en clubes, academias y proyectos de fútbol. Encontrá propuestas acordes a tu experiencia y metodología de trabajo."
-      h2="Trabajo para entrenadores y cuerpos técnicos"
+      translationPrefix="coach_offers_landing"
     />
   );
 }

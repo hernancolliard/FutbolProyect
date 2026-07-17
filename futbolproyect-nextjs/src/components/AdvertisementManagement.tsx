@@ -28,26 +28,27 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const placements = [
-  { value: "home_top", label: "Home superior" },
-  { value: "home_middle", label: "Home medio" },
-  { value: "home_profiles", label: "Home perfiles" },
-  { value: "offers_top", label: "Ofertas superior" },
-  { value: "offers_inline", label: "Ofertas listado" },
-  { value: "profiles_top", label: "Perfiles superior" },
-  { value: "profiles_inline", label: "Perfiles listado" },
-  { value: "player_profile_sidebar", label: "Detalle de perfil" },
-  { value: "footer", label: "Footer" },
+  { value: "home_top", labelKey: "ad_placement_home_top" },
+  { value: "home_middle", labelKey: "ad_placement_home_middle" },
+  { value: "home_profiles", labelKey: "ad_placement_home_profiles" },
+  { value: "offers_top", labelKey: "ad_placement_offers_top" },
+  { value: "offers_inline", labelKey: "ad_placement_offers_inline" },
+  { value: "profiles_top", labelKey: "ad_placement_profiles_top" },
+  { value: "profiles_inline", labelKey: "ad_placement_profiles_inline" },
+  { value: "player_profile_sidebar", labelKey: "ad_placement_profile_detail" },
+  { value: "footer", labelKey: "ad_placement_footer" },
 ];
 
 const advertiserTypes = [
-  { value: "sponsor", label: "Sponsor" },
-  { value: "brand", label: "Marca" },
-  { value: "club", label: "Club" },
-  { value: "academy", label: "Academia" },
-  { value: "agency", label: "Agencia" },
-  { value: "event", label: "Evento" },
+  { value: "sponsor", labelKey: "advertiser_sponsor" },
+  { value: "brand", labelKey: "advertising_type_sports_brand" },
+  { value: "club", labelKey: "advertising_type_club" },
+  { value: "academy", labelKey: "advertising_type_academy" },
+  { value: "agency", labelKey: "advertising_type_agency" },
+  { value: "event", labelKey: "advertising_type_event" },
 ];
 
 const emptyForm = {
@@ -60,7 +61,7 @@ const emptyForm = {
   language: "all",
   country: "",
   description: "",
-  button_text: "Ver mas",
+  button_text: "",
   package_type: "",
   notes: "",
   priority: 0,
@@ -72,6 +73,7 @@ const emptyForm = {
 const formatInputDate = (value?: string) => (value ? value.slice(0, 10) : "");
 
 export default function AdvertisementManagement() {
+  const { t } = useTranslation("common");
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -86,7 +88,7 @@ export default function AdvertisementManagement() {
       const { data } = await apiClient.get("/ads/admin/advertisements");
       setAds(data);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Error al cargar anuncios.");
+      toast.error(error.response?.data?.message || t("ads_load_error"));
     } finally {
       setLoading(false);
     }
@@ -98,7 +100,7 @@ export default function AdvertisementManagement() {
 
   const openCreateDialog = () => {
     setEditingAd(null);
-    setForm({ ...emptyForm });
+    setForm({ ...emptyForm, button_text: t("see_more") });
     setImageFile(null);
     setDialogOpen(true);
   };
@@ -115,7 +117,7 @@ export default function AdvertisementManagement() {
       language: ad.language || "all",
       country: ad.country || "",
       description: ad.description || "",
-      button_text: ad.button_text || "Ver mas",
+      button_text: ad.button_text || t("see_more"),
       package_type: ad.package_type || "",
       notes: ad.notes || "",
       priority: ad.priority || 0,
@@ -172,19 +174,19 @@ export default function AdvertisementManagement() {
 
       if (editingAd) {
         await apiClient.put(`/ads/admin/advertisements/${editingAd.id}`, payload);
-        toast.success("Anuncio actualizado.");
+        toast.success(t("ad_updated"));
       } else {
         await apiClient.post("/ads/admin/advertisements", payload);
         toast.success(
           form.placement.length > 1
-            ? "Anuncios creados en las ubicaciones seleccionadas."
-            : "Anuncio creado.",
+            ? t("ads_created_for_placements")
+            : t("ad_created"),
         );
       }
       setDialogOpen(false);
       fetchAds();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "No se pudo guardar el anuncio.");
+      toast.error(error.response?.data?.message || t("ad_save_error"));
     } finally {
       setSaving(false);
     }
@@ -194,21 +196,21 @@ export default function AdvertisementManagement() {
     try {
       const { data } = await apiClient.patch(`/ads/admin/advertisements/${ad.id}/toggle`);
       setAds((prev) => prev.map((item) => (item.id === ad.id ? data : item)));
-      toast.success("Estado actualizado.");
+      toast.success(t("status_updated"));
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "No se pudo cambiar el estado.");
+      toast.error(error.response?.data?.message || t("status_change_error"));
     }
   };
 
   const handleDelete = async (ad: Advertisement) => {
-    if (!window.confirm(`Eliminar el anuncio "${ad.title}"?`)) return;
+    if (!window.confirm(t("confirm_delete_ad", { title: ad.title }))) return;
 
     try {
       await apiClient.delete(`/ads/admin/advertisements/${ad.id}`);
       setAds((prev) => prev.filter((item) => item.id !== ad.id));
-      toast.success("Anuncio eliminado.");
+      toast.success(t("ad_deleted"));
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "No se pudo eliminar el anuncio.");
+      toast.error(error.response?.data?.message || t("ad_delete_error"));
     }
   };
 
@@ -216,7 +218,7 @@ export default function AdvertisementManagement() {
     return (
       <Typography align="center" sx={{ mt: 4 }}>
         <CircularProgress sx={{ mr: 2 }} />
-        Cargando anuncios...
+        {t("loading_ads")}
       </Typography>
     );
   }
@@ -231,18 +233,18 @@ export default function AdvertisementManagement() {
         sx={{ mb: 2 }}
       >
         <Box>
-          <Typography variant="h5">Publicidad y sponsors</Typography>
+          <Typography variant="h5">{t("ads_management_title")}</Typography>
           <Typography variant="body2" color="text.secondary">
-            Administra banners directos, fechas, ubicaciones y metricas.
+            {t("ads_management_subtitle")}
           </Typography>
         </Box>
         <Button variant="contained" onClick={openCreateDialog}>
-          Nuevo anuncio
+          {t("new_ad")}
         </Button>
       </Stack>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        Los clicks redirigen por el backend para sumar metricas y agregar UTM al destino.
+        {t("ads_redirect_metrics_help")}
       </Alert>
 
       <TableContainer component={Paper}>
@@ -250,14 +252,14 @@ export default function AdvertisementManagement() {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>Anuncio</TableCell>
-              <TableCell>Ubicacion</TableCell>
-              <TableCell>Idioma</TableCell>
-              <TableCell>Periodo</TableCell>
-              <TableCell>Prioridad</TableCell>
-              <TableCell>Metricas</TableCell>
-              <TableCell>Activo</TableCell>
-              <TableCell>Acciones</TableCell>
+              <TableCell>{t("advertisement")}</TableCell>
+              <TableCell>{t("placement")}</TableCell>
+              <TableCell>{t("language")}</TableCell>
+              <TableCell>{t("period")}</TableCell>
+              <TableCell>{t("priority")}</TableCell>
+              <TableCell>{t("metrics")}</TableCell>
+              <TableCell>{t("active")}</TableCell>
+              <TableCell>{t("actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -273,11 +275,11 @@ export default function AdvertisementManagement() {
                     <Chip size="small" label={ad.advertiser_type} sx={{ width: "fit-content" }} />
                   </Stack>
                 </TableCell>
-                <TableCell>{placements.find((p) => p.value === ad.placement)?.label || ad.placement}</TableCell>
+                <TableCell>{t(placements.find((p) => p.value === ad.placement)?.labelKey || ad.placement)}</TableCell>
                 <TableCell>{ad.language}</TableCell>
                 <TableCell>
-                  {formatInputDate(ad.start_date) || "Sin inicio"} -{" "}
-                  {formatInputDate(ad.end_date) || "Sin fin"}
+                  {formatInputDate(ad.start_date) || t("no_start_date")} -{" "}
+                  {formatInputDate(ad.end_date) || t("no_end_date")}
                 </TableCell>
                 <TableCell>{ad.priority}</TableCell>
                 <TableCell>
@@ -291,7 +293,7 @@ export default function AdvertisementManagement() {
                 <TableCell>
                   <Stack direction="row" spacing={1}>
                     <Button variant="outlined" size="small" onClick={() => openEditDialog(ad)}>
-                      Editar
+                      {t("edit_button")}
                     </Button>
                     <Button
                       variant="outlined"
@@ -299,7 +301,7 @@ export default function AdvertisementManagement() {
                       size="small"
                       onClick={() => handleDelete(ad)}
                     >
-                      Eliminar
+                      {t("delete_button")}
                     </Button>
                   </Stack>
                 </TableCell>
@@ -309,7 +311,7 @@ export default function AdvertisementManagement() {
               <TableRow>
                 <TableCell colSpan={9}>
                   <Typography align="center" color="text.secondary">
-                    Todavia no hay anuncios cargados.
+                    {t("no_ads")}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -319,20 +321,20 @@ export default function AdvertisementManagement() {
       </TableContainer>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{editingAd ? "Editar anuncio" : "Nuevo anuncio"}</DialogTitle>
+        <DialogTitle>{editingAd ? t("edit_ad") : t("new_ad")}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid item xs={12} md={6}>
-              <TextField name="title" label="Titulo" value={form.title} onChange={handleChange} fullWidth required />
+              <TextField name="title" label={t("title_label")} value={form.title} onChange={handleChange} fullWidth required />
             </Grid>
             <Grid item xs={12} md={6}>
-              <TextField name="advertiser_name" label="Anunciante" value={form.advertiser_name} onChange={handleChange} fullWidth required />
+              <TextField name="advertiser_name" label={t("advertiser")} value={form.advertiser_name} onChange={handleChange} fullWidth required />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField select name="advertiser_type" label="Tipo" value={form.advertiser_type} onChange={handleChange} fullWidth>
+              <TextField select name="advertiser_type" label={t("type")} value={form.advertiser_type} onChange={handleChange} fullWidth>
                 {advertiserTypes.map((type) => (
                   <MenuItem key={type.value} value={type.value}>
-                    {type.label}
+                    {t(type.labelKey)}
                   </MenuItem>
                 ))}
               </TextField>
@@ -341,7 +343,7 @@ export default function AdvertisementManagement() {
               <TextField
                 select
                 name="placement"
-                label={editingAd ? "Ubicacion" : "Ubicaciones"}
+                label={editingAd ? t("placement") : t("ad_placements")}
                 value={editingAd ? form.placement[0] : form.placement}
                 onChange={handleChange}
                 fullWidth
@@ -350,39 +352,39 @@ export default function AdvertisementManagement() {
                   renderValue: (selected) =>
                     Array.isArray(selected)
                       ? selected
-                          .map((value) => placements.find((item) => item.value === value)?.label || value)
+                          .map((value) => t(placements.find((item) => item.value === value)?.labelKey || value))
                           .join(", ")
-                      : placements.find((item) => item.value === selected)?.label || String(selected),
+                      : t(placements.find((item) => item.value === selected)?.labelKey || String(selected)),
                 }}
                 helperText={
                   editingAd
-                    ? "Edita esta ubicacion especifica."
-                    : "Puedes elegir mas de una ubicacion para el mismo plan."
+                    ? t("edit_specific_placement_help")
+                    : t("multiple_placements_help")
                 }
               >
                 {placements.map((placement) => (
                   <MenuItem key={placement.value} value={placement.value}>
-                    {placement.label}
+                    {t(placement.labelKey)}
                   </MenuItem>
                 ))}
               </TextField>
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField select name="language" label="Idioma" value={form.language} onChange={handleChange} fullWidth>
-                <MenuItem value="all">Todos</MenuItem>
-                <MenuItem value="es">Espanol</MenuItem>
-                <MenuItem value="en">Ingles</MenuItem>
+              <TextField select name="language" label={t("language")} value={form.language} onChange={handleChange} fullWidth>
+                <MenuItem value="all">{t("all_languages")}</MenuItem>
+                <MenuItem value="es">{t("spanish")}</MenuItem>
+                <MenuItem value="en">{t("english")}</MenuItem>
               </TextField>
             </Grid>
             <Grid item xs={12}>
               <Stack spacing={1}>
                 <TextField
                   name="image_url"
-                  label="URL de imagen/banner"
+                  label={t("banner_image_url")}
                   value={form.image_url}
                   onChange={handleChange}
                   fullWidth
-                  helperText="Puedes pegar una URL o subir una imagen desde tu computadora."
+                  helperText={t("banner_image_help")}
                 />
                 <Stack
                   direction={{ xs: "column", sm: "row" }}
@@ -390,7 +392,7 @@ export default function AdvertisementManagement() {
                   alignItems={{ xs: "stretch", sm: "center" }}
                 >
                   <Button variant="outlined" component="label">
-                    Subir imagen
+                    {t("upload_image")}
                     <input
                       hidden
                       type="file"
@@ -399,59 +401,59 @@ export default function AdvertisementManagement() {
                     />
                   </Button>
                   <Typography variant="body2" color="text.secondary">
-                    {imageFile ? imageFile.name : "Ningun archivo seleccionado"}
+                    {imageFile ? imageFile.name : t("no_file_selected_short")}
                   </Typography>
                 </Stack>
                 {(form.image_url || imageFile) && (
                   <Alert severity="info">
                     {imageFile
-                      ? "Al guardar se subira esta imagen y se usara como banner."
-                      : "Se usara la URL cargada como banner."}
+                      ? t("banner_upload_on_save_help")
+                      : t("banner_url_usage_help")}
                   </Alert>
                 )}
               </Stack>
             </Grid>
             <Grid item xs={12}>
-              <TextField name="target_url" label="URL destino" value={form.target_url} onChange={handleChange} fullWidth required />
+              <TextField name="target_url" label={t("target_url")} value={form.target_url} onChange={handleChange} fullWidth required />
             </Grid>
             <Grid item xs={12}>
-              <TextField name="description" label="Descripcion" value={form.description} onChange={handleChange} fullWidth multiline rows={3} />
+              <TextField name="description" label={t("description_label")} value={form.description} onChange={handleChange} fullWidth multiline rows={3} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField name="button_text" label="Texto boton" value={form.button_text} onChange={handleChange} fullWidth />
+              <TextField name="button_text" label={t("button_text")} value={form.button_text} onChange={handleChange} fullWidth />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField name="country" label="Pais/mercado" value={form.country} onChange={handleChange} fullWidth />
+              <TextField name="country" label={t("country_market")} value={form.country} onChange={handleChange} fullWidth />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField name="package_type" label="Paquete" value={form.package_type} onChange={handleChange} fullWidth />
+              <TextField name="package_type" label={t("package")} value={form.package_type} onChange={handleChange} fullWidth />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField type="number" name="priority" label="Prioridad" value={form.priority} onChange={handleChange} fullWidth />
+              <TextField type="number" name="priority" label={t("priority")} value={form.priority} onChange={handleChange} fullWidth />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField type="date" name="start_date" label="Fecha inicio" value={form.start_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
+              <TextField type="date" name="start_date" label={t("start_date")} value={form.start_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
             </Grid>
             <Grid item xs={12} md={4}>
-              <TextField type="date" name="end_date" label="Fecha fin" value={form.end_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
+              <TextField type="date" name="end_date" label={t("ad_end_date")} value={form.end_date} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} />
             </Grid>
             <Grid item xs={12}>
-              <TextField name="notes" label="Notas internas" value={form.notes} onChange={handleChange} fullWidth multiline rows={2} />
+              <TextField name="notes" label={t("internal_notes")} value={form.notes} onChange={handleChange} fullWidth multiline rows={2} />
             </Grid>
             <Grid item xs={12}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Switch name="is_active" checked={form.is_active} onChange={handleChange} />
-                <Typography>Activo</Typography>
+                <Typography>{t("active")}</Typography>
               </Stack>
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={saving}>
-            Cancelar
+            {t("cancel")}
           </Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>
-            {saving ? "Guardando..." : "Guardar"}
+            {saving ? t("saving") : t("save")}
           </Button>
         </DialogActions>
       </Dialog>

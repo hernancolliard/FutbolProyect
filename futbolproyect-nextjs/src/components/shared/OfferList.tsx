@@ -119,7 +119,7 @@ function OfferCard({
                 />
               )}
               {offer.is_featured && (
-                <Chip size="small" label="Destacada" color="primary" />
+                <Chip size="small" label={t("featured")} color="primary" />
               )}
             </Stack>
           </Box>

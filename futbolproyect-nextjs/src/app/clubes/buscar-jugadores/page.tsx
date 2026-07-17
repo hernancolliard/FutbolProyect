@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function BuscarJugadoresClubesPage() {
   return (
     <ProfileSeoLanding
-      h1="Buscar jugadores para clubes de fútbol"
-      mainText="Consultá perfiles deportivos para identificar futbolistas adecuados para tu plantel, academia o proyecto. Filtrá por posición y nacionalidad, revisá su trayectoria y accedé a material profesional.\n\nLos clubes también pueden publicar ofertas para recibir postulaciones de jugadores y profesionales."
-      h2="Talento disponible para clubes"
-      ctaText="Publicar una oferta para mi club"
+      translationPrefix="clubs_find_players_landing"
       ctaLink="/create-offer"
     />
   );

@@ -21,6 +21,7 @@ import ContactPageClient from "@/components/client-components/ContactPageClient"
 import Modal from "@/components/ui/Modal";
 import AdBanner from "@/components/ads/AdBanner";
 import { FeaturedVideo, Offer, Profile } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 const PromotionModal = dynamic(() => import("@/components/PromotionModal"), {
   ssr: false,
@@ -48,6 +49,7 @@ export default function HomePageClient({
   featuredVideos,
   seoOverview,
 }: HomePageClientProps) {
+  const { t } = useTranslation("common");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
@@ -150,10 +152,10 @@ export default function HomePageClient({
                 </Box>
                 <Box>
                   <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                    Anunciá con FutbolProyect
+                    {t("home_advertise_title")}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 0.4, color: "#65738a" }}>
-                    Llegá a una comunidad enfocada en talento y oportunidades deportivas.
+                    {t("home_advertise_text")}
                   </Typography>
                 </Box>
               </Stack>
@@ -163,7 +165,7 @@ export default function HomePageClient({
                 variant="contained"
                 sx={{ bgcolor: "#1262db", fontWeight: 900, whiteSpace: "nowrap" }}
               >
-                Conocer opciones
+                {t("home_advertise_cta")}
               </Button>
             </Paper>
 

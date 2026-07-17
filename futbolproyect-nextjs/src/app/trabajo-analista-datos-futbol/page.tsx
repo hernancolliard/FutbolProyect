@@ -1,6 +1,5 @@
 import { Metadata } from "next";
-import SeoPage from "@/components/shared/SeoPage";
-import OfferList from "@/components/shared/OfferList";
+import OfferSeoLandingContent from "@/components/seo/OfferSeoLandingContent";
 import { getTranslation } from "@/lib/i18n-server";
 import { Offer } from "@/lib/types";
 import { getApiBaseUrl } from "@/lib/api";
@@ -34,18 +33,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function TrabajoAnalistaDatosFutbolPage() {
-  const { t } = await getTranslation("es");
   const offers = await getAnalystOffers();
 
   return (
-    <SeoPage
-      h1={t("trabajo_analista_datos_futbol_h1")}
-      mainText={t("trabajo_analista_datos_futbol_main_text")}
-      h2={t("trabajo_analista_datos_futbol_h2")}
-      ctaText={t("trabajo_analista_datos_futbol_cta")}
-      ctaLink="/register"
-    >
-      <OfferList offers={offers} isHomePage={false} showApplyButton={false} />
-    </SeoPage>
+    <OfferSeoLandingContent
+      offers={offers}
+      translationPrefix="trabajo_analista_datos_futbol"
+      ctaKey="trabajo_analista_datos_futbol_cta"
+    />
   );
 }

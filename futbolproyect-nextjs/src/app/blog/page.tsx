@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import BlogCard from "@/components/blog/BlogCard";
-import BlogHero from "@/components/blog/BlogHero";
+import BlogIndexContent from "@/components/blog/BlogIndexContent";
 import { blogPosts } from "@/data/blogPosts";
-import styles from "@/components/blog/blog.module.css";
 
 export const metadata: Metadata = {
   title: { absolute: "Blog de fútbol para jugadores y clubes | FutbolProyect" },
@@ -32,22 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
-  return (
-    <>
-      <BlogHero />
-      <div className={styles.blogMain}>
-        <section className={styles.container} aria-labelledby="latest-posts">
-          <div className={styles.sectionHeading}>
-            <span>Recursos prácticos</span>
-            <h2 id="latest-posts">Últimos artículos</h2>
-          </div>
-          <div className={styles.grid}>
-            {blogPosts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
-          </div>
-        </section>
-      </div>
-    </>
-  );
+  return <BlogIndexContent posts={blogPosts} />;
 }

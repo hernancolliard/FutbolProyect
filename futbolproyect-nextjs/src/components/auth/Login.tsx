@@ -7,8 +7,10 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Divider,
+  FormControlLabel,
   IconButton,
   Link as MuiLink,
   Stack,
@@ -36,6 +38,7 @@ export default function Login({
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedTermsForGoogle, setAcceptedTermsForGoogle] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((current) => ({
@@ -65,7 +68,10 @@ export default function Login({
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       if (!loginWithGoogle) throw new Error(t("login_configuration_error"));
-      await loginWithGoogle(credentialResponse.credential);
+      await loginWithGoogle(
+        credentialResponse.credential,
+        acceptedTermsForGoogle,
+      );
       onClose();
     } catch (requestError: any) {
       setError(requestError?.message || t("login_with_google_error"));
@@ -144,6 +150,35 @@ export default function Login({
       <Divider sx={{ my: 2.5, color: "#94a3b8", fontSize: ".78rem" }}>
         {t("or_login_with")}
       </Divider>
+      <FormControlLabel
+        sx={{ alignItems: "flex-start", mx: 0, mb: 1.5 }}
+        control={
+          <Checkbox
+            checked={acceptedTermsForGoogle}
+            onChange={(event) => setAcceptedTermsForGoogle(event.target.checked)}
+            sx={{ pt: 0.2, pl: 0 }}
+          />
+        }
+        label={
+          <Typography variant="caption" sx={{ color: "#64748b", lineHeight: 1.5 }}>
+            {t(
+              "google_legal_acceptance_intro",
+              "Si Google crea una cuenta nueva, acepto los",
+            )}{" "}
+            <MuiLink component={Link} href="/terms" target="_blank" rel="noopener noreferrer" sx={{ fontWeight: 800 }}>
+              {t("terms_and_conditions", "Términos y Condiciones")}
+            </MuiLink>{" "}
+            {t("legal_acceptance_connector", "y la")} {" "}
+            <MuiLink component={Link} href="/privacy" target="_blank" rel="noopener noreferrer" sx={{ fontWeight: 800 }}>
+              {t("privacy_policy", "Política de Privacidad")}
+            </MuiLink>
+            {t(
+              "legal_content_consent_short",
+              ", incluido el uso autorizado del contenido que publique en el sitio y las redes oficiales de FutbolProyect.",
+            )}
+          </Typography>
+        }
+      />
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <GoogleLoginButton
           onSuccess={handleGoogleSuccess}

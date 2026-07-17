@@ -61,7 +61,7 @@ export default function HomeFAQ() {
       <Box sx={{ textAlign: "center", mb: 3 }}>
         <Chip
           icon={<HelpOutlineRoundedIcon />}
-          label="Centro de ayuda"
+          label={t("help_center")}
           sx={{ bgcolor: "#edf5ff", color: "#1262db", fontWeight: 800 }}
         />
         <Typography

@@ -12,12 +12,14 @@ import { Box, Typography, CircularProgress } from '@mui/material'; // Material U
 export default function TermsOfService() {
   const [termsContent, setTermsContent] = useState('');
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
 
   useEffect(() => {
     const fetchTerms = async () => {
       try {
-        const response = await apiClient.get('/terms');
+        const response = await apiClient.get('/terms', {
+          params: { lang: i18n.resolvedLanguage || i18n.language },
+        });
         setTermsContent(response.data);
       } catch (error) {
         console.error('Error fetching terms:', error);
@@ -28,7 +30,7 @@ export default function TermsOfService() {
     };
 
     fetchTerms();
-  }, [t]);
+  }, [i18n.language, i18n.resolvedLanguage, t]);
 
   // Dynamic SEO update for client components
   useEffect(() => {

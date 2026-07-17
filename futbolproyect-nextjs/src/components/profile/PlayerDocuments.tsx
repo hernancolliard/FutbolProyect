@@ -36,8 +36,8 @@ export function PlayerDocuments({ cvUrl }: PlayerDocumentsProps) {
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#071C3C]/5 text-[#071C3C]">
           <Film size={20} />
         </div>
-        <p className="mt-4 font-semibold text-[#071C3C]">Videos</p>
-        <p className="mt-1 text-sm text-slate-500">Los videos se muestran en la pestaña correspondiente cuando el usuario los sube.</p>
+        <p className="mt-4 font-semibold text-[#071C3C]">{t("videos")}</p>
+        <p className="mt-1 text-sm text-slate-500">{t("profile_videos_tab_help")}</p>
       </div>
     </motion.div>
   );

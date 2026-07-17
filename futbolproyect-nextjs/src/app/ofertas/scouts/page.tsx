@@ -13,9 +13,7 @@ export default function OfertasScoutsPage() {
   return (
     <OfferSeoLanding
       role="scout"
-      h1="Ofertas para scouts y ojeadores de fútbol"
-      mainText="Explorá oportunidades de scouting, captación y evaluación de jugadores. Presentá tu experiencia, zonas de trabajo y metodología a clubes y agencias."
-      h2="Oportunidades profesionales en scouting"
+      translationPrefix="scout_offers_landing"
     />
   );
 }

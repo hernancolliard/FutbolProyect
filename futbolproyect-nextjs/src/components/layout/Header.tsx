@@ -154,7 +154,7 @@ export default function Header({
             component={Link}
             href="/"
             prefetch={false}
-            aria-label="FutbolProyect - Inicio"
+            aria-label={t("home_aria_label")}
             sx={{ display: "flex", alignItems: "center", flexShrink: 0, mr: { lg: 1, xl: 2 } }}
           >
             <Image
@@ -168,7 +168,7 @@ export default function Header({
 
           <Box
             component="nav"
-            aria-label="Navegación principal"
+            aria-label={t("main_navigation")}
             sx={{
               display: { xs: "none", lg: "flex" },
               alignItems: "center",
@@ -217,14 +217,14 @@ export default function Header({
         <Box sx={{ display: { xs: "flex", lg: "none" }, alignItems: "center", gap: 0.5 }}>
           <IconButton
             color="inherit"
-            aria-label="Cambiar idioma"
+            aria-label={t("change_language")}
             onClick={(event) => setLanguageAnchor(event.currentTarget)}
           >
             <LanguageRoundedIcon />
           </IconButton>
           <IconButton
             color="inherit"
-            aria-label="Abrir menú"
+            aria-label={t("open_menu", "Abrir menú")}
             onClick={(event) => setMobileAnchor(event.currentTarget)}
           >
             <MenuRoundedIcon />
@@ -257,7 +257,7 @@ export default function Header({
       >
         <Box sx={{ px: 2, py: 1.3 }}>
           <Typography variant="caption" sx={{ color: "#758196" }}>
-            Sesión iniciada como
+            {t("signed_in_as", "Sesión iniciada como")}
           </Typography>
           <Typography sx={{ color: "#0a1930", fontWeight: 900 }} noWrap>
             {user?.nombre || "FutbolProyect"}
@@ -275,13 +275,13 @@ export default function Header({
             onClick={closeAccountMenu}
           >
             <PersonOutlineRoundedIcon fontSize={'small'} sx={{ mr: 1.2 }} />
-            Panel de afiliado
+            {t("affiliate_dashboard", "Panel de afiliado")}
           </MenuItem>
         )}
         {isAdmin && (
           <MenuItem component={Link} href="/admin" onClick={closeAccountMenu}>
             <AdminPanelSettingsOutlinedIcon fontSize="small" sx={{ mr: 1.2 }} />
-            Administración
+            {t("administration", "Administración")}
           </MenuItem>
         )}
         <Divider />
@@ -325,7 +325,7 @@ export default function Header({
                 href={'/afiliados/dashboard'}
                 onClick={closeMobileMenu}
               >
-                Panel de afiliado
+                {t("affiliate_dashboard", "Panel de afiliado")}
               </MenuItem>
             )}
             {canPublish && (
@@ -439,7 +439,7 @@ function StackDesktop({
             color="inherit"
             onClick={(event) => onAccountOpen(event.currentTarget)}
             endIcon={<KeyboardArrowDownRoundedIcon />}
-            aria-label="Abrir menú de cuenta"
+            aria-label={t("open_account_menu", "Abrir menú de cuenta")}
             sx={{
               minWidth: 0,
               pl: 0.5,
@@ -473,7 +473,7 @@ function StackDesktop({
               }}
               noWrap
             >
-              {user.nombre || "Mi cuenta"}
+              {user.nombre || t("my_account", "Mi cuenta")}
             </Typography>
           </Button>
         </>

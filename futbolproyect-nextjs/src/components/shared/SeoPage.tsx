@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import {
   Typography,
   Container,
@@ -28,6 +31,7 @@ const SeoPage = ({
   children,
   internalLinks = [],
 }: SeoPageProps) => {
+  const { t } = useTranslation("common");
   const paragraphs = (mainText || "").split("\n\n");
 
   return (
@@ -99,7 +103,7 @@ const SeoPage = ({
         {internalLinks.length > 0 && (
           <Stack
             component="nav"
-            aria-label="Enlaces relacionados"
+            aria-label={t("related_links", "Enlaces relacionados")}
             direction="row"
             useFlexGap
             flexWrap="wrap"
@@ -136,7 +140,10 @@ const SeoPage = ({
           }}
         >
           <Typography component="h2" sx={{ mb: 2, color: "#fff", fontSize: "1.35rem", fontWeight: 900 }}>
-            Da el próximo paso en tu carrera o proyecto deportivo
+            {t(
+              "seo_page_cta_title",
+              "Da el próximo paso en tu carrera o proyecto deportivo",
+            )}
           </Typography>
           <Button
             component={Link}

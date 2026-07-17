@@ -12,12 +12,14 @@ import { Box, Typography, CircularProgress } from '@mui/material'; // Material U
 export default function PrivacyPolicy() {
   const [privacyContent, setPrivacyContent] = useState('');
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
 
   useEffect(() => {
     const fetchPrivacy = async () => {
       try {
-        const response = await apiClient.get('/privacy');
+        const response = await apiClient.get('/privacy', {
+          params: { lang: i18n.resolvedLanguage || i18n.language },
+        });
         setPrivacyContent(response.data);
       } catch (error) {
         console.error('Error fetching privacy policy:', error);
@@ -28,7 +30,7 @@ export default function PrivacyPolicy() {
     };
 
     fetchPrivacy();
-  }, [t]);
+  }, [i18n.language, i18n.resolvedLanguage, t]);
 
   // Dynamic SEO update for client components
   useEffect(() => {

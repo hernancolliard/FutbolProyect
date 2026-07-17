@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BadgeCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PlayerTimelineProps {
   timeline?: string | null;
@@ -54,13 +55,14 @@ const parseRows = (value?: string | null): TimelineRow[] =>
     });
 
 export function PlayerTimeline({ timeline }: PlayerTimelineProps) {
+  const { t } = useTranslation("common");
   const rows = parseRows(timeline);
 
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-2 text-[#071C3C]">
         <BadgeCheck size={18} />
-        <h2 className="text-xl font-semibold uppercase">Trayectoria deportiva</h2>
+        <h2 className="text-xl font-semibold uppercase">{t("sports_career")}</h2>
       </div>
 
       {rows.length > 0 ? (
@@ -68,10 +70,10 @@ export function PlayerTimeline({ timeline }: PlayerTimelineProps) {
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase text-[#071C3C]">
-                <th className="px-2 py-3">A&ntilde;o</th>
-                <th className="px-2 py-3">Club</th>
-                <th className="px-2 py-3">Liga</th>
-                <th className="px-2 py-3">Pais</th>
+                <th className="px-2 py-3">{t("year_label")}</th>
+                <th className="px-2 py-3">{t("club_label")}</th>
+                <th className="px-2 py-3">{t("league_label")}</th>
+                <th className="px-2 py-3">{t("country_label")}</th>
               </tr>
             </thead>
             <tbody>
@@ -87,7 +89,7 @@ export function PlayerTimeline({ timeline }: PlayerTimelineProps) {
           </table>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-slate-500">Aun no hay informacion de trayectoria cargada.</p>
+        <p className="mt-4 text-sm text-slate-500">{t("no_career_uploaded")}</p>
       )}
     </motion.section>
   );

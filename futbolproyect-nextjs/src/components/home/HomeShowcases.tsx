@@ -61,7 +61,10 @@ function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
 }
 
 export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
+  const language = i18n.language?.startsWith("en") ? "en" : "es";
+  const localizedField = (offer: Offer, field: string) =>
+    (offer as any)[`${field}_${language}`] || (offer as any)[field] || "";
   if (!offers.length) return null;
 
   return (
@@ -102,7 +105,7 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
           >
             <Stack direction="row" justifyContent="space-between" spacing={1}>
               <Chip
-                label={offer.nivel || t("offer")}
+                label={localizedField(offer, "nivel") || t("offer")}
                 size="small"
                 sx={{ bgcolor: "#edf5ff", color: "#1557ad", fontWeight: 800 }}
               />
@@ -143,19 +146,19 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
                 overflow: "hidden",
               }}
             >
-              {offer.titulo}
+              {localizedField(offer, "titulo")}
             </Typography>
             <Stack spacing={0.5} sx={{ mt: 1.2 }}>
               <Stack direction="row" spacing={0.6} alignItems="center">
                 <BadgeOutlinedIcon sx={{ fontSize: 15, color: "#52709a" }} />
                 <Typography variant="caption" sx={{ color: "#65738a" }} noWrap>
-                  {offer.puesto || t("position_not_specified")}
+                  {localizedField(offer, "puesto") || t("position_not_specified")}
                 </Typography>
               </Stack>
               <Stack direction="row" spacing={0.6} alignItems="center">
                 <PlaceOutlinedIcon sx={{ fontSize: 15, color: "#52709a" }} />
                 <Typography variant="caption" sx={{ color: "#65738a" }} noWrap>
-                  {offer.ubicacion || t("location_not_specified")}
+                  {localizedField(offer, "ubicacion") || t("location_not_specified")}
                 </Typography>
               </Stack>
             </Stack>
@@ -224,8 +227,8 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   src={profile.foto_perfil_url || "/images/logos/logofpazul.webp"}
                   alt={
                     fullName
-                      ? `Perfil deportivo de ${fullName}`
-                      : "Perfil deportivo en FutbolProyect"
+                      ? t("profile_image_alt", { name: fullName })
+                      : t("sports_profile_on_futbolproyect")
                   }
                   width={220}
                   height={150}

@@ -1,13 +1,10 @@
-import SeoPage from "@/components/shared/SeoPage";
-import OfferList from "@/components/shared/OfferList";
+import OfferSeoLandingContent from "./OfferSeoLandingContent";
 import { getApiBaseUrl } from "@/lib/api";
 import { Offer } from "@/lib/types";
 
 type OfferSeoLandingProps = {
   role: string;
-  h1: string;
-  mainText: string;
-  h2: string;
+  translationPrefix: string;
 };
 
 async function getOffers(role: string): Promise<Offer[]> {
@@ -31,28 +28,14 @@ async function getOffers(role: string): Promise<Offer[]> {
 
 export default async function OfferSeoLanding({
   role,
-  h1,
-  mainText,
-  h2,
+  translationPrefix,
 }: OfferSeoLandingProps) {
   const offers = await getOffers(role);
 
   return (
-    <SeoPage
-      h1={h1}
-      mainText={mainText}
-      h2={h2}
-      ctaText="Creá tu perfil gratis en FutbolProyect"
-      ctaLink="/register"
-      internalLinks={[
-        { href: "/all-offers", label: "Ver todas las ofertas" },
-        { href: "/perfiles/jugadores", label: "Perfiles de jugadores" },
-        { href: "/create-offer", label: "Publicar una oferta" },
-      ]}
-    >
-      {offers.length > 0 ? (
-        <OfferList offers={offers} isHomePage={false} showApplyButton={false} />
-      ) : null}
-    </SeoPage>
+    <OfferSeoLandingContent
+      offers={offers}
+      translationPrefix={translationPrefix}
+    />
   );
 }

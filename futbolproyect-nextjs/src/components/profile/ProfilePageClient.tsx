@@ -300,13 +300,13 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const handleShare = async () => {
-    const title = profile ? `${profile.nombre} ${profile.apellido || ""}`.trim() : "Perfil FutbolProyect";
+    const title = profile ? `${profile.nombre} ${profile.apellido || ""}`.trim() : t("futbolproyect_profile");
 
     try {
       if (navigator.share) {
         await navigator.share({
           title,
-          text: "Mira este perfil en FutbolProyect.",
+          text: t("share_profile_short_message"),
           url: currentUrl,
         });
         return;
@@ -509,7 +509,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <PlayCircle size={18} />
-                      <h2 className="text-xl font-semibold">Video principal</h2>
+                      <h2 className="text-xl font-semibold">{t("featured_video", "Video principal")}</h2>
                     </div>
                     <div className="mt-4 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
                       {featuredVideo && featuredVideo.youtube_url ? (
@@ -526,13 +526,13 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                           <div className="flex items-center justify-between p-4">
                             <div>
                               <p className="font-semibold text-[#071C3C]">{featuredVideo.title || "Video destacado"}</p>
-                              <p className="text-sm text-slate-500">Primer video cargado por el usuario.</p>
+                              <p className="text-sm text-slate-500">{t("first_user_video", "Primer video cargado por el usuario.")}</p>
                             </div>
                           </div>
                         </>
                       ) : (
                         <div className="flex h-72 items-center justify-center p-6 text-center text-sm text-slate-500">
-                          Aún no hay videos cargados.
+                          {t("no_videos_uploaded")}
                         </div>
                       )}
                     </div>
@@ -541,7 +541,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <ImageIcon size={18} />
-                      <h2 className="text-xl font-semibold">Galeria de fotos</h2>
+                      <h2 className="text-xl font-semibold">{t("photo_gallery", "Galería de fotos")}</h2>
                     </div>
                     {summaryPhotos.length > 0 ? (
                       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -551,14 +551,14 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                             type="button"
                             className="aspect-[4/3] overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
                             onClick={() => setActiveTab("gallery")}
-                            aria-label={photo.title || "Ver foto del perfil"}
+                            aria-label={photo.title || t("view_profile_photo")}
                           >
-                            <img src={photo.url} alt={photo.title || "Foto del perfil"} className="h-full w-full object-cover transition duration-300 hover:scale-105" />
+                            <img src={photo.url} alt={photo.title || t("profile_photo_alt")} className="h-full w-full object-cover transition duration-300 hover:scale-105" />
                           </button>
                         ))}
                       </div>
                     ) : (
-                      <p className="mt-4 text-sm text-slate-500">Aun no hay fotos cargadas.</p>
+                      <p className="mt-4 text-sm text-slate-500">{t("no_photos_uploaded", "Aún no hay fotos cargadas.")}</p>
                     )}
                   </div>
 
@@ -569,7 +569,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                       <div className="mb-1 flex items-center gap-2 text-[#071C3C]">
                         <TrendingUp size={18} />
-                        <h2 className="text-xl font-semibold">Analisis de scouting</h2>
+                        <h2 className="text-xl font-semibold">{t("scouting_analysis", "Análisis de scouting")}</h2>
                       </div>
                       <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />
                     </div>
@@ -578,12 +578,12 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <BadgeInfo size={18} />
-                      <h2 className="text-xl font-semibold">Descripción corta</h2>
+                      <h2 className="text-xl font-semibold">{t("short_description", "Descripción corta")}</h2>
                     </div>
                     {resumen_profesional ? (
                       <p className="mt-4 break-words text-base leading-7 text-slate-600">{resumen_profesional}</p>
                     ) : (
-                      <p className="mt-4 text-sm text-slate-500">Aún no hay una descripción cargada.</p>
+                      <p className="mt-4 text-sm text-slate-500">{t("no_description_uploaded", "Aún no hay una descripción cargada.")}</p>
                     )}
                   </div>
                 </div>
@@ -592,25 +592,25 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <BadgeCheck size={18} />
-                      <h2 className="text-xl font-semibold">Información personal</h2>
+                      <h2 className="text-xl font-semibold">{t("personal_information", "Información personal")}</h2>
                     </div>
                     <div className="mt-4 space-y-3 text-sm text-slate-600">
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nombre</span><span className="font-medium text-[#071C3C]">{profile.nombre} {profile.apellido}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacimiento</span><span className="font-medium text-[#071C3C]">{formatDateOnly(profile.fecha_de_nacimiento) || ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Nacionalidad</span><span className="font-medium text-[#071C3C]">{nacionalidad || ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Altura</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Peso</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Pierna hábil</span><span className="font-medium text-[#071C3C]">{pie_dominante || ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Idiomas</span><span className="font-medium text-[#071C3C]">{idiomas || ""}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>Representante</span><span className="font-medium text-[#071C3C]">{profile.agente_nombre || ""}</span></div>
-                      <div className="flex justify-between pb-2"><span>Disponibilidad</span><span className="font-medium text-[#25D366]">{availabilityLabel}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("name", "Nombre")}</span><span className="font-medium text-[#071C3C]">{profile.nombre} {profile.apellido}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("birth_date", "Nacimiento")}</span><span className="font-medium text-[#071C3C]">{formatDateOnly(profile.fecha_de_nacimiento) || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("nationality", "Nacionalidad")}</span><span className="font-medium text-[#071C3C]">{nacionalidad || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("height", "Altura")}</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("weight", "Peso")}</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("preferred_foot", "Pierna hábil")}</span><span className="font-medium text-[#071C3C]">{pie_dominante || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("languages", "Idiomas")}</span><span className="font-medium text-[#071C3C]">{idiomas || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("representative", "Representante")}</span><span className="font-medium text-[#071C3C]">{profile.agente_nombre || ""}</span></div>
+                      <div className="flex justify-between pb-2"><span>{t("availability", "Disponibilidad")}</span><span className="font-medium text-[#25D366]">{availabilityLabel}</span></div>
                     </div>
                   </div>
 
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <Users size={18} />
-                      <h2 className="text-xl font-semibold">Calificación</h2>
+                      <h2 className="text-xl font-semibold">{t("rating", "Calificación")}</h2>
                     </div>
                     <div className="mt-4 flex items-center gap-3">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -621,7 +621,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <div className="mt-4 flex flex-wrap gap-3">
                       {!canEditProfile && (
                         <div className="flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2">
-                          <span className="text-xs font-semibold uppercase text-slate-500">Tu voto</span>
+                          <span className="text-xs font-semibold uppercase text-slate-500">{t("your_vote", "Tu voto")}</span>
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
@@ -636,27 +636,27 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                         </div>
                       )}
                       {canEditProfile && (
-                        <button onClick={handleOpenEditModal} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">Editar perfil</button>
+                        <button onClick={handleOpenEditModal} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">{t("edit_profile", "Editar perfil")}</button>
                       )}
-                      <button onClick={handleCopyLink} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">Copiar enlace</button>
+                      <button onClick={handleCopyLink} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">{t("copy_link", "Copiar enlace")}</button>
                     </div>
                   </div>
 
                   <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="flex items-center gap-2 text-[#071C3C]">
                       <TrendingUp size={18} />
-                      <h2 className="text-xl font-semibold">Actividad del perfil</h2>
+                      <h2 className="text-xl font-semibold">{t("profile_activity", "Actividad del perfil")}</h2>
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-3">
                       <div className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <Eye size={20} className="text-[#25D366]" />
                         <p className="mt-3 break-words text-2xl font-extrabold leading-none text-[#071C3C]">{profileViews}</p>
-                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">Visitas al perfil</p>
+                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">{t("profile_views", "Visitas al perfil")}</p>
                       </div>
                       <div className="min-w-0 rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <CheckCircle2 size={20} className="text-[#25D366]" />
                         <p className="mt-3 break-words text-2xl font-extrabold leading-none text-[#071C3C]">{completionPercent}%</p>
-                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">Perfil completado</p>
+                        <p className="mt-2 text-xs font-semibold uppercase text-slate-500">{t("profile_completed", "Perfil completado")}</p>
                       </div>
                     </div>
                     <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
@@ -673,7 +673,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
               <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
                   <ImageIcon size={18} />
-                  <h2 className="text-xl font-semibold">Galería del jugador</h2>
+                  <h2 className="text-xl font-semibold">{t("player_gallery", "Galería del jugador")}</h2>
                 </div>
                 <UserPhotosSection userId={profile.id} isMyProfile={canEditProfile} />
               </div>
@@ -682,7 +682,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
               <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
                   <PlayCircle size={18} />
-                  <h2 className="text-xl font-semibold">Videos</h2>
+                  <h2 className="text-xl font-semibold">{t("videos", "Videos")}</h2>
                 </div>
                 <VideosSection userId={profile.id} isMyProfile={canEditProfile} createEndpoint={isManagedProfile ? `/profiles/${profile.id}/videos` : "/profiles/videos"} updateEndpointBuilder={(videoId) => isManagedProfile ? `/profiles/managed-videos/${videoId}` : `/profiles/videos/${videoId}`} deleteEndpointBuilder={(videoId) => isManagedProfile ? `/profiles/managed-videos/${videoId}` : `/profiles/videos/${videoId}`} />
               </div>
@@ -692,7 +692,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                 <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
                     <TrendingUp size={18} />
-                    <h2 className="text-xl font-semibold">Informes de Scouting</h2>
+                    <h2 className="text-xl font-semibold">{t("scouting_reports", "Informes de Scouting")}</h2>
                   </div>
                   {!isManagedProfile && <ScoutingReportsSection userId={profile.id} isMyProfile={Boolean(isOwnAccountProfile)} />}
                 </div>
@@ -703,7 +703,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                 <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center gap-2 text-[#071C3C]">
                     <FileText size={18} />
-                    <h2 className="text-xl font-semibold">Documentos y CV</h2>
+                    <h2 className="text-xl font-semibold">{t("documents_and_cv", "Documentos y CV")}</h2>
                   </div>
                   <PlayerDocuments cvUrl={profile.cv_url} />
                 </div>
@@ -729,11 +729,11 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <KeyRound size={20} />
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-[#071C3C]">Seguridad</p>
-                    <p className="mt-1 text-sm text-slate-600">Actualizá la contraseña de acceso a tu cuenta.</p>
+                    <p className="text-lg font-semibold text-[#071C3C]">{t("security", "Seguridad")}</p>
+                    <p className="mt-1 text-sm text-slate-600">{t("update_password_help", "Actualizá la contraseña de acceso a tu cuenta.")}</p>
                   </div>
                 </div>
-                <button onClick={() => setIsPasswordModalOpen(true)} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C] transition hover:bg-slate-50">Cambiar contraseña</button>
+                <button onClick={() => setIsPasswordModalOpen(true)} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C] transition hover:bg-slate-50">{t("change_password", "Cambiar contraseña")}</button>
               </div>
             </div>
           )}
@@ -742,10 +742,10 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             <div className="mt-6 rounded-[28px] border border-red-200 bg-red-50 p-6 shadow-sm">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-lg font-semibold text-red-700">Eliminar cuenta</p>
-                  <p className="mt-1 text-sm text-red-600">Da de baja tu cuenta y elimina tus datos asociados de FutbolProyect.</p>
+                  <p className="text-lg font-semibold text-red-700">{t("delete_account", "Eliminar cuenta")}</p>
+                  <p className="mt-1 text-sm text-red-600">{t("delete_account_help", "Da de baja tu cuenta y elimina tus datos asociados de FutbolProyect.")}</p>
                 </div>
-                <button onClick={handleDeleteAccount} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700">Eliminar cuenta</button>
+                <button onClick={handleDeleteAccount} className="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-700">{t("delete_account", "Eliminar cuenta")}</button>
               </div>
             </div>
           )}

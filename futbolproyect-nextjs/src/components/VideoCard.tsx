@@ -13,8 +13,10 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useTranslation } from 'react-i18next';
 
 const VideoCard = ({ video, onAdd, onPlay, onEdit, onDelete, isMyProfile }) => {
+  const { t } = useTranslation('common');
   if (!video) {
     return (
       <Card sx={{ height: "100%", display: "flex" }}>
@@ -34,7 +36,7 @@ const VideoCard = ({ video, onAdd, onPlay, onEdit, onDelete, isMyProfile }) => {
             sx={{ fontSize: 40, color: "text.secondary" }}
           />
           <Typography sx={{ mt: 1, color: "text.secondary" }}>
-            Añadir Video
+            {t('add_video')}
           </Typography>
         </CardActionArea>
       </Card>
@@ -67,10 +69,10 @@ const VideoCard = ({ video, onAdd, onPlay, onEdit, onDelete, isMyProfile }) => {
       </CardActionArea>
       {isMyProfile && (
         <CardActions sx={{ p: 0, justifyContent: "flex-end" }}>
-          <IconButton aria-label="edit" size="small" onClick={() => onEdit(video)}>
+          <IconButton aria-label={t('edit_button')} size="small" onClick={() => onEdit(video)}>
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton aria-label="delete" size="small" onClick={() => onDelete(video.id)}>
+          <IconButton aria-label={t('delete_button')} size="small" onClick={() => onDelete(video.id)}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </CardActions>

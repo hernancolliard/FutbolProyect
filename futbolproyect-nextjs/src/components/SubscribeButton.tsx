@@ -234,12 +234,12 @@ function SubscribeButton({
           "&:hover": { bgcolor: "#0d4faf" },
         }}
       >
-        {loading ? <CircularProgress size={24} /> : "Suscribirme con Mercado Pago"}
+        {loading ? <CircularProgress size={24} /> : t("subscribe_with_mercadopago")}
       </Button>
 
       <Divider sx={{ my: 2 }}>
         <Typography variant="caption" sx={{ color: "#758196" }}>
-          o pagar con
+          {t("or_pay_with")}
         </Typography>
       </Divider>
 

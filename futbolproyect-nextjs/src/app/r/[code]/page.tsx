@@ -4,8 +4,10 @@ import { useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { Box, CircularProgress, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export default function AffiliateRedirectPage() {
+  const { t } = useTranslation("common");
   const params = useParams<{ code: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,7 +34,7 @@ export default function AffiliateRedirectPage() {
   return (
     <Box sx={{ minHeight: "50vh", display: "grid", placeItems: "center", gap: 2 }}>
       <CircularProgress />
-      <Typography>Redirigiendo...</Typography>
+      <Typography>{t("redirecting")}</Typography>
     </Box>
   );
 }

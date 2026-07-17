@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function ScoutingInformesPage() {
   return (
     <ProfileSeoLanding
-      h1="Scouting e informes de jugadores"
-      mainText="Centralizá la búsqueda y evaluación de talento mediante perfiles con datos deportivos, trayectoria, videos y estadísticas. FutbolProyect facilita el trabajo de scouts, analistas, clubes y agencias.\n\nLos informes y el material del perfil ayudan a ordenar el seguimiento profesional de cada jugador."
-      h2="Jugadores para seguimiento y evaluación"
-      ctaText="Crear una cuenta de scouting"
+      translationPrefix="scouting_landing"
       ctaLink="/register"
     />
   );

@@ -18,11 +18,14 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const money = (value: any, currency = "USD") =>
   `${currency} ${Number(value || 0).toFixed(2)}`;
 
 export default function AffiliateDashboard() {
+  const { t, i18n } = useTranslation("common");
+  const dateLocale = i18n.language?.startsWith("en") ? "en-US" : "es-AR";
   const statsQuery = useQuery({
     queryKey: ["affiliateMeStats"],
     queryFn: async () => (await apiClient.get("/affiliate/me/stats")).data,
@@ -41,7 +44,7 @@ export default function AffiliateDashboard() {
   }
 
   if (statsQuery.isError) {
-    return <Alert severity="info">No hay una cuenta de afiliado asociada a tu usuario.</Alert>;
+    return <Alert severity="info">{t("affiliate_account_missing")}</Alert>;
   }
 
   const stats = statsQuery.data;
@@ -52,24 +55,24 @@ export default function AffiliateDashboard() {
     <Box sx={{ p: { xs: 2, md: 4 }, width: "100%" }}>
       <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 900 }}>Panel de afiliado</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 900 }}>{t("affiliate_dashboard_title")}</Typography>
           <Typography sx={{ color: "#64748b" }}>{stats.name} · {stats.code}</Typography>
         </Box>
         <Button variant="contained" onClick={() => navigator.clipboard?.writeText(referralLink)}>
-          Copiar enlace
+          {t("copy_link")}
         </Button>
       </Stack>
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" }, gap: 2, mt: 3 }}>
         {[
-          ["Clics", stats.total_clicks],
-          ["Registros", stats.registrations],
-          ["Suscriptores", stats.paying_subscribers],
-          ["Ingresos", money(stats.gross_revenue)],
-          ["Pendiente", money(stats.pending_commission)],
-          ["Disponible", money(stats.available_commission)],
-          ["Aprobado", money(stats.approved_commission)],
-          ["Cobrado", money(stats.paid_commission)],
+          [t("clicks"), stats.total_clicks],
+          [t("registrations"), stats.registrations],
+          [t("subscribers"), stats.paying_subscribers],
+          [t("revenue"), money(stats.gross_revenue)],
+          [t("pending"), money(stats.pending_commission)],
+          [t("available"), money(stats.available_commission)],
+          [t("approved"), money(stats.approved_commission)],
+          [t("paid"), money(stats.paid_commission)],
         ].map(([label, value]) => (
           <Paper key={label} sx={{ p: 2, borderRadius: 2 }}>
             <Typography variant="caption" sx={{ color: "#64748b" }}>{label}</Typography>
@@ -78,15 +81,15 @@ export default function AffiliateDashboard() {
         ))}
       </Box>
 
-      <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 900 }}>Comisiones</Typography>
+      <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 900 }}>{t("commissions")}</Typography>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Usuario</TableCell>
-              <TableCell>Estado</TableCell>
-              <TableCell>Importe</TableCell>
-              <TableCell>Disponible</TableCell>
+              <TableCell>{t("user")}</TableCell>
+              <TableCell>{t("status")}</TableCell>
+              <TableCell>{t("amount")}</TableCell>
+              <TableCell>{t("available")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -95,22 +98,22 @@ export default function AffiliateDashboard() {
                 <TableCell>{row.referred_label}</TableCell>
                 <TableCell>{row.status}</TableCell>
                 <TableCell>{money(row.commission_amount, row.currency)}</TableCell>
-                <TableCell>{row.available_at ? new Date(row.available_at).toLocaleDateString() : "-"}</TableCell>
+                <TableCell>{row.available_at ? new Date(row.available_at).toLocaleDateString(dateLocale) : "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 900 }}>Pagos</Typography>
+      <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 900 }}>{t("payments")}</Typography>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Estado</TableCell>
-              <TableCell>Metodo</TableCell>
-              <TableCell>Importe</TableCell>
-              <TableCell>Fecha</TableCell>
+              <TableCell>{t("status")}</TableCell>
+              <TableCell>{t("method")}</TableCell>
+              <TableCell>{t("amount")}</TableCell>
+              <TableCell>{t("date")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -119,7 +122,7 @@ export default function AffiliateDashboard() {
                 <TableCell>{row.status}</TableCell>
                 <TableCell>{row.payment_method}</TableCell>
                 <TableCell>{money(row.amount, row.currency)}</TableCell>
-                <TableCell>{row.paid_at ? new Date(row.paid_at).toLocaleDateString() : "-"}</TableCell>
+                <TableCell>{row.paid_at ? new Date(row.paid_at).toLocaleDateString(dateLocale) : "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

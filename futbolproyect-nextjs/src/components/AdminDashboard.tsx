@@ -32,7 +32,7 @@ function AdminDashboard() {
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
-          aria-label="admin tabs"
+          aria-label={t('admin_tabs')}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
@@ -43,7 +43,7 @@ function AdminDashboard() {
         <Tab label={t('subscription_management_tab', 'Gestión de Suscripciones')} value="subscriptions" />
         <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
         <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
-        <Tab label="Afiliados" value="affiliates" />
+        <Tab label={t('affiliates')} value="affiliates" />
         <Tab label={t('contact_messages_tab', 'Mensajes de Contacto')} value="contact" />
         <Tab label={t('club_contacts_tab', 'Contactos Clubes')} value="club-contacts" sx={{ minWidth: 120 }} />
       </Tabs>

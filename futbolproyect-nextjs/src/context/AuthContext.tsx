@@ -50,9 +50,12 @@ export const AuthProvider = ({ children }: any) => {
     }
   };
 
-  const loginWithGoogle = async (token: string) => {
+  const loginWithGoogle = async (token: string, acceptedTerms = false) => {
     try {
-      const res = await apiClient.post("/users/google-login", { token });
+      const res = await apiClient.post("/users/google-login", {
+        token,
+        acceptedTerms,
+      });
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
@@ -60,11 +63,23 @@ export const AuthProvider = ({ children }: any) => {
       await fetchUser();
     } catch (error: any) {
       console.error("Google login error:", error);
-      throw error;
+      throw new Error(
+        error.response?.data?.message ||
+          error.message ||
+          "Error al iniciar sesión con Google.",
+      );
     }
   };
 
-  const register = async (name: string, email: string, password: string, tipo_usuario: string, rol: string, affiliateCode?: string) => {
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    tipo_usuario: string,
+    rol: string,
+    affiliateCode: string | undefined,
+    acceptedTerms: boolean,
+  ) => {
     try {
       const normalizedEmail = email.trim().toLowerCase();
       const res = await apiClient.post("/users/register", {
@@ -74,6 +89,7 @@ export const AuthProvider = ({ children }: any) => {
         tipo_usuario,
         rol,
         affiliateCode,
+        acceptedTerms,
       });
       if (res.data?.token) {
         localStorage.setItem("token", res.data.token);

@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 export default function PerfilesJugadoresPage() {
   return (
     <ProfileSeoLanding
-      h1="Perfiles de jugadores de fútbol"
-      mainText="Descubrí futbolistas con información deportiva, trayectoria, posición, nacionalidad, fotos y videos. Los perfiles facilitan el contacto profesional con clubes, agencias y scouts.\n\nSi sos jugador, creá tu perfil y compartilo como presentación deportiva."
-      h2="Jugadores disponibles en FutbolProyect"
-      ctaText="Crear mi perfil deportivo"
+      translationPrefix="player_profiles_landing"
       ctaLink="/register"
     />
   );

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { BadgeCheck, CalendarDays, Copy, Download, Mail, MessageCircle, Ruler, Share2, Sparkles, Weight, Footprints, Globe2 } from "lucide-react";
 import { Profile } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 
 interface HeroPlayerProps {
   profile: Profile;
@@ -69,6 +70,7 @@ export function HeroPlayer({
   languagesLabel,
   birthDateLabel,
 }: HeroPlayerProps) {
+  const { t } = useTranslation("common");
   const heroImage = profile.foto_perfil_url || "/images/logos/logofp.png";
 
   return (
@@ -90,7 +92,7 @@ export function HeroPlayer({
         <div className="relative flex-1 p-6 sm:p-8 lg:p-10">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100 backdrop-blur">
             <Sparkles size={16} className="text-[#25D366]" />
-            Perfil del jugador
+            {t("player_profile_badge")}
           </div>
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -99,11 +101,11 @@ export function HeroPlayer({
                 <button
                   onClick={onOpenLightbox}
                   className="group relative h-40 w-40 overflow-hidden rounded-[24px] border border-white/20 shadow-2xl sm:h-48 sm:w-48"
-                  aria-label="Abrir foto del jugador"
+                  aria-label={t("open_player_photo")}
                 >
                   <img src={heroImage} alt={`${profile.nombre} ${profile.apellido}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition group-hover:opacity-100">
-                    <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-[#071C3C]">Ver foto</span>
+                    <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-[#071C3C]">{t("view_photo")}</span>
                   </div>
                 </button>
 
@@ -124,10 +126,10 @@ export function HeroPlayer({
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                  { label: "Edad", value: age !== null ? `${age} años` : "" },
-                  { label: "Nacimiento", value: birthDateLabel || "" },
-                  { label: "Altura", value: profile.altura_cm ? `${profile.altura_cm} cm` : "" },
-                  { label: "Peso", value: profile.peso_kg ? `${profile.peso_kg} kg` : "" },
+                  { label: t("age_plain"), value: age !== null ? t("age_years", { age }) : "" },
+                  { label: t("birth_plain"), value: birthDateLabel || "" },
+                  { label: t("height_plain"), value: profile.altura_cm ? `${profile.altura_cm} cm` : "" },
+                  { label: t("weight_plain"), value: profile.peso_kg ? `${profile.peso_kg} kg` : "" },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-sm">
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-300">{item.label}</p>
@@ -140,7 +142,7 @@ export function HeroPlayer({
             <div className="w-full max-w-sm rounded-[24px] border border-white/15 bg-white/10 p-4 backdrop-blur-md sm:p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-300">Nacionalidad</p>
+                  <p className="text-sm text-slate-300">{t("nationality_plain")}</p>
                   <p className="mt-1 flex items-center gap-2 text-lg font-semibold text-white">
                     <span>{flagFor(nationalityLabel)}</span>
                     {nationalityLabel}
@@ -151,19 +153,19 @@ export function HeroPlayer({
                 </div>
               </div>
               <div className="mt-4 space-y-2 text-sm text-slate-200">
-                <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> Pierna hábil: {dominantFoot || ""}</div>
-                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> Idiomas: {languagesLabel || "Sin cargar"}</div>
-                <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {birthDateLabel ? `Cumpleaños: ${birthDateLabel}` : "Sin fecha cargada"}</div>
+                <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> {t("preferred_foot")}: {dominantFoot || ""}</div>
+                <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> {t("languages")}: {languagesLabel || t("not_loaded")}</div>
+                <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {birthDateLabel ? t("birthday_value", { date: birthDateLabel }) : t("birth_date_not_loaded")}</div>
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button onClick={onShare} className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 font-semibold text-[#071C3C] transition hover:-translate-y-0.5">
-              <Share2 size={16} /> Compartir perfil
+              <Share2 size={16} /> {t("share_profile")}
             </button>
             <button onClick={onCopyLink} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 font-semibold text-white transition hover:-translate-y-0.5">
-              <Copy size={16} /> Copiar enlace
+              <Copy size={16} /> {t("copy_link")}
             </button>
             <button onClick={onWhatsApp} className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 font-semibold text-white transition hover:-translate-y-0.5">
               <MessageCircle size={16} /> WhatsApp
@@ -172,14 +174,14 @@ export function HeroPlayer({
               <Mail size={16} /> Email
             </button>
             <button onClick={onDownloadCv} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2.5 font-semibold text-white transition hover:-translate-y-0.5">
-              <Download size={16} /> Descargar CV
+              <Download size={16} /> {t("download_cv")}
             </button>
           </div>
 
           {canEditProfile && (
             <div className="mt-4">
               <button onClick={onEditProfile} className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20">
-                Editar perfil
+                {t("edit_profile")}
               </button>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BarChart3, CalendarDays, ListChecks, Target, Timer, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PlayerStatsProps {
   stats?: string | null;
@@ -68,13 +69,26 @@ const parseStats = (value?: string | null) =>
     });
 
 export function PlayerStats({ stats }: PlayerStatsProps) {
-  const items = parseStats(stats);
+  const { t } = useTranslation("common");
+  const labelTranslations: Record<string, string> = {
+    Temporada: t("season_label"),
+    Partidos: t("matches_label"),
+    Minutos: t("minutes_label"),
+    Goles: t("goals_label"),
+    Asistencias: t("assists_label"),
+    "Temporada actual": t("current_season"),
+  };
+  const items = parseStats(stats).map((item) => ({
+    ...item,
+    label: labelTranslations[item.label] || item.label,
+    detail: item.detail.replace(/^Temporada\s+/, `${t("season_label")} `),
+  }));
 
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-2 text-[#071C3C]">
         <BarChart3 size={18} />
-        <h2 className="text-xl font-semibold uppercase">Estadisticas destacadas</h2>
+        <h2 className="text-xl font-semibold uppercase">{t("featured_statistics")}</h2>
       </div>
 
       {items.length > 0 ? (
@@ -93,7 +107,7 @@ export function PlayerStats({ stats }: PlayerStatsProps) {
           })}
         </div>
       ) : (
-        <p className="mt-4 text-sm text-slate-500">Aun no hay estadisticas cargadas.</p>
+        <p className="mt-4 text-sm text-slate-500">{t("no_statistics_uploaded")}</p>
       )}
     </motion.section>
   );

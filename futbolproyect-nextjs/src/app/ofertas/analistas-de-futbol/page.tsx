@@ -13,9 +13,7 @@ export default function OfertasAnalistasPage() {
   return (
     <OfferSeoLanding
       role="analista"
-      h1="Ofertas para analistas de fútbol"
-      mainText="Consultá oportunidades para analistas tácticos, videoanalistas y especialistas en datos aplicados al fútbol. Conectá tu experiencia con clubes, cuerpos técnicos y agencias."
-      h2="Trabajo en análisis táctico, video y datos"
+      translationPrefix="analyst_offers_landing"
     />
   );
 }

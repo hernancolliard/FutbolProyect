@@ -13,6 +13,12 @@ const {
 const { createReferralForUser } = require("../services/affiliateService");
 const { clearAffiliateCookie } = require("../services/affiliateCookieService");
 const { validateNewPassword } = require("../passwordPolicy");
+const {
+  CURRENT_TERMS_VERSION,
+  CURRENT_PRIVACY_VERSION,
+  LEGAL_ACCEPTANCE_REQUIRED_MESSAGE,
+  hasAcceptedLegalPolicies,
+} = require("../legalPolicy");
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -114,6 +120,12 @@ router.post("/google-login", async (req, res) => {
     let user = result.rows[0];
 
     if (!user) {
+      if (!hasAcceptedLegalPolicies(req.body.acceptedTerms)) {
+        return res.status(400).json({
+          message: LEGAL_ACCEPTANCE_REQUIRED_MESSAGE,
+        });
+      }
+
       // La columna es NOT NULL, pero este valor aleatorio nunca se usa para
       // autenticar: las cuentas creadas aquí ingresan únicamente con Google.
       const passwordHash = await bcrypt.hash(
@@ -121,10 +133,22 @@ router.post("/google-login", async (req, res) => {
         12,
       );
       const created = await db.query(
-        `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario)
-         VALUES (@name, @email, @passwordHash, 'ofertante')
+        `INSERT INTO usuarios (
+           nombre, email, password_hash, tipo_usuario,
+           terms_accepted_at, terms_version, privacy_version
+         )
+         VALUES (
+           @name, @email, @passwordHash, 'ofertante',
+           NOW(), @termsVersion, @privacyVersion
+         )
          RETURNING *`,
-        { name, email, passwordHash },
+        {
+          name,
+          email,
+          passwordHash,
+          termsVersion: CURRENT_TERMS_VERSION,
+          privacyVersion: CURRENT_PRIVACY_VERSION,
+        },
       );
       user = created.rows[0];
       try {
@@ -266,6 +290,12 @@ router.post("/register", async (req, res) => {
         .json({ message: "Email, nombre y contraseña son obligatorios." });
     }
 
+    if (!hasAcceptedLegalPolicies(req.body.acceptedTerms)) {
+      return res.status(400).json({
+        message: LEGAL_ACCEPTANCE_REQUIRED_MESSAGE,
+      });
+    }
+
     // Validación de tipo de usuario
     const tiposValidos = ["postulante", "ofertante"];
     if (!tiposValidos.includes(tipo_usuario)) {
@@ -306,8 +336,14 @@ router.post("/register", async (req, res) => {
 
       // Insertar el nuevo usuario
       result = await client.query(
-        `INSERT INTO usuarios (nombre, email, password_hash, tipo_usuario, rol)
-         VALUES (@nombre, @email, @password_hash, @tipo_usuario, @rol)
+        `INSERT INTO usuarios (
+           nombre, email, password_hash, tipo_usuario, rol,
+           terms_accepted_at, terms_version, privacy_version
+         )
+         VALUES (
+           @nombre, @email, @password_hash, @tipo_usuario, @rol,
+           NOW(), @termsVersion, @privacyVersion
+         )
          RETURNING id, nombre, email, tipo_usuario, rol`,
         {
           nombre,
@@ -315,6 +351,8 @@ router.post("/register", async (req, res) => {
           password_hash,
           tipo_usuario,
           rol,
+          termsVersion: CURRENT_TERMS_VERSION,
+          privacyVersion: CURRENT_PRIVACY_VERSION,
         }
       );
 

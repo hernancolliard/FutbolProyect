@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 
 interface ChangePasswordModalProps {
@@ -34,6 +35,7 @@ export default function ChangePasswordModal({
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const { t } = useTranslation("common");
 
   const closeModal = () => {
     if (saving) return;
@@ -47,12 +49,12 @@ export default function ChangePasswordModal({
     setError("");
 
     if (form.newPassword.length < 8) {
-      setError("La nueva contraseña debe tener al menos 8 caracteres.");
+      setError(t("password_minimum_error"));
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setError("La nueva contraseña y su confirmación no coinciden.");
+      setError(t("password_confirmation_error"));
       return;
     }
 
@@ -62,13 +64,13 @@ export default function ChangePasswordModal({
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      toast.success(data?.message || "Contraseña actualizada correctamente.");
+      toast.success(data?.message || t("password_updated_success"));
       setForm(emptyForm);
       onClose();
     } catch (requestError: any) {
       setError(
         requestError.response?.data?.message ||
-          "No se pudo actualizar la contraseña.",
+          t("password_update_error"),
       );
     } finally {
       setSaving(false);
@@ -78,16 +80,15 @@ export default function ChangePasswordModal({
   return (
     <Dialog open={open} onClose={closeModal} maxWidth="xs" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle>Cambiar contraseña</DialogTitle>
+        <DialogTitle>{t("change_password")}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Ingresá tu contraseña actual y elegí una nueva de al menos 8
-              caracteres.
+              {t("change_password_help_text")}
             </Typography>
             {error && <Alert severity="error">{error}</Alert>}
             <TextField
-              label="Contraseña actual"
+              label={t("current_password_label")}
               type="password"
               value={form.currentPassword}
               onChange={(event) =>
@@ -101,7 +102,7 @@ export default function ChangePasswordModal({
               fullWidth
             />
             <TextField
-              label="Nueva contraseña"
+              label={t("new_password_label")}
               type="password"
               value={form.newPassword}
               onChange={(event) =>
@@ -116,7 +117,7 @@ export default function ChangePasswordModal({
               fullWidth
             />
             <TextField
-              label="Confirmar nueva contraseña"
+              label={t("confirm_new_password_label")}
               type="password"
               value={form.confirmPassword}
               onChange={(event) =>
@@ -134,10 +135,10 @@ export default function ChangePasswordModal({
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={closeModal} disabled={saving}>
-            Cancelar
+            {t("cancel")}
           </Button>
           <Button type="submit" variant="contained" disabled={saving}>
-            {saving ? <CircularProgress size={22} color="inherit" /> : "Guardar"}
+            {saving ? <CircularProgress size={22} color="inherit" /> : t("save")}
           </Button>
         </DialogActions>
       </form>

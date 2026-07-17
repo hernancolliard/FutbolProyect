@@ -24,7 +24,7 @@ export default function HomeFinalCta() {
     >
       <Image
         src="/images/estadio-futbol.webp"
-        alt="Estadio de fútbol durante un partido"
+        alt={t("football_stadium_alt", "Estadio de fútbol durante un partido")}
         fill
         sizes="(max-width: 1200px) 100vw, 1150px"
         style={{ objectFit: "cover" }}

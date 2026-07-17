@@ -58,7 +58,7 @@ export default function Hero({ metrics }: HeroProps) {
     >
       <Image
         src="/images/estadiohero.webp"
-        alt="Futbolista en un estadio representando oportunidades profesionales"
+        alt={t("hero_stadium_alt")}
         fill
         priority
         quality={70}
@@ -88,10 +88,10 @@ export default function Hero({ metrics }: HeroProps) {
               fontWeight: 900,
             }}
           >
-            Mostrá tu talento.
+            {t("hero_title_primary", "Mostrá tu talento.")}
             <br />
             <Box component="span" sx={{ color: "#2f80ff" }}>
-              Conectá con nuevas oportunidades.
+              {t("hero_title_secondary", "Conectá con nuevas oportunidades.")}
             </Box>
           </Typography>
           <Typography
