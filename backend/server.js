@@ -64,6 +64,7 @@ app.use("/api/users", require("./routes/users"));
 app.use("/api/offers", require("./routes/offers"));
 app.use("/api/applications", require("./routes/applications"));
 app.use("/api/profiles", require("./routes/profiles"));
+app.use("/api/clubs", require("./routes/clubs"));
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/admin", require("./routes/admin"));

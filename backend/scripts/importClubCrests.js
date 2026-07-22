@@ -28,6 +28,7 @@ Uso:
 
 Opciones:
   --countries argentina,spain  Slugs de país separados por coma (default: argentina)
+  --all-countries              Descubre e importa todos los países publicados
   --download                   Descarga los escudos WebP al frontend (default)
   --no-download                Solo guarda metadatos y URL de origen
   --force-download             Reemplaza también los escudos que ya existen
@@ -47,6 +48,7 @@ Ejemplos:
 function parseArgs(argv) {
   const options = {
     countries: ["argentina"],
+    allCountries: false,
     download: true,
     forceDownload: false,
     db: false,
@@ -62,6 +64,8 @@ function parseArgs(argv) {
         .split(",")
         .map((value) => value.trim().toLowerCase())
         .filter(Boolean);
+    } else if (argument === "--all-countries") {
+      options.allCountries = true;
     } else if (argument === "--download") {
       options.download = true;
     } else if (argument === "--no-download") {
@@ -134,6 +138,22 @@ function parseCountryName(html, countrySlug) {
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function parseCountrySlugs(html) {
+  const countryPattern = /href="\/es\/country\/([a-z0-9-]+)"/gi;
+  const slugs = new Set();
+  let match;
+
+  while ((match = countryPattern.exec(html)) !== null) {
+    slugs.add(match[1].toLowerCase());
+  }
+
+  if (!slugs.size) {
+    throw new Error("No se encontraron países en el catálogo de FootyLogos.");
+  }
+
+  return [...slugs].sort((left, right) => left.localeCompare(right));
 }
 
 function parseClubCards(html, countrySlug) {
@@ -317,12 +337,13 @@ function clubsToCsv(clubs) {
   ].join("\n");
 }
 
-async function writeManifests(clubs, countries, manifestRoot) {
+async function writeManifests(clubs, countries, manifestRoot, failedCountries = []) {
   await fs.mkdir(manifestRoot, { recursive: true });
   const manifest = {
     generated_at: new Date().toISOString(),
     source: SOURCE_ORIGIN,
     countries,
+    failed_countries: failedCountries,
     count: clubs.length,
     clubs,
   };
@@ -404,14 +425,29 @@ async function run(options) {
   const robotsText = await fetchResource(robotsUrl);
   const disallowedPaths = parseRobotsTxt(robotsText);
   let clubs = [];
+  let countrySlugs = options.countries;
+  const failedCountries = [];
 
-  for (const countrySlug of options.countries) {
+  if (options.allCountries) {
+    const catalogueUrl = `${SOURCE_ORIGIN}/es/logos`;
+    assertRobotsAllows(disallowedPaths, catalogueUrl);
+    const catalogueHtml = await fetchResource(catalogueUrl);
+    countrySlugs = parseCountrySlugs(catalogueHtml);
+    console.log(`${countrySlugs.length} países encontrados en el catálogo.`);
+  }
+
+  for (const [index, countrySlug] of countrySlugs.entries()) {
     const countryUrl = `${SOURCE_ORIGIN}/es/country/${countrySlug}`;
-    assertRobotsAllows(disallowedPaths, countryUrl);
-    const html = await fetchResource(countryUrl);
-    const countryClubs = parseClubCards(html, countrySlug);
-    clubs.push(...countryClubs);
-    console.log(`${countryClubs.length} clubes encontrados en ${countryClubs[0].country}.`);
+    try {
+      assertRobotsAllows(disallowedPaths, countryUrl);
+      const html = await fetchResource(countryUrl);
+      const countryClubs = parseClubCards(html, countrySlug);
+      clubs.push(...countryClubs);
+      console.log(`[${index + 1}/${countrySlugs.length}] ${countryClubs.length} clubes en ${countryClubs[0].country}.`);
+    } catch (error) {
+      failedCountries.push({ country_slug: countrySlug, error: error.message });
+      console.warn(`[${index + 1}/${countrySlugs.length}] Omitido ${countrySlug}: ${error.message}`);
+    }
   }
 
   const uniqueClubs = new Map(clubs.map((club) => [`${club.source}:${club.source_slug}`, club]));
@@ -426,7 +462,7 @@ async function run(options) {
 
   if (options.download) {
     let downloaded = 0;
-    for (const club of clubs) {
+    for (const [index, club] of clubs.entries()) {
       try {
         club.logo_url = await downloadCrest(
           club,
@@ -438,11 +474,14 @@ async function run(options) {
       } catch (error) {
         console.warn(`Aviso: ${error.message}`);
       }
+      if ((index + 1) % 50 === 0 || index + 1 === clubs.length) {
+        console.log(`Escudos procesados: ${index + 1}/${clubs.length}.`);
+      }
     }
-    console.log(`${downloaded}/${clubs.length} escudos descargados.`);
+    console.log(`${downloaded}/${clubs.length} escudos disponibles localmente.`);
   }
 
-  await writeManifests(clubs, options.countries, DEFAULT_MANIFEST_ROOT);
+  await writeManifests(clubs, countrySlugs, DEFAULT_MANIFEST_ROOT, failedCountries);
   console.log(`Manifiestos escritos en ${DEFAULT_MANIFEST_ROOT}.`);
 
   if (options.db) {
@@ -476,6 +515,7 @@ module.exports = {
   parseArgs,
   parseClubCards,
   parseCountryName,
+  parseCountrySlugs,
   parseRobotsTxt,
   run,
 };

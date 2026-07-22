@@ -27,6 +27,7 @@ import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 import { getProfileCompletion } from "@/lib/seoSlugs";
+import { getSafeClubLogoUrl } from "@/lib/clubCrests";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -94,6 +95,7 @@ const parseCvCareer = (value?: string | null) => {
           year: String(row.year || ""),
           club: String(row.club || ""),
           detail: [row.league || row.category, row.country].filter(Boolean).join(" · "),
+          logoUrl: getSafeClubLogoUrl(row.logo_url),
         }))
         .filter((row) => row.year || row.club || row.detail);
     }
@@ -103,7 +105,7 @@ const parseCvCareer = (value?: string | null) => {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => ({ year: "", club: line, detail: "" }));
+    .map((line) => ({ year: "", club: line, detail: "", logoUrl: "" }));
 };
 
 const getCvImageSource = (value?: string | null) => {
@@ -360,15 +362,20 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
     const toastId = toast.loading(t("generating_profile_cv"));
     try {
-      const profileImage = cvTemplateRef.current.querySelector("img");
-      if (profileImage && !profileImage.complete) {
-        await new Promise<void>((resolve) => {
-          const finish = () => resolve();
-          profileImage.addEventListener("load", finish, { once: true });
-          profileImage.addEventListener("error", finish, { once: true });
-          window.setTimeout(finish, 4000);
-        });
-      }
+      const pendingImages = Array.from(
+        cvTemplateRef.current.querySelectorAll("img"),
+      ).filter((image) => !image.complete);
+      await Promise.all(
+        pendingImages.map(
+          (image) =>
+            new Promise<void>((resolve) => {
+              const finish = () => resolve();
+              image.addEventListener("load", finish, { once: true });
+              image.addEventListener("error", finish, { once: true });
+              window.setTimeout(finish, 4000);
+            }),
+        ),
+      );
 
       const canvas = await html2canvas(cvTemplateRef.current, {
         scale: 2,
@@ -858,8 +865,17 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                 <h2 style={{ margin: 0, paddingBottom: 8, borderBottom: "3px solid #1262db", color: "#071c3c", fontSize: 18 }}>{t("career_path_placeholder")}</h2>
                 <div style={{ marginTop: 12 }}>
                   {cvCareer.map((row, index) => (
-                    <div key={`${row.year}-${row.club}-${index}`} style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 12, padding: "10px 0", borderBottom: "1px solid #e2e8f0" }}>
+                    <div key={`${row.year}-${row.club}-${index}`} style={{ display: "grid", gridTemplateColumns: "70px 42px 1fr", gap: 12, alignItems: "center", padding: "10px 0", borderBottom: "1px solid #e2e8f0" }}>
                       <strong style={{ color: "#1262db", fontSize: 13 }}>{row.year}</strong>
+                      {row.logoUrl ? (
+                        <img
+                          src={getCvImageSource(row.logoUrl)}
+                          alt=""
+                          style={{ width: 38, height: 38, objectFit: "contain" }}
+                        />
+                      ) : (
+                        <span />
+                      )}
                       <div>
                         <div style={{ color: "#152238", fontSize: 14, fontWeight: 700 }}>{row.club}</div>
                         {row.detail && <div style={{ marginTop: 3, color: "#64748b", fontSize: 12 }}>{row.detail}</div>}

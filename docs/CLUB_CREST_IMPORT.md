@@ -15,6 +15,9 @@ node backend/scripts/importClubCrests.js --countries argentina --db
 
 # Varios países (los valores son los slugs usados por FootyLogos)
 node backend/scripts/importClubCrests.js --countries argentina,uruguay,brazil,chile --db
+
+# Todos los países publicados en el catálogo
+node backend/scripts/importClubCrests.js --all-countries --db
 ```
 
 Para `--db`, definí `DATABASE_URL` en `backend/.env` o en el entorno. El script ejecuta primero `create_football_clubs.sql`, por lo que puede crear la tabla automáticamente. Los registros se actualizan con `upsert`: repetir una importación no genera duplicados.

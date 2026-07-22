@@ -5,6 +5,11 @@ import { useTranslation } from "react-i18next";
 import { Stack, TextField, Button, Alert, Divider, Typography, Card, CardContent, CircularProgress, MenuItem } from "@mui/material";
 import { Profile } from "@/lib/types";
 import apiClient from "@/lib/apiClient";
+import CareerClubSelector from "./CareerClubSelector";
+import {
+  CareerClubValue,
+  normalizeClubLogoSource,
+} from "@/lib/clubCrests";
 import {
   getPlayerPositionCategory,
   PLAYER_POSITION_OPTIONS,
@@ -29,11 +34,8 @@ interface StatsFormData {
   asistencias: string;
 }
 
-interface CareerRow {
+interface CareerRow extends CareerClubValue {
   year: string;
-  club: string;
-  league: string;
-  country: string;
 }
 
 const emptyStatsForm: StatsFormData = {
@@ -46,9 +48,12 @@ const emptyStatsForm: StatsFormData = {
 
 const emptyCareerRow: CareerRow = {
   year: "",
+  club_id: null,
   club: "",
   league: "",
   country: "",
+  logo_url: "",
+  logo_source: "",
 };
 
 const parseStatsForm = (value?: string | null): StatsFormData => {
@@ -93,9 +98,15 @@ const parseCareerRows = (value?: string | null): CareerRow[] => {
     if (Array.isArray(parsed)) {
       const rows = parsed.map((row) => ({
         year: String(row.year || ""),
+        club_id:
+          Number.isInteger(Number(row.club_id)) && Number(row.club_id) > 0
+            ? Number(row.club_id)
+            : null,
         club: String(row.club || ""),
         league: String(row.league || row.category || ""),
         country: String(row.country || ""),
+        logo_url: String(row.logo_url || ""),
+        logo_source: normalizeClubLogoSource(row.logo_source),
       }));
       return rows.length > 0 ? rows : [{ ...emptyCareerRow }];
     }
@@ -114,9 +125,12 @@ const parseCareerRows = (value?: string | null): CareerRow[] => {
 
       return {
         year: parts[0] || "",
+        club_id: null,
         club: parts[1] || "",
         league: parts[2] || "",
         country: parts[3] || "",
+        logo_url: "",
+        logo_source: "" as const,
       };
     });
 
@@ -186,9 +200,21 @@ const EditProfileForm = ({
     setStatsForm((current) => ({ ...current, [field]: value }));
   };
 
-  const handleCareerChange = (index: number, field: keyof CareerRow, value: string) => {
+  const handleCareerChange = (
+    index: number,
+    field: "year" | "league" | "country",
+    value: string,
+  ) => {
     setCareerRows((current) =>
       current.map((row, rowIndex) => (rowIndex === index ? { ...row, [field]: value } : row)),
+    );
+  };
+
+  const handleCareerPatch = (index: number, patch: Partial<CareerRow>) => {
+    setCareerRows((current) =>
+      current.map((row, rowIndex) =>
+        rowIndex === index ? { ...row, ...patch } : row,
+      ),
     );
   };
 
@@ -209,7 +235,9 @@ const EditProfileForm = ({
     setError("");
 
     const cleanedCareerRows = careerRows.filter((row) =>
-      Object.values(row).some((value) => value.trim()),
+      [row.year, row.club, row.league, row.country, row.logo_url].some((value) =>
+        String(value || "").trim(),
+      ),
     );
     const payload = {
       ...formData,
@@ -366,7 +394,10 @@ const EditProfileForm = ({
                     <Stack spacing={2}>
                       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                         <TextField label={t("year_label", "Año")} value={row.year} onChange={(event) => handleCareerChange(index, "year", event.target.value)} fullWidth />
-                        <TextField label={t("club_label", "Club")} value={row.club} onChange={(event) => handleCareerChange(index, "club", event.target.value)} fullWidth />
+                        <CareerClubSelector
+                          value={row}
+                          onChange={(patch) => handleCareerPatch(index, patch)}
+                        />
                       </Stack>
                       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                         <TextField label={t("league_label", "Liga")} value={row.league} onChange={(event) => handleCareerChange(index, "league", event.target.value)} fullWidth />

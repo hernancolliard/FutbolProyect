@@ -7,6 +7,7 @@ const {
   decodeHtml,
   parseArgs,
   parseClubCards,
+  parseCountrySlugs,
   parseRobotsTxt,
 } = require("../scripts/importClubCrests");
 
@@ -67,6 +68,15 @@ test("clubsToCsv protege comas y comillas", () => {
 test("parseArgs aplica límites conservadores", () => {
   assert.throws(() => parseArgs(["--delay", "100"]), /500 ms/);
   assert.deepEqual(parseArgs(["--countries", "argentina,uruguay", "--no-download"]).countries, ["argentina", "uruguay"]);
+});
+
+test("parseCountrySlugs descubre países y elimina duplicados", () => {
+  const html = `
+    <a href="/es/country/argentina">Argentina</a>
+    <a href="/es/country/spain">España</a>
+    <a href="/es/country/argentina">Argentina repetida</a>
+  `;
+  assert.deepEqual(parseCountrySlugs(html), ["argentina", "spain"]);
 });
 
 test("robots.txt puede bloquear una ruta", () => {
