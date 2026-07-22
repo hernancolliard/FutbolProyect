@@ -272,15 +272,15 @@ const EditProfileForm = ({
   };
 
   return (
-    <Card sx={{ maxWidth: 900, width: "100%" }}>
-      <CardContent>
+    <Card sx={{ maxWidth: 900, width: "100%", minWidth: 0, overflow: "visible" }}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, "&:last-child": { pb: { xs: 1.5, sm: 2.5 } } }}>
         <Typography variant="h5" sx={{ mb: 2 }}>{title || t("edit_profile_title", "Editar Perfil")}</Typography>
         <form onSubmit={handleSubmit}>
             <Stack spacing={2}>
             {error && <Alert severity="error">{error}</Alert>}
             
             <Typography variant="subtitle1" sx={{ mb: 1 }}>{t("profile_image", "Imagen de Perfil")}</Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems={{ xs: "flex-start", sm: "center" }}>
                 {profileData.foto_perfil_url && <img src={profileData.foto_perfil_url} alt="Profile" width="80" height="80" style={{borderRadius: '50%'}}/>}
                 <Button variant="outlined" component="label">
                     {t("select_file", "Seleccionar Archivo")}
@@ -383,23 +383,23 @@ const EditProfileForm = ({
 
             <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" spacing={2}>
               <Typography variant="subtitle2">{t("career_path_placeholder", "Trayectoria deportiva / clubes")}</Typography>
-              <Button type="button" variant="outlined" onClick={handleAddCareerRow}>
+              <Button type="button" variant="outlined" onClick={handleAddCareerRow} sx={{ width: { xs: "100%", sm: "auto" } }}>
                 {t("add_club_button", "Agregar club")}
               </Button>
             </Stack>
             <Stack spacing={2}>
               {careerRows.map((row, index) => (
-                <Card key={index} variant="outlined">
-                  <CardContent>
+                <Card key={index} variant="outlined" sx={{ minWidth: 0, overflow: "visible" }}>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 }, "&:last-child": { pb: { xs: 1.5, sm: 2 } } }}>
                     <Stack spacing={2}>
-                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                        <TextField label={t("year_label", "Año")} value={row.year} onChange={(event) => handleCareerChange(index, "year", event.target.value)} fullWidth />
+                      <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="flex-start" sx={{ minWidth: 0, "& > *": { minWidth: 0 } }}>
+                        <TextField label={t("year_label", "Año")} value={row.year} onChange={(event) => handleCareerChange(index, "year", event.target.value)} fullWidth sx={{ flex: { md: "0 0 170px" } }} />
                         <CareerClubSelector
                           value={row}
                           onChange={(patch) => handleCareerPatch(index, patch)}
                         />
                       </Stack>
-                      <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                      <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ minWidth: 0, "& > *": { minWidth: 0 } }}>
                         <TextField label={t("league_label", "Liga")} value={row.league} onChange={(event) => handleCareerChange(index, "league", event.target.value)} fullWidth />
                         <TextField label={t("country_label", "Pais")} value={row.country} onChange={(event) => handleCareerChange(index, "country", event.target.value)} fullWidth />
                       </Stack>
@@ -445,9 +445,9 @@ const EditProfileForm = ({
               </Button>
             )}
 
-            <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
-                <Button type="button" onClick={onCancel} variant="outlined" disabled={loading}>{t("cancel_button", "Cancelar")}</Button>
-                <Button type="submit" disabled={loading} variant="contained">
+            <Stack direction={{ xs: "column-reverse", sm: "row" }} spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
+                <Button type="button" onClick={onCancel} variant="outlined" disabled={loading} sx={{ width: { xs: "100%", sm: "auto" } }}>{t("cancel_button", "Cancelar")}</Button>
+                <Button type="submit" disabled={loading} variant="contained" sx={{ width: { xs: "100%", sm: "auto" } }}>
                     {loading ? <CircularProgress size={24} /> : submitLabel || t("save_changes_button", "Guardar Cambios")}
                 </Button>
             </Stack>

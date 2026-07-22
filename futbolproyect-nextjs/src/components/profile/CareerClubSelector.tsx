@@ -149,7 +149,7 @@ export default function CareerClubSelector({
   };
 
   return (
-    <Stack spacing={1.25} sx={{ flex: 1, minWidth: 0 }}>
+    <Stack spacing={1.25} sx={{ flex: 1, width: "100%", minWidth: 0, maxWidth: "100%" }}>
       <Autocomplete<ClubOption, false, false, true>
         freeSolo
         options={options}
@@ -174,7 +174,7 @@ export default function CareerClubSelector({
         renderOption={(props, option) => {
           const optionLogo = getSafeClubLogoUrl(option.logo_url);
           return (
-            <Box component="li" {...props} key={option.id} sx={{ gap: 1.5 }}>
+            <Box component="li" {...props} key={option.id} sx={{ gap: 1.5, minWidth: 0 }}>
               <Avatar
                 variant="rounded"
                 src={optionLogo || undefined}
@@ -215,17 +215,17 @@ export default function CareerClubSelector({
         )}
       />
 
-      <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} alignItems={{ xs: "stretch", sm: "center" }} flexWrap={{ sm: "wrap" }} useFlexGap sx={{ width: "100%", minWidth: 0 }}>
         {logoUrl && !imageFailed ? (
           <Avatar
             variant="rounded"
             src={logoUrl}
             alt={value.club ? `Escudo de ${value.club}` : "Escudo del club"}
             imgProps={{ onError: () => setImageFailed(true) }}
-            sx={{ width: 52, height: 52, bgcolor: "grey.100", p: 0.5 }}
+            sx={{ width: 52, height: 52, bgcolor: "grey.100", p: 0.5, alignSelf: { xs: "center", sm: "auto" } }}
           />
         ) : null}
-        <Button component="label" variant="outlined" size="small" disabled={uploading}>
+        <Button component="label" variant="outlined" size="small" disabled={uploading} sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "normal", textAlign: "center" }}>
           {uploading ? (
             <CircularProgress size={18} />
           ) : logoUrl ? (
@@ -248,6 +248,7 @@ export default function CareerClubSelector({
             type="button"
             size="small"
             color="inherit"
+            sx={{ width: { xs: "100%", sm: "auto" } }}
             onClick={() =>
               onChange({ club_id: null, logo_url: "", logo_source: "" })
             }

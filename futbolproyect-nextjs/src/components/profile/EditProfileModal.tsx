@@ -19,16 +19,22 @@ interface EditProfileModalProps {
 
 const style = {
     position: 'absolute' as 'absolute',
-    top: '50%',
+    top: { xs: 12, sm: '50%' },
     left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: { xs: '95%', sm: '80%', md: '700px' },
+    transform: { xs: 'translateX(-50%)', sm: 'translate(-50%, -50%)' },
+    width: { xs: 'calc(100vw - 24px)', sm: 'min(92vw, 820px)', md: 'min(88vw, 960px)' },
+    maxWidth: '960px',
+    boxSizing: 'border-box',
     bgcolor: 'background.paper',
     boxShadow: 24,
-    p: 2,
-    maxHeight: '90vh',
+    p: { xs: 1, sm: 2 },
+    maxHeight: { xs: 'calc(100dvh - 24px)', sm: '90vh' },
     overflowY: 'auto',
-    borderRadius: 2,
+    overflowX: 'hidden',
+    overscrollBehavior: 'contain',
+    WebkitOverflowScrolling: 'touch',
+    borderRadius: { xs: 2, sm: 3 },
+    outline: 'none',
 };
 
 const EditProfileModal = ({
