@@ -157,6 +157,7 @@ Opciones:
   --no-download       Solo actualiza metadatos
   --force-download    Reemplaza archivos locales existentes
   --db                Inserta o actualiza los clubes en PostgreSQL
+  --db-only           Importa a PostgreSQL desde el manifiesto ya generado
   --dry-run           Valida las páginas sin escribir archivos ni base de datos
   --delay 900         Pausa mínima entre solicitudes, en ms (mínimo: 700)
   --limit 20          Limita el total de clubes, para pruebas
@@ -170,6 +171,7 @@ function parseArgs(argv) {
     forceDownload: false,
     db: false,
     dryRun: false,
+    dbOnly: false,
     delay: 900,
     limit: null,
   };
@@ -181,6 +183,7 @@ function parseArgs(argv) {
     else if (argument === "--force-download") options.forceDownload = true;
     else if (argument === "--db") options.db = true;
     else if (argument === "--dry-run") options.dryRun = true;
+    else if (argument === "--db-only") options.dbOnly = true;
     else if (argument === "--delay") options.delay = Number(argv[++index]);
     else if (argument === "--limit") options.limit = Number(argv[++index]);
     else if (argument === "--help" || argument === "-h") options.help = true;
@@ -194,6 +197,16 @@ function parseArgs(argv) {
     throw new Error("--limit debe ser un entero positivo.");
   }
   return options;
+}
+
+function resolveDatabaseUrl(value, renderRegion = process.env.RENDER_POSTGRES_REGION) {
+  if (!value) return value;
+  const url = new URL(value);
+  if (!url.hostname.includes(".") && renderRegion) {
+    if (!/^[a-z0-9-]+$/i.test(renderRegion)) throw new Error("RENDER_POSTGRES_REGION no es válida.");
+    url.hostname = `${url.hostname}.${renderRegion}-postgres.render.com`;
+  }
+  return url.href;
 }
 
 function decodeHtml(value) {
@@ -557,7 +570,11 @@ async function writeManifests(existingManifest, clubs) {
 
 async function upsertClubs(clubs) {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL no está definida; no se puede usar --db.");
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 15_000 });
+  const pool = new Pool({
+    connectionString: resolveDatabaseUrl(process.env.DATABASE_URL),
+    connectionTimeoutMillis: 15_000,
+    ssl: { rejectUnauthorized: false },
+  });
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -593,6 +610,16 @@ async function upsertClubs(clubs) {
 }
 
 async function run(options) {
+  if (options.dbOnly) {
+    if (!options.db) throw new Error("--db-only requiere también --db.");
+    const manifest = await readExistingManifest();
+    const clubs = (manifest.clubs || []).filter((club) => club.source === SOURCE);
+    if (!clubs.length) throw new Error("El manifiesto no contiene clubes de La Futbolteca.");
+    await upsertClubs(clubs);
+    console.log(`${clubs.length} clubes de La Futbolteca insertados o actualizados en PostgreSQL.`);
+    return { clubs, accepted: clubs, reused: [] };
+  }
+
   const fetchResource = createRateLimitedFetcher(options.delay);
   const robotsText = await fetchResource(`${SOURCE_ORIGIN}/robots.txt`);
   const disallowedPaths = parseRobotsTxt(robotsText);
@@ -675,5 +702,6 @@ module.exports = {
   parseIndividualClubPage,
   parseRobotsTxt,
   parseTerceraPage,
+  resolveDatabaseUrl,
   slugify,
 };

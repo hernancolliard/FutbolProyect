@@ -8,6 +8,7 @@ const {
   parseArgs,
   parseIndividualClubPage,
   parseTerceraPage,
+  resolveDatabaseUrl,
   slugify,
 } = require("../scripts/importLaFutboltecaRFEF");
 
@@ -75,8 +76,13 @@ test("valida argumentos y normaliza slugs", () => {
     forceDownload: false,
     db: false,
     dryRun: false,
+    dbOnly: false,
     delay: 750,
     limit: 2,
   });
   assert.throws(() => parseArgs(["--delay", "100"]), /700/);
+  assert.equal(
+    new URL(resolveDatabaseUrl("postgres://user:pass@internal-host/db", "oregon")).hostname,
+    "internal-host.oregon-postgres.render.com",
+  );
 });

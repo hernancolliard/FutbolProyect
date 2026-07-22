@@ -20,6 +20,36 @@ node backend/scripts/importClubCrests.js --countries argentina,uruguay,brazil,ch
 node backend/scripts/importClubCrests.js --all-countries --db
 ```
 
+### Primera, Segunda y Tercera RFEF (España)
+
+El importador de La Futbolteca toma la temporada 2025/26: 2 grupos de Primera
+RFEF, 5 de Segunda RFEF y 18 de Tercera RFEF. Los escudos de Tercera se separan
+de las láminas de cada grupo y todos los archivos se convierten a WebP 256x256.
+
+```powershell
+cd backend
+
+# Validar las 25 páginas sin escribir cambios
+npm run import:rfef-crests -- --dry-run
+
+# Descargar, combinar con el catálogo e importar a PostgreSQL
+npm run import:rfef-crests -- --db
+
+# Reimportar a PostgreSQL desde el manifiesto local, sin descargar otra vez
+npm run import:rfef-crests -- --db --db-only
+```
+
+Si `DATABASE_URL` contiene el hostname interno de Render y el comando se ejecuta
+fuera de Render, indicá la región del endpoint público en la sesión. Por ejemplo:
+
+```powershell
+$env:RENDER_POSTGRES_REGION='oregon'
+npm run import:rfef-crests -- --db --db-only
+```
+
+La fusión reutiliza los clubes españoles que ya existen en el catálogo y evita
+crear una segunda opción para el mismo equipo.
+
 Para `--db`, definí `DATABASE_URL` en `backend/.env` o en el entorno. El script ejecuta primero `create_football_clubs.sql`, por lo que puede crear la tabla automáticamente. Los registros se actualizan con `upsert`: repetir una importación no genera duplicados.
 
 Si solo querés referencias remotas y no querés descargar imágenes:
