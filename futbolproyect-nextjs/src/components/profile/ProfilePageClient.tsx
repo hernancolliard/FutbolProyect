@@ -28,6 +28,8 @@ import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 import { getProfileCompletion } from "@/lib/seoSlugs";
 import { getSafeClubLogoUrl } from "@/lib/clubCrests";
+import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
+import ProfileActionGateDialog from "./ProfileActionGateDialog";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -145,6 +147,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isProfileActionGateOpen, setIsProfileActionGateOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
   const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
@@ -297,11 +300,25 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : pathname || "";
 
+  const canUseProfileActions = Boolean(
+    currentUser && hasCompatibleActiveSubscription(currentUser),
+  );
+
+  const requireProfileActionAccess = () => {
+    if (authLoading) return false;
+    if (canUseProfileActions) return true;
+
+    setIsProfileActionGateOpen(true);
+    return false;
+  };
+
   const handleCopyLink = async () => {
+    if (!requireProfileActionAccess()) return;
     try { await navigator.clipboard.writeText(currentUrl); } catch {}
   };
 
   const handleShare = async () => {
+    if (!requireProfileActionAccess()) return;
     const title = profile ? `${profile.nombre} ${profile.apellido || ""}`.trim() : t("futbolproyect_profile");
 
     try {
@@ -326,7 +343,13 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     }
   };
 
+  const handleProfileActionDestination = (url: string) => {
+    if (!requireProfileActionAccess()) return;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const handleWhatsApp = () => {
+    if (!requireProfileActionAccess()) return;
     const url = normalizeWhatsAppUrl(profile?.whatsapp_url);
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
@@ -358,6 +381,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const handleDownloadCv = async () => {
+    if (!requireProfileActionAccess()) return;
     if (!profile || !cvTemplateRef.current) return;
 
     const toastId = toast.loading(t("generating_profile_cv"));
@@ -712,14 +736,14 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <FileText size={18} />
                     <h2 className="text-xl font-semibold">{t("documents_and_cv", "Documentos y CV")}</h2>
                   </div>
-                  <PlayerDocuments cvUrl={profile.cv_url} />
+                  <PlayerDocuments cvUrl={profile.cv_url} onOpenCv={handleProfileActionDestination} />
                 </div>
               </div>
             )}
             {activeTab === "contact" && (
               <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                 <PlayerContact email={profile.email} whatsappUrl={profile.whatsapp_url} instagramUrl={profile.instagram_url} linkedinUrl={profile.linkedin_url} websiteUrl={profile.transfermarkt_url} onWhatsApp={handleWhatsApp} onEmail={handleEmail} />
-                <PlayerShare link={currentUrl} onCopy={handleCopyLink} />
+                <PlayerShare link={currentUrl} onCopy={handleCopyLink} onShare={handleProfileActionDestination} />
               </div>
             )}
           </div>
@@ -775,6 +799,12 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           onClose={() => setIsPasswordModalOpen(false)}
         />
       )}
+
+      <ProfileActionGateDialog
+        open={isProfileActionGateOpen}
+        isRegistered={Boolean(currentUser)}
+        onClose={() => setIsProfileActionGateOpen(false)}
+      />
 
       <div
         ref={cvTemplateRef}

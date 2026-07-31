@@ -6,9 +6,10 @@ import { useTranslation } from "react-i18next";
 
 interface PlayerDocumentsProps {
   cvUrl?: string;
+  onOpenCv: (url: string) => void;
 }
 
-export function PlayerDocuments({ cvUrl }: PlayerDocumentsProps) {
+export function PlayerDocuments({ cvUrl, onOpenCv }: PlayerDocumentsProps) {
   const { t } = useTranslation("common");
   const normalizedCvUrl = (() => {
     const trimmed = String(cvUrl || "").trim();
@@ -28,7 +29,7 @@ export function PlayerDocuments({ cvUrl }: PlayerDocumentsProps) {
         <p className="mt-4 font-semibold text-[#071C3C]">{t("sports_cv")}</p>
         <p className="mt-1 text-sm text-slate-500">{hasCv ? t("cv_document_uploaded") : t("profile_cv_missing")}</p>
         {hasCv ? (
-          <a href={normalizedCvUrl} target="_blank" rel="noopener noreferrer" download className="mt-4 inline-flex rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">{t("open_cv")}</a>
+          <button type="button" onClick={() => onOpenCv(normalizedCvUrl)} className="mt-4 inline-flex rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-[#071C3C]">{t("open_cv")}</button>
         ) : null}
       </div>
 

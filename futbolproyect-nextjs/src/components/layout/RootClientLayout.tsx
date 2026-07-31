@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import { Dialog, Modal, Box } from "@mui/material";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import SubscriptionInvitationDialog from "@/components/SubscriptionInvitationDialog";
 
 const Login = dynamic(() => import("@/components/auth/Login"), { ssr: false });
 const Register = dynamic(() => import("@/components/auth/Register"), {
@@ -70,6 +71,8 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
       <main className="min-h-screen" style={{ paddingTop: '80px' }}>{children}</main>
 
       <Footer />
+
+      <SubscriptionInvitationDialog />
 
       {/* --- MODALES --- */}
 
