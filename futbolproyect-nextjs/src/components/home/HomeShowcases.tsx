@@ -221,7 +221,12 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               <Box
                 component={Link}
                 href={getProfilePath(profile)}
-                sx={{ display: "block", height: 135, bgcolor: "#eaf0f7" }}
+                sx={{ 
+                  display: "block", 
+                  height: { xs: 180, sm: 160, md: 135 },
+                  bgcolor: "#eaf0f7",
+                  aspectRatio: "220 / 150"
+                }}
               >
                 <Image
                   src={profile.foto_perfil_url || "/images/logos/logofpazul.webp"}
