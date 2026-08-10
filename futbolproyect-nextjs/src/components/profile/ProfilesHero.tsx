@@ -122,7 +122,7 @@ export default function ProfilesHero({
         <Paper
           elevation={0}
           sx={{
-            display: "grid",
+            display: "none",
             gridTemplateColumns: {
               xs: "repeat(2, minmax(0, 1fr))",
               md: "repeat(4, minmax(0, 1fr))",
