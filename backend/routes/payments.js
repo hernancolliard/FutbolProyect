@@ -563,6 +563,13 @@ router.post("/create-paypal-order", verificarToken, async (req, res) => {
 
 router.post("/paypal-checkout-event", async (req, res) => {
   const { trackingToken, event } = req.body || {};
+  
+  console.log("[PAYPAL_CHECKOUT_EVENT] Evento recibido:", {
+    event,
+    hasTrackingToken: !!trackingToken,
+    timestamp: new Date().toISOString(),
+  });
+  
   if (!VALID_PAYPAL_CLIENT_EVENTS.has(event)) {
     return res.status(400).json({ message: "Evento de PayPal no valido." });
   }
@@ -570,11 +577,27 @@ router.post("/paypal-checkout-event", async (req, res) => {
   let trackingContext;
   try {
     trackingContext = verifyPaypalTrackingToken(trackingToken);
+    console.log("[PAYPAL_CHECKOUT_EVENT] Token verificado correctamente:", {
+      orderID: trackingContext.orderID,
+      userId: trackingContext.userId,
+    });
   } catch (_error) {
+    console.error("[PAYPAL_CHECKOUT_EVENT] Token inválido:", {
+      error: _error.message,
+      hasToken: !!trackingToken,
+    });
     return res.status(401).json({ message: "Seguimiento de PayPal no valido o vencido." });
   }
 
   const details = sanitizePaypalClientEventDetails(req.body.details);
+  
+  console.log("[PAYPAL_CHECKOUT_EVENT] Actualizando intento de checkout:", {
+    orderID: trackingContext.orderID,
+    userId: trackingContext.userId,
+    event,
+    details,
+  });
+  
   const persisted = await updatePaypalCheckoutAttempt({
     ...trackingContext,
     status: event,
@@ -588,6 +611,11 @@ router.post("/paypal-checkout-event", async (req, res) => {
         : null,
     details,
     preservePaidStatus: true,
+  });
+
+  console.log("[PAYPAL_CHECKOUT_EVENT] Actualización completada:", {
+    persisted,
+    orderID: trackingContext.orderID,
   });
 
   return res.status(persisted ? 200 : 202).json({ ok: true, persisted });

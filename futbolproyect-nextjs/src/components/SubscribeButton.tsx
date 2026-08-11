@@ -107,6 +107,7 @@ function SubscribeButton({
     setError("");
     setInfo("");
     try {
+      console.log("[PAYPAL_CREATE_ORDER] Iniciando creación de orden...");
       const response = await apiClient.post("/payments/create-paypal-order", {
         planType,
         billingCycle,
@@ -114,8 +115,20 @@ function SubscribeButton({
       const orderID = String(response.data.orderID || "");
       const trackingToken = String(response.data.trackingToken || "");
       lastPayPalOrderId.current = orderID;
+      
+      console.log("[PAYPAL_CREATE_ORDER] Orden creada exitosamente:", {
+        orderID,
+        hasTrackingToken: !!trackingToken,
+        timestamp: new Date().toISOString(),
+      });
+      
       if (orderID && trackingToken) {
         trackingTokens.current[orderID] = trackingToken;
+      } else {
+        console.warn("[PAYPAL_CREATE_ORDER] Datos incompletos:", {
+          orderID,
+          trackingToken: trackingToken ? "presente" : "FALTANTE",
+        });
       }
       return orderID;
     } catch (error: any) {
@@ -127,7 +140,12 @@ function SubscribeButton({
           ),
         );
       } else {
-        console.error("Error creating PayPal order:", error);
+        console.error("[PAYPAL_CREATE_ORDER_ERROR]", {
+          status: error.response?.status,
+          message: error.response?.data?.message,
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
         setError(
           error.response?.data?.message ||
             t(
@@ -149,26 +167,39 @@ function SubscribeButton({
         "Pago aprobado. Estamos confirmando la operación...",
       ),
     );
+    
+    console.log("[PAYPAL_APPROVE] Pago aprobado por usuario:", {
+      orderID: data.orderID,
+      timestamp: new Date().toISOString(),
+    });
+    
     await reportPayPalEvent("APPROVED", data.orderID);
 
     try {
-      await apiClient.post("/payments/capture-paypal-order", {
+      console.log("[PAYPAL_CAPTURE] Iniciando captura de orden...");
+      const captureResponse = await apiClient.post("/payments/capture-paypal-order", {
         orderID: data.orderID,
         planType,
         billingCycle,
       });
+      console.log("[PAYPAL_CAPTURE] Orden capturada exitosamente");
       router.push("/payment/success/paypal"); // Use router.push
     } catch (captureError: any) {
       const httpStatus = Number(captureError?.response?.status) || undefined;
       const errorMessage = String(
         captureError?.response?.data?.message || captureError?.message || "",
       );
+      console.error("[PAYPAL_CAPTURE_ERROR]", {
+        status: httpStatus,
+        message: errorMessage,
+        orderID: data.orderID,
+        timestamp: new Date().toISOString(),
+      });
       await reportPayPalEvent("CLIENT_CAPTURE_ERROR", data.orderID, {
         httpStatus,
         errorName: httpStatus ? `HTTP_${httpStatus}` : "CAPTURE_REQUEST_ERROR",
         errorMessage,
       });
-      console.error("Error capturing PayPal order:", captureError);
       setInfo("");
       setError(
         httpStatus === 401
@@ -188,6 +219,14 @@ function SubscribeButton({
 
   const onCancel = (data: Record<string, unknown>) => {
     const orderID = String(data.orderID || lastPayPalOrderId.current || "");
+    // ⚠️ LOG DETALLADO PARA DIAGNOSTICAR CANCELACIONES
+    console.warn("[PAYPAL_CANCEL_EVENT] Datos recibidos:", {
+      data,
+      orderID,
+      fundingSource: data.fundingSource,
+      timestamp: new Date().toISOString(),
+      pageVisibilityState: typeof document !== 'undefined' ? document.visibilityState : 'unknown',
+    });
     void reportPayPalEvent("CANCELLED", orderID, {
       fundingSource: String(data.fundingSource || ""),
     });
@@ -203,6 +242,14 @@ function SubscribeButton({
   const onError = (paypalError: Record<string, unknown>) => {
     const orderID = lastPayPalOrderId.current;
     const errorMessage = String(paypalError.message || "PayPal SDK error");
+    // ⚠️ LOG DETALLADO PARA DIAGNOSTICAR ERRORES DEL SDK
+    console.error("[PAYPAL_SDK_ERROR] Error completo:", {
+      paypalError,
+      orderID,
+      errorName: paypalError.name,
+      errorMessage,
+      timestamp: new Date().toISOString(),
+    });
     void reportPayPalEvent("SDK_ERROR", orderID, {
       errorName: String(paypalError.name || "SDK_ERROR"),
       errorMessage,

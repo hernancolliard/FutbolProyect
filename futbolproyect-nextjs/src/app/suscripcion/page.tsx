@@ -127,6 +127,13 @@ export default function SubscriptionPage() {
         clientId:
           process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "YOUR_PAYPAL_CLIENT_ID",
         currency: "USD",
+        intent: "capture",
+        // Usar 'defer' para mejor inicialización
+        dataAttributes: {
+          "data-defer": "true",
+        },
+        // Opciones adicionales para mejor compatibilidad
+        components: "buttons",
       }}
     >
       <Box sx={{ minHeight: "100vh", bgcolor: "#f7f9fc", pb: { xs: 7, md: 10 } }}>
