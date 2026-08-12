@@ -183,6 +183,9 @@ function SubscribeButton({
         billingCycle,
       });
       console.log("[PAYPAL_CAPTURE] Orden capturada exitosamente");
+      // Pequeño delay para permitir que el SDK de PayPal finalice su procesamiento
+      // antes de cerrar/redirigir la ventana (evita "Window is closed" error)
+      await new Promise(resolve => setTimeout(resolve, 300));
       router.push("/payment/success/paypal"); // Use router.push
     } catch (captureError: any) {
       const httpStatus = Number(captureError?.response?.status) || undefined;

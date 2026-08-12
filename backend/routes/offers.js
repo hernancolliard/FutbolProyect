@@ -310,6 +310,12 @@ router.get(
 router.get("/public/:id", verificarTokenOpcional, async (req, res) => {
   const { id } = req.params;
 
+  // Validar que id sea un número válido
+  const offerId = parseInt(id, 10);
+  if (isNaN(offerId) || offerId <= 0) {
+    return res.status(400).json({ message: "ID de oferta inválido." });
+  }
+
   try {
     const result = await db.query(
       `
@@ -326,7 +332,7 @@ router.get("/public/:id", verificarTokenOpcional, async (req, res) => {
       JOIN usuarios u ON o.id_usuario_ofertante = u.id
       WHERE o.id = @id AND o.estado = 'abierta'
       `,
-      { id },
+      { id: offerId },
     );
 
     if (result.rows.length === 0) {
