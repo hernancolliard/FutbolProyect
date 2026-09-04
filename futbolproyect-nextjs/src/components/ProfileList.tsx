@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { Grid, Typography, Button, Box } from '@mui/material';
+import { getProfilePath } from '@/lib/seoSlugs';
 
 const ProfileList = ({ profiles }) => {
   const { t } = useTranslation('common'); // 'common' namespace for translation
@@ -18,7 +19,7 @@ const ProfileList = ({ profiles }) => {
       {profiles.map((profile) => (
         <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
           <Box className="profile-card" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
-            <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link href={getProfilePath(profile)} style={{ textDecoration: 'none', color: 'inherit' }}>
               <Image
                 src={profile.foto_perfil_url || '/images/logos/logofp.png'}
                 alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
@@ -33,7 +34,7 @@ const ProfileList = ({ profiles }) => {
             </Link>
             <Button
               component={Link}
-              href={`/profile/${profile.id}`}
+              href={getProfilePath(profile)}
               variant="outlined"
               sx={{ mb: 1 }}
             >

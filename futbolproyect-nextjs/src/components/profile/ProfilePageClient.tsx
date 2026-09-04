@@ -30,6 +30,7 @@ import { getProfileCompletion } from "@/lib/seoSlugs";
 import { getSafeClubLogoUrl } from "@/lib/clubCrests";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 import ProfileActionGateDialog from "./ProfileActionGateDialog";
+import LazyYouTubeEmbed from "@/components/media/LazyYouTubeEmbed";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -37,13 +38,6 @@ interface ProfilePageClientProps {
 }
 
 const ANONYMOUS_VOTER_ID_KEY = "fp_anonymous_voter_id";
-
-const getYouTubeId = (url?: string | null) => {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : null;
-};
 
 const parseDateOnly = (value?: string | null) => {
   if (!value) return null;
@@ -545,13 +539,11 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     <div className="mt-4 overflow-hidden rounded-[24px] border border-slate-200 bg-slate-50">
                       {featuredVideo && featuredVideo.youtube_url ? (
                         <>
-                          <div className="aspect-video w-full bg-black">
-                            <iframe
-                              src={`https://www.youtube.com/embed/${getYouTubeId(featuredVideo.youtube_url)}`}
+                          <div className="relative aspect-video w-full bg-black">
+                            <LazyYouTubeEmbed
+                              youtubeUrl={featuredVideo.youtube_url}
+                              coverImageUrl={featuredVideo.cover_image_url}
                               title={featuredVideo.title || "Video destacado"}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              className="h-full w-full"
                             />
                           </div>
                           <div className="flex items-center justify-between p-4">

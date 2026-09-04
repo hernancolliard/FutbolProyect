@@ -266,6 +266,20 @@ const buildManagedProfileResponseSelect = () => `
     mp.nacionalidad_en,
     mp.pie_dominante_es,
     mp.pie_dominante_en,
+    mp.created_at,
+    mp.updated_at,
+    (
+      CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN mp.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN mp.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN NULLIF(TRIM(mp.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN mp.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+    ) AS completion_score,
     s.plan as subscription_plan,
     s.fecha_fin as subscription_end_date,
     CASE
@@ -335,7 +349,7 @@ router.get("/", async (req, res) => {
     }
 
     const query = `
-      SELECT *
+      SELECT profiles.*, (completion_score >= 5) AS is_indexable
       FROM (
         SELECT
           u.id::text AS id,
@@ -352,6 +366,8 @@ router.get("/", async (req, res) => {
           p.fecha_de_nacimiento,
           p.average_rating,
           p.total_ratings,
+          u.fecha_creacion AS created_at,
+          COALESCE(p.updated_at, u.fecha_creacion) AS updated_at,
           EXISTS (
             SELECT 1 FROM user_videos uv WHERE uv.user_id = u.id
           ) AS has_video,
@@ -392,6 +408,8 @@ router.get("/", async (req, res) => {
           mp.fecha_de_nacimiento,
           mp.average_rating,
           mp.total_ratings,
+          mp.created_at,
+          mp.updated_at,
           EXISTS (
             SELECT 1
             FROM managed_profile_videos mpv
@@ -1163,7 +1181,21 @@ router.get("/:userId", async (req, res) => {
       SELECT u.id, u.nombre, u.apellido, u.email, u.tipo_usuario, u.rol,
              u.profile_views,
              COALESCE(p.foto_perfil_url, '/images/logos/logofp.webp') AS foto_perfil_url, p.telefono, p.nacionalidad, p.resumen_profesional, p.cv_url, p.posicion_principal, p.linkedin_url, p.instagram_url, p.youtube_url, p.transfermarkt_url, p.whatsapp_url, p.agente_nombre, p.agente_contacto, p.altura_cm, p.peso_kg, p.pie_dominante, p.fecha_de_nacimiento, p.idiomas, p.estadisticas, p.trayectoria, p.disponibilidad,
-             p.average_rating, p.total_ratings, -- Añadir calificación al SELECT
+             p.average_rating, p.total_ratings,
+             COALESCE(p.created_at, u.fecha_creacion) AS created_at,
+             p.updated_at,
+             (
+               CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN p.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN p.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN NULLIF(TRIM(p.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+               CASE WHEN p.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+             ) AS completion_score,
              s.plan as subscription_plan,
              s.fecha_fin as subscription_end_date,
              CASE
@@ -1479,7 +1511,8 @@ router.put(
           idiomas = @idiomas,
           estadisticas = @estadisticas,
           trayectoria = @trayectoria,
-          disponibilidad = @disponibilidad
+          disponibilidad = @disponibilidad,
+          updated_at = NOW()
         RETURNING *;
       `;
 

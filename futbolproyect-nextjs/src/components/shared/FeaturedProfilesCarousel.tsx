@@ -42,6 +42,7 @@ function PrevArrow(props: any) { // Use any for props for now
 }
 
 import { Profile } from '../../lib/types';
+import { getProfilePath } from '../../lib/seoSlugs';
 
 interface FeaturedProfilesCarouselProps {
     profiles: Profile[];
@@ -97,7 +98,7 @@ function FeaturedProfilesCarousel({ profiles }: FeaturedProfilesCarouselProps) {
         {profiles.map((profile) => (
           <div key={profile.id} className="carousel-profile-card-wrapper" style={{ padding: 2 }}>
             <div className="carousel-profile-card">
-              <Link href={`/profile/${profile.id}`} className="carousel-profile-card-link">
+              <Link href={getProfilePath(profile)} className="carousel-profile-card-link">
                 <Image
                   src={profile.foto_perfil_url || '/images/logos/logofp.png'}
                   alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}

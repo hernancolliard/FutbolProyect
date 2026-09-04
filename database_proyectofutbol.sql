@@ -88,7 +88,9 @@ CREATE TABLE perfiles_usuario (
 	nacionalidad_es VARCHAR(100),
 	nacionalidad_en VARCHAR(100),
 	pie_dominante_es VARCHAR(50),
-	pie_dominante_en VARCHAR(50)
+	pie_dominante_en VARCHAR(50),
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Tabla de perfiles de jugadores gestionados por clubes, agentes o scouts

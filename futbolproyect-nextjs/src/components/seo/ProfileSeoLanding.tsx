@@ -10,7 +10,7 @@ type ProfileSeoLandingProps = {
 async function getProfiles(): Promise<Profile[]> {
   try {
     const response = await fetch(`${getApiBaseUrl()}/profiles`, {
-      cache: "no-store",
+      next: { revalidate: 600, tags: ["profiles-seo-landings"] },
     });
     if (!response.ok) return [];
     const data = await response.json();

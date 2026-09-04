@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { BadgeCheck, CalendarDays, Copy, Download, Mail, MessageCircle, Ruler, Share2, Sparkles, Weight, Footprints, Globe2 } from "lucide-react";
 import { Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
+import Image from "next/image";
 
 interface HeroPlayerProps {
   profile: Profile;
@@ -103,7 +104,14 @@ export function HeroPlayer({
                   className="group relative h-40 w-40 overflow-hidden rounded-[24px] border border-white/20 shadow-2xl sm:h-48 sm:w-48"
                   aria-label={t("open_player_photo")}
                 >
-                  <img src={heroImage} alt={`${profile.nombre} ${profile.apellido}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                  <Image
+                    src={heroImage}
+                    alt={`${profile.nombre} ${profile.apellido}`}
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 160px, 192px"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition group-hover:opacity-100">
                     <span className="rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-[#071C3C]">{t("view_photo")}</span>
                   </div>

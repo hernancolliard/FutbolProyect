@@ -4,13 +4,13 @@ import React from "react";
 import {
   Card,
   CardActionArea,
-  CardMedia,
   CardContent,
   Typography,
   CardActions,
   IconButton,
   Box, // <--- ¡AQUÍ ESTABA EL FALTANTE!
 } from "@mui/material";
+import Image from "next/image";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -63,6 +63,15 @@ const VideoCard = ({
     );
   }
 
+  const youtubeId = String(video.youtube_url || "").match(
+    /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/,
+  )?.[1];
+  const imageUrl =
+    video.cover_image_url ||
+    (youtubeId?.length === 11
+      ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
+      : "/images/logos/logofp.webp");
+
   return (
     <Card
       sx={{
@@ -77,12 +86,15 @@ const VideoCard = ({
         onClick={() => onPlay(video)}
         sx={{ flexGrow: 1, position: "relative" }}
       >
-        <CardMedia
-          component="img"
-          image={video.cover_image_url}
-          alt={video.title}
-          sx={{ objectFit: "contain", height: 120 }}
-        />
+        <Box sx={{ position: "relative", height: 120, bgcolor: "#071c3c" }}>
+          <Image
+            src={imageUrl}
+            alt={video.title}
+            fill
+            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+            style={{ objectFit: "cover" }}
+          />
+        </Box>
         <Box
           sx={{
             position: "absolute",

@@ -70,7 +70,7 @@ async function getHomeData(): Promise<{
       fetch(`${apiBaseUrl}/profiles/featured`, {
         next: { revalidate: 300 },
       }),
-      fetch(`${apiBaseUrl}/profiles/featured-videos?limit=30`, {
+      fetch(`${apiBaseUrl}/profiles/featured-videos?limit=12`, {
         next: { revalidate: 300 },
       }),
     ]);

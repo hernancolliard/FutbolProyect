@@ -9,6 +9,7 @@ import { Select, MenuItem, FormControl, InputLabel, Button, Grid, Typography, Bo
 import LoadingSpinner from '@/components/LoadingSpinner'; // Corrected path
 import apiClient from '@/lib/apiClient'; // Corrected path
 import { PLAYER_POSITION_OPTIONS } from '@/lib/profilePositions';
+import { getProfilePath } from '@/lib/seoSlugs';
 
 const fetchFeaturedProfiles = async (filters: { nacionalidad: string; puesto: string; }) => {
 
@@ -161,7 +162,7 @@ export default function FeaturedProfilesClient() {
                     color: 'black',
                   }}
                 >
-                  <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Link href={getProfilePath(profile)} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <Image
                       src={profile.foto_perfil_url || '/images/logos/logofp.png'}
                       alt={t("profile_image_alt", { name: `${profile.nombre} ${profile.apellido || ''}`.trim() })}
@@ -183,7 +184,7 @@ export default function FeaturedProfilesClient() {
                   </Link>
                   <Button
                     component={Link}
-                    href={`/profile/${profile.id}`}
+                    href={getProfilePath(profile)}
                     variant="outlined"
                     sx={{
                       mb: 1,

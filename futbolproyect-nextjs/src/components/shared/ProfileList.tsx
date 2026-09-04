@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Grid, Typography, Button, Box } from '@mui/material'; // Using Material UI components
 
 import { Profile } from '@/lib/types';
+import { getProfilePath } from '@/lib/seoSlugs';
 
 interface ProfileListProps {
     profiles: Profile[];
@@ -25,7 +26,7 @@ const ProfileList = ({ profiles }: ProfileListProps) => {
         return (
         <Grid item key={profile.id} xs={12} sm={6} md={4} lg={3}>
           <Box className="profile-card" sx={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', textAlign: 'center' }}>
-            <Link href={`/profile/${profile.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link href={getProfilePath(profile)} style={{ textDecoration: 'none', color: 'inherit' }}>
               <Image
                 src={profile.foto_perfil_url || 'images/logos/logofp.png'}
                 alt={`Perfil de ${profile.nombre} ${profile.apellido || ''}`}
@@ -40,7 +41,7 @@ const ProfileList = ({ profiles }: ProfileListProps) => {
             </Link>
             <Button
               component={Link}
-              href={`/profile/${profile.id}`} // Use href for next/link
+              href={getProfilePath(profile)}
               variant="outlined"
               sx={{ mb: 1 }}
             >

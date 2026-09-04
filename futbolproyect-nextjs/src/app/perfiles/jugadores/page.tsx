@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ProfileSeoLanding from "@/components/seo/ProfileSeoLanding";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
 export const metadata: Metadata = {
   title: { absolute: "Perfiles de jugadores de fútbol | FutbolProyect" },
   description:

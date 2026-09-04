@@ -12,6 +12,8 @@ type PageProps = {
 };
 
 const BASE_URL = "https://www.futbolproyect.com";
+const toArgentinaDateTime = (date: string) =>
+  date.includes("T") ? date : `${date}T09:00:00-03:00`;
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
@@ -32,7 +34,10 @@ export function generateMetadata({ params }: PageProps): Metadata {
       url: canonical,
       title: post.seoTitle,
       description: post.seoDescription,
-      publishedTime: post.date,
+      publishedTime: toArgentinaDateTime(post.date),
+      modifiedTime: post.modifiedDate
+        ? toArgentinaDateTime(post.modifiedDate)
+        : undefined,
       authors: [post.author],
       section: post.category,
       images: [{ url: post.image, alt: post.imageAlt }],
@@ -58,15 +63,20 @@ export default function BlogPostPage({ params }: PageProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": `${articleUrl}#article`,
+    url: articleUrl,
     headline: post.title,
     description: post.seoDescription,
     image: [`${BASE_URL}${post.image}`],
-    datePublished: post.date,
-    dateModified: post.date,
+    datePublished: toArgentinaDateTime(post.date),
+    dateModified: post.modifiedDate
+      ? toArgentinaDateTime(post.modifiedDate)
+      : undefined,
+    inLanguage: "es",
     author: {
       "@type": "Organization",
       name: post.author,
-      url: BASE_URL,
+      url: post.authorUrl || BASE_URL,
     },
     publisher: {
       "@type": "Organization",

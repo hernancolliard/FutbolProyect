@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import apiClient from "@/lib/apiClient";
 import { Profile } from "@/lib/types";
 import EditProfileModal from "./EditProfileModal";
+import { getProfilePath } from "@/lib/seoSlugs";
 
 const emptyManagedProfile: Profile = {
   id: "",
@@ -215,7 +216,7 @@ export default function ManagedPlayerProfilesSection() {
                         <Button
                           size="small"
                           component={Link}
-                          href={`/profile/${profile.id}`}
+                          href={getProfilePath(profile)}
                           startIcon={<OpenInNewIcon />}
                         >
                           {t("view_profile", "Ver Perfil")}

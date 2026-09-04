@@ -95,6 +95,11 @@ const nextConfig = {
         hostname: "futbolproyect-imagenes.s3.us-east-1.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        pathname: "/vi/**",
+      },
     ],
   },
 };

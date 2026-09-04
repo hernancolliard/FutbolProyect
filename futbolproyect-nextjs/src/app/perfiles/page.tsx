@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 import { Profile } from "@/lib/types";
 import FilterControls from "@/components/profile/FilterControls";
 import { getApiBaseUrl } from "@/lib/api";
@@ -16,8 +16,8 @@ async function fetchInitialData(): Promise<{
 }> {
   try {
     const [profilesRes, nacRes] = await Promise.all([
-      fetch(`${API_URL}/profiles`, { cache: "no-store" }),
-      fetch(`${API_URL}/profiles/nacionalidades`, { cache: "no-store" }),
+      fetch(`${API_URL}/profiles`, { next: { revalidate } }),
+      fetch(`${API_URL}/profiles/nacionalidades`, { next: { revalidate } }),
     ]);
 
     return {

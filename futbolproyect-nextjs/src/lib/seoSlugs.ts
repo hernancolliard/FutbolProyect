@@ -58,3 +58,11 @@ export const getProfileCompletion = (profile: Profile) => {
   const completed = fields.filter(Boolean).length;
   return Math.round((completed / fields.length) * 100);
 };
+
+export const isProfileIndexable = (profile: Profile) => {
+  if (typeof profile.is_indexable === "boolean") return profile.is_indexable;
+  if (profile.completion_score !== undefined) {
+    return Number(profile.completion_score) >= 5;
+  }
+  return getProfileCompletion(profile) >= 50;
+};

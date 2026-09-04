@@ -12,6 +12,7 @@ const routes = [
   })),
   { path: "/all-offers", priority: "0.9", changeFrequency: "daily" },
   { path: "/perfiles", priority: "0.9", changeFrequency: "daily" },
+  { path: "/jugadores", priority: "0.9", changeFrequency: "daily" },
   {
     path: "/ofertas-trabajo-futbol",
     priority: "0.8",

@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -25,6 +26,8 @@ import ProfileFiltersSidebar, {
   ProfileFilters,
 } from "@/components/profile/ProfileFiltersSidebar";
 import { getPlayerPositionCategory } from "@/lib/profilePositions";
+import { getPlayersCategoryPath } from "@/lib/profileSeoTaxonomy";
+import { isProfileIndexable } from "@/lib/seoSlugs";
 import { useTranslation } from "react-i18next";
 
 interface FilterControlsProps {
@@ -149,6 +152,7 @@ export default function FilterControls({
   initialProfiles,
 }: FilterControlsProps) {
   const { t } = useTranslation("common");
+  const router = useRouter();
   const agesInProfiles = useMemo(
     () =>
       initialProfiles
@@ -184,10 +188,18 @@ export default function FilterControls({
   }, [ageBounds, isAgeFilterActive]);
 
   const applyFilters = useCallback(() => {
+    const categoryPath = getPlayersCategoryPath(
+      draftFilters.puesto,
+      draftFilters.nacionalidad,
+    );
+    if (categoryPath) {
+      router.push(categoryPath);
+      return;
+    }
     setAppliedFilters(draftFilters);
     setAppliedAgeRange(draftAgeRange);
     setShowMobileFilters(false);
-  }, [draftAgeRange, draftFilters]);
+  }, [draftAgeRange, draftFilters, router]);
 
   const clearFilters = useCallback(() => {
     setDraftFilters(emptyFilters);
@@ -266,6 +278,24 @@ export default function FilterControls({
     ];
   }, [initialProfiles, nacionalidades.length, t]);
 
+  const categoryLinks = useMemo(() => {
+    const categories = new Map<string, { label: string; count: number }>();
+    initialProfiles.filter(isProfileIndexable).forEach((profile) => {
+      const path = getPlayersCategoryPath(
+        profile.posicion_principal,
+        profile.nacionalidad,
+      );
+      if (!path) return;
+      const label = `${getPlayerPositionCategory(profile.posicion_principal)} · ${profile.nacionalidad}`;
+      const current = categories.get(path);
+      categories.set(path, { label, count: (current?.count || 0) + 1 });
+    });
+    return [...categories.entries()]
+      .filter(([, category]) => category.count >= 3)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 12);
+  }, [initialProfiles]);
+
   const filtersSidebar = (
     <ProfileFiltersSidebar
       filters={draftFilters}
@@ -321,6 +351,23 @@ export default function FilterControls({
               {t("publish_offer")}
             </Button>
           </Stack>
+          {categoryLinks.length > 0 && (
+            <Box sx={{ mt: 2 }}>
+              <Typography sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}>
+                {t("explore_players_by_position_country", "Explorar jugadores por posición y país")}
+              </Typography>
+              <Stack direction="row" useFlexGap flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
+                {categoryLinks.map(([path, category]) => (
+                  <Button key={path} component={Link} href={path} size="small" variant="outlined">
+                    {category.label} ({category.count})
+                  </Button>
+                ))}
+                <Button component={Link} href="/jugadores" size="small">
+                  {t("view_all_categories", "Ver todas")}
+                </Button>
+              </Stack>
+            </Box>
+          )}
         </Box>
 
         <AdBanner placement="profiles_top" />

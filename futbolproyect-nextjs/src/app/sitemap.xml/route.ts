@@ -10,6 +10,9 @@ export async function GET() {
   <sitemap>
     <loc>https://www.futbolproyect.com/sitemap-ofertas.xml</loc>
   </sitemap>
+  <sitemap>
+    <loc>https://www.futbolproyect.com/sitemap-jugadores.xml</loc>
+  </sitemap>
 </sitemapindex>`;
 
   return new Response(xml, {

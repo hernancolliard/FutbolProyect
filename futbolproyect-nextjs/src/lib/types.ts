@@ -41,6 +41,10 @@ export interface Profile {
   fecha_de_nacimiento: string;
   has_video?: boolean;
   has_photos?: boolean;
+  completion_score?: number;
+  is_indexable?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Video {

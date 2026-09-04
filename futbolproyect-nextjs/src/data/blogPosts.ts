@@ -11,9 +11,11 @@ export type BlogPost = {
   description: string;
   category: string;
   date: string;
+  modifiedDate?: string;
   image: string;
   imageAlt: string;
   author: string;
+  authorUrl?: string;
   content: BlogSection[];
   seoTitle: string;
   seoDescription: string;

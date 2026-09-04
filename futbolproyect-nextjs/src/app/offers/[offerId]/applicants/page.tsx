@@ -25,6 +25,7 @@ import {
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useAuth } from "@/context/AuthContext";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
+import { getProfilePath } from "@/lib/seoSlugs";
 
 type Applicant = {
   id: number;
@@ -222,7 +223,12 @@ export default function ApplicantsPage() {
                     <Stack direction="row" spacing={1}>
                       <Button
                         component={Link}
-                        href={`/profile/${applicant.id_usuario}`}
+                        href={getProfilePath({
+                          id: String(applicant.id_usuario),
+                          nombre: applicant.nombre,
+                          apellido: applicant.apellido || "",
+                          posicion_principal: applicant.posicion_principal || "",
+                        })}
                         variant="outlined"
                         size="small"
                       >

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import {
   Avatar,
   Box,
@@ -32,7 +33,7 @@ const getCoverUrl = (video: FeaturedVideo) => {
   if (video.cover_image_url) return video.cover_image_url;
   const videoId = getYouTubeId(video.youtube_url);
   return videoId
-    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     : "/images/logos/logofp.webp";
 };
 
@@ -72,7 +73,7 @@ export default function FeaturedVideos({ videos }: Props) {
       setIsLoading(true);
       try {
         const response = await publicApi.get<FeaturedVideo[]>(
-          "/profiles/featured-videos?limit=30",
+          "/profiles/featured-videos?limit=12",
           { signal: controller.signal },
         );
         setDisplayedVideos(Array.isArray(response.data) ? response.data : []);
@@ -219,11 +220,23 @@ export default function FeaturedVideos({ videos }: Props) {
                     position: "relative",
                     aspectRatio: "16 / 9",
                     bgcolor: "#071c3c",
-                    backgroundImage: `linear-gradient(rgba(3, 16, 38, .08), rgba(3, 16, 38, .32)), url(${JSON.stringify(coverUrl)})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    overflow: "hidden",
                   }}
                 >
+                  <Image
+                    src={coverUrl}
+                    alt={`Miniatura de ${title}`}
+                    fill
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "linear-gradient(rgba(3, 16, 38, .08), rgba(3, 16, 38, .32))",
+                    }}
+                  />
                   <Box
                     sx={{
                       position: "absolute",
