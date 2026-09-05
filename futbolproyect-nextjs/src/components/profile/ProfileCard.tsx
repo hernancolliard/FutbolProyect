@@ -49,7 +49,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
       sx={{
         overflow: "hidden",
         height: "100%",
-        minHeight: 420,
+        minHeight: { xs: 330, sm: 420 },
         display: "flex",
         flexDirection: "column",
         bgcolor: "#fff",
@@ -81,7 +81,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
         sx={{
           position: "relative",
           display: "block",
-          height: 210,
+          height: { xs: 135, sm: 210 },
           bgcolor: "#eaf0f7",
           overflow: "hidden",
           textDecoration: "none",
@@ -117,8 +117,8 @@ function ProfileCard({ profile }: ProfileCardProps) {
             size="small"
             sx={{
               position: "absolute",
-              top: 12,
-              left: 12,
+            top: { xs: 8, sm: 12 },
+            left: { xs: 8, sm: 12 },
               color: "#fff",
               bgcolor: "rgba(7, 34, 72, .88)",
               fontWeight: 800,
@@ -132,8 +132,8 @@ function ProfileCard({ profile }: ProfileCardProps) {
             size="small"
             sx={{
               position: "absolute",
-              right: 12,
-              bottom: 12,
+            right: { xs: 8, sm: 12 },
+            bottom: { xs: 8, sm: 12 },
               color: "#fff",
               bgcolor: "rgba(7, 34, 72, .82)",
               fontWeight: 800,
@@ -142,13 +142,13 @@ function ProfileCard({ profile }: ProfileCardProps) {
         )}
       </Box>
 
-      <Stack sx={{ p: 2.25, flexGrow: 1 }}>
+      <Stack sx={{ p: { xs: 1.25, sm: 2.25 }, flexGrow: 1 }}>
         <Typography
           component={Link}
           href={getProfilePath(profile)}
           sx={{
             color: "#09172d",
-            fontSize: "1.08rem",
+            fontSize: { xs: ".92rem", sm: "1.08rem" },
             lineHeight: 1.25,
             fontWeight: 900,
             textDecoration: "none",
@@ -162,15 +162,15 @@ function ProfileCard({ profile }: ProfileCardProps) {
         </Typography>
 
         <Stack spacing={0.65} sx={{ mt: 1.25 }}>
-          <Stack direction="row" spacing={0.8} alignItems="center">
-            <SportsSoccerOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
-            <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
+          <Stack direction="row" spacing={0.55} alignItems="center">
+            <SportsSoccerOutlinedIcon sx={{ fontSize: { xs: 15, sm: 17 }, color: "#3269b3" }} />
+            <Typography variant="body2" sx={{ color: "#56657b", fontSize: { xs: ".78rem", sm: ".875rem" } }} noWrap>
               {profile.posicion_principal || t("position_not_specified")}
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={0.8} alignItems="center">
-            <PlaceOutlinedIcon sx={{ fontSize: 17, color: "#3269b3" }} />
-            <Typography variant="body2" sx={{ color: "#56657b" }} noWrap>
+          <Stack direction="row" spacing={0.55} alignItems="center">
+            <PlaceOutlinedIcon sx={{ fontSize: { xs: 15, sm: 17 }, color: "#3269b3" }} />
+            <Typography variant="body2" sx={{ color: "#56657b", fontSize: { xs: ".78rem", sm: ".875rem" } }} noWrap>
               {profile.nacionalidad || t("nationality_not_specified")}
             </Typography>
           </Stack>
@@ -183,7 +183,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
               mt: 1.3,
               color: "#445269",
               lineHeight: 1.5,
-              display: "-webkit-box",
+              display: { xs: "none", sm: "-webkit-box" },
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
@@ -194,7 +194,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
         )}
 
         {Number(profile.average_rating) > 0 && (
-          <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 1.3 }}>
+          <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 1.3, display: { xs: "none", sm: "flex" } }}>
             <Rating
               size="small"
               value={Number(profile.average_rating)}
@@ -207,7 +207,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
           </Stack>
         )}
 
-        <Box sx={{ mt: "auto", pt: 2 }}>
+        <Box sx={{ mt: "auto", pt: { xs: 1.25, sm: 2 } }}>
           <Button
             component={Link}
             href={getProfilePath(profile)}
@@ -218,6 +218,8 @@ function ProfileCard({ profile }: ProfileCardProps) {
               borderColor: "#1262db",
               color: "#1262db",
               fontWeight: 900,
+              minHeight: { xs: 40, sm: 32 },
+              width: { xs: "100%", sm: "auto" },
               "&:hover": { bgcolor: "#edf5ff", borderColor: "#0d4faf" },
             }}
           >

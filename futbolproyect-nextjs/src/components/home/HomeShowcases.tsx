@@ -238,11 +238,13 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               <Box
                 component={Link}
                 href={getProfilePath(profile)}
-                sx={{ 
-                  display: "block", 
+                sx={{
+                  display: "block",
                   height: { xs: 180, sm: 160, md: 135 },
-                  bgcolor: "#eaf0f7",
-                  aspectRatio: "220 / 150"
+                  p: { xs: 1, sm: 0.75, md: 0 },
+                  bgcolor: "#eef3fa",
+                  aspectRatio: "220 / 150",
+                  boxSizing: "border-box",
                 }}
               >
                 <Image
@@ -258,9 +260,13 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                     width: "100%",
                     height: "100%",
                     objectFit: profile.foto_perfil_url ? "cover" : "contain",
-                    objectPosition: "center top",
+                    objectPosition: "center center",
                     padding: profile.foto_perfil_url ? 0 : 38,
                     opacity: profile.foto_perfil_url ? 1 : 0.25,
+                    boxSizing: "border-box",
+                    border: "2px solid rgba(18, 98, 219, .18)",
+                    borderRadius: "12px",
+                    boxShadow: "0 6px 16px rgba(8, 34, 70, .12)",
                   }}
                 />
               </Box>
