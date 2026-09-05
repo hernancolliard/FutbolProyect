@@ -44,12 +44,12 @@ export default function Hero({ metrics }: HeroProps) {
       aria-describedby="home-hero-description"
       sx={{
         position: "relative",
-        minHeight: { xs: 650, md: 570 },
+        minHeight: { xs: 600, sm: 630, md: 570 },
         display: "flex",
         alignItems: "center",
         overflow: "visible",
         color: "#fff",
-        pb: { xs: 16, md: 8 },
+        pb: { xs: 6, md: 8 },
         bgcolor: "#06142c",
         "& > img": {
           objectPosition: { xs: "62% center", md: "center" },
@@ -75,14 +75,14 @@ export default function Hero({ metrics }: HeroProps) {
             "linear-gradient(90deg, rgba(2, 11, 28, .96) 0%, rgba(2, 17, 39, .7) 42%, rgba(2, 17, 39, .12) 72%)",
         }}
       />
-      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
-        <Box sx={{ maxWidth: { xs: "100%", md: 580 }, position: "relative", zIndex: 1 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4.5, sm: 6, md: 8 } }}>
+        <Box sx={{ maxWidth: { xs: "100%", md: 650 }, position: "relative", zIndex: 1 }}>
           <Typography
             id="home-hero-title"
             component="h1"
             sx={{
               color: "#fff",
-              fontSize: { xs: "2.65rem", sm: "3.4rem", md: "4.2rem" },
+              fontSize: { xs: "2.3rem", sm: "3.4rem", md: "4.2rem" },
               lineHeight: 0.98,
               letterSpacing: "-0.05em",
               fontWeight: 900,

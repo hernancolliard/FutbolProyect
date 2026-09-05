@@ -99,28 +99,28 @@ export default function HomePageClient({
         <Container
           maxWidth="lg"
           sx={{
-            pt: { xs: 13, md: 11 },
+            pt: { xs: 6, md: 8 },
             pb: { xs: 7, md: 9 },
           }}
         >
-          <Stack spacing={{ xs: 5, md: 6 }}>
-            {seoOverview}
-
-            <HomeRoleGrid />
-
-            <AdBanner placement="home_middle" />
-
+          <Stack spacing={{ xs: 4.5, md: 6 }}>
             <HomeOffersShowcase offers={offersData.offers} />
 
             <HomeProfilesShowcase profiles={featuredProfiles} />
 
             <HowItWorks />
 
+            <HomeRoleGrid />
+
             <FeaturedVideos videos={featuredVideos} />
 
             <HomeTrustSignals />
 
             <HomeAudienceSpotlight />
+
+            {seoOverview}
+
+            <AdBanner placement="home_middle" />
 
             <Paper
               elevation={0}

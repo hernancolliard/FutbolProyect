@@ -71,7 +71,7 @@ export default function HomeTrustSignals() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+          gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, 1fr)" },
           gap: 1.5,
         }}
       >
@@ -79,13 +79,13 @@ export default function HomeTrustSignals() {
           <Paper
             key={item.titleKey}
             elevation={0}
-            sx={{ p: 2.2, textAlign: "center", border: "1px solid #dfe6ef", borderRadius: 2.3 }}
+            sx={{ p: { xs: 1.5, sm: 2.2 }, textAlign: "center", border: "1px solid #dfe6ef", borderRadius: 2.3 }}
           >
             <Box sx={{ color: "#1262db", "& svg": { fontSize: 30 } }}>{item.icon}</Box>
             <Typography sx={{ mt: 0.8, color: "#0a1930", fontWeight: 900 }}>
               {t(item.titleKey)}
             </Typography>
-            <Typography variant="caption" sx={{ mt: 0.6, color: "#65738a", lineHeight: 1.5, display: "block" }}>
+            <Typography variant="caption" sx={{ mt: 0.6, color: "#65738a", fontSize: { xs: ".78rem", sm: ".75rem" }, lineHeight: 1.45, display: "block" }}>
               {t(item.textKey)}
             </Typography>
           </Paper>
@@ -98,12 +98,12 @@ export default function HomeTrustSignals() {
           pt: 3.5,
           borderTop: "1px solid #e2e8f0",
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1.25fr repeat(4, 1fr)" },
+          gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "1.25fr repeat(4, 1fr)" },
           gap: 2.5,
           alignItems: "center",
         }}
       >
-        <Box>
+        <Box sx={{ gridColumn: { xs: "1 / -1", md: "auto" } }}>
           <Typography sx={{ color: "#0a1930", fontSize: "1.2rem", fontWeight: 900 }}>
             {t("home_network_title")}
           </Typography>

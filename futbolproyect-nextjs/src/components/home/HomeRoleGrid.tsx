@@ -61,20 +61,21 @@ export default function HomeRoleGrid() {
         sx={{
           display: "grid",
           gridTemplateColumns: {
-            xs: "1fr",
+            xs: "repeat(2, minmax(0, 1fr))",
             sm: "repeat(2, 1fr)",
             md: "repeat(5, 1fr)",
           },
           gap: 1.5,
         }}
       >
-        {roles.map((role) => (
+        {roles.map((role, index) => (
           <Paper
             key={role.titleKey}
             elevation={0}
             sx={{
-              p: 2.2,
-              minHeight: 185,
+              p: { xs: 1.4, sm: 2.2 },
+              minHeight: { xs: 155, sm: 185 },
+              gridColumn: { xs: index === roles.length - 1 ? "1 / -1" : "auto", sm: "auto" },
               border: "1px solid #e0e7f0",
               borderRadius: 2.5,
               textAlign: "center",
@@ -88,14 +89,14 @@ export default function HomeRoleGrid() {
             <Stack alignItems="center" spacing={1.2}>
               <Box
                 sx={{
-                  width: 52,
-                  height: 52,
+                  width: { xs: 44, sm: 52 },
+                  height: { xs: 44, sm: 52 },
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
                   bgcolor: "#edf5ff",
                   color: "#1262db",
-                  "& svg": { fontSize: 29 },
+                  "& svg": { fontSize: { xs: 25, sm: 29 } },
                 }}
               >
                 {role.icon}
@@ -103,7 +104,7 @@ export default function HomeRoleGrid() {
               <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
                 {t(role.titleKey)}
               </Typography>
-              <Typography variant="caption" sx={{ color: "#647188", lineHeight: 1.5 }}>
+              <Typography variant="caption" sx={{ color: "#647188", fontSize: { xs: ".78rem", sm: ".75rem" }, lineHeight: 1.45 }}>
                 {t(role.textKey)}
               </Typography>
             </Stack>

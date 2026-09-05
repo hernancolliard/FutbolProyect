@@ -38,7 +38,7 @@ export default function HowItWorks() {
     <Box
       component="section"
       sx={{
-        p: { xs: 2.5, md: 3.5 },
+        p: { xs: 2, md: 3.5 },
         color: "#fff",
         borderRadius: 2.5,
         background: "linear-gradient(115deg, #061831, #0a3269)",
@@ -54,10 +54,10 @@ export default function HowItWorks() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "repeat(7, auto)" },
+          gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(7, auto)" },
           alignItems: "center",
           justifyContent: "space-between",
-          gap: { xs: 2, md: 1.2 },
+          gap: { xs: 2.5, md: 1.2 },
         }}
       >
         {steps.map((step, index) => (
@@ -65,14 +65,14 @@ export default function HowItWorks() {
             <Stack alignItems="center" sx={{ maxWidth: 210, mx: "auto", textAlign: "center" }}>
               <Box
                 sx={{
-                  width: 62,
-                  height: 62,
+                  width: { xs: 52, md: 62 },
+                  height: { xs: 52, md: 62 },
                   display: "grid",
                   placeItems: "center",
                   borderRadius: "50%",
                   border: "1px solid rgba(78, 151, 255, .7)",
                   color: "#62a8ff",
-                  "& svg": { fontSize: 31 },
+                  "& svg": { fontSize: { xs: 27, md: 31 } },
                 }}
               >
                 {step.icon}
@@ -96,7 +96,7 @@ export default function HowItWorks() {
                   {t(step.titleKey)}
                 </Typography>
               </Stack>
-              <Typography variant="caption" sx={{ mt: 0.7, color: "rgba(255,255,255,.65)", lineHeight: 1.45 }}>
+              <Typography variant="caption" sx={{ mt: 0.7, color: "rgba(255,255,255,.72)", fontSize: { xs: ".78rem", md: ".75rem" }, lineHeight: 1.45 }}>
                 {t(step.textKey)}
               </Typography>
             </Stack>

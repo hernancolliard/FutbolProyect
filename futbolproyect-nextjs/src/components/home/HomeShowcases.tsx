@@ -52,7 +52,7 @@ function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
         href={href}
         size="small"
         endIcon={<ArrowForwardRoundedIcon />}
-        sx={{ color: "#1262db", fontWeight: 900, whiteSpace: "nowrap" }}
+        sx={{ minHeight: 44, color: "#1262db", fontWeight: 900, whiteSpace: "nowrap" }}
       >
         {action}
       </Button>
@@ -77,23 +77,31 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
       <Box
         sx={{
           display: "grid",
+          gridAutoFlow: { xs: "column", sm: "row" },
+          gridAutoColumns: { xs: "82%", sm: "auto" },
           gridTemplateColumns: {
-            xs: "1fr",
+            xs: "none",
             sm: "repeat(2, 1fr)",
             md: "repeat(5, minmax(0, 1fr))",
           },
           gap: 1.5,
+          overflowX: { xs: "auto", sm: "visible" },
+          overscrollBehaviorX: "contain",
+          scrollSnapType: { xs: "x mandatory", sm: "none" },
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {offers.slice(0, 5).map((offer) => (
+        {offers.slice(0, 5).map((offer, index) => (
           <Paper
             key={offer.id}
             elevation={0}
             sx={{
               p: 1.7,
-              minHeight: 255,
-              display: "flex",
+              minHeight: { xs: 235, sm: 255 },
+              display: { xs: index < 3 ? "flex" : "none", sm: "flex" },
               flexDirection: "column",
+              scrollSnapAlign: "start",
               border: "1px solid #dfe6ef",
               borderRadius: 2.2,
               transition: "transform 180ms ease, box-shadow 180ms ease",
@@ -167,7 +175,7 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
               href={getOfferPath(offer)}
               variant="outlined"
               size="small"
-              sx={{ mt: "auto", alignSelf: "flex-start", fontWeight: 900 }}
+              sx={{ mt: "auto", minHeight: 44, alignSelf: "flex-start", fontWeight: 900 }}
             >
               {t("view_offer")}
             </Button>
@@ -193,15 +201,22 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
       <Box
         sx={{
           display: "grid",
+          gridAutoFlow: { xs: "column", sm: "row" },
+          gridAutoColumns: { xs: "82%", sm: "auto" },
           gridTemplateColumns: {
-            xs: "1fr",
+            xs: "none",
             sm: "repeat(2, 1fr)",
             md: "repeat(5, minmax(0, 1fr))",
           },
           gap: 1.5,
+          overflowX: { xs: "auto", sm: "visible" },
+          overscrollBehaviorX: "contain",
+          scrollSnapType: { xs: "x mandatory", sm: "none" },
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {profiles.slice(0, 5).map((profile) => {
+        {profiles.slice(0, 5).map((profile, index) => {
           const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
           return (
             <Paper
@@ -209,6 +224,8 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               elevation={0}
               sx={{
                 overflow: "hidden",
+                display: { xs: index < 3 ? "block" : "none", sm: "block" },
+                scrollSnapAlign: "start",
                 border: "1px solid #dfe6ef",
                 borderRadius: 2.2,
                 transition: "transform 180ms ease, box-shadow 180ms ease",
@@ -264,7 +281,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   variant="outlined"
                   sx={{ mt: 1, alignSelf: "flex-start", maxWidth: "100%" }}
                 />
-                <Typography variant="caption" sx={{ mt: 0.8, color: "#65738a" }} noWrap>
+                <Typography variant="caption" sx={{ mt: 0.8, color: "#65738a", fontSize: ".8rem" }} noWrap>
                   {profile.nacionalidad || t("nationality_not_specified")}
                 </Typography>
                 <Button
@@ -272,7 +289,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   href={getProfilePath(profile)}
                   size="small"
                   endIcon={<ArrowForwardRoundedIcon />}
-                  sx={{ mt: "auto", px: 0, alignSelf: "flex-start", fontWeight: 900 }}
+                  sx={{ mt: "auto", minHeight: 44, px: 0, alignSelf: "flex-start", fontWeight: 900 }}
                 >
                   {t("view_profile")}
                 </Button>
