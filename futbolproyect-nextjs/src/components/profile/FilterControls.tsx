@@ -27,7 +27,7 @@ import ProfileFiltersSidebar, {
 } from "@/components/profile/ProfileFiltersSidebar";
 import { getPlayerPositionCategory } from "@/lib/profilePositions";
 import { getPlayersCategoryPath } from "@/lib/profileSeoTaxonomy";
-import { isProfileIndexable } from "@/lib/seoSlugs";
+import { hasProfilePhoto, isProfileIndexable } from "@/lib/seoSlugs";
 import { useTranslation } from "react-i18next";
 
 interface FilterControlsProps {
@@ -244,7 +244,8 @@ export default function FilterControls({
             profileAge >= appliedAgeRange[0] &&
             profileAge <= appliedAgeRange[1]);
         const matchVideo = !appliedFilters.hasVideo || Boolean(profile.has_video);
-        const matchPhotos = !appliedFilters.hasPhotos || Boolean(profile.has_photos);
+        const matchPhotos =
+          !appliedFilters.hasPhotos || hasProfilePhoto(profile);
 
         return (
           matchName &&
@@ -267,7 +268,7 @@ export default function FilterControls({
         .filter(Boolean),
     ).size;
     const completeProfiles = initialProfiles.filter(
-      (profile) => profile.foto_perfil_url && profile.cv_url,
+      (profile) => hasProfilePhoto(profile) && profile.cv_url,
     ).length;
 
     return [

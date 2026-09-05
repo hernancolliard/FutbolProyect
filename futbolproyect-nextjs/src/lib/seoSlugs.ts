@@ -35,12 +35,13 @@ export const parseSeoId = (value: string) => {
   }
 };
 
+export const hasProfilePhoto = (profile: Pick<Profile, "foto_perfil_url">) =>
+  Boolean(profile.foto_perfil_url) &&
+  !String(profile.foto_perfil_url).includes("/images/logos/");
+
 export const getProfileCompletion = (profile: Profile) => {
-  const hasProfilePhoto =
-    Boolean(profile.foto_perfil_url) &&
-    !String(profile.foto_perfil_url).includes("/images/logos/");
   const fields = [
-    hasProfilePhoto,
+    hasProfilePhoto(profile),
     profile.telefono,
     profile.nacionalidad,
     profile.resumen_profesional,
