@@ -194,14 +194,15 @@ function ProfileCard({ profile }: ProfileCardProps) {
         )}
 
         {Number(profile.average_rating) > 0 && (
-          <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 1.3, display: { xs: "none", sm: "flex" } }}>
+          <Stack direction="row" spacing={0.45} alignItems="center" sx={{ mt: { xs: 1, sm: 1.3 } }}>
             <Rating
               size="small"
               value={Number(profile.average_rating)}
               readOnly
               precision={0.5}
+              sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
             />
-            <Typography variant="caption" sx={{ color: "#758196" }}>
+            <Typography variant="caption" sx={{ color: "#758196", fontSize: { xs: ".66rem", sm: ".75rem" } }}>
               ({profile.total_ratings || 0})
             </Typography>
           </Stack>
