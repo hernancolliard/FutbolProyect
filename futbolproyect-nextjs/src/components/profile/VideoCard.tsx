@@ -17,6 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Video } from "@/lib/types";
 import { useTranslation } from "react-i18next";
+import { getYouTubeThumbnailUrl } from "@/lib/youtube";
 
 interface VideoCardProps {
   video: Video | null;
@@ -63,14 +64,10 @@ const VideoCard = ({
     );
   }
 
-  const youtubeId = String(video.youtube_url || "").match(
-    /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/,
-  )?.[1];
   const imageUrl =
     video.cover_image_url ||
-    (youtubeId?.length === 11
-      ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
-      : "/images/logos/logofp.webp");
+    getYouTubeThumbnailUrl(video.youtube_url) ||
+    "/images/logos/logofp.webp";
 
   return (
     <Card

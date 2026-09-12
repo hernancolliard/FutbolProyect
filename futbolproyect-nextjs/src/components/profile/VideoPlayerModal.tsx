@@ -4,14 +4,7 @@ import React from 'react';
 import { Dialog, DialogContent, Box, IconButton, Typography } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { useTranslation } from 'react-i18next';
-
-// Function to extract YouTube video ID from a URL
-const getYouTubeId = (url: string | null): string | null => {
-  if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
-};
+import { getYouTubeVideoId } from '@/lib/youtube';
 
 interface VideoPlayerModalProps {
     open: boolean;
@@ -22,7 +15,7 @@ interface VideoPlayerModalProps {
 
 const VideoPlayerModal = ({ open, onClose, youtubeUrl, title }: VideoPlayerModalProps) => {
     const { t } = useTranslation();
-    const videoId = getYouTubeId(youtubeUrl);
+    const videoId = getYouTubeVideoId(youtubeUrl);
 
     return (
         <Dialog 

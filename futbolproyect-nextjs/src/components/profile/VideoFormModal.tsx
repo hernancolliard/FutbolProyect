@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Video } from '@/lib/types';
 import FileUpload from '@/components/ui/FileUpload';
 import apiClient from '@/lib/apiClient';
+import { getYouTubeVideoId } from '@/lib/youtube';
 
 interface VideoFormModalProps {
     open: boolean;
@@ -93,6 +94,12 @@ const VideoFormModal = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+
+        if (!getYouTubeVideoId(formData.youtube_url)) {
+            setError(t('invalid_youtube_url', 'Pegá un enlace válido de un video de YouTube.'));
+            return;
+        }
+
         setIsSaving(true);
 
         try {
@@ -107,7 +114,11 @@ const VideoFormModal = ({
             onSave(); // This will trigger a data refresh in the parent
             onClose();
         } catch (err: any) {
-            setError(err.message);
+            const fieldErrors = err.response?.data?.errors;
+            const firstFieldError = fieldErrors
+                ? (Object.values(fieldErrors).flat().find(Boolean) as string | undefined)
+                : undefined;
+            setError(firstFieldError || err.response?.data?.message || err.message || t('video_save_error', 'Error al guardar el video.'));
             // alert(err.message);
         } finally {
             setIsSaving(false);
@@ -128,6 +139,7 @@ const VideoFormModal = ({
                             label={t('video_title')}
                             value={formData.title}
                             onChange={handleChange}
+                            inputProps={{ minLength: 3, maxLength: 100 }}
                             fullWidth
                             required
                         />
@@ -136,6 +148,8 @@ const VideoFormModal = ({
                             label={t('youtube_link')}
                             value={formData.youtube_url}
                             onChange={handleChange}
+                            type="url"
+                            helperText={t('youtube_link_help', 'Acepta enlaces de YouTube, YouTube Shorts y youtu.be.')}
                             fullWidth
                             required
                         />
@@ -159,7 +173,8 @@ const VideoFormModal = ({
                             ))}
                         </TextField>
                         
-                        <Typography variant="subtitle2" sx={{color: 'text.secondary', pt: 1}}>{t('cover_image', 'Imagen de Portada')}</Typography>
+                        <Typography variant="subtitle2" sx={{color: 'text.secondary', pt: 1}}>{t('cover_image_optional', 'Imagen de portada (opcional)')}</Typography>
+                        <Typography variant="body2" color="text.secondary">{t('cover_image_youtube_help', 'Si no subís una imagen, usaremos automáticamente la miniatura de YouTube.')}</Typography>
                         <FileUpload 
                             onFilesChange={handleFileChange}
                             multiple={false}

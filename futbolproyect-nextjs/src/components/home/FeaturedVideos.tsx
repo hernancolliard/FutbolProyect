@@ -17,24 +17,15 @@ import { useTranslation } from "react-i18next";
 import VideoPlayerModal from "@/components/profile/VideoPlayerModal";
 import publicApi from "@/lib/publicApi";
 import type { FeaturedVideo } from "@/lib/types";
+import { getYouTubeThumbnailUrl } from "@/lib/youtube";
 
 type Props = {
   videos: FeaturedVideo[];
 };
 
-const getYouTubeId = (url: string) => {
-  const match = String(url || "").match(
-    /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/,
-  );
-  return match?.[1]?.length === 11 ? match[1] : null;
-};
-
 const getCoverUrl = (video: FeaturedVideo) => {
   if (video.cover_image_url) return video.cover_image_url;
-  const videoId = getYouTubeId(video.youtube_url);
-  return videoId
-    ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-    : "/images/logos/logofp.webp";
+  return getYouTubeThumbnailUrl(video.youtube_url) || "/images/logos/logofp.webp";
 };
 
 export default function FeaturedVideos({ videos }: Props) {

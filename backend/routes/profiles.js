@@ -14,6 +14,10 @@ const sharp = require("sharp");
 const { translateText } = require("../services/translationService");
 const fs = require("fs");
 const crypto = require("crypto");
+const {
+  getYouTubeThumbnailUrl,
+  isYouTubeThumbnailUrl,
+} = require("../youtubeVideo");
 
 const { uploadToS3 } = require("../services/s3Service");
 
@@ -1596,7 +1600,10 @@ const videoSchema = z.object({
   title: z.string().min(3).max(100),
   youtube_url: z
     .string()
-    .url({ message: "Por favor, introduce una URL de YouTube válida." }),
+    .url({ message: "Por favor, introduce una URL de YouTube válida." })
+    .refine((url) => getYouTubeThumbnailUrl(url) !== null, {
+      message: "El enlace debe corresponder a un video válido de YouTube.",
+    }),
   position: z.preprocess(
     (val) => parseInt(val, 10),
     z
@@ -1655,25 +1662,23 @@ router.post(
     const user_id = req.user.id;
     const { title, youtube_url, position } = req.body;
 
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: "La imagen de portada es obligatoria." });
-    }
-
     try {
-      const processedImageBuffer = await sharp(req.file.buffer)
-        .resize(800, 450)
-        .webp({ quality: 85 })
-        .toBuffer();
+      let coverImageUrl = getYouTubeThumbnailUrl(youtube_url);
 
-      const key = `video-covers/cover-${user_id}-${Date.now()}.webp`;
+      if (req.file) {
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .resize(800, 450)
+          .webp({ quality: 85 })
+          .toBuffer();
 
-      const coverImageUrl = await uploadToS3(
-        processedImageBuffer,
-        key,
-        "image/webp"
-      );
+        const key = `video-covers/cover-${user_id}-${Date.now()}.webp`;
+
+        coverImageUrl = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
+      }
 
       const translatedTitles = await translateText(title, ["es", "en"]);
 
@@ -1718,12 +1723,6 @@ router.post(
       return res.status(400).json({ message: "El ID de perfil no es vÃ¡lido." });
     }
 
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: "La imagen de portada es obligatoria." });
-    }
-
     try {
       const ownedProfile = await getOwnedManagedProfile(managedProfileId, req.user.id);
 
@@ -1733,17 +1732,21 @@ router.post(
         });
       }
 
-      const processedImageBuffer = await sharp(req.file.buffer)
-        .resize(800, 450)
-        .webp({ quality: 85 })
-        .toBuffer();
+      let coverImageUrl = getYouTubeThumbnailUrl(youtube_url);
 
-      const key = `managed-profile-videos/cover-${managedProfileId}-${Date.now()}.webp`;
-      const coverImageUrl = await uploadToS3(
-        processedImageBuffer,
-        key,
-        "image/webp"
-      );
+      if (req.file) {
+        const processedImageBuffer = await sharp(req.file.buffer)
+          .resize(800, 450)
+          .webp({ quality: 85 })
+          .toBuffer();
+
+        const key = `managed-profile-videos/cover-${managedProfileId}-${Date.now()}.webp`;
+        coverImageUrl = await uploadToS3(
+          processedImageBuffer,
+          key,
+          "image/webp"
+        );
+      }
 
       const translatedTitles = await translateText(title, ["es", "en"]);
 
@@ -2259,6 +2262,11 @@ router.put(
           key,
           "image/webp"
         );
+      } else if (
+        youtube_url &&
+        (!coverImageFilename || isYouTubeThumbnailUrl(coverImageFilename))
+      ) {
+        coverImageFilename = getYouTubeThumbnailUrl(youtube_url);
       }
 
       const translatedTitles = title
@@ -2343,6 +2351,11 @@ router.put(
           // TODO: Implementar la eliminación de la imagen anterior de S3
         }
         coverImageFilename = newCoverImageUrl;
+      } else if (
+        youtube_url &&
+        (!coverImageFilename || isYouTubeThumbnailUrl(coverImageFilename))
+      ) {
+        coverImageFilename = getYouTubeThumbnailUrl(youtube_url);
       }
 
       const translatedTitles = await translateText(title, ["es", "en"]);
