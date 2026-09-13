@@ -69,13 +69,11 @@ const getProfileAge = (birthDate?: string) => {
 
 type ProfilesResultsProps = {
   profiles: Profile[];
-  totalProfiles: number;
   onClear: () => void;
 };
 
 const ProfilesResults = memo(function ProfilesResults({
   profiles,
-  totalProfiles,
   onClear,
 }: ProfilesResultsProps) {
   const { t } = useTranslation("common");
@@ -89,12 +87,6 @@ const ProfilesResults = memo(function ProfilesResults({
         spacing={0.5}
         sx={{ mb: 2.25 }}
       >
-        <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
-          {t("profiles_results_count", {
-            shown: profiles.length,
-            total: totalProfiles,
-          })}
-        </Typography>
         <Typography
           sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}
         >
@@ -259,26 +251,6 @@ export default function FilterControls({
     [appliedAgeRange, appliedFilters, initialProfiles, isAgeFilterActive],
   );
 
-  const metrics = useMemo(() => {
-    const representedPositions = new Set(
-      initialProfiles
-        .map((profile) =>
-          getPlayerPositionCategory(profile.posicion_principal),
-        )
-        .filter(Boolean),
-    ).size;
-    const completeProfiles = initialProfiles.filter(
-      (profile) => hasProfilePhoto(profile) && profile.cv_url,
-    ).length;
-
-    return [
-      { value: initialProfiles.length, label: t("available_profiles_metric") },
-      { value: nacionalidades.length, label: t("nationalities_metric") },
-      { value: representedPositions, label: t("represented_positions_metric") },
-      { value: completeProfiles, label: t("complete_profiles_metric") },
-    ];
-  }, [initialProfiles, nacionalidades.length, t]);
-
   const filtersSidebar = (
     <ProfileFiltersSidebar
       filters={draftFilters}
@@ -297,7 +269,6 @@ export default function FilterControls({
     <Box sx={{ bgcolor: "#f7f9fc", minHeight: "100vh", pb: { xs: 7, md: 10 } }}>
       <ProfilesHero
         activePosition={draftFilters.puesto}
-        metrics={metrics}
         onPositionChange={handlePositionChange}
       />
 
@@ -375,7 +346,6 @@ export default function FilterControls({
 
           <ProfilesResults
             profiles={filteredProfiles}
-            totalProfiles={initialProfiles.length}
             onClear={clearFilters}
           />
         </Box>

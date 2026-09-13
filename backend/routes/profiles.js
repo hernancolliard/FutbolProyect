@@ -18,6 +18,10 @@ const {
   getYouTubeThumbnailUrl,
   isYouTubeThumbnailUrl,
 } = require("../youtubeVideo");
+const {
+  getProfileForRequester,
+  redactProfileContact,
+} = require("../profilePrivacy");
 
 const { uploadToS3 } = require("../services/s3Service");
 
@@ -445,7 +449,7 @@ router.get("/", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
-    res.json(result.rows);
+    res.json(result.rows.map(redactProfileContact));
   } catch (error) {
     console.error("Error al obtener todos los perfiles:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -549,7 +553,7 @@ router.get("/featured", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
-    res.json(result.rows);
+    res.json(result.rows.map(redactProfileContact));
   } catch (error) {
     console.error("Error al obtener los perfiles destacados:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -1149,6 +1153,7 @@ router.get("/:profileId/my-rating", async (req, res) => {
 
 router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
+  const requester = getRequesterFromRequest(req);
 
   // Validar que userId sea un número
   const managedProfileId = getManagedProfileIdFromSlug(userId);
@@ -1167,7 +1172,7 @@ router.get("/:userId", async (req, res) => {
         return res.status(404).json({ message: "Perfil no encontrado." });
       }
 
-      return res.json(result.rows[0]);
+      return res.json(getProfileForRequester(result.rows[0], requester));
     } catch (error) {
       console.error("Error al obtener el perfil gestionado:", error);
       return res.status(500).json({ message: "Error del servidor." });
@@ -1228,7 +1233,6 @@ router.get("/:userId", async (req, res) => {
 
     const userProfile = result.rows[0];
 
-    const requester = getRequesterFromRequest(req);
     const isPublicProfile = userProfile.tipo_usuario === "postulante";
     const isOwnProfile = requester && Number(requester.id) === userIdNum;
     const isRequesterAdmin = Boolean(requester?.isadmin);
@@ -1237,7 +1241,7 @@ router.get("/:userId", async (req, res) => {
       return res.status(404).json({ message: "Perfil no encontrado." });
     }
 
-    res.json(userProfile);
+    res.json(getProfileForRequester(userProfile, requester));
   } catch (error) {
     console.error("Error al obtener el perfil del usuario:", error);
     res.status(500).json({ message: "Error del servidor." });

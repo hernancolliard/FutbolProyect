@@ -7,35 +7,14 @@ import {
   Box,
   Button,
   Container,
-  Paper,
   Stack,
   Typography,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
-import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import UpdateRoundedIcon from "@mui/icons-material/UpdateRounded";
 import { useTranslation } from "react-i18next";
 
-export type HomeMetric = {
-  label: string;
-  value: number | string;
-};
-
-type HeroProps = {
-  metrics: HomeMetric[];
-};
-
-const metricIcons = [
-  <WorkOutlineRoundedIcon key="offers" />,
-  <GroupsOutlinedIcon key="profiles" />,
-  <PublicOutlinedIcon key="locations" />,
-  <UpdateRoundedIcon key="roles" />,
-];
-
-export default function Hero({ metrics }: HeroProps) {
+export default function Hero() {
   const { t } = useTranslation("common");
   return (
     <Box
@@ -167,78 +146,6 @@ export default function Hero({ metrics }: HeroProps) {
         </Box>
       </Container>
 
-      <Container
-        maxWidth="lg"
-        sx={{
-          position: "absolute",
-          left: "50%",
-          bottom: 0,
-          transform: "translate(-50%, 50%)",
-          width: "100%",
-          zIndex: 2,
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            display: "none",
-            gridTemplateColumns: {
-              xs: "repeat(2, minmax(0, 1fr))",
-              md: "repeat(4, minmax(0, 1fr))",
-            },
-            color: "#fff",
-            bgcolor: "#071a38",
-            border: "1px solid rgba(74, 142, 232, .24)",
-            borderRadius: 2.5,
-            boxShadow: "0 16px 45px rgba(3, 17, 39, .28)",
-            overflow: "hidden",
-          }}
-        >
-          {metrics.map((metric, index) => (
-            <Stack
-              key={metric.label}
-              direction="row"
-              alignItems="center"
-              spacing={1.5}
-              sx={{
-                px: { xs: 1.5, md: 3 },
-                py: { xs: 1.7, md: 2.3 },
-                borderRight: {
-                  xs: index % 2 === 0 ? "1px solid rgba(255,255,255,.1)" : 0,
-                  md: index < 3 ? "1px solid rgba(255,255,255,.1)" : 0,
-                },
-                borderBottom: {
-                  xs: index < 2 ? "1px solid rgba(255,255,255,.1)" : 0,
-                  md: 0,
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  flexShrink: 0,
-                  display: "grid",
-                  placeItems: "center",
-                  borderRadius: "50%",
-                  bgcolor: "rgba(18, 98, 219, .18)",
-                  color: "#4b95ff",
-                }}
-              >
-                {metricIcons[index]}
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ color: "#fff", fontWeight: 900, fontSize: "1.1rem" }}>
-                  {metric.value}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "rgba(255,255,255,.65)" }}>
-                  {metric.label}
-                </Typography>
-              </Box>
-            </Stack>
-          ))}
-        </Paper>
-      </Container>
     </Box>
   );
 }

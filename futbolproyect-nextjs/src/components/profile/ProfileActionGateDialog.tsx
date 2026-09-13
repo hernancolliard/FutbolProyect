@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button, Dialog, DialogContent } from "@mui/material";
 import { LockKeyhole } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -8,16 +9,25 @@ import { useTranslation } from "react-i18next";
 interface ProfileActionGateDialogProps {
   open: boolean;
   isRegistered: boolean;
+  mode?: "contact" | "subscription";
   onClose: () => void;
 }
 
 export default function ProfileActionGateDialog({
   open,
   isRegistered,
+  mode = "subscription",
   onClose,
 }: ProfileActionGateDialogProps) {
   const { t } = useTranslation("common");
-  const actionHref = isRegistered ? "/suscripcion" : "/register";
+  const pathname = usePathname();
+  const isContactGate = mode === "contact";
+  const returnTo = encodeURIComponent(pathname || "/");
+  const actionHref = isContactGate
+    ? `/login?returnTo=${returnTo}`
+    : isRegistered
+      ? "/suscripcion"
+      : "/register";
 
   return (
     <Dialog
@@ -41,13 +51,19 @@ export default function ProfileActionGateDialog({
           id="profile-action-gate-title"
           className="mt-5 text-2xl font-semibold text-[#071C3C]"
         >
-          {t("profile_action_gate_title")}
+          {t(
+            isContactGate
+              ? "profile_contact_gate_title"
+              : "profile_action_gate_title",
+          )}
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           {t(
-            isRegistered
-              ? "profile_action_gate_subscription_description"
-              : "profile_action_gate_guest_description",
+            isContactGate
+              ? "profile_contact_gate_description"
+              : isRegistered
+                ? "profile_action_gate_subscription_description"
+                : "profile_action_gate_guest_description",
           )}
         </p>
         <div className="mt-6 flex flex-col gap-3">
@@ -66,11 +82,31 @@ export default function ProfileActionGateDialog({
             }}
           >
             {t(
-              isRegistered
-                ? "view_subscription_plans"
-                : "profile_action_gate_register",
+              isContactGate
+                ? "login"
+                : isRegistered
+                  ? "view_subscription_plans"
+                  : "profile_action_gate_register",
             )}
           </Button>
+          {isContactGate && (
+            <Button
+              component={Link}
+              href={`/register?returnTo=${returnTo}`}
+              variant="outlined"
+              onClick={onClose}
+              sx={{
+                borderRadius: "999px",
+                py: 1.1,
+                fontWeight: 700,
+                textTransform: "none",
+                borderColor: "#cbd5e1",
+                color: "#071C3C",
+              }}
+            >
+              {t("register")}
+            </Button>
+          )}
           <Button
             type="button"
             onClick={onClose}

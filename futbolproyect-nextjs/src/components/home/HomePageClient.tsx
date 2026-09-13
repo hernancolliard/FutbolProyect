@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
-import Hero, { HomeMetric } from "@/components/Hero";
+import Hero from "@/components/Hero";
 import HomeRoleGrid from "@/components/home/HomeRoleGrid";
 import {
   HomeOffersShowcase,
@@ -67,25 +67,6 @@ export default function HomePageClient({
     }
   }, []);
 
-  const locations = new Set(
-    offersData.offers.map((offer) => offer.ubicacion).filter(Boolean),
-  ).size;
-  const roles = new Set(
-    offersData.offers.map((offer) => offer.puesto).filter(Boolean),
-  ).size;
-  const metrics: HomeMetric[] = [
-      {
-        value: offersData.totalOffers || offersData.offers.length || "—",
-        label: "Ofertas activas",
-      },
-      {
-        value: featuredProfiles.length || "—",
-        label: "Perfiles destacados",
-      },
-      { value: locations || "—", label: "Ubicaciones activas" },
-      { value: roles || "—", label: "Roles publicados" },
-  ];
-
   const handleShowRegisterModal = (role: "player" | "club") => {
     setRegistrationRole(role);
     setShowRegisterModal(true);
@@ -94,7 +75,7 @@ export default function HomePageClient({
   return (
     <Box sx={{ bgcolor: "#f7f9fc" }}>
       <Box>
-        <Hero metrics={metrics} />
+        <Hero />
 
         <Container
           maxWidth="lg"

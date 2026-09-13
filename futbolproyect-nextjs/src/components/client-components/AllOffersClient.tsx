@@ -134,18 +134,10 @@ export default function AllOffersClient({
     setCurrentPage(1);
   };
 
-  const metrics = [
-    { value: data?.totalOffers ?? "—", label: t("active_offers_metric") },
-    { value: options.ubicaciones.length || "—", label: t("locations_metric") },
-    { value: options.puestos.length || "—", label: t("available_positions_metric") },
-    { value: options.horarios.length || "—", label: t("schedule_types_metric") },
-  ];
-
   return (
     <Box sx={{ bgcolor: "#f7f9fc", minHeight: "100vh", pb: { xs: 7, md: 10 } }}>
       <OffersHero
         activeRole={draftFilters.puesto}
-        metrics={metrics}
         onRoleChange={handleRoleChange}
       />
 
@@ -254,13 +246,7 @@ export default function AllOffersClient({
               sx={{ mb: 2.25 }}
             >
               <Typography sx={{ color: "#5b6a80", fontSize: ".9rem" }}>
-                {data?.totalOffers
-                  ? t("offers_results_count", {
-                      from: Math.min((currentPage - 1) * 10 + 1, data.totalOffers),
-                      to: Math.min(currentPage * 10, data.totalOffers),
-                      total: data.totalOffers,
-                    })
-                  : t("available_offers")}
+                {t("available_offers")}
               </Typography>
               <Typography sx={{ color: "#0a1930", fontWeight: 800, fontSize: ".9rem" }}>
                 {appliedFilters.sort === "asc" ? t("oldest_first") : t("newest_first")}

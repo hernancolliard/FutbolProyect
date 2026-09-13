@@ -10,11 +10,12 @@ interface PlayerContactProps {
   instagramUrl?: string;
   linkedinUrl?: string;
   websiteUrl?: string;
+  isAuthenticated: boolean;
   onWhatsApp: () => void;
   onEmail: () => void;
 }
 
-export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, websiteUrl, onWhatsApp, onEmail }: PlayerContactProps) {
+export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, websiteUrl, isAuthenticated, onWhatsApp, onEmail }: PlayerContactProps) {
   const { t } = useTranslation("common");
   const normalizeExternalUrl = (url?: string) => {
     if (!url) return undefined;
@@ -58,7 +59,7 @@ export function PlayerContact({ email, whatsappUrl, instagramUrl, linkedinUrl, w
 
           if (item.label === "Email") {
             return (
-              <button key={item.label} onClick={onEmail} disabled={!email} className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${email ? "border-slate-200 bg-slate-50 text-slate-700 hover:-translate-y-0.5" : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"}`}>
+              <button key={item.label} onClick={onEmail} disabled={isAuthenticated && !email} className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${email || !isAuthenticated ? "border-slate-200 bg-slate-50 text-slate-700 hover:-translate-y-0.5" : "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"}`}>
                 <div className="rounded-xl bg-white p-2 text-[#071C3C]">
                   <Icon size={16} />
                 </div>

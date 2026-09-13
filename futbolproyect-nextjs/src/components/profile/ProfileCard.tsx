@@ -18,7 +18,7 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Profile } from "@/lib/types";
-import { getProfilePath } from "@/lib/seoSlugs";
+import { getProfilePath, isProfileComplete } from "@/lib/seoSlugs";
 
 interface ProfileCardProps {
   profile: Profile;
@@ -39,7 +39,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
   const { t } = useTranslation("common");
   const profileImageUrl =
     profile.foto_perfil_url || "/images/logos/logofpazul.webp";
-  const hasCompleteProfile = Boolean(profile.foto_perfil_url && profile.cv_url);
+  const hasCompleteProfile = isProfileComplete(profile);
   const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
   const age = getAge(profile.fecha_de_nacimiento);
 

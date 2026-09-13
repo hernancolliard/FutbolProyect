@@ -60,6 +60,11 @@ export const getProfileCompletion = (profile: Profile) => {
   return Math.round((completed / fields.length) * 100);
 };
 
+export const PROFILE_COMPLETION_THRESHOLD = 100;
+
+export const isProfileComplete = (profile: Profile) =>
+  getProfileCompletion(profile) >= PROFILE_COMPLETION_THRESHOLD;
+
 export const isProfileIndexable = (profile: Profile) => {
   if (typeof profile.is_indexable === "boolean") return profile.is_indexable;
   if (profile.completion_score !== undefined) {

@@ -128,7 +128,7 @@ export default async function PlayersCategoryPage({ params }: PageProps) {
 
         <section aria-labelledby="category-results" className="mt-8">
           <h2 id="category-results" className="mb-5 text-2xl font-bold text-[#071c3c]">
-            Perfiles disponibles ({data.profiles.length})
+            Perfiles disponibles
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {data.profiles.map((profile) => (

@@ -142,6 +142,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isProfileActionGateOpen, setIsProfileActionGateOpen] = useState(false);
+  const [profileActionGateMode, setProfileActionGateMode] = useState<"contact" | "subscription">("subscription");
+  const [isContactLoading, setIsContactLoading] = useState(false);
   const [profileStats, setProfileStats] = useState<any>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
   const [anonymousVoterId, setAnonymousVoterId] = useState<string | null>(null);
@@ -182,6 +184,40 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const isManagedProfileOwner = currentUser && profile && isManagedProfile && String(currentUser.id) === String(profile.owner_user_id);
   const canEditProfile = Boolean(isOwnAccountProfile || isManagedProfileOwner);
   const canManagePlayerProfiles = currentUser?.tipo_usuario === "ofertante" && ["club", "agente", "scout"].includes(currentUser?.rol);
+
+  useEffect(() => {
+    if (authLoading || !currentUser?.id || !profile?.id) return;
+
+    let cancelled = false;
+    const loadPrivateContact = async () => {
+      setIsContactLoading(true);
+      try {
+        const { data } = await apiClient.get(`/profiles/${profile.id}`);
+        if (cancelled) return;
+
+        setProfile((previousProfile) =>
+          previousProfile
+            ? {
+                ...previousProfile,
+                email: data.email || "",
+                telefono: data.telefono || "",
+                whatsapp_url: data.whatsapp_url || "",
+                agente_contacto: data.agente_contacto || "",
+              }
+            : previousProfile,
+        );
+      } catch (error) {
+        console.error("Failed to load private profile contact:", error);
+      } finally {
+        if (!cancelled) setIsContactLoading(false);
+      }
+    };
+
+    loadPrivateContact();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, currentUser?.id, profile?.id]);
 
   useEffect(() => {
     if (!profile?.id) {
@@ -302,6 +338,16 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     if (authLoading) return false;
     if (canUseProfileActions) return true;
 
+    setProfileActionGateMode("subscription");
+    setIsProfileActionGateOpen(true);
+    return false;
+  };
+
+  const requireProfileContactAccess = () => {
+    if (authLoading) return false;
+    if (currentUser) return true;
+
+    setProfileActionGateMode("contact");
     setIsProfileActionGateOpen(true);
     return false;
   };
@@ -343,14 +389,25 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const handleWhatsApp = () => {
-    if (!requireProfileActionAccess()) return;
+    if (!requireProfileContactAccess()) return;
+    if (isContactLoading) {
+      toast.info(t("profile_contact_loading"));
+      return;
+    }
     const url = normalizeWhatsAppUrl(profile?.whatsapp_url);
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      toast.info(t("profile_whatsapp_missing"));
     }
   };
 
   const handleEmail = () => {
+    if (!requireProfileContactAccess()) return;
+    if (isContactLoading) {
+      toast.info(t("profile_contact_loading"));
+      return;
+    }
     const email = String(profile?.email || "").trim();
     if (!email) {
       toast.info(t("profile_email_missing"));
@@ -734,7 +791,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             )}
             {activeTab === "contact" && (
               <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                <PlayerContact email={profile.email} whatsappUrl={profile.whatsapp_url} instagramUrl={profile.instagram_url} linkedinUrl={profile.linkedin_url} websiteUrl={profile.transfermarkt_url} onWhatsApp={handleWhatsApp} onEmail={handleEmail} />
+                <PlayerContact email={profile.email} whatsappUrl={profile.whatsapp_url} instagramUrl={profile.instagram_url} linkedinUrl={profile.linkedin_url} websiteUrl={profile.transfermarkt_url} isAuthenticated={Boolean(currentUser)} onWhatsApp={handleWhatsApp} onEmail={handleEmail} />
                 <PlayerShare link={currentUrl} onCopy={handleCopyLink} onShare={handleProfileActionDestination} />
               </div>
             )}
@@ -795,6 +852,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
       <ProfileActionGateDialog
         open={isProfileActionGateOpen}
         isRegistered={Boolean(currentUser)}
+        mode={profileActionGateMode}
         onClose={() => setIsProfileActionGateOpen(false)}
       />
 
