@@ -13,6 +13,7 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { useAuth } from "@/context/AuthContext";
 import { getRequiredSubscriptionPlan } from "@/lib/subscriptionAccess";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface SubscribeButtonProps {
   planType: string;
@@ -78,6 +79,11 @@ function SubscribeButton({
         planType,
         billingCycle,
       });
+      trackAnalyticsEvent("begin_checkout", {
+        plan_type: planType,
+        billing_cycle: billingCycle,
+        payment_provider: "mercadopago",
+      });
       window.open(response.data.init_point, "_blank");
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
@@ -128,6 +134,13 @@ function SubscribeButton({
         console.warn("[PAYPAL_CREATE_ORDER] Datos incompletos:", {
           orderID,
           trackingToken: trackingToken ? "presente" : "FALTANTE",
+        });
+      }
+      if (orderID) {
+        trackAnalyticsEvent("begin_checkout", {
+          plan_type: planType,
+          billing_cycle: billingCycle,
+          payment_provider: "paypal",
         });
       }
       return orderID;

@@ -8,6 +8,7 @@ import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import apiClient from "@/lib/apiClient";
+import { getCompletionRange, trackAnalyticsEvent } from "@/lib/analytics";
 import { getProfileCompletion } from "@/lib/seoSlugs";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
@@ -45,7 +46,8 @@ export default function SubscriptionInvitationDialog() {
       try {
         const { data: profile } = await apiClient.get(`/profiles/${user.id}`);
         if (cancelled) return;
-        if (getProfileCompletion(profile) < SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION) {
+        const completionPercent = getProfileCompletion(profile);
+        if (completionPercent < SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION) {
           setOpen(false);
           return;
         }
@@ -58,7 +60,15 @@ export default function SubscriptionInvitationDialog() {
           // El aviso sigue funcionando aunque el navegador bloquee sessionStorage.
         }
 
-        if (!cancelled) setOpen(true);
+        if (!cancelled) {
+          setOpen(true);
+          trackAnalyticsEvent("subscription_prompt_viewed", {
+            source_path: pathname || "/",
+            profile_completion_range: getCompletionRange(completionPercent),
+            account_type: user.tipo_usuario,
+            user_role: user.rol,
+          });
+        }
       } catch {
         // Si no se puede comprobar el perfil, evitamos interrumpir al usuario.
         if (!cancelled) setOpen(false);
@@ -102,7 +112,14 @@ export default function SubscriptionInvitationDialog() {
             component={Link}
             href="/suscripcion"
             variant="contained"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackAnalyticsEvent("subscription_plans_clicked", {
+                source: "profile_activation_prompt",
+                account_type: user?.tipo_usuario,
+                user_role: user?.rol,
+              });
+              setOpen(false);
+            }}
             sx={{
               borderRadius: "999px",
               py: 1.25,

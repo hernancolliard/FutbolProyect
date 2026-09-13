@@ -31,6 +31,7 @@ import { getSafeClubLogoUrl } from "@/lib/clubCrests";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 import ProfileActionGateDialog from "./ProfileActionGateDialog";
 import LazyYouTubeEmbed from "@/components/media/LazyYouTubeEmbed";
+import { getCompletionRange, trackAnalyticsEventOnce } from "@/lib/analytics";
 
 interface ProfilePageClientProps {
   profile: Profile | null;
@@ -125,6 +126,20 @@ const hasMeaningfulProfileSection = (value?: string | null) => {
 
   return true;
 };
+
+const getProfileActivationState = (
+  profile: Profile | null,
+  hasFeaturedVideo: boolean,
+) => ({
+  sports: Boolean(
+    profile?.posicion_principal &&
+      profile?.nacionalidad &&
+      profile?.resumen_profesional,
+  ),
+  photo: profile ? hasProfilePhoto(profile) : false,
+  career: hasMeaningfulProfileSection(profile?.trayectoria),
+  evidence: Boolean(profile?.cv_url || profile?.has_video || hasFeaturedVideo),
+});
 
 const getOrCreateAnonymousVoterId = () => {
   if (typeof window === "undefined") return null;
@@ -539,6 +554,47 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     if (!profile) return 0;
     return getProfileCompletion(profile);
   }, [profile]);
+  const effectiveCompletionPercent = Number(
+    profileStats?.completion_percent ?? localCompletionPercent,
+  );
+  const activationState = useMemo(
+    () => getProfileActivationState(profile, Boolean(featuredVideo)),
+    [featuredVideo, profile],
+  );
+  const completedActivationStepCount = Object.values(activationState).filter(Boolean).length;
+
+  useEffect(() => {
+    if (!isOwnAccountProfile || !currentUser?.id) return;
+
+    const commonParameters = {
+      account_type: currentUser.tipo_usuario,
+      user_role: currentUser.rol,
+      profile_completion_range: getCompletionRange(effectiveCompletionPercent),
+    };
+
+    if (effectiveCompletionPercent >= 25) {
+      trackAnalyticsEventOnce(
+        `fp_analytics_profile_started_${currentUser.id}`,
+        "profile_started",
+        commonParameters,
+      );
+    }
+
+    if (completedActivationStepCount === 4) {
+      trackAnalyticsEventOnce(
+        `fp_analytics_profile_essential_completed_${currentUser.id}`,
+        "profile_essential_completed",
+        commonParameters,
+      );
+    }
+  }, [
+    completedActivationStepCount,
+    currentUser?.id,
+    currentUser?.rol,
+    currentUser?.tipo_usuario,
+    effectiveCompletionPercent,
+    isOwnAccountProfile,
+  ]);
 
   if (!profile && authLoading) return null;
   if (!profile) {
@@ -569,33 +625,29 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const normalizedAvailability = availabilityLabel.toLowerCase();
   const availabilityTone = normalizedAvailability.includes("disponible") || normalizedAvailability.includes("libre") ? "positive" as const : "neutral" as const;
   const profileViews = Number(profileStats?.profile_views ?? profile.profile_views ?? 0);
-  const completionPercent = Number(profileStats?.completion_percent ?? localCompletionPercent);
+  const completionPercent = effectiveCompletionPercent;
   const cvStats = parseCvStats(profile.estadisticas);
   const cvCareer = parseCvCareer(profile.trayectoria);
   const activationSteps = [
     {
       id: "sports",
       label: t("profile_activation_sports", "Datos deportivos"),
-      complete: Boolean(
-        profile.posicion_principal &&
-          profile.nacionalidad &&
-          profile.resumen_profesional,
-      ),
+      complete: activationState.sports,
     },
     {
       id: "photo",
       label: t("profile_activation_photo", "Foto profesional"),
-      complete: hasProfilePhoto(profile),
+      complete: activationState.photo,
     },
     {
       id: "career",
       label: t("profile_activation_career", "Trayectoria"),
-      complete: hasMeaningfulProfileSection(profile.trayectoria),
+      complete: activationState.career,
     },
     {
       id: "evidence",
       label: t("profile_activation_evidence", "Video o CV"),
-      complete: Boolean(profile.cv_url || profile.has_video || featuredVideo),
+      complete: activationState.evidence,
     },
   ];
   const completedActivationSteps = activationSteps.filter((step) => step.complete).length;

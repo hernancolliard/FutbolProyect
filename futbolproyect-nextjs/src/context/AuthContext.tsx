@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 const AuthContext = createContext<any>(null);
 
@@ -61,7 +62,15 @@ export const AuthProvider = ({ children }: any) => {
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
       await fetchUser();
-      return Boolean(res.data?.isNewUser);
+      const isNewUser = Boolean(res.data?.isNewUser);
+      if (isNewUser) {
+        trackAnalyticsEvent("sign_up", {
+          method: "google",
+          account_type: res.data?.user?.tipo_usuario,
+          user_role: res.data?.user?.rol,
+        });
+      }
+      return isNewUser;
     } catch (error: any) {
       console.error("Google login error:", error);
       throw new Error(
@@ -97,6 +106,11 @@ export const AuthProvider = ({ children }: any) => {
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
       await fetchUser();
+      trackAnalyticsEvent("sign_up", {
+        method: "email",
+        account_type: tipo_usuario,
+        user_role: rol,
+      });
     } catch (error: any) {
       console.error("Register error:", error);
       throw new Error(error.response?.data?.message || error.message || "Error en el registro.");

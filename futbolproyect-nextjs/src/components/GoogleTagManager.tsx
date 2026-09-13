@@ -3,23 +3,13 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
 import { useEffect } from 'react';
+import { trackAnalyticsEvent } from '@/lib/analytics';
+import { GTM_CONTAINER_ID } from '@/lib/analyticsConfig';
 
-// Augment the Window interface to include dataLayer
-declare global {
-  interface Window {
-    dataLayer: any[];
-  }
-}
-
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+const GTM_ID = GTM_CONTAINER_ID;
 
 const pageview = (url: string) => {
-  if (typeof window.dataLayer !== 'undefined') {
-    window.dataLayer.push({
-      event: 'pageview',
-      page: url,
-    });
-  }
+  trackAnalyticsEvent('pageview', { page: url });
 };
 
 const GoogleTagManager = () => {
