@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 import { Dialog, Modal, Box } from "@mui/material";
@@ -25,6 +26,7 @@ interface RootClientLayoutProps {
 type RegisterRole = "player" | "club" | "scout" | "agent" | "user";
 
 export default function RootClientLayout({ children }: RootClientLayoutProps) {
+  const router = useRouter();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isCreateOfferOpen, setIsCreateOfferOpen] = useState(false);
@@ -87,6 +89,10 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
         >
           <Login
             onClose={handleCloseLogin}
+            onGoogleRegistration={() => {
+              handleCloseLogin();
+              router.push("/profile");
+            }}
             onSwitchToRegister={() => {
               handleCloseLogin();
               handleShowRegister("player");
@@ -106,6 +112,10 @@ export default function RootClientLayout({ children }: RootClientLayoutProps) {
         >
           <Register
             onClose={handleCloseRegister}
+            onSuccess={() => {
+              handleCloseRegister();
+              router.push("/profile");
+            }}
             initialRole={registerRole}
             onSwitchToLogin={() => {
               handleCloseRegister();

@@ -7,9 +7,12 @@ import { Button, Dialog, DialogContent } from "@mui/material";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
+import apiClient from "@/lib/apiClient";
+import { getProfileCompletion } from "@/lib/seoSlugs";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 const SUBSCRIPTION_PROMPT_KEY_PREFIX = "fp_subscription_prompt_shown_";
+const SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION = 25;
 
 export default function SubscriptionInvitationDialog() {
   const { t } = useTranslation("common");
@@ -21,28 +24,52 @@ export default function SubscriptionInvitationDialog() {
     const isAdmin = Boolean(user?.isadmin || user?.isAdmin);
     const isSubscriptionFlow =
       pathname?.startsWith("/suscripcion") || pathname?.startsWith("/payment");
+    const isProfileFlow =
+      pathname?.startsWith("/profile") || pathname?.startsWith("/perfiles");
 
     if (
       loading ||
       !user ||
       isAdmin ||
       isSubscriptionFlow ||
+      isProfileFlow ||
       hasCompatibleActiveSubscription(user)
     ) {
       setOpen(false);
       return;
     }
 
-    const storageKey = `${SUBSCRIPTION_PROMPT_KEY_PREFIX}${user.id}`;
+    let cancelled = false;
 
-    try {
-      if (window.sessionStorage.getItem(storageKey)) return;
-      window.sessionStorage.setItem(storageKey, "true");
-    } catch {
-      // El aviso sigue funcionando aunque el navegador bloquee sessionStorage.
-    }
+    const openWhenProfileIsReady = async () => {
+      try {
+        const { data: profile } = await apiClient.get(`/profiles/${user.id}`);
+        if (cancelled) return;
+        if (getProfileCompletion(profile) < SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION) {
+          setOpen(false);
+          return;
+        }
 
-    setOpen(true);
+        const storageKey = `${SUBSCRIPTION_PROMPT_KEY_PREFIX}${user.id}`;
+        try {
+          if (window.sessionStorage.getItem(storageKey)) return;
+          window.sessionStorage.setItem(storageKey, "true");
+        } catch {
+          // El aviso sigue funcionando aunque el navegador bloquee sessionStorage.
+        }
+
+        if (!cancelled) setOpen(true);
+      } catch {
+        // Si no se puede comprobar el perfil, evitamos interrumpir al usuario.
+        if (!cancelled) setOpen(false);
+      }
+    };
+
+    openWhenProfileIsReady();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loading, pathname, user]);
 
   return (

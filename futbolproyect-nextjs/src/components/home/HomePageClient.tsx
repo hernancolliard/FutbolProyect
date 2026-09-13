@@ -22,6 +22,7 @@ import Modal from "@/components/ui/Modal";
 import AdBanner from "@/components/ads/AdBanner";
 import { FeaturedVideo, Offer, Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/navigation";
 
 const PromotionModal = dynamic(() => import("@/components/PromotionModal"), {
   ssr: false,
@@ -50,6 +51,7 @@ export default function HomePageClient({
   seoOverview,
 }: HomePageClientProps) {
   const { t } = useTranslation("common");
+  const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
@@ -171,7 +173,13 @@ export default function HomePageClient({
 
       {showLoginModal && (
         <Modal isOpen onClose={() => setShowLoginModal(false)}>
-          <Login onClose={() => setShowLoginModal(false)} />
+          <Login
+            onClose={() => setShowLoginModal(false)}
+            onGoogleRegistration={() => {
+              setShowLoginModal(false);
+              router.push("/profile");
+            }}
+          />
         </Modal>
       )}
 
@@ -180,6 +188,10 @@ export default function HomePageClient({
           <Register
             initialRole={registrationRole}
             onClose={() => setShowRegisterModal(false)}
+            onSuccess={() => {
+              setShowRegisterModal(false);
+              router.push("/profile");
+            }}
             onSwitchToLogin={() => {
               setShowRegisterModal(false);
               setShowLoginModal(true);

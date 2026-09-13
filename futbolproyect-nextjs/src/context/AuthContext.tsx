@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }: any) => {
         apiClient.defaults.headers.Authorization = `Bearer ${res.data.token}`;
       }
       await fetchUser();
+      return Boolean(res.data?.isNewUser);
     } catch (error: any) {
       console.error("Google login error:", error);
       throw new Error(

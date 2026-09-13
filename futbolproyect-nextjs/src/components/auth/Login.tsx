@@ -24,12 +24,14 @@ import GoogleLoginButton from "./GoogleLoginButton";
 
 interface LoginProps {
   onClose: () => void;
+  onGoogleRegistration?: () => void;
   onSwitchToRegister?: () => void;
   showCloseButton?: boolean;
 }
 
 export default function Login({
   onClose,
+  onGoogleRegistration,
   onSwitchToRegister,
   showCloseButton = true,
 }: LoginProps) {
@@ -68,11 +70,15 @@ export default function Login({
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       if (!loginWithGoogle) throw new Error(t("login_configuration_error"));
-      await loginWithGoogle(
+      const isNewUser = await loginWithGoogle(
         credentialResponse.credential,
         acceptedTermsForGoogle,
       );
-      onClose();
+      if (isNewUser && onGoogleRegistration) {
+        onGoogleRegistration();
+      } else {
+        onClose();
+      }
     } catch (requestError: any) {
       setError(requestError?.message || t("login_with_google_error"));
     }

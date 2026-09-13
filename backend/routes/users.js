@@ -118,6 +118,7 @@ router.post("/google-login", async (req, res) => {
     });
 
     let user = result.rows[0];
+    let isNewUser = false;
 
     if (!user) {
       if (!hasAcceptedLegalPolicies(req.body.acceptedTerms)) {
@@ -151,6 +152,7 @@ router.post("/google-login", async (req, res) => {
         },
       );
       user = created.rows[0];
+      isNewUser = true;
       try {
         await createReferralForUser({
           req,
@@ -175,7 +177,7 @@ router.post("/google-login", async (req, res) => {
     setAuthCookie(res, jwtToken);
 
     const { password_hash, ...userSafe } = user;
-    res.json({ user: userSafe, token: jwtToken });
+    res.json({ user: userSafe, token: jwtToken, isNewUser });
   } catch (err) {
     console.error(err);
     res.status(401).json({ message: "Error Google Login" });

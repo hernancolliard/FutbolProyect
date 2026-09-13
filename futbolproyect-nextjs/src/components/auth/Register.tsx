@@ -23,6 +23,7 @@ import { useAuth } from "@/context/AuthContext";
 
 interface RegisterProps {
   onClose: () => void;
+  onSuccess?: () => void;
   onSwitchToLogin: () => void;
   initialRole?: string;
   showCloseButton?: boolean;
@@ -39,6 +40,7 @@ const normalizeRole = (role?: string) => {
 
 export default function Register({
   onClose,
+  onSuccess,
   onSwitchToLogin,
   initialRole = "jugador",
   showCloseButton = true,
@@ -108,7 +110,11 @@ export default function Register({
         formData.affiliateCode,
         acceptedTerms,
       );
-      onClose();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        onClose();
+      }
     } catch (requestError: any) {
       setError(requestError?.message || t("register_error"));
     } finally {

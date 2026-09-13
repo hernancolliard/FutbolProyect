@@ -23,10 +23,10 @@ import MyApplicationsSection from "./MyApplicationsSection";
 import MyOffersSection from "./MyOffersSection";
 import ManagedPlayerProfilesSection from "./ManagedPlayerProfilesSection";
 import AdBanner from "@/components/ads/AdBanner";
-import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Compass, Eye, FileText, ImageIcon, KeyRound, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Circle, Compass, Eye, FileText, ImageIcon, KeyRound, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
-import { getProfileCompletion } from "@/lib/seoSlugs";
+import { getProfileCompletion, hasProfilePhoto } from "@/lib/seoSlugs";
 import { getSafeClubLogoUrl } from "@/lib/clubCrests";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 import ProfileActionGateDialog from "./ProfileActionGateDialog";
@@ -109,6 +109,21 @@ const getCvImageSource = (value?: string | null) => {
   if (!source) return "/images/logos/logofp.png";
   if (!/^https?:\/\//i.test(source)) return source;
   return `/api/profile-image?url=${encodeURIComponent(source)}`;
+};
+
+const hasMeaningfulProfileSection = (value?: string | null) => {
+  const normalized = String(value || "").trim();
+  if (!normalized || normalized === "[]" || normalized === "{}") return false;
+
+  try {
+    const parsed = JSON.parse(normalized);
+    if (Array.isArray(parsed)) return parsed.length > 0;
+    if (parsed && typeof parsed === "object") return Object.keys(parsed).length > 0;
+  } catch {
+    // El contenido anterior en texto plano tambiÃ©n cuenta como trayectoria.
+  }
+
+  return true;
 };
 
 const getOrCreateAnonymousVoterId = () => {
@@ -557,6 +572,49 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   const completionPercent = Number(profileStats?.completion_percent ?? localCompletionPercent);
   const cvStats = parseCvStats(profile.estadisticas);
   const cvCareer = parseCvCareer(profile.trayectoria);
+  const activationSteps = [
+    {
+      id: "sports",
+      label: t("profile_activation_sports", "Datos deportivos"),
+      complete: Boolean(
+        profile.posicion_principal &&
+          profile.nacionalidad &&
+          profile.resumen_profesional,
+      ),
+    },
+    {
+      id: "photo",
+      label: t("profile_activation_photo", "Foto profesional"),
+      complete: hasProfilePhoto(profile),
+    },
+    {
+      id: "career",
+      label: t("profile_activation_career", "Trayectoria"),
+      complete: hasMeaningfulProfileSection(profile.trayectoria),
+    },
+    {
+      id: "evidence",
+      label: t("profile_activation_evidence", "Video o CV"),
+      complete: Boolean(profile.cv_url || profile.has_video || featuredVideo),
+    },
+  ];
+  const completedActivationSteps = activationSteps.filter((step) => step.complete).length;
+  const nextActivationStep = activationSteps.find((step) => !step.complete);
+
+  const handleActivationAction = () => {
+    if (nextActivationStep?.id === "evidence") {
+      setActiveTab("videos");
+      window.requestAnimationFrame(() => {
+        document.getElementById("profile-tabs")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+      return;
+    }
+
+    handleOpenEditModal();
+  };
 
   return (
     <div className="min-h-screen max-w-full overflow-x-clip bg-[linear-gradient(180deg,#f8fafc_0%,#fdfefe_100%)] px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
@@ -582,7 +640,77 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
             languagesLabel={idiomas}
           />
 
-          <PlayerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+          {isOwnAccountProfile && (
+            <section className="mt-6 overflow-hidden rounded-[28px] border border-[#25D366]/30 bg-white shadow-sm">
+              <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-[#168a46]">
+                    <Sparkles size={18} aria-hidden="true" />
+                    <p className="text-xs font-bold uppercase tracking-[0.18em]">
+                      {t("profile_activation_eyebrow", "ActivÃ¡ tu perfil")}
+                    </p>
+                  </div>
+                  <h2 className="mt-2 text-xl font-semibold text-[#071C3C]">
+                    {nextActivationStep
+                      ? t("profile_activation_title", "Tu prÃ³ximo paso: {{step}}", {
+                          step: nextActivationStep.label,
+                        })
+                      : t("profile_activation_complete_title", "Tu perfil ya estÃ¡ listo para mostrar")}
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                    {nextActivationStep
+                      ? t(
+                          "profile_activation_description",
+                          "CompletÃ¡ estos puntos para que clubes y profesionales entiendan rÃ¡pido tu experiencia.",
+                        )
+                      : t(
+                          "profile_activation_complete_description",
+                          "Ya tenÃ©s la informaciÃ³n esencial para presentar mejor tu perfil.",
+                        )}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {activationSteps.map((step) => (
+                      <span
+                        key={step.id}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                          step.complete
+                            ? "border-[#25D366]/30 bg-[#25D366]/10 text-[#168a46]"
+                            : "border-slate-200 bg-slate-50 text-slate-600"
+                        }`}
+                      >
+                        {step.complete ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                        {step.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex min-w-[180px] flex-col gap-3 md:items-end">
+                  <p className="text-sm font-semibold text-slate-600">
+                    {t("profile_activation_progress", "{{completed}} de {{total}} pasos", {
+                      completed: completedActivationSteps,
+                      total: activationSteps.length,
+                    })}
+                  </p>
+                  {nextActivationStep && (
+                    <button
+                      type="button"
+                      onClick={handleActivationAction}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-[#071C3C] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b2c5f]"
+                    >
+                      {nextActivationStep.id === "evidence"
+                        ? t("profile_activation_add_video", "Agregar video")
+                        : t("profile_activation_continue", "Completar mi perfil")}
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          <div id="profile-tabs" className="scroll-mt-24">
+            <PlayerTabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
+          </div>
 
           <div className="mt-6 min-w-0 space-y-6">
             {activeTab === "summary" && (
