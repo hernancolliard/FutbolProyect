@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button, Dialog, DialogContent } from "@mui/material";
+import { Box, Button, Paper, Snackbar, Typography } from "@mui/material";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
@@ -13,7 +13,7 @@ import { getProfileCompletion } from "@/lib/seoSlugs";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 
 const SUBSCRIPTION_PROMPT_KEY_PREFIX = "fp_subscription_prompt_shown_";
-const SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION = 25;
+const SUBSCRIPTION_PROMPT_MINIMUM_COMPLETION = 70;
 
 export default function SubscriptionInvitationDialog() {
   const { t } = useTranslation("common");
@@ -83,31 +83,77 @@ export default function SubscriptionInvitationDialog() {
   }, [loading, pathname, user]);
 
   return (
-    <Dialog
+    <Snackbar
       open={open}
-      onClose={() => setOpen(false)}
-      maxWidth="xs"
-      fullWidth
-      aria-labelledby="subscription-invitation-title"
-      PaperProps={{ sx: { borderRadius: "24px", overflow: "hidden" } }}
+      autoHideDuration={14000}
+      onClose={(_event, reason) => {
+        if (reason !== "clickaway") setOpen(false);
+      }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      sx={{
+        left: { xs: 16, sm: "auto" },
+        right: { xs: 16, sm: 24 },
+        bottom: { xs: 16, sm: 24 },
+      }}
     >
-      <DialogContent sx={{ p: { xs: 3, sm: 4 }, textAlign: "center" }}>
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366]/15 text-[#168a46]">
-          <Sparkles size={27} aria-hidden="true" />
-        </div>
-        <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-[#168a46]">
-          {t("subscription_invitation_badge")}
-        </p>
-        <h2
-          id="subscription-invitation-title"
-          className="mt-2 text-2xl font-semibold text-[#071C3C]"
+      <Paper
+        role="status"
+        aria-live="polite"
+        elevation={8}
+        sx={{
+          width: { xs: "100%", sm: 410 },
+          maxWidth: "100%",
+          p: { xs: 2, sm: 2.5 },
+          border: "1px solid #dbe5f1",
+          borderRadius: 3,
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+          <Box
+            aria-hidden="true"
+            sx={{
+              flex: "0 0 auto",
+              width: 42,
+              height: 42,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: "50%",
+              bgcolor: "rgba(18, 98, 219, .1)",
+              color: "#1262db",
+            }}
+          >
+            <Sparkles size={21} />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="caption"
+              sx={{ color: "#1262db", fontWeight: 900, letterSpacing: ".08em" }}
+            >
+              {t("subscription_invitation_badge")}
+            </Typography>
+            <Typography
+              id="subscription-invitation-title"
+              component="h2"
+              sx={{ mt: 0.3, color: "#071C3C", fontSize: "1.08rem", fontWeight: 900 }}
+            >
+              {t("subscription_invitation_title")}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.6, color: "#5d6b80", lineHeight: 1.5 }}>
+              {t("subscription_invitation_description")}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            justifyContent: "flex-end",
+          }}
         >
-          {t("subscription_invitation_title")}
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          {t("subscription_invitation_description")}
-        </p>
-        <div className="mt-6 flex flex-col gap-3">
           <Button
             component={Link}
             href="/suscripcion"
@@ -121,8 +167,9 @@ export default function SubscriptionInvitationDialog() {
               setOpen(false);
             }}
             sx={{
-              borderRadius: "999px",
-              py: 1.25,
+              order: { xs: 1, sm: 2 },
+              borderRadius: 2,
+              px: 2,
               fontWeight: 700,
               textTransform: "none",
               backgroundColor: "#071C3C",
@@ -135,7 +182,8 @@ export default function SubscriptionInvitationDialog() {
             type="button"
             onClick={() => setOpen(false)}
             sx={{
-              borderRadius: "999px",
+              order: { xs: 2, sm: 1 },
+              borderRadius: 2,
               fontWeight: 600,
               textTransform: "none",
               color: "#475569",
@@ -143,8 +191,8 @@ export default function SubscriptionInvitationDialog() {
           >
             {t("subscription_invitation_later")}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </Box>
+      </Paper>
+    </Snackbar>
   );
 }

@@ -10,7 +10,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useAuth } from "@/context/AuthContext";
 import { getRequiredSubscriptionPlan } from "@/lib/subscriptionAccess";
 import { trackAnalyticsEvent } from "@/lib/analytics";
@@ -301,6 +303,18 @@ function SubscribeButton({
           {info}
         </Alert>
       )}
+      <Stack
+        direction="row"
+        spacing={0.8}
+        alignItems="center"
+        justifyContent="center"
+        sx={{ mb: 1.4, color: "#526179" }}
+      >
+        <LockOutlinedIcon sx={{ color: "#168a46", fontSize: 18 }} />
+        <Typography variant="caption" sx={{ fontWeight: 800 }}>
+          {t("subscription_checkout_security_note")}
+        </Typography>
+      </Stack>
       <Button
         variant="contained"
         color="primary"

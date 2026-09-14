@@ -330,6 +330,7 @@
   "year": "año",
   "subscription_secure_payment_title": "Pago protegido",
   "subscription_secure_payment_text": "Procesado mediante proveedores de pago integrados.",
+  "subscription_checkout_security_note": "Pago seguro procesado por Mercado Pago o PayPal",
   "subscription_payment_methods_title": "Dos medios de pago",
   "subscription_payment_methods_text": "Mercado Pago y PayPal disponibles.",
   "subscription_support_title": "Soporte",

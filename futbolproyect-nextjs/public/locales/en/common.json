@@ -330,6 +330,7 @@
   "year": "year",
   "subscription_secure_payment_title": "Secure payment",
   "subscription_secure_payment_text": "Processed through integrated payment providers.",
+  "subscription_checkout_security_note": "Secure payment processed by Mercado Pago or PayPal",
   "subscription_payment_methods_title": "Two payment methods",
   "subscription_payment_methods_text": "Mercado Pago and PayPal are available.",
   "subscription_support_title": "Support",
