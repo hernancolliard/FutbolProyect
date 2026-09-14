@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BadgeCheck, CalendarDays, Copy, Download, Mail, MessageCircle, Ruler, Share2, Sparkles, Weight, Footprints, Globe2 } from "lucide-react";
+import { BadgeCheck, CalendarDays, Copy, Download, Footprints, Globe2, ListChecks, Mail, MessageCircle, Ruler, Share2, Sparkles, Weight } from "lucide-react";
 import { Profile } from "@/lib/types";
+import { isProfileComplete } from "@/lib/seoSlugs";
 import { useTranslation } from "react-i18next";
 import Image from "next/image";
 
@@ -73,6 +74,7 @@ export function HeroPlayer({
 }: HeroPlayerProps) {
   const { t } = useTranslation("common");
   const heroImage = profile.foto_perfil_url || "/images/logos/logofp.png";
+  const hasCompleteProfile = isProfileComplete(profile);
 
   return (
     <motion.section
@@ -91,9 +93,13 @@ export function HeroPlayer({
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,211,102,0.15),transparent_40%)]" />
         <div className="relative flex-1 p-6 sm:p-8 lg:p-10">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-slate-100 backdrop-blur">
-            <Sparkles size={16} className="text-[#25D366]" />
-            {t("player_profile_badge")}
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm font-semibold text-slate-100 backdrop-blur">
+            {hasCompleteProfile ? (
+              <ListChecks size={16} className="text-[#25D366]" />
+            ) : (
+              <Sparkles size={16} className="text-slate-300" />
+            )}
+            {t(hasCompleteProfile ? "profile_complete_badge" : "profile_created_badge")}
           </div>
 
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -138,7 +144,7 @@ export function HeroPlayer({
                   { label: t("birth_plain"), value: birthDateLabel || "" },
                   { label: t("height_plain"), value: profile.altura_cm ? `${profile.altura_cm} cm` : "" },
                   { label: t("weight_plain"), value: profile.peso_kg ? `${profile.peso_kg} kg` : "" },
-                ].map((item) => (
+                ].filter((item) => item.value).map((item) => (
                   <div key={item.label} className="rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-sm">
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-300">{item.label}</p>
                     <p className="mt-1 font-semibold text-white">{item.value}</p>
@@ -163,7 +169,9 @@ export function HeroPlayer({
               <div className="mt-4 space-y-2 text-sm text-slate-200">
                 <div className="flex items-center gap-2"><Footprints size={16} className="text-[#25D366]" /> {t("preferred_foot")}: {dominantFoot || ""}</div>
                 <div className="flex items-center gap-2"><Globe2 size={16} className="text-[#25D366]" /> {t("languages")}: {languagesLabel || t("not_loaded")}</div>
-                <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {birthDateLabel ? t("birthday_value", { date: birthDateLabel }) : t("birth_date_not_loaded")}</div>
+                {birthDateLabel ? (
+                  <div className="flex items-center gap-2"><CalendarDays size={16} className="text-[#25D366]" /> {t("birthday_value", { date: birthDateLabel })}</div>
+                ) : null}
               </div>
             </div>
           </div>

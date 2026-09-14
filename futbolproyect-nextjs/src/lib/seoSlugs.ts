@@ -39,7 +39,20 @@ export const hasProfilePhoto = (profile: Pick<Profile, "foto_perfil_url">) =>
   Boolean(profile.foto_perfil_url) &&
   !String(profile.foto_perfil_url).includes("/images/logos/");
 
+const PROFILE_COMPLETION_SCORE_TOTAL = 10;
+
 export const getProfileCompletion = (profile: Profile) => {
+  if (
+    profile.completion_score !== undefined &&
+    profile.completion_score !== null &&
+    Number.isFinite(Number(profile.completion_score))
+  ) {
+    const percentage = Math.round(
+      (Number(profile.completion_score) / PROFILE_COMPLETION_SCORE_TOTAL) * 100,
+    );
+    return Math.min(100, Math.max(0, percentage));
+  }
+
   const fields = [
     hasProfilePhoto(profile),
     profile.telefono,
@@ -50,7 +63,7 @@ export const getProfileCompletion = (profile: Profile) => {
     profile.altura_cm,
     profile.peso_kg,
     profile.pie_dominante,
-    profile.fecha_de_nacimiento,
+    profile.fecha_de_nacimiento || Number.isFinite(profile.edad),
     profile.idiomas,
     profile.estadisticas,
     profile.trayectoria,
@@ -60,10 +73,13 @@ export const getProfileCompletion = (profile: Profile) => {
   return Math.round((completed / fields.length) * 100);
 };
 
-export const PROFILE_COMPLETION_THRESHOLD = 100;
+export const PROFILE_COMPLETION_THRESHOLD = 70;
 
 export const isProfileComplete = (profile: Profile) =>
   getProfileCompletion(profile) >= PROFILE_COMPLETION_THRESHOLD;
+
+export const getProfileLevel = (profile: Profile) =>
+  isProfileComplete(profile) ? "complete" : "created";
 
 export const isProfileIndexable = (profile: Profile) => {
   if (typeof profile.is_indexable === "boolean") return profile.is_indexable;

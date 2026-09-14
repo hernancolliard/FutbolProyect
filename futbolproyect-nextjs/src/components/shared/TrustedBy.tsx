@@ -14,7 +14,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import GroupsIcon from "@mui/icons-material/Groups";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
 import "../../styles/TrustedBy.css";
 
 const audiences = [
@@ -57,7 +57,7 @@ function TrustedBy() {
     <Box className="trust-section">
       <Stack spacing={1.5} sx={{ mb: 3, maxWidth: 1180, mx: 'auto', alignItems: { xs: 'center', md: 'flex-start' } }}>
         <Chip
-          icon={<VerifiedOutlinedIcon />}
+          icon={<HubOutlinedIcon />}
           label={t("trust_badge", "Perfiles, ofertas y contacto en un solo lugar")}
           color="primary"
           variant="outlined"

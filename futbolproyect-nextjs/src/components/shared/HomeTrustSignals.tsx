@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 
 const trustItems = [
   {
-    icon: <VerifiedOutlinedIcon />,
+    icon: <BadgeOutlinedIcon />,
     titleKey: "home_trust_profiles_title",
     textKey: "home_trust_profiles_text",
   },

@@ -41,6 +41,8 @@ type Applicant = {
   cv_url?: string;
   average_rating?: number;
   total_ratings?: number;
+  completion_score?: number;
+  mensaje_presentacion?: string;
 };
 
 const statusOptions = [
@@ -195,6 +197,23 @@ export default function ApplicantsPage() {
                         {Number(applicant.average_rating).toFixed(1)} / 5 ({applicant.total_ratings || 0})
                       </Typography>
                     ) : null}
+                    <Stack spacing={0.5} sx={{ mt: 0.75, maxWidth: 320 }}>
+                      <Chip
+                        size="small"
+                        color={Number(applicant.completion_score || 0) >= 7 ? "success" : "default"}
+                        label={t(
+                          Number(applicant.completion_score || 0) >= 7
+                            ? "profile_complete_badge"
+                            : "profile_created_badge",
+                        )}
+                        sx={{ alignSelf: "flex-start" }}
+                      />
+                      {applicant.mensaje_presentacion ? (
+                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: "pre-wrap" }}>
+                          {applicant.mensaje_presentacion}
+                        </Typography>
+                      ) : null}
+                    </Stack>
                   </TableCell>
                   <TableCell>{applicant.posicion_principal || "-"}</TableCell>
                   <TableCell>{applicant.nacionalidad || "-"}</TableCell>

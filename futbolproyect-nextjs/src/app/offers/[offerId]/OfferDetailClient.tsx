@@ -18,6 +18,7 @@ import {
   Divider,
   Paper,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -37,8 +38,13 @@ import { useAuth } from "@/context/AuthContext";
 import FeatureOfferPaymentModal from "@/components/FeatureOfferPaymentModal";
 import OfferActions from "@/components/shared/OfferActions";
 import ShareButtons from "@/components/ShareButtons";
-import { Offer } from "@/lib/types";
+import { Offer, Profile } from "@/lib/types";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
+import {
+  getProfileCompletion,
+  getProfilePath,
+  isProfileComplete,
+} from "@/lib/seoSlugs";
 
 type Props = {
   offerId: string;
@@ -152,6 +158,7 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   const queryClient = useQueryClient();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [presentationMessage, setPresentationMessage] = useState("");
   const offerCardRef = useRef<HTMLDivElement | null>(null);
 
   const isAdmin = Boolean(user?.isAdmin || user?.isadmin);
@@ -176,6 +183,28 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
     refetchOnMount: "always",
     retry: 2,
   });
+
+  const shouldLoadApplicantProfile = Boolean(
+    user?.id && user?.tipo_usuario === "postulante" && !isAdmin,
+  );
+  const {
+    data: applicantProfile,
+    isLoading: isApplicantProfileLoading,
+  } = useQuery<Profile>({
+    queryKey: ["application-profile", user?.id],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Profile>(`/profiles/${user?.id}`);
+      return data;
+    },
+    enabled: shouldLoadApplicantProfile,
+    staleTime: 60_000,
+  });
+  const applicantCompletionPercent = applicantProfile
+    ? getProfileCompletion(applicantProfile)
+    : 0;
+  const hasCompleteApplicantProfile = Boolean(
+    applicantProfile && isProfileComplete(applicantProfile),
+  );
 
   const lang = i18n.language?.startsWith("en") ? "en" : "es";
   const titulo = offer?.[`titulo_${lang}`] || offer?.titulo || "";
@@ -219,9 +248,14 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
   });
 
   const { mutate: applyToOffer, isPending: isApplying } = useMutation({
-    mutationFn: () => apiClient.post("/applications", { id_oferta: offerId }),
+    mutationFn: () =>
+      apiClient.post("/applications", {
+        id_oferta: offerId,
+        mensaje_presentacion: presentationMessage.trim() || null,
+      }),
     onSuccess: () => {
       setApplied(true);
+      setPresentationMessage("");
       toast.success(t("apply_success", "¡Postulación exitosa!"));
     },
     onError: (mutationError: any) => {
@@ -560,16 +594,80 @@ export default function OfferDetailClient({ offerId, initialOffer }: Props) {
                 </Alert>
               ) : user?.tipo_usuario === "postulante" && !isOwner && !isAdmin ? (
                 hasActiveSubscription ? (
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    startIcon={<SendRoundedIcon />}
-                    onClick={() => applyToOffer()}
-                    disabled={isApplying}
-                    sx={{ mt: 2, py: 1.15, bgcolor: "#1262db", fontWeight: 900 }}
-                  >
-                    {isApplying ? t("applying") : t("apply_now")}
-                  </Button>
+                  isApplicantProfileLoading ? (
+                    <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+                      <CircularProgress size={28} />
+                    </Box>
+                  ) : hasCompleteApplicantProfile && applicantProfile ? (
+                    <Stack spacing={1.5} sx={{ mt: 2 }}>
+                      <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: "#f3f8ff", border: "1px solid #cfe0f5" }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="caption" sx={{ color: "#65738a" }}>
+                              {t("application_profile_to_send", "Perfil que se enviará")}
+                            </Typography>
+                            <Typography sx={{ color: "#0a1930", fontWeight: 900 }} noWrap>
+                              {`${applicantProfile.nombre || ""} ${applicantProfile.apellido || ""}`.trim()}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "#65738a" }}>
+                              {applicantProfile.posicion_principal || t("position_not_specified")}
+                            </Typography>
+                          </Box>
+                          <Chip
+                            color="success"
+                            size="small"
+                            label={t("profile_complete_badge", "Perfil completo")}
+                          />
+                        </Stack>
+                        <Button
+                          component={Link}
+                          href={getProfilePath(applicantProfile)}
+                          size="small"
+                          sx={{ mt: 0.5, px: 0 }}
+                        >
+                          {t("review_my_profile", "Revisar mi perfil")}
+                        </Button>
+                      </Box>
+                      <TextField
+                        label={t("application_message_label", "Mensaje de presentación (opcional)")}
+                        value={presentationMessage}
+                        onChange={(event) => setPresentationMessage(event.target.value)}
+                        multiline
+                        minRows={3}
+                        inputProps={{ maxLength: 1000 }}
+                        helperText={t(
+                          "application_message_help",
+                          "Contá brevemente por qué te interesa la oportunidad. Máximo 1000 caracteres.",
+                        )}
+                      />
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        startIcon={<SendRoundedIcon />}
+                        onClick={() => applyToOffer()}
+                        disabled={isApplying}
+                        sx={{ py: 1.15, bgcolor: "#1262db", fontWeight: 900 }}
+                      >
+                        {isApplying ? t("applying") : t("send_profile_application", "Enviar mi perfil")}
+                      </Button>
+                    </Stack>
+                  ) : (
+                    <Alert
+                      severity="warning"
+                      action={
+                        <Button component={Link} href="/profile" color="inherit" size="small">
+                          {t("complete_profile_action", "Completar perfil")}
+                        </Button>
+                      }
+                      sx={{ mt: 2 }}
+                    >
+                      {t(
+                        "application_profile_incomplete",
+                        "Tu perfil está al {{percent}}%. Necesitás alcanzar el 70% para postularte.",
+                        { percent: applicantCompletionPercent },
+                      )}
+                    </Alert>
+                  )
                 ) : (
                   <SubscriptionAccessNotice
                     title={t(

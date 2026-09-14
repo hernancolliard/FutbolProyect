@@ -50,7 +50,10 @@ const normalizeForSearch = (value?: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
 
-const getProfileAge = (birthDate?: string) => {
+const getProfileAge = (profile: Profile) => {
+  if (Number.isFinite(profile.edad)) return Number(profile.edad);
+
+  const birthDate = profile.fecha_de_nacimiento;
   if (!birthDate) return null;
   const parsedDate = new Date(birthDate);
   if (Number.isNaN(parsedDate.getTime())) return null;
@@ -148,7 +151,7 @@ export default function FilterControls({
   const agesInProfiles = useMemo(
     () =>
       initialProfiles
-        .map((profile) => getProfileAge(profile.fecha_de_nacimiento))
+        .map((profile) => getProfileAge(profile))
         .filter((age): age is number => age !== null),
     [initialProfiles],
   );
@@ -229,7 +232,7 @@ export default function FilterControls({
           !appliedFilters.puesto ||
           getPlayerPositionCategory(profile.posicion_principal) ===
             appliedFilters.puesto;
-        const profileAge = getProfileAge(profile.fecha_de_nacimiento);
+        const profileAge = getProfileAge(profile);
         const matchAge =
           !isAgeFilterActive ||
           (profileAge !== null &&

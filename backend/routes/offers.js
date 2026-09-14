@@ -811,7 +811,19 @@ router.get(
           pu.foto_perfil_url,
           pu.cv_url,
           pu.average_rating,
-          pu.total_ratings
+          pu.total_ratings,
+          (
+            CASE WHEN NULLIF(TRIM(pu.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN pu.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN pu.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(pu.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN pu.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+          ) AS completion_score
         FROM postulaciones p
         JOIN usuarios u ON p.id_usuario_postulante = u.id
         LEFT JOIN perfiles_usuario pu ON u.id = pu.id_usuario

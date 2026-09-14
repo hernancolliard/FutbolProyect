@@ -6,6 +6,14 @@ const {
   verificarSuscripcionActiva,
 } = require("../middleware/authMiddleware");
 const { sendNewApplicationNotification } = require("../services/emailService");
+const {
+  PROFILE_COMPLETION_REQUIRED_SCORE,
+  buildProfileCompletionScoreSql,
+  getProfileCompletionPercent,
+  isProfileCompletionScoreComplete,
+} = require("../profileCompletion");
+
+const MAX_PRESENTATION_MESSAGE_LENGTH = 1000;
 
 // --- RUTA PROTEGIDA: POSTULARSE A UNA OFERTA ---
 // Solo usuarios logueados, con el rol 'postulante' y con suscripción activa pueden postularse.
@@ -15,23 +23,83 @@ router.post(
   async (req, res) => {
     const { id_oferta, mensaje_presentacion } = req.body;
     const id_usuario_postulante = req.user.id;
+    const normalizedOfferId = Number.parseInt(id_oferta, 10);
+    const normalizedPresentationMessage =
+      typeof mensaje_presentacion === "string"
+        ? mensaje_presentacion.trim()
+        : "";
 
-    if (!id_oferta) {
+    if (!Number.isInteger(normalizedOfferId) || normalizedOfferId <= 0) {
       return res
         .status(400)
         .json({ message: "El ID de la oferta es obligatorio." });
     }
 
+    if (normalizedPresentationMessage.length > MAX_PRESENTATION_MESSAGE_LENGTH) {
+      return res.status(400).json({
+        message: `El mensaje de presentación no puede superar los ${MAX_PRESENTATION_MESSAGE_LENGTH} caracteres.`,
+      });
+    }
+
     try {
+      const [profileResult, offerResult] = await Promise.all([
+        db.query(
+          `
+            SELECT ${buildProfileCompletionScoreSql("p")} AS completion_score
+            FROM perfiles_usuario p
+            WHERE p.id_usuario = @userId;
+          `,
+          { userId: id_usuario_postulante },
+        ),
+        db.query(
+          `
+            SELECT id, id_usuario_ofertante
+            FROM ofertas_laborales
+            WHERE id = @offerId AND estado = 'abierta';
+          `,
+          { offerId: normalizedOfferId },
+        ),
+      ]);
+
+      if (profileResult.rows.length === 0) {
+        return res.status(400).json({
+          code: "PROFILE_REQUIRED",
+          message: "Debes crear tu perfil antes de postularte.",
+        });
+      }
+
+      const completionScore = Number(profileResult.rows[0].completion_score || 0);
+      if (!isProfileCompletionScoreComplete(completionScore)) {
+        return res.status(400).json({
+          code: "PROFILE_INCOMPLETE",
+          message: "Completa al menos el 70% de tu perfil antes de postularte.",
+          completion_percent: getProfileCompletionPercent(completionScore),
+          required_score: PROFILE_COMPLETION_REQUIRED_SCORE,
+        });
+      }
+
+      if (offerResult.rows.length === 0) {
+        return res.status(404).json({ message: "Oferta no encontrada o cerrada." });
+      }
+
+      if (
+        Number(offerResult.rows[0].id_usuario_ofertante) ===
+        Number(id_usuario_postulante)
+      ) {
+        return res.status(403).json({
+          message: "No puedes postularte a tu propia oferta.",
+        });
+      }
+
       const query = `
             INSERT INTO postulaciones (id_oferta, id_usuario_postulante, mensaje_presentacion)
             VALUES (@id_oferta, @id_usuario_postulante, @mensaje_presentacion)
-            RETURNING id_oferta;
+            RETURNING id, id_oferta;
         `;
       const result = await db.query(query, {
-        id_oferta,
+        id_oferta: normalizedOfferId,
         id_usuario_postulante,
-        mensaje_presentacion: mensaje_presentacion || null,
+        mensaje_presentacion: normalizedPresentationMessage || null,
       });
 
       // Notificar al ofertante
@@ -82,7 +150,10 @@ router.post(
         // No bloquear la postulación si el email falla.
       }
 
-      res.status(201).json({ message: "Postulación enviada correctamente." });
+      res.status(201).json({
+        id: result.rows[0].id,
+        message: "Postulación enviada correctamente.",
+      });
     } catch (error) {
       // Comprueba si el error es por una violación de la restricción UNIQUE (código 23505 en PostgreSQL)
       if (error.code === "23505") {

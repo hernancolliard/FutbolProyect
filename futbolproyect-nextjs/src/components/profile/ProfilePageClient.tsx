@@ -26,7 +26,12 @@ import AdBanner from "@/components/ads/AdBanner";
 import { ArrowRight, BadgeCheck, BadgeInfo, CalendarRange, CheckCircle2, Circle, Compass, Eye, FileText, ImageIcon, KeyRound, MessageCircle, PlayCircle, Sparkles, Star, TrendingUp, Users } from "lucide-react";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
-import { getProfileCompletion, hasProfilePhoto } from "@/lib/seoSlugs";
+import {
+  getProfileCompletion,
+  hasProfilePhoto,
+  isProfileComplete,
+  PROFILE_COMPLETION_THRESHOLD,
+} from "@/lib/seoSlugs";
 import { getSafeClubLogoUrl } from "@/lib/clubCrests";
 import { hasCompatibleActiveSubscription } from "@/lib/subscriptionAccess";
 import ProfileActionGateDialog from "./ProfileActionGateDialog";
@@ -233,6 +238,9 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                 telefono: data.telefono || "",
                 whatsapp_url: data.whatsapp_url || "",
                 agente_contacto: data.agente_contacto || "",
+                fecha_de_nacimiento: data.fecha_de_nacimiento || null,
+                edad: Number.isFinite(data.edad) ? Number(data.edad) : null,
+                es_menor: Boolean(data.es_menor),
               }
             : previousProfile,
         );
@@ -536,6 +544,8 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   };
 
   const age = useMemo(() => {
+    if (Number.isFinite(profile?.edad)) return Number(profile?.edad);
+
     const birth = parseDateOnly(profile?.fecha_de_nacimiento);
     if (!birth) return null;
 
@@ -548,15 +558,14 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
     }
 
     return calculatedAge;
-  }, [profile?.fecha_de_nacimiento]);
+  }, [profile?.edad, profile?.fecha_de_nacimiento]);
+  const birthDateLabel = formatDateOnly(profile?.fecha_de_nacimiento);
 
   const localCompletionPercent = useMemo(() => {
     if (!profile) return 0;
     return getProfileCompletion(profile);
   }, [profile]);
-  const effectiveCompletionPercent = Number(
-    profileStats?.completion_percent ?? localCompletionPercent,
-  );
+  const effectiveCompletionPercent = localCompletionPercent;
   const activationState = useMemo(
     () => getProfileActivationState(profile, Boolean(featuredVideo)),
     [featuredVideo, profile],
@@ -652,6 +661,11 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
   ];
   const completedActivationSteps = activationSteps.filter((step) => step.complete).length;
   const nextActivationStep = activationSteps.find((step) => !step.complete);
+  const hasCompleteProfile = isProfileComplete(profile);
+  const profileLevelLabel = t(
+    hasCompleteProfile ? "profile_complete_badge" : "profile_created_badge",
+  );
+  const boundedCompletionPercent = Math.min(100, Math.max(0, completionPercent));
 
   const handleActivationAction = () => {
     if (nextActivationStep?.id === "evidence") {
@@ -675,7 +689,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           <HeroPlayer
             profile={profile}
             age={age}
-            birthDateLabel={formatDateOnly(profile.fecha_de_nacimiento)}
+            birthDateLabel={birthDateLabel}
             nationalityLabel={nacionalidad || ""}
             availabilityLabel={availabilityLabel}
             availabilityTone={availabilityTone}
@@ -699,26 +713,22 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   <div className="flex items-center gap-2 text-[#168a46]">
                     <Sparkles size={18} aria-hidden="true" />
                     <p className="text-xs font-bold uppercase tracking-[0.18em]">
-                      {t("profile_activation_eyebrow", "ActivÃ¡ tu perfil")}
+                      {t("profile_level_title", "Nivel actual: {{level}}", {
+                        level: profileLevelLabel,
+                      })}
                     </p>
                   </div>
                   <h2 className="mt-2 text-xl font-semibold text-[#071C3C]">
-                    {nextActivationStep
-                      ? t("profile_activation_title", "Tu prÃ³ximo paso: {{step}}", {
-                          step: nextActivationStep.label,
-                        })
-                      : t("profile_activation_complete_title", "Tu perfil ya estÃ¡ listo para mostrar")}
+                    {hasCompleteProfile
+                      ? t("profile_level_complete_title", "Tu perfil alcanzó el nivel completo")
+                      : t("profile_level_created_title", "Convertí tu perfil creado en un perfil completo")}
                   </h2>
                   <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                    {nextActivationStep
-                      ? t(
-                          "profile_activation_description",
-                          "CompletÃ¡ estos puntos para que clubes y profesionales entiendan rÃ¡pido tu experiencia.",
-                        )
-                      : t(
-                          "profile_activation_complete_description",
-                          "Ya tenÃ©s la informaciÃ³n esencial para presentar mejor tu perfil.",
-                        )}
+                    {t(
+                      hasCompleteProfile
+                        ? "profile_level_complete_description"
+                        : "profile_level_created_description",
+                    )}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {activationSteps.map((step) => (
@@ -737,7 +747,27 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                   </div>
                 </div>
                 <div className="flex min-w-[180px] flex-col gap-3 md:items-end">
-                  <p className="text-sm font-semibold text-slate-600">
+                  <div className="w-full md:w-52">
+                    <p className="text-sm font-semibold text-slate-600 md:text-right">
+                      {t("profile_level_progress", "{{percent}}% completado · objetivo {{target}}%", {
+                        percent: boundedCompletionPercent,
+                        target: PROFILE_COMPLETION_THRESHOLD,
+                      })}
+                    </p>
+                    <div
+                      className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={boundedCompletionPercent}
+                    >
+                      <div
+                        className="h-full rounded-full bg-[#25D366] transition-[width]"
+                        style={{ width: `${boundedCompletionPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs font-medium text-slate-500">
                     {t("profile_activation_progress", "{{completed}} de {{total}} pasos", {
                       completed: completedActivationSteps,
                       total: activationSteps.length,
@@ -856,7 +886,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
                     </div>
                     <div className="mt-4 space-y-3 text-sm text-slate-600">
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("name", "Nombre")}</span><span className="font-medium text-[#071C3C]">{profile.nombre} {profile.apellido}</span></div>
-                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("birth_date", "Nacimiento")}</span><span className="font-medium text-[#071C3C]">{formatDateOnly(profile.fecha_de_nacimiento) || ""}</span></div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2"><span>{birthDateLabel ? t("birth_date", "Nacimiento") : t("age_plain", "Edad")}</span><span className="font-medium text-[#071C3C]">{birthDateLabel || (age !== null ? t("age_years", { age }) : "")}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("nationality", "Nacionalidad")}</span><span className="font-medium text-[#071C3C]">{nacionalidad || ""}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("height", "Altura")}</span><span className="font-medium text-[#071C3C]">{profile.altura_cm ? `${profile.altura_cm} cm` : ""}</span></div>
                       <div className="flex justify-between border-b border-slate-100 pb-2"><span>{t("weight", "Peso")}</span><span className="font-medium text-[#071C3C]">{profile.peso_kg ? `${profile.peso_kg} kg` : ""}</span></div>
@@ -1078,7 +1108,7 @@ export default function ProfilePageClient({ profile: initialProfile, requestedPr
           <aside style={{ padding: 22, borderRadius: 20, background: "#f1f6fc" }}>
             <h2 style={{ margin: 0, color: "#071c3c", fontSize: 17 }}>{t("personal_data_title")}</h2>
             {[
-              [t("birth_date_placeholder"), formatDateOnly(profile.fecha_de_nacimiento)],
+              [birthDateLabel ? t("birth_date_placeholder") : t("age_plain"), birthDateLabel || (age !== null ? t("age_years", { age }) : "")],
               [t("height_placeholder"), profile.altura_cm ? `${profile.altura_cm} cm` : ""],
               [t("weight_placeholder"), profile.peso_kg ? `${profile.peso_kg} kg` : ""],
               [t("dominant_foot_placeholder"), pie_dominante],

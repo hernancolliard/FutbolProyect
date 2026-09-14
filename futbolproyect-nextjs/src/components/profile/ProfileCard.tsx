@@ -16,7 +16,7 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { useTranslation } from "react-i18next";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
-import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { Profile } from "@/lib/types";
 import { getProfilePath, isProfileComplete } from "@/lib/seoSlugs";
 
@@ -41,7 +41,9 @@ function ProfileCard({ profile }: ProfileCardProps) {
     profile.foto_perfil_url || "/images/logos/logofpazul.webp";
   const hasCompleteProfile = isProfileComplete(profile);
   const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
-  const age = getAge(profile.fecha_de_nacimiento);
+  const age = Number.isFinite(profile.edad)
+    ? Number(profile.edad)
+    : getAge(profile.fecha_de_nacimiento || undefined);
 
   return (
     <Paper
@@ -66,14 +68,14 @@ function ProfileCard({ profile }: ProfileCardProps) {
         },
       }}
     >
-      {hasCompleteProfile && (
-        <Box
-          sx={{
-            height: 3,
-            background: "linear-gradient(90deg, #1262db, #47a1ff)",
-          }}
-        />
-      )}
+      <Box
+        sx={{
+          height: 3,
+          background: hasCompleteProfile
+            ? "linear-gradient(90deg, #1262db, #47a1ff)"
+            : "#dfe6ef",
+        }}
+      />
 
       <Box
         component={Link}
@@ -110,22 +112,26 @@ function ProfileCard({ profile }: ProfileCardProps) {
               "linear-gradient(180deg, transparent 55%, rgba(5, 20, 43, .62))",
           }}
         />
-        {hasCompleteProfile && (
-          <Chip
-            icon={<VerifiedOutlinedIcon />}
-            label={t("profile_complete_badge")}
-            size="small"
-            sx={{
-              position: "absolute",
+        <Chip
+          icon={hasCompleteProfile ? <CheckCircleOutlineRoundedIcon /> : undefined}
+          label={t(
+            hasCompleteProfile
+              ? "profile_complete_badge"
+              : "profile_created_badge",
+          )}
+          size="small"
+          sx={{
+            position: "absolute",
             top: { xs: 8, sm: 12 },
             left: { xs: 8, sm: 12 },
-              color: "#fff",
-              bgcolor: "rgba(7, 34, 72, .88)",
-              fontWeight: 800,
-              "& .MuiChip-icon": { color: "#56a4ff" },
-            }}
-          />
-        )}
+            color: "#fff",
+            bgcolor: hasCompleteProfile
+              ? "rgba(7, 34, 72, .88)"
+              : "rgba(71, 85, 105, .88)",
+            fontWeight: 800,
+            "& .MuiChip-icon": { color: "#56a4ff" },
+          }}
+        />
         {age !== null && (
           <Chip
             label={t("age_years", { age })}

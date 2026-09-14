@@ -38,7 +38,9 @@ export interface Profile {
   average_rating: number;
   total_ratings: number;
   profile_views?: number;
-  fecha_de_nacimiento: string;
+  fecha_de_nacimiento?: string | null;
+  edad?: number | null;
+  es_menor?: boolean;
   has_video?: boolean;
   has_photos?: boolean;
   completion_score?: number;

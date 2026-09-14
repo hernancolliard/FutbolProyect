@@ -20,6 +20,7 @@ const {
 } = require("../youtubeVideo");
 const {
   getProfileForRequester,
+  protectProfileBirthDate,
   redactProfileContact,
 } = require("../profilePrivacy");
 
@@ -449,7 +450,11 @@ router.get("/", async (req, res) => {
     `;
 
     const result = await db.query(query, queryParams);
-    res.json(result.rows.map(redactProfileContact));
+    res.json(
+      result.rows.map((profile) =>
+        protectProfileBirthDate(redactProfileContact(profile)),
+      ),
+    );
   } catch (error) {
     console.error("Error al obtener todos los perfiles:", error);
     res.status(500).json({ message: "Error del servidor." });
@@ -518,6 +523,18 @@ router.get("/featured", async (req, res) => {
           p.nacionalidad,
           p.average_rating,
           p.total_ratings,
+          (
+            CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(p.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN p.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+          ) AS completion_score,
           s.fecha_fin
         FROM usuarios u
         JOIN perfiles_usuario p ON u.id = p.id_usuario
@@ -540,6 +557,18 @@ router.get("/featured", async (req, res) => {
           mp.nacionalidad,
           mp.average_rating,
           mp.total_ratings,
+          (
+            CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.nacionalidad), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.resumen_profesional), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.cv_url), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.posicion_principal), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.altura_cm IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.peso_kg IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN NULLIF(TRIM(mp.pie_dominante), '') IS NOT NULL THEN 1 ELSE 0 END +
+            CASE WHEN mp.fecha_de_nacimiento IS NOT NULL THEN 1 ELSE 0 END
+          ) AS completion_score,
           s.fecha_fin
         FROM managed_player_profiles mp
         JOIN usuarios owner ON owner.id = mp.owner_user_id
@@ -1172,7 +1201,17 @@ router.get("/:userId", async (req, res) => {
         return res.status(404).json({ message: "Perfil no encontrado." });
       }
 
-      return res.json(getProfileForRequester(result.rows[0], requester));
+      const managedProfile = result.rows[0];
+      const canViewExactBirthDate = Boolean(
+        requester?.isadmin ||
+          (requester && Number(requester.id) === Number(managedProfile.owner_user_id)),
+      );
+
+      return res.json(
+        getProfileForRequester(managedProfile, requester, {
+          canViewExactBirthDate,
+        }),
+      );
     } catch (error) {
       console.error("Error al obtener el perfil gestionado:", error);
       return res.status(500).json({ message: "Error del servidor." });
@@ -1241,7 +1280,11 @@ router.get("/:userId", async (req, res) => {
       return res.status(404).json({ message: "Perfil no encontrado." });
     }
 
-    res.json(getProfileForRequester(userProfile, requester));
+    res.json(
+      getProfileForRequester(userProfile, requester, {
+        canViewExactBirthDate: Boolean(isOwnProfile || isRequesterAdmin),
+      }),
+    );
   } catch (error) {
     console.error("Error al obtener el perfil del usuario:", error);
     res.status(500).json({ message: "Error del servidor." });
