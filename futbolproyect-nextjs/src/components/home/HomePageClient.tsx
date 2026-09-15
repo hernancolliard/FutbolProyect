@@ -2,9 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
-import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
+import { Box, Container, Stack } from "@mui/material";
 import Hero from "@/components/Hero";
 import HomeRoleGrid from "@/components/home/HomeRoleGrid";
 import {
@@ -104,53 +102,6 @@ export default function HomePageClient({
             {seoOverview}
 
             <AdBanner placement="home_middle" />
-
-            <Paper
-              elevation={0}
-              sx={{
-                p: { xs: 2.5, md: 3 },
-                border: "1px solid #dfe6ef",
-                borderRadius: 2.5,
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                alignItems: { xs: "flex-start", md: "center" },
-                justifyContent: "space-between",
-                gap: 2,
-              }}
-            >
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 46,
-                    height: 46,
-                    display: "grid",
-                    placeItems: "center",
-                    borderRadius: 2,
-                    bgcolor: "#edf5ff",
-                    color: "#1262db",
-                    flexShrink: 0,
-                  }}
-                >
-                  <CampaignOutlinedIcon />
-                </Box>
-                <Box>
-                  <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                    {t("home_advertise_title")}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 0.4, color: "#65738a" }}>
-                    {t("home_advertise_text")}
-                  </Typography>
-                </Box>
-              </Stack>
-              <Button
-                component={Link}
-                href="/publicidad"
-                variant="contained"
-                sx={{ bgcolor: "#1262db", fontWeight: 900, whiteSpace: "nowrap" }}
-              >
-                {t("home_advertise_cta")}
-              </Button>
-            </Paper>
 
             <HomeFAQ />
 

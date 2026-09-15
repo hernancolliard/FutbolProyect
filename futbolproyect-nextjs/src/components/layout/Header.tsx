@@ -37,11 +37,6 @@ const navItems = [
   { href: "/perfiles", key: "all_profiles", fallback: "Perfiles" },
   { href: "/blog", key: "blog", fallback: "Blog" },
   {
-    href: "/publicidad",
-    key: "advertise_with_us",
-    fallback: "Anunciá con nosotros",
-  },
-  {
     href: "/suscripcion",
     key: "subscriptions",
     fallback: "Suscripciones",

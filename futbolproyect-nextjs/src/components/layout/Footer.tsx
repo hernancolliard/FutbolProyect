@@ -21,7 +21,6 @@ const navigationLinks = [
   { href: "/all-offers", key: "offers" },
   { href: "/perfiles", key: "all_profiles" },
   { href: "/blog", key: "blog" },
-  { href: "/publicidad", key: "advertising_label" },
   { href: "/suscripcion", key: "subscriptions" },
 ];
 
