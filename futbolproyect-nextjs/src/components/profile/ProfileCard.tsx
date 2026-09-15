@@ -2,7 +2,6 @@
 
 import { memo } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   Box,
   Button,
@@ -19,6 +18,7 @@ import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { Profile } from "@/lib/types";
 import { getProfilePath, isProfileComplete } from "@/lib/seoSlugs";
+import ProfilePhoto from "@/components/profile/ProfilePhoto";
 
 interface ProfileCardProps {
   profile: Profile;
@@ -83,26 +83,18 @@ function ProfileCard({ profile }: ProfileCardProps) {
         sx={{
           position: "relative",
           display: "block",
-          height: { xs: 135, sm: 210 },
+          height: { xs: 175, sm: 210 },
           bgcolor: "#eaf0f7",
           overflow: "hidden",
           textDecoration: "none",
         }}
       >
-        <Image
-          src={profileImageUrl}
+        <ProfilePhoto
+          src={profile.foto_perfil_url}
           alt={t("profile_image_alt", { name: fullName || t("player") })}
-          width={360}
-          height={250}
-          sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 300px"
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: profile.foto_perfil_url ? "cover" : "contain",
-            objectPosition: "center top",
-            padding: profile.foto_perfil_url ? 0 : 54,
-            opacity: profile.foto_perfil_url ? 1 : 0.28,
-          }}
+          sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 300px"
+          fallbackSrc={profileImageUrl}
+          fallbackPadding={54}
         />
         <Box
           sx={{

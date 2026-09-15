@@ -19,6 +19,10 @@ import { useTranslation } from "react-i18next";
 import { getOfferPath, getProfilePath } from "@/lib/seoSlugs";
 import ProBadge from "@/components/ui/ProBadge";
 import { trackAnalyticsEvent } from "@/lib/analytics";
+import ProfilePhoto from "@/components/profile/ProfilePhoto";
+
+const INITIAL_MOBILE_PROFILES = 10;
+const MOBILE_PROFILE_BATCH_SIZE = 10;
 
 type SectionHeaderProps = {
   title: string;
@@ -199,6 +203,27 @@ export function HomeOffersShowcase({ offers }: { offers: Offer[] }) {
 
 export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
   const { t } = useTranslation("common");
+  const railRef = React.useRef<HTMLDivElement | null>(null);
+  const [visibleMobileProfiles, setVisibleMobileProfiles] = React.useState(
+    Math.min(INITIAL_MOBILE_PROFILES, profiles.length),
+  );
+
+  React.useEffect(() => {
+    setVisibleMobileProfiles(Math.min(INITIAL_MOBILE_PROFILES, profiles.length));
+  }, [profiles.length]);
+
+  const loadMoreProfilesNearEnd = () => {
+    const rail = railRef.current;
+    if (!rail || rail.scrollWidth <= rail.clientWidth) return;
+
+    const remainingDistance = rail.scrollWidth - rail.clientWidth - rail.scrollLeft;
+    if (remainingDistance <= rail.clientWidth * 0.8) {
+      setVisibleMobileProfiles((current) =>
+        Math.min(current + MOBILE_PROFILE_BATCH_SIZE, profiles.length),
+      );
+    }
+  };
+
   if (!profiles.length) return null;
 
   return (
@@ -222,6 +247,8 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
         pro
       />
       <Box
+        ref={railRef}
+        onScroll={loadMoreProfilesNearEnd}
         sx={{
           display: "grid",
           gridAutoFlow: { xs: "column", sm: "row" },
@@ -239,7 +266,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
           "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {profiles.slice(0, 5).map((profile, index) => {
+        {profiles.slice(0, visibleMobileProfiles).map((profile, index) => {
           const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
           return (
             <Paper
@@ -247,7 +274,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
               elevation={0}
               sx={{
                 overflow: "hidden",
-                display: { xs: index < 3 ? "block" : "none", sm: "block" },
+                display: { xs: "block", sm: index < 5 ? "block" : "none" },
                 scrollSnapAlign: "start",
                 border: "1px solid rgba(194, 145, 18, .42)",
                 borderRadius: 2.2,
@@ -269,29 +296,20 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                   bgcolor: "#eef3fa",
                   aspectRatio: "220 / 150",
                   boxSizing: "border-box",
+                  overflow: "hidden",
+                  border: "2px solid rgba(194, 145, 18, .28)",
+                  borderRadius: "12px",
                 }}
               >
-                <Image
-                  src={profile.foto_perfil_url || "/images/logos/logofpazul.webp"}
+                <ProfilePhoto
+                  src={profile.foto_perfil_url}
                   alt={
                     fullName
                       ? t("profile_image_alt", { name: fullName })
                       : t("sports_profile_on_futbolproyect")
                   }
-                  width={220}
-                  height={150}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: profile.foto_perfil_url ? "cover" : "contain",
-                    objectPosition: "center center",
-                    padding: profile.foto_perfil_url ? 0 : 38,
-                    opacity: profile.foto_perfil_url ? 1 : 0.25,
-                    boxSizing: "border-box",
-                    border: "2px solid rgba(18, 98, 219, .18)",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 16px rgba(8, 34, 70, .12)",
-                  }}
+                  sizes="(max-width: 600px) 82vw, (max-width: 900px) 50vw, 220px"
+                  fallbackPadding={38}
                 />
                 <Box sx={{ position: "absolute", top: 10, right: 10 }}>
                   <ProBadge compact />
