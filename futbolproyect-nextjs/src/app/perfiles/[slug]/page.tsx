@@ -11,7 +11,7 @@ import {
   parseSeoId,
 } from "@/lib/seoSlugs";
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const getProfile = cache(async (slug: string): Promise<Profile | null> => {
   const profileId = parseSeoId(slug);
@@ -20,10 +20,7 @@ const getProfile = cache(async (slug: string): Promise<Profile | null> => {
     const response = await fetch(
       `${getApiBaseUrl()}/profiles/${encodeURIComponent(profileId)}`,
       {
-        next: {
-          revalidate,
-          tags: [`profile:${profileId}`],
-        },
+        cache: "no-store",
       },
     );
     if (!response.ok) return null;
