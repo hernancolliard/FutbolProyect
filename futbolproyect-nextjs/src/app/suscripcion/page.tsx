@@ -27,6 +27,7 @@ import SportsSoccerOutlinedIcon from "@mui/icons-material/SportsSoccerOutlined";
 import apiClient from "@/lib/apiClient";
 import SubscribeButton from "@/components/SubscribeButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ProBadge from "@/components/ui/ProBadge";
 import { useTranslation } from "react-i18next";
 
 type SubscriptionPlan = {
@@ -70,6 +71,7 @@ const paidBenefitKeys = [
   "subscription_paid_benefit_2",
   "subscription_paid_benefit_3",
   "subscription_paid_benefit_4",
+  "subscription_paid_benefit_5",
 ];
 
 export default function SubscriptionPage() {
@@ -371,26 +373,36 @@ export default function SubscriptionPage() {
                   benefits: freeBenefitKeys,
                   color: "#65738a",
                   bgcolor: "#f7f9fc",
+                  isPro: false,
                 },
                 {
                   title: t("subscription_paid_column_title"),
                   benefits: paidBenefitKeys,
-                  color: "#1262db",
-                  bgcolor: "#edf5ff",
+                  color: "#9a6700",
+                  bgcolor: "#fff9e6",
+                  isPro: true,
                 },
               ].map((column) => (
                 <Box
                   key={column.title}
                   sx={{
                     p: 2,
-                    border: "1px solid #dfe6ef",
+                    border: "1px solid",
+                    borderColor: column.isPro ? "#d7a928" : "#dfe6ef",
                     borderRadius: 2,
                     bgcolor: column.bgcolor,
+                    boxShadow: column.isPro
+                      ? "0 12px 28px rgba(154, 103, 0, .1)"
+                      : "none",
                   }}
                 >
-                  <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
-                    {column.title}
-                  </Typography>
+                  {column.isPro ? (
+                    <ProBadge label={column.title} />
+                  ) : (
+                    <Typography sx={{ color: "#0a1930", fontWeight: 900 }}>
+                      {column.title}
+                    </Typography>
+                  )}
                   <Stack spacing={1.1} sx={{ mt: 1.5 }}>
                     {column.benefits.map((benefitKey) => (
                       <Stack

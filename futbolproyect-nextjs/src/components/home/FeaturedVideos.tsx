@@ -2,9 +2,11 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Avatar,
   Box,
+  Button,
   IconButton,
   Paper,
   Stack,
@@ -18,6 +20,8 @@ import VideoPlayerModal from "@/components/profile/VideoPlayerModal";
 import publicApi from "@/lib/publicApi";
 import type { FeaturedVideo } from "@/lib/types";
 import { getYouTubeThumbnailUrl } from "@/lib/youtube";
+import ProBadge from "@/components/ui/ProBadge";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 type Props = {
   videos: FeaturedVideo[];
@@ -103,7 +107,19 @@ export default function FeaturedVideos({ videos }: Props) {
   );
 
   return (
-    <Box component="section" aria-labelledby="featured-videos-title">
+    <Box
+      component="section"
+      aria-labelledby="featured-videos-title"
+      sx={{
+        p: { xs: 2, sm: 2.5, md: 3 },
+        border: "1px solid rgba(194, 145, 18, .38)",
+        borderRadius: 3,
+        bgcolor: "#fffdf7",
+        backgroundImage:
+          "linear-gradient(135deg, rgba(255, 249, 223, .9) 0%, rgba(255, 255, 255, .96) 58%, rgba(255, 246, 210, .7) 100%)",
+        boxShadow: "0 16px 38px rgba(112, 70, 0, .07)",
+      }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
@@ -112,13 +128,16 @@ export default function FeaturedVideos({ videos }: Props) {
         sx={{ mb: 2.25 }}
       >
         <Box>
-          <Typography
-            id="featured-videos-title"
-            component="h2"
-            sx={{ color: "#0a1930", fontSize: { xs: "1.65rem", md: "2rem" }, fontWeight: 950 }}
-          >
-            {t("featured_videos_title", "Videos Destacados")}
-          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+            <Typography
+              id="featured-videos-title"
+              component="h2"
+              sx={{ color: "#0a1930", fontSize: { xs: "1.65rem", md: "2rem" }, fontWeight: 950 }}
+            >
+              {t("featured_videos_title", "Videos PRO destacados")}
+            </Typography>
+            <ProBadge />
+          </Stack>
           <Typography sx={{ mt: 0.6, color: "#617086" }}>
             {t(
               "featured_videos_subtitle",
@@ -190,7 +209,7 @@ export default function FeaturedVideos({ videos }: Props) {
                   overflow: "hidden",
                   scrollSnapAlign: "start",
                   textAlign: "left",
-                  border: "1px solid #dfe6ef",
+                  border: "1px solid rgba(194, 145, 18, .42)",
                   borderRadius: 2.5,
                   bgcolor: "#fff",
                   cursor: "pointer",
@@ -198,10 +217,10 @@ export default function FeaturedVideos({ videos }: Props) {
                   transition: "transform .2s ease, box-shadow .2s ease",
                   "&:hover": {
                     transform: "translateY(-3px)",
-                    boxShadow: "0 15px 32px rgba(7, 28, 60, .12)",
+                    boxShadow: "0 15px 32px rgba(112, 70, 0, .14)",
                   },
                   "&:focus-visible": {
-                    outline: "3px solid rgba(18, 98, 219, .35)",
+                    outline: "3px solid rgba(194, 145, 18, .42)",
                     outlineOffset: 2,
                   },
                 }}
@@ -244,12 +263,15 @@ export default function FeaturedVideos({ videos }: Props) {
                         placeItems: "center",
                         borderRadius: "50%",
                         color: "#fff",
-                        bgcolor: "rgba(18, 98, 219, .94)",
+                        bgcolor: "rgba(154, 103, 0, .94)",
                         boxShadow: "0 8px 22px rgba(0, 0, 0, .28)",
                       }}
                     >
                       <PlayArrowRoundedIcon sx={{ fontSize: 38 }} />
                     </Box>
+                  </Box>
+                  <Box sx={{ position: "absolute", top: 10, left: 10 }}>
+                    <ProBadge compact />
                   </Box>
                 </Box>
 
@@ -312,6 +334,32 @@ export default function FeaturedVideos({ videos }: Props) {
               )}
         </Paper>
       )}
+
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+        spacing={1.5}
+        sx={{ mt: 2.2, pt: 2, borderTop: "1px solid rgba(194, 145, 18, .25)" }}
+      >
+        <Typography variant="body2" sx={{ color: "#76520d", fontWeight: 700 }}>
+          {t("home_pro_videos_note")}
+        </Typography>
+        <Button
+          component={Link}
+          href="/suscripcion"
+          variant="outlined"
+          size="small"
+          onClick={() =>
+            trackAnalyticsEvent("subscription_plans_clicked", {
+              source: "home_featured_videos",
+            })
+          }
+          sx={{ color: "#805400", borderColor: "#c29112", fontWeight: 900 }}
+        >
+          {t("home_discover_pro")}
+        </Button>
+      </Stack>
 
       <VideoPlayerModal
         open={Boolean(selectedVideo)}

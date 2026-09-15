@@ -17,15 +17,18 @@ import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import { Offer, Profile } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import { getOfferPath, getProfilePath } from "@/lib/seoSlugs";
+import ProBadge from "@/components/ui/ProBadge";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 type SectionHeaderProps = {
   title: string;
   subtitle?: string;
   href: string;
   action: string;
+  pro?: boolean;
 };
 
-function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
+function SectionHeader({ title, subtitle, href, action, pro = false }: SectionHeaderProps) {
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
@@ -35,12 +38,15 @@ function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
       sx={{ mb: 2 }}
     >
       <Box>
-        <Typography
-          component="h2"
-          sx={{ color: "#0a1930", fontSize: "1.4rem", fontWeight: 900 }}
-        >
-          {title}
-        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+          <Typography
+            component="h2"
+            sx={{ color: "#0a1930", fontSize: "1.4rem", fontWeight: 900 }}
+          >
+            {title}
+          </Typography>
+          {pro ? <ProBadge /> : null}
+        </Stack>
         {subtitle && (
           <Typography variant="body2" sx={{ mt: 0.4, color: "#65738a" }}>
             {subtitle}
@@ -52,7 +58,12 @@ function SectionHeader({ title, subtitle, href, action }: SectionHeaderProps) {
         href={href}
         size="small"
         endIcon={<ArrowForwardRoundedIcon />}
-        sx={{ minHeight: 44, color: "#1262db", fontWeight: 900, whiteSpace: "nowrap" }}
+        sx={{
+          minHeight: 44,
+          color: pro ? "#8a5a00" : "#1262db",
+          fontWeight: 900,
+          whiteSpace: "nowrap",
+        }}
       >
         {action}
       </Button>
@@ -191,12 +202,24 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
   if (!profiles.length) return null;
 
   return (
-    <Box component="section">
+    <Box
+      component="section"
+      sx={{
+        p: { xs: 2, sm: 2.5, md: 3 },
+        border: "1px solid rgba(194, 145, 18, .38)",
+        borderRadius: 3,
+        bgcolor: "#fffdf7",
+        backgroundImage:
+          "linear-gradient(135deg, rgba(255, 249, 223, .92) 0%, rgba(255, 255, 255, .96) 58%, rgba(255, 246, 210, .72) 100%)",
+        boxShadow: "0 16px 38px rgba(112, 70, 0, .07)",
+      }}
+    >
       <SectionHeader
         title={t("home_featured_profiles")}
         subtitle={t("home_featured_profiles_text")}
         href="/perfiles"
         action={t("view_all_profiles")}
+        pro
       />
       <Box
         sx={{
@@ -226,12 +249,12 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                 overflow: "hidden",
                 display: { xs: index < 3 ? "block" : "none", sm: "block" },
                 scrollSnapAlign: "start",
-                border: "1px solid #dfe6ef",
+                border: "1px solid rgba(194, 145, 18, .42)",
                 borderRadius: 2.2,
                 transition: "transform 180ms ease, box-shadow 180ms ease",
                 "&:hover": {
                   transform: "translateY(-3px)",
-                  boxShadow: "0 14px 30px rgba(8, 34, 70, .09)",
+                  boxShadow: "0 14px 30px rgba(112, 70, 0, .13)",
                 },
               }}
             >
@@ -239,6 +262,7 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                 component={Link}
                 href={getProfilePath(profile)}
                 sx={{
+                  position: "relative",
                   display: "block",
                   height: { xs: 180, sm: 160, md: 135 },
                   p: { xs: 1, sm: 0.75, md: 0 },
@@ -269,6 +293,9 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
                     boxShadow: "0 6px 16px rgba(8, 34, 70, .12)",
                   }}
                 />
+                <Box sx={{ position: "absolute", top: 10, right: 10 }}>
+                  <ProBadge compact />
+                </Box>
               </Box>
               <Stack sx={{ p: 1.6, minHeight: 150 }}>
                 <Stack direction="row" justifyContent="space-between" spacing={1}>
@@ -304,6 +331,31 @@ export function HomeProfilesShowcase({ profiles }: { profiles: Profile[] }) {
           );
         })}
       </Box>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+        spacing={1.5}
+        sx={{ mt: 2.2, pt: 2, borderTop: "1px solid rgba(194, 145, 18, .25)" }}
+      >
+        <Typography variant="body2" sx={{ color: "#76520d", fontWeight: 700 }}>
+          {t("home_pro_profiles_note")}
+        </Typography>
+        <Button
+          component={Link}
+          href="/suscripcion"
+          variant="outlined"
+          size="small"
+          onClick={() =>
+            trackAnalyticsEvent("subscription_plans_clicked", {
+              source: "home_featured_profiles",
+            })
+          }
+          sx={{ color: "#805400", borderColor: "#c29112", fontWeight: 900 }}
+        >
+          {t("home_discover_pro")}
+        </Button>
+      </Stack>
     </Box>
   );
 }
