@@ -35,6 +35,7 @@ export interface Profile {
   subscription_status: 'activa' | 'inactiva' | 'cancelada';
   subscription_plan: string;
   subscription_end_date: string;
+  is_pro?: boolean;
   average_rating: number;
   total_ratings: number;
   profile_views?: number;

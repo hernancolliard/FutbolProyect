@@ -383,6 +383,14 @@ router.get("/", async (req, res) => {
           EXISTS (
             SELECT 1 FROM user_photos up WHERE up.user_id = u.id
           ) AS has_photos,
+          EXISTS (
+            SELECT 1
+            FROM suscripciones s
+            WHERE s.id_usuario = u.id
+              AND s.estado = 'activa'
+              AND s.fecha_fin > NOW()
+              AND LOWER(TRIM(s.plan)) = 'postulante'
+          ) AS is_pro,
           (
             CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
             CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
@@ -429,6 +437,14 @@ router.get("/", async (req, res) => {
             FROM managed_profile_photos mpp
             WHERE mpp.managed_profile_id = mp.id
           ) AS has_photos,
+          EXISTS (
+            SELECT 1
+            FROM suscripciones s
+            WHERE s.id_usuario = owner.id
+              AND s.estado = 'activa'
+              AND s.fecha_fin > NOW()
+              AND LOWER(TRIM(s.plan)) = 'ofertante'
+          ) AS is_pro,
           (
             CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
             CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
@@ -446,7 +462,7 @@ router.get("/", async (req, res) => {
         JOIN usuarios owner ON owner.id = mp.owner_user_id
         WHERE ${managedWhereClauses.join(" AND ")}
       ) profiles
-      ORDER BY completion_score DESC, sort_created_at DESC, id DESC;
+      ORDER BY is_pro DESC, completion_score DESC, sort_created_at DESC, id DESC;
     `;
 
     const result = await db.query(query, queryParams);

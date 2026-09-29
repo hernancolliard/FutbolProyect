@@ -19,6 +19,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import { Profile } from "@/lib/types";
 import { getProfilePath, isProfileComplete } from "@/lib/seoSlugs";
 import ProfilePhoto from "@/components/profile/ProfilePhoto";
+import ProBadge from "@/components/ui/ProBadge";
 
 interface ProfileCardProps {
   profile: Profile;
@@ -40,6 +41,7 @@ function ProfileCard({ profile }: ProfileCardProps) {
   const profileImageUrl =
     profile.foto_perfil_url || "/images/logos/logofpazul.webp";
   const hasCompleteProfile = isProfileComplete(profile);
+  const isPro = Boolean(profile.is_pro);
   const fullName = `${profile.nombre || ""} ${profile.apellido || ""}`.trim();
   const age = Number.isFinite(profile.edad)
     ? Number(profile.edad)
@@ -56,7 +58,11 @@ function ProfileCard({ profile }: ProfileCardProps) {
         flexDirection: "column",
         bgcolor: "#fff",
         border: "1px solid",
-        borderColor: hasCompleteProfile ? "rgba(18, 98, 219, .34)" : "#dfe6ef",
+        borderColor: isPro
+          ? "rgba(194, 145, 18, .54)"
+          : hasCompleteProfile
+            ? "rgba(18, 98, 219, .34)"
+            : "#dfe6ef",
         borderRadius: 2.5,
         boxShadow: "0 5px 18px rgba(8, 34, 70, .045)",
         transition:
@@ -71,9 +77,11 @@ function ProfileCard({ profile }: ProfileCardProps) {
       <Box
         sx={{
           height: 3,
-          background: hasCompleteProfile
-            ? "linear-gradient(90deg, #1262db, #47a1ff)"
-            : "#dfe6ef",
+          background: isPro
+            ? "linear-gradient(90deg, #c29112, #f4d66f)"
+            : hasCompleteProfile
+              ? "linear-gradient(90deg, #1262db, #47a1ff)"
+              : "#dfe6ef",
         }}
       />
 
@@ -124,6 +132,11 @@ function ProfileCard({ profile }: ProfileCardProps) {
             "& .MuiChip-icon": { color: "#56a4ff" },
           }}
         />
+        {isPro && (
+          <Box sx={{ position: "absolute", top: { xs: 8, sm: 12 }, right: { xs: 8, sm: 12 } }}>
+            <ProBadge compact />
+          </Box>
+        )}
         {age !== null && (
           <Chip
             label={t("age_years", { age })}

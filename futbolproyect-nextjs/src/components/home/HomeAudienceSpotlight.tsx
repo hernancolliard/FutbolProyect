@@ -56,13 +56,20 @@ export default function HomeAudienceSpotlight() {
           <Typography sx={{ mb: 1, color: "#0a1930", fontWeight: 900 }}>
             {t(audience.titleKey)}
           </Typography>
-          <Box sx={{ position: "relative", height: 155, borderRadius: 1.7, overflow: "hidden" }}>
+          <Box
+            sx={{
+              position: "relative",
+              height: { xs: 220, md: 155 },
+              borderRadius: 1.7,
+              overflow: "hidden",
+            }}
+          >
             <Image
               src={audience.image}
               alt={t(audience.titleKey)}
               fill
               sizes="(max-width: 900px) 100vw, 33vw"
-              style={{ objectFit: "cover", objectPosition: "center" }}
+              style={{ objectFit: "cover", objectPosition: "center top" }}
             />
             <Box
               sx={{
