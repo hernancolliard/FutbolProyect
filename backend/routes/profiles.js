@@ -277,6 +277,11 @@ const buildManagedProfileResponseSelect = () => `
     mp.pie_dominante_en,
     mp.created_at,
     mp.updated_at,
+    EXISTS (
+      SELECT 1
+      FROM managed_profile_videos mpv
+      WHERE mpv.managed_profile_id = mp.id
+    ) AS has_video,
     (
       CASE WHEN NULLIF(TRIM(mp.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
       CASE WHEN NULLIF(TRIM(mp.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +
@@ -1248,6 +1253,9 @@ router.get("/:userId", async (req, res) => {
              p.average_rating, p.total_ratings,
              COALESCE(p.created_at, u.fecha_creacion) AS created_at,
              p.updated_at,
+             EXISTS (
+               SELECT 1 FROM user_videos uv WHERE uv.user_id = u.id
+             ) AS has_video,
              (
                CASE WHEN NULLIF(TRIM(p.foto_perfil_url), '') IS NOT NULL THEN 1 ELSE 0 END +
                CASE WHEN NULLIF(TRIM(p.telefono), '') IS NOT NULL THEN 1 ELSE 0 END +

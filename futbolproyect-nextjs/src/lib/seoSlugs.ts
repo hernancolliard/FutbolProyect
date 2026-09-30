@@ -42,6 +42,8 @@ export const hasProfilePhoto = (profile: Pick<Profile, "foto_perfil_url">) =>
 const PROFILE_COMPLETION_SCORE_TOTAL = 10;
 
 export const getProfileCompletion = (profile: Profile) => {
+  const hasRequiredMedia = hasProfilePhoto(profile) && Boolean(profile.has_video);
+
   if (
     profile.completion_score !== undefined &&
     profile.completion_score !== null &&
@@ -50,7 +52,10 @@ export const getProfileCompletion = (profile: Profile) => {
     const percentage = Math.round(
       (Number(profile.completion_score) / PROFILE_COMPLETION_SCORE_TOTAL) * 100,
     );
-    return Math.min(100, Math.max(0, percentage));
+    const boundedPercentage = Math.min(100, Math.max(0, percentage));
+    return boundedPercentage === 100 && !hasRequiredMedia
+      ? 90
+      : boundedPercentage;
   }
 
   const fields = [
@@ -70,12 +75,14 @@ export const getProfileCompletion = (profile: Profile) => {
     profile.disponibilidad,
   ];
   const completed = fields.filter(Boolean).length;
-  return Math.round((completed / fields.length) * 100);
+  const percentage = Math.round((completed / fields.length) * 100);
+  return percentage === 100 && !hasRequiredMedia ? 90 : percentage;
 };
 
 export const PROFILE_COMPLETION_THRESHOLD = 70;
 
 export const isProfileComplete = (profile: Profile) =>
+  hasProfilePhoto(profile) &&
   getProfileCompletion(profile) >= PROFILE_COMPLETION_THRESHOLD;
 
 export const getProfileLevel = (profile: Profile) =>
