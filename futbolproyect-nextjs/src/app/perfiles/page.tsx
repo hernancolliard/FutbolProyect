@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-export const revalidate = 300;
 import { Profile } from "@/lib/types";
 import FilterControls from "@/components/profile/FilterControls";
 import { getApiBaseUrl } from "@/lib/api";
 
-/* =========================
-   STATIC FETCH (BUILD TIME)
-========================= */
+// El orden de los perfiles depende de suscripciones vigentes, por lo que debe
+// consultarse en cada solicitud y no reutilizar una lista desactualizada.
+export const dynamic = "force-dynamic";
 
 const API_URL = getApiBaseUrl();
 
@@ -16,8 +15,8 @@ async function fetchInitialData(): Promise<{
 }> {
   try {
     const [profilesRes, nacRes] = await Promise.all([
-      fetch(`${API_URL}/profiles`, { next: { revalidate } }),
-      fetch(`${API_URL}/profiles/nacionalidades`, { next: { revalidate } }),
+      fetch(`${API_URL}/profiles`, { cache: "no-store" }),
+      fetch(`${API_URL}/profiles/nacionalidades`, { cache: "no-store" }),
     ]);
 
     return {
