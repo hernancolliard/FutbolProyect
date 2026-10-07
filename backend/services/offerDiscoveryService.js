@@ -3,8 +3,9 @@ const { hasApplicationContact, extractedApplicationContact } = require('../offer
 const { Budget, realProvider } = require('./offerDiscoveryProviders');
 const LOCK_ID = 734182910;
 const safeCodes = new Set(['COST_LIMIT','UNSAFE_URL','EXCLUDED_DOMAIN','SOURCE_NOT_APPROVED','ROBOTS_RESTRICTED','SOURCE_UNAVAILABLE','SOURCE_TIMEOUT','PAGE_TOO_LARGE','ACCESS_RESTRICTED','REDIRECT_LIMIT','PROVIDER_UNAVAILABLE','PROVIDER_INVALID_JSON','PROVIDER_TOO_LARGE','EXTRACTION_INCOMPLETE','EXTRACTION_REFUSED','EXTRACTION_INVALID','TIME_LIMIT']);
+const terminalCodes = new Set(['COST_LIMIT','OPENAI_QUOTA_EXCEEDED','OPENAI_RATE_LIMIT','BRAVE_RATE_LIMIT','OPENAI_HTTP_401','OPENAI_HTTP_403','BRAVE_HTTP_401','BRAVE_HTTP_403']);
 function safeError(error) {
-  return safeCodes.has(error.message) || /^PROVIDER_HTTP_\d+$/.test(error.message) ? error.message : 'DISCOVERY_ERROR';
+  return safeCodes.has(error.message) || terminalCodes.has(error.message) || /^(PROVIDER|OPENAI|BRAVE)_HTTP_\d+$/.test(error.message) ? error.message : 'DISCOVERY_ERROR';
 }
 async function readConfig(client) {
   const result = await client.query('SELECT config FROM offer_discovery_settings WHERE id = 1');
@@ -87,7 +88,7 @@ async function runDiscovery(db, userId = null, {provider = realProvider, env = p
       if(controller.signal.aborted || stats.pages >= config.maxPages) break;
       let links;
       try { stats.searches++; links = await provider.search(query,budget,controller.signal,env); }
-      catch(error) { errors.push(safeError(error)); if(error.message === 'COST_LIMIT') break; continue; }
+      catch(error) { errors.push(safeError(error)); if(terminalCodes.has(error.message)) {controller.abort(error);break;} continue; }
       for(const link of links) {
         if(controller.signal.aborted || stats.pages >= config.maxPages) break;
         let url;
@@ -114,7 +115,7 @@ async function runDiscovery(db, userId = null, {provider = realProvider, env = p
           catch(error) { await client.query('ROLLBACK'); throw error; }
         } catch(error) {
           errors.push(safeError(error));
-          if(error.message === 'COST_LIMIT') {controller.abort();break;}
+          if(terminalCodes.has(error.message)) {controller.abort(error);break;}
         }
         stats.reservedCostUsd = Number(budget.reserved.toFixed(6));
         // Persist counters after every candidate to preserve useful crash history.
@@ -123,7 +124,7 @@ async function runDiscovery(db, userId = null, {provider = realProvider, env = p
       }
     }
     stats.reservedCostUsd = Number(budget.reserved.toFixed(6));
-    if(controller.signal.aborted && !errors.includes('COST_LIMIT')) errors.push('TIME_LIMIT');
+    if(controller.signal.aborted && !errors.some(code => terminalCodes.has(code))) errors.push('TIME_LIMIT');
     const status = errors.length ? (stats.created+stats.updated+stats.unchanged ? 'partial':'failed') : 'completed';
     await client.query('UPDATE offer_discovery_runs SET status=@status,finished_at=NOW(),stats=@stats,errors=@errors WHERE id=@id',
       {status,stats:JSON.stringify(stats),errors:JSON.stringify(errors.slice(0,80)),id:runId});

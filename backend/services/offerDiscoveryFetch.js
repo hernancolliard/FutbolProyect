@@ -94,13 +94,18 @@ async function fetchOriginal(value, config, signal) {
     } catch (error) { if(error.message !== 'NOT_FOUND') throw error; }
     const result = await requestPage(url,options);
     if (result.status === 200) {
-      if (/captcha|cloudflare challenge|sign in to continue|log in to continue|access denied|enable javascript and cookies/i.test(result.body)) throw new Error('ACCESS_RESTRICTED');
+      if (isAccessRestricted(result.body)) throw new Error('ACCESS_RESTRICTED');
       return result;
     }
     if (!result.location) throw new Error('SOURCE_UNAVAILABLE');
     url = normalizeUrl(new URL(result.location,url).href);
   }
   throw new Error('REDIRECT_LIMIT');
+}
+function isAccessRestricted(html) {
+  const visible = html.replace(/<(script|style|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi,' ').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ');
+  // A job application may embed reCAPTCHA scripts; that alone is not an access block.
+  return /cloudflare challenge|sign in to continue|log in to continue|access denied|enable javascript and cookies|verify (?:that )?you are human|(?:complete|solve) (?:the |a )?captcha|checking your browser|just a moment\.\.\./i.test(visible);
 }
 function pageText(html) {
   // Keep JobPosting JSON-LD as data; discard executable scripts and markup.
@@ -111,4 +116,4 @@ function pageText(html) {
     .replace(/\s+/g,' ').trim();
   return [...jsonld,text].join('\n').slice(0,12000);
 }
-module.exports = { isPublicIPv4, resolvePublic, requestPage, fetchOriginal, robotsAllowed, pageText };
+module.exports = { isPublicIPv4, resolvePublic, requestPage, fetchOriginal, robotsAllowed, pageText, isAccessRestricted };

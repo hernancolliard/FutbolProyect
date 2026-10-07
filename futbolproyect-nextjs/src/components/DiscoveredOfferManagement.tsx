@@ -26,6 +26,17 @@ const messageOf = (error: any) => {
   const details = body?.errors ? Object.entries(body.errors).map(([field,messages]) => `${field}: ${(messages as string[]).join(', ')}`).join('; ') : '';
   return [body?.message || 'No se pudo completar la operación.',details].filter(Boolean).join(' ');
 };
+const discoveryErrorLabels: Record<string,string> = {
+  OPENAI_QUOTA_EXCEEDED:'OpenAI: saldo o cuota de API agotados. Revisar la facturación y los límites del proyecto de la clave.',
+  OPENAI_RATE_LIMIT:'OpenAI: límite temporal de solicitudes. Esperar y revisar los límites del proyecto.',
+  BRAVE_RATE_LIMIT:'Brave: límite de solicitudes alcanzado. Revisar el consumo y los créditos de la cuenta.',
+  OPENAI_HTTP_401:'OpenAI: clave de API no válida.',BRAVE_HTTP_401:'Brave: clave de API no válida.',
+  OPENAI_HTTP_403:'OpenAI: acceso al modelo o proyecto denegado.',BRAVE_HTTP_403:'Brave: acceso a la API denegado.',
+  SOURCE_UNAVAILABLE:'Fuente no disponible para lectura automática.',ACCESS_RESTRICTED:'La fuente requiere acceso o verificación.',
+  ROBOTS_RESTRICTED:'La fuente no permite esta lectura automática.',REDIRECT_LIMIT:'La fuente redirige demasiadas veces.',
+  PAGE_TOO_LARGE:'La página supera el tamaño permitido.',COST_LIMIT:'Se alcanzó el presupuesto estimado. Revisar las tarifas configuradas.',
+  TIME_LIMIT:'Se alcanzó el tiempo máximo de búsqueda.',PROVIDER_HTTP_429:'Proveedor: límite de solicitudes o cuota agotada (registro anterior).',
+};
 export default function DiscoveredOfferManagement() {
   const [items,setItems] = useState<Candidate[]>([]), [runs,setRuns] = useState<Run[]>([]);
   const [status,setStatus] = useState('pendiente'), [flag,setFlag] = useState(''), [q,setQ] = useState('');
@@ -93,7 +104,7 @@ export default function DiscoveredOfferManagement() {
     <Typography variant="h6">Historial de ejecuciones</Typography>
     {runs.map(run => <Paper key={run.id} sx={{p:2}}><Typography>#{run.id} · {new Date(run.started_at).toLocaleString('es-AR')} · {run.status}</Typography>
       <Typography variant="body2">Consultas: {run.stats.searches || 0} · Páginas: {run.stats.pages || 0} · Nuevas: {run.stats.created || 0} · Actualizadas: {run.stats.updated || 0} · Repetidas: {run.stats.unchanged || 0} · Omitidas: {run.stats.skipped || 0} · Reserva estimada: USD {run.stats.reservedCostUsd || 0}</Typography>
-      {run.errors.length > 0 && <Typography color="error" variant="body2">{run.errors.join(', ')}</Typography>}</Paper>)}
+      {run.errors.length > 0 && <Typography color="error" variant="body2">{[...new Set(run.errors)].map(code => discoveryErrorLabels[code] || code).join(' · ')}</Typography>}</Paper>)}
     <Dialog open={Boolean(selected)} onClose={() => !busy && setSelected(null)} fullWidth maxWidth="md">
       <DialogTitle>Revisar oferta encontrada</DialogTitle><DialogContent><Stack spacing={2} sx={{pt:1}}>
         {error && <Alert severity="error">{error}</Alert>}

@@ -46,9 +46,34 @@ test('automatic publication fails closed; multilingual search rotates languages'
  assert.deepEqual(queries.map(q=>q.language),['es','en','pt']);assert.ok(queries[1].q.includes('coach'));assert.ok(queries.every(q=>q.q.includes('site:club.example')));
 });
 test('budget includes retries and prevents over-budget provider requests',async()=>{
- const budget=new Budget({...config,maxCostUsd:0.015},env);let calls=0;
+ const budget=new Budget({...config,maxCostUsd:0.0075},env);let calls=0;
  await assert.rejects(searchWeb({q:'football coach',language:'en'},budget,new AbortController().signal,env,async()=>{calls++;return new Response('',{status:503});}),/COST_LIMIT/);
- assert.equal(calls,1);assert.equal(budget.reserved,0.01);
+ assert.equal(calls,1);assert.equal(budget.reserved,0.005);
+});
+test('default budget matches mini prices and retains overrides and conservative unknown model ceilings',()=>{
+ const budget=new Budget(config,env);assert.equal(budget.inputPrice,0.15);assert.equal(budget.outputPrice,0.60);
+ const other=new Budget(config,{...env,DISCOVERY_OPENAI_MODEL:'other-model'});assert.equal(other.inputPrice,10);assert.equal(other.outputPrice,30);
+ assert.equal(new Budget(config,{...env,DISCOVERY_INPUT_USD_PER_MILLION:'3'}).inputPrice,3);
+});
+test('OpenAI quota errors do not retry or expose provider messages; rate limits are distinguished',async()=>{
+ let calls=0;
+ const quota=async()=>{calls++;return Response.json({error:{code:'insufficient_quota',message:'sensitive details'}},{status:429});};
+ await assert.rejects(extractPage(evidence,url,new Budget(config,env),new AbortController().signal,env,quota),e=>e.message==='OPENAI_QUOTA_EXCEEDED');
+ assert.equal(calls,1);
+ for(const code of ['credit_balance_exhausted','organization_spend_limit_exceeded','project_spend_limit_exceeded','organization_usage_limit_exceeded']) {
+  calls=0;
+  await assert.rejects(extractPage(evidence,url,new Budget(config,env),new AbortController().signal,env,async()=>{calls++;return Response.json({error:{code}},{status:429});}),/OPENAI_QUOTA_EXCEEDED/);
+  assert.equal(calls,1);
+ }
+ calls=0;
+ const rate=async()=>{calls++;return Response.json({error:{code:'rate_limit_exceeded'}},{status:429,headers:{'retry-after':'60'}});};
+ await assert.rejects(extractPage(evidence,url,new Budget(config,env),new AbortController().signal,env,rate),/OPENAI_RATE_LIMIT/);
+ assert.equal(calls,1);
+ await assert.rejects(searchWeb({q:'coach',language:'en'},new Budget(config,env),new AbortController().signal,env,rate),/BRAVE_RATE_LIMIT/);
+});
+test('application captcha scripts do not block readable vacancies but visible access challenges do',()=>{
+ assert.equal(f.isAccessRestricted('<script src="https://google.example/recaptcha.js"></script><p>Football coach vacancy. Apply below.</p>'),false);
+ for(const html of ['<h1>Verify you are human</h1>','<p>Complete the CAPTCHA</p>','<h1>Access denied</h1>','<p>Enable JavaScript and cookies</p>']) assert.equal(f.isAccessRestricted(html),true);
 });
 test('structured extraction has strict schema, no tools, no store and handles refusals',async()=>{
  let body;const fetchImpl=async(u,o)=>{body=JSON.parse(o.body);return Response.json({status:'completed',output:[{content:[{type:'output_text',text:JSON.stringify(vacancy())}]}]});};
@@ -99,6 +124,11 @@ test('provider errors are sanitized; missing keys and disabled scheduler do not 
  assert.equal(run.status,'failed');assert.deepEqual(run.errors,['DISCOVERY_ERROR']);assert.equal(JSON.stringify(store.calls).includes('secret-key'),false);
  await assert.rejects(runDiscovery(store,7,{env:{},provider:fakeProvider()}),e=>e.status===503);
  assert.deepEqual(await runDiscovery(store,null,{scheduled:true,env:{}}),{disabled:true});
+});
+test('quota failure stops remaining pages and queries without being reported as a timeout',async()=>{
+ let attempts=0;
+ const run=await runDiscovery(memoryDb(),7,{env,provider:fakeProvider({search:async()=>[url,'https://club.example/jobs/second'],extract:async()=>{attempts++;throw new Error('OPENAI_QUOTA_EXCEEDED');}})});
+ assert.equal(attempts,1);assert.equal(run.stats.pages,1);assert.equal(run.status,'failed');assert.deepEqual(run.errors,['OPENAI_QUOTA_EXCEEDED']);
 });
 async function serverFor(t){const app=express();app.use(express.json());app.use('/admin/discovered-offers',router);
  const server=await new Promise(r=>{const s=app.listen(0,'127.0.0.1',()=>r(s));});t.after(()=>server.close());return `http://127.0.0.1:${server.address().port}/admin/discovered-offers`;

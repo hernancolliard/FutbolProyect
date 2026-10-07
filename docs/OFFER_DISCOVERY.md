@@ -52,9 +52,13 @@ Todas estas variables son **del servidor**:
 | `OPENAI_API_KEY` | Clave de API de OpenAI |
 | `DISCOVERY_OPENAI_MODEL` | `gpt-4o-mini`; usar un modelo compatible con salida estructurada y ajustar sus tarifas |
 | `DISCOVERY_SCHEDULE_ENABLED` | `false` hasta configurar el cron y la base |
-| `DISCOVERY_SEARCH_USD` | Reserva por intento de consulta; techo inicial USD 0.01 |
-| `DISCOVERY_INPUT_USD_PER_MILLION` | Techo de reserva por millón de tokens de entrada; inicial USD 10 |
-| `DISCOVERY_OUTPUT_USD_PER_MILLION` | Techo de reserva por millón de tokens de salida; inicial USD 30 |
+| `DISCOVERY_SEARCH_USD` | Reserva por intento de consulta; inicial USD 0.005 |
+| `DISCOVERY_INPUT_USD_PER_MILLION` | Reserva por millón de tokens de entrada; inicial USD 0.15 para `gpt-4o-mini` |
+| `DISCOVERY_OUTPUT_USD_PER_MILLION` | Reserva por millón de tokens de salida; inicial USD 0.60 para `gpt-4o-mini` |
+
+Si Render conserva los valores antiguos `0.01`, `10` y `30`, actualizarlos a los de la tabla para `gpt-4o-mini`. Las variables de entorno tienen prioridad sobre los valores por defecto. Otros modelos sin tarifas explícitas conservan los techos de entrada 10 y salida 30. Las tarifas del modelo están verificadas en [OpenAI](https://developers.openai.com/api/docs/models/gpt-4o-mini) y la búsqueda en [Brave](https://brave.com/search/api/).
+
+Un 429 de OpenAI puede indicar falta de saldo/cuota (`OPENAI_QUOTA_EXCEEDED`) o un límite temporal (`OPENAI_RATE_LIMIT`). El agente identifica el tipo sin guardar mensajes privados del proveedor y detiene el resto de la ejecución para evitar repetir solicitudes rechazadas. La falta de cuota no se reintenta. Revisar la facturación y los límites del proyecto de API; crear una clave por sí solo no proporciona saldo. No confundir estos errores con fuentes inaccesibles o bloqueadas por robots, que se omiten conservando sus restricciones.
 
 La configuración del administrador limita cada ejecución a 6 consultas lógicas, 10 páginas candidatas, 180 segundos y USD 0.50 de reserva estimada inicialmente. Cada llamada fallida/reintento también reserva presupuesto. Máximo dos intentos por llamada a un proveedor. Cada página tiene hasta tres redirecciones y una comprobación de robots por destino, 300 KB por página (64 KB para robots), 12 KB de texto enviado y 2500 tokens de salida. Esos accesos auxiliares no son búsquedas de pago. El filtro inicial de siete días usa solo fechas comprobables de publicación; la fecha de indexación o modificación del buscador no cuenta.
 
@@ -83,7 +87,7 @@ En otro alojamiento, programar el mismo comando y compartir la misma base. Las e
 
 ## Resultado de verificación de esta entrega
 
-`node --test`: 64 pruebas aprobadas, incluidas 17 nuevas. `tsc --noEmit --incremental false`: aprobado. Sintaxis de los módulos modificados y `git diff --check`: aprobados. No se verificó PostgreSQL real, proveedores con cargo ni un despliegue.
+`node --test`: 68 pruebas aprobadas, incluidas 21 del agente. `tsc --noEmit --incremental false`: aprobado. La compilación de producción del panel se verificó al integrar el agente. Las pruebas de errores y costos usan proveedores controlados; no se comprobaron el saldo ni las claves reales de Render.
 
 ## Contacto obligatorio en cada oferta importada
 
