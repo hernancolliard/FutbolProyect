@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import UserManagement from "./UserManagement";
 import OfferManagement from "./OfferManagement";
+import DiscoveredOfferManagement from "./DiscoveredOfferManagement";
 import SubscriptionManagement from "./SubscriptionManagement";
 import ContactMessages from "./ContactMessages";
 import ClubContacts from "./ClubContacts";
@@ -40,6 +41,7 @@ function AdminDashboard() {
         >
         <Tab label={t('user_management_tab', 'Gestión de Usuarios')} value="users" />
         <Tab label={t('offer_management_tab', 'Gestión de Ofertas')} value="offers" />
+        <Tab label="Ofertas encontradas" value="discovered-offers" />
         <Tab label={t('subscription_management_tab', 'Gestión de Suscripciones')} value="subscriptions" />
         <Tab label={t('advertising_management_tab', 'Publicidad')} value="advertising" />
         <Tab label={t('advertising_leads_tab', 'Consultas publicidad')} value="advertising-leads" />
@@ -51,6 +53,7 @@ function AdminDashboard() {
       <Box className="admin-content" sx={{ mt: 3, width: '100%' }}>
         {activeTab === "users" && <UserManagement />}
         {activeTab === "offers" && <OfferManagement />}
+        {activeTab === "discovered-offers" && <DiscoveredOfferManagement />}
         {activeTab === "subscriptions" && <SubscriptionManagement />}
         {activeTab === "advertising" && <AdvertisementManagement />}
         {activeTab === "advertising-leads" && <AdvertisingLeadManagement />}

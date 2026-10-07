@@ -67,6 +67,7 @@ app.use("/api/profiles", require("./routes/profiles"));
 app.use("/api/clubs", require("./routes/clubs"));
 app.use("/api/payments", require("./routes/payments"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
+app.use("/api/admin/discovered-offers", require("./routes/offerDiscovery"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/admin", require("./routes/adminAffiliates"));
 app.use("/api/affiliates", require("./routes/affiliates"));

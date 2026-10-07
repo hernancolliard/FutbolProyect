@@ -21,6 +21,7 @@ const {
   getActiveOfferNotificationRecipients,
 } = require("../services/offerNotificationRecipientsService");
 const { offerSchema } = require("../offerSchema");
+const { createOfferRecord, updateOfferRecord } = require("../services/offerCreationService");
 
 // --- Configuración de Caché en Memoria ---
 const NodeCache = require("node-cache");
@@ -479,87 +480,11 @@ router.post(
   processOfferImages,
   validate(offerSchema),
   async (req, res) => {
-    const {
-      titulo,
-      descripcion,
-      puesto,
-      ubicacion,
-      salario,
-      horarios,
-      nivel,
-      detalles_adicionales,
-      processedImages,
-    } = req.body;
+    const { titulo } = req.body;
     const id_usuario_ofertante = req.user.id;
 
     try {
-      // Traducción de los campos
-      const [
-        titulo_trans,
-        desc_trans,
-        puesto_trans,
-        ubicacion_trans,
-        horarios_trans,
-        nivel_trans,
-        detalles_trans,
-      ] = await Promise.all([
-        translateText(titulo),
-        translateText(descripcion),
-        translateText(puesto),
-        translateText(ubicacion),
-        translateText(horarios),
-        translateText(nivel),
-        translateText(detalles_adicionales),
-      ]);
-
-      const query = `
-                INSERT INTO ofertas_laborales (
-          id_usuario_ofertante, titulo, descripcion, puesto, ubicacion, salario, 
-          horarios, nivel, detalles_adicionales, estado, 
-          imagen_url,
-          titulo_es, titulo_en, descripcion_es, descripcion_en, puesto_es, puesto_en,
-          ubicacion_es, ubicacion_en, horarios_es, horarios_en, nivel_es, nivel_en,
-          detalles_adicionales_es, detalles_adicionales_en
-        ) 
-        VALUES (
-          @id_usuario_ofertante, @titulo, @descripcion, @puesto, @ubicacion, @salario, 
-          @horarios, @nivel, @detalles_adicionales, 'abierta', 
-          @imagen_url,
-          @titulo_es, @titulo_en, @descripcion_es, @descripcion_en, @puesto_es, @puesto_en,
-          @ubicacion_es, @ubicacion_en, @horarios_es, @horarios_en, @nivel_es, @nivel_en,
-          @detalles_adicionales_es, @detalles_adicionales_en
-        )
-        RETURNING id;
-      `;
-
-      const result = await db.query(query, {
-        id_usuario_ofertante,
-        titulo,
-        descripcion,
-        puesto,
-        ubicacion,
-        salario: salario || null,
-        horarios: horarios || null,
-        nivel: nivel || null,
-        detalles_adicionales: detalles_adicionales || null,
-        imagen_url: processedImages?.imagen_url?.original || null,
-        titulo_es: titulo_trans.es,
-        titulo_en: titulo_trans.en,
-        descripcion_es: desc_trans.es,
-        descripcion_en: desc_trans.en,
-        puesto_es: puesto_trans.es,
-        puesto_en: puesto_trans.en,
-        ubicacion_es: ubicacion_trans.es,
-        ubicacion_en: ubicacion_trans.en,
-        horarios_es: horarios_trans.es,
-        horarios_en: horarios_trans.en,
-        nivel_es: nivel_trans.es,
-        nivel_en: nivel_trans.en,
-        detalles_adicionales_es: detalles_trans.es,
-        detalles_adicionales_en: detalles_trans.en,
-      });
-
-      const newOfferId = result.rows[0].id;
+      const newOfferId = await createOfferRecord(db, req.body, id_usuario_ofertante);
 
       // Invalidar el caché para que la nueva oferta aparezca inmediatamente
       myCache.flushAll();
@@ -626,127 +551,11 @@ router.put(
   validate(offerSchema),
   async (req, res) => {
     const { id } = req.params;
-    const {
-      titulo,
-      descripcion,
-      puesto,
-      ubicacion,
-      salario,
-      horarios,
-      nivel,
-      detalles_adicionales,
-      processedImages,
-    } = req.body;
     const id_usuario_actual = req.user.id;
     const esAdmin = req.user.isadmin; // Corregido para ser consistente con el payload del JWT
 
     try {
-      // 1. Verificar que la oferta existe y obtener el dueño
-      const offerQuery = `SELECT id_usuario_ofertante FROM ofertas_laborales WHERE id = @id`;
-      const offerResult = await db.query(offerQuery, { id });
-
-      if (offerResult.rows.length === 0) {
-        return res.status(404).json({ message: "Oferta no encontrada." });
-      }
-
-      const id_dueño_oferta = offerResult.rows[0].id_usuario_ofertante;
-
-      // 2. Verificar permisos (solo el dueño o un admin pueden editar)
-      if (id_dueño_oferta !== id_usuario_actual && !esAdmin) {
-        return res
-          .status(403)
-          .json({ message: "No tienes permiso para editar esta oferta." });
-      }
-
-      // 3. Construir la consulta de actualización dinámica
-      let updateFields = [];
-      let queryParams = { id };
-
-      if (titulo) {
-        const titulo_trans = await translateText(titulo);
-        updateFields.push("titulo = @titulo");
-        updateFields.push("titulo_es = @titulo_es");
-        updateFields.push("titulo_en = @titulo_en");
-        queryParams.titulo = titulo;
-        queryParams.titulo_es = titulo_trans.es;
-        queryParams.titulo_en = titulo_trans.en;
-      }
-      if (descripcion) {
-        const desc_trans = await translateText(descripcion);
-        updateFields.push("descripcion = @descripcion");
-        updateFields.push("descripcion_es = @descripcion_es");
-        updateFields.push("descripcion_en = @descripcion_en");
-        queryParams.descripcion = descripcion;
-        queryParams.descripcion_es = desc_trans.es;
-        queryParams.descripcion_en = desc_trans.en;
-      }
-      if (puesto) {
-        const puesto_trans = await translateText(puesto);
-        updateFields.push("puesto = @puesto");
-        updateFields.push("puesto_es = @puesto_es");
-        updateFields.push("puesto_en = @puesto_en");
-        queryParams.puesto = puesto;
-        queryParams.puesto_es = puesto_trans.es;
-        queryParams.puesto_en = puesto_trans.en;
-      }
-      if (ubicacion) {
-        const ubicacion_trans = await translateText(ubicacion);
-        updateFields.push("ubicacion = @ubicacion");
-        updateFields.push("ubicacion_es = @ubicacion_es");
-        updateFields.push("ubicacion_en = @ubicacion_en");
-        queryParams.ubicacion = ubicacion;
-        queryParams.ubicacion_es = ubicacion_trans.es;
-        queryParams.ubicacion_en = ubicacion_trans.en;
-      }
-      if (salario) {
-        updateFields.push("salario = @salario");
-        queryParams.salario = salario;
-      }
-      if (horarios) {
-        const horarios_trans = await translateText(horarios);
-        updateFields.push("horarios = @horarios");
-        updateFields.push("horarios_es = @horarios_es");
-        updateFields.push("horarios_en = @horarios_en");
-        queryParams.horarios = horarios;
-        queryParams.horarios_es = horarios_trans.es;
-        queryParams.horarios_en = horarios_trans.en;
-      }
-      if (nivel) {
-        const nivel_trans = await translateText(nivel);
-        updateFields.push("nivel = @nivel");
-        updateFields.push("nivel_es = @nivel_es");
-        updateFields.push("nivel_en = @nivel_en");
-        queryParams.nivel = nivel;
-        queryParams.nivel_es = nivel_trans.es;
-        queryParams.nivel_en = nivel_trans.en;
-      }
-      if (detalles_adicionales) {
-        const detalles_trans = await translateText(detalles_adicionales);
-        updateFields.push("detalles_adicionales = @detalles_adicionales");
-        updateFields.push("detalles_adicionales_es = @detalles_adicionales_es");
-        updateFields.push("detalles_adicionales_en = @detalles_adicionales_en");
-        queryParams.detalles_adicionales = detalles_adicionales;
-        queryParams.detalles_adicionales_es = detalles_trans.es;
-        queryParams.detalles_adicionales_en = detalles_trans.en;
-      }
-      if (processedImages && processedImages.imagen_url) {
-        updateFields.push("imagen_url = @imagen_url");
-        queryParams.imagen_url = processedImages.imagen_url.original;
-      }
-
-      if (updateFields.length === 0) {
-        return res
-          .status(400)
-          .json({ message: "No se proporcionaron campos para actualizar." });
-      }
-
-      const updateQuery = `
-        UPDATE ofertas_laborales
-        SET ${updateFields.join(", ")}
-        WHERE id = @id;
-      `;
-
-      await db.query(updateQuery, queryParams);
+      await updateOfferRecord(db, id, req.body, id_usuario_actual, esAdmin);
 
       // Invalidar caché para esta oferta y listas de ofertas
       myCache.del(`offer:${id}`);
@@ -755,9 +564,7 @@ router.put(
       res.status(200).json({ message: "Oferta actualizada con éxito." });
     } catch (error) {
       console.error("Error al actualizar la oferta:", error);
-      res
-        .status(500)
-        .json({ message: "Error del servidor al actualizar la oferta." });
+      res.status(error.status || 500).json({ message: error.status ? error.message : "Error del servidor al actualizar la oferta." });
     }
   },
 );
@@ -983,3 +790,5 @@ router.post(
 );
 
 module.exports = router;
+
+module.exports.invalidateOfferCache = () => myCache.flushAll();
