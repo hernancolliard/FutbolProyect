@@ -1,5 +1,13 @@
 # Agente de ofertas de fútbol
 
+## Activación en producción
+
+El frontend está alojado en Vercel y el backend en Render. Ambos deben desplegar un commit de `main` que incluya el agente; configurar las claves o ejecutar el SQL no actualiza el código del panel. En cada alojamiento comprobar la rama y el commit del despliegue, y que este termine correctamente.
+
+Mantener `DISCOVERY_SCHEDULE_ENABLED=false` para comenzar con búsquedas manuales. Entrar con una cuenta administradora a `/admin`, abrir **Ofertas encontradas** y pulsar **Buscar ahora**. Los borradores aparecen con estado **pendiente** y los errores en **Historial de ejecuciones**. Revisar la fuente y completar el contacto o enlace de postulación antes de publicar.
+
+Si no aparece la pestaña, comprobar el despliegue del frontend. Si aparece pero falla la carga, comprobar el despliegue del backend y que `create_offer_discovery.sql` se haya ejecutado en la misma base configurada en su `DATABASE_URL`. La variable de programación no afecta la visibilidad del panel ni las búsquedas manuales.
+
 ## Arquitectura comprobada
 
 El frontend es Next.js 14 / React 18 con Material UI. El panel existente es `src/components/AdminDashboard.tsx` y usa `AdminRoute`, `AuthContext` y el cliente Axios con JWT/cookie. El backend es Express 5, con PostgreSQL (`pg`) y consultas parametrizadas mediante `backend/db.js` y `queryParams.js`. `verificarAdmin` consulta `usuarios.isadmin` en cada solicitud.

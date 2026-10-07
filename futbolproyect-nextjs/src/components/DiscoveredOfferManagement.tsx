@@ -11,7 +11,7 @@ type Draft = { contacto_postulacion?: string; titulo: string; descripcion: strin
 type Candidate = { id: number; version: number; draft: Draft; extracted: Record<string, any>; status: string; flags: string[];
   source_url: string; source_urls: string[]; consulted_at: string; updated_at: string; possible_duplicate_ids: number[]; published_offer_id?: number };
 type Run = { id: number; status: string; started_at: string; stats: Record<string, number>; errors: string[] };
-const fields: [keyof Draft, string][] = [['contacto_postulacion','Contacto o enlace de postulaci?n (obligatorio)'],['titulo','Título'],['descripcion','Resumen en español'],['puesto','Puesto'],
+const fields: [keyof Draft, string][] = [['contacto_postulacion','Contacto o enlace de postulación (obligatorio)'],['titulo','Título'],['descripcion','Resumen en español'],['puesto','Puesto'],
   ['ubicacion','Ubicación'],['nivel','Categoría'],['horarios','Modalidad'],['salario','Salario (importe revisado)'],['detalles_adicionales','Requisitos y postulación']];
 const extractedLabels: Record<string,string> = {title:'Título original',role:'Puesto',organization:'Organización',country:'País',city:'Ciudad',
   category:'Categoría',modality:'Modalidad',requirements:'Requisitos',salary:'Salario',currency:'Moneda',benefits:'Beneficios',
@@ -20,7 +20,7 @@ const extractedLabels: Record<string,string> = {title:'Título original',role:'P
   vacancyEvidence:'Evidencia de vacante',publicationEvidence:'Evidencia de publicación',closingEvidence:'Evidencia de cierre',validityEvidence:'Evidencia de vigencia'};
 const flagLabels: Record<string,string> = {posible_duplicado:'Posible duplicado',vencida:'Vencida',fecha_sin_verificar:'Fecha sin verificar',
   vigencia_sin_verificar:'Vigencia sin verificar',fuente_original_sin_verificar:'Fuente sin verificar',datos_extraidos_por_ia:'Datos por revisar',
-  actualizacion_pendiente:'Actualización pendiente',varias_fuentes:'Varias fuentes',postulacion_sin_verificar:'Postulación sin verificar'};
+  actualizacion_pendiente:'Actualización pendiente',varias_fuentes:'Varias fuentes',postulacion_sin_verificar:'Postulación sin verificar',contacto_faltante:'Contacto faltante'};
 const messageOf = (error: any) => {
   const body = error.response?.data;
   const details = body?.errors ? Object.entries(body.errors).map(([field,messages]) => `${field}: ${(messages as string[]).join(', ')}`).join('; ') : '';
